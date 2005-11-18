@@ -36,19 +36,23 @@ def check_changes_for_sanity(cache, allowed_origins):
     return True
 
 if __name__ == "__main__":
+
+    # options
     parser = OptionParser()
     parser.add_option("-d", "--debug",
                       action="store_true", dest="debug", default=False,
                       help="print debug messages")
-
     (options, args) = parser.parse_args()
     debug = options.debug
 
     # get a cache
     cache = MyCache()
-    pkgs_to_upgrade = []
+
+    # FIXME: figure with with lsb_release
     allowed_origins = [("Ubuntu","breezy-security")]
-    
+
+    # find out about the packages that are upgradable (in a allowed_origin)
+    pkgs_to_upgrade = []
     for pkg in cache:
         if pkg.isUpgradable and \
                is_allowed_origin(pkg,allowed_origins):
@@ -64,4 +68,4 @@ if __name__ == "__main__":
     print "pkgs to upgrade: "
     print "\n".join([pkg.name for pkg in pkgs_to_upgrade])
                     
-# TODO: download and check for possible conffile prompts
+    # TODO: download and check for possible conffile prompts
