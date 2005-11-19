@@ -1,7 +1,7 @@
 #!/usr/bin/python2.4
 
-import apt
-import sys
+import apt, apt_pkg
+import sys, os
 from optparse import OptionParser
 
 class MyCache(apt.Cache):
@@ -25,6 +25,7 @@ def is_allowed_origin(pkg, allowed_origins):
     return False
 
 def check_changes_for_sanity(cache, allowed_origins):
+    # FIXME: check if the archive is trusted!
     if cache.brokenCount != 0:
         return False
     for pkg in cache:
@@ -35,6 +36,7 @@ def check_changes_for_sanity(cache, allowed_origins):
                 return False
     return True
 
+
 if __name__ == "__main__":
 
     # options
@@ -44,6 +46,15 @@ if __name__ == "__main__":
                       help="print debug messages")
     (options, args) = parser.parse_args()
     debug = options.debug
+
+    if debug:
+        dir = "/tmp/pyapt-test"
+        try:
+            os.mkdir(dir)
+            os.mkdir(dir+"/partial")
+        except OSError:
+            pass
+        apt_pkg.Config.Set("Dir::Cache::archives",dir)
 
     # get a cache
     cache = MyCache()
@@ -67,5 +78,33 @@ if __name__ == "__main__":
     
     print "pkgs to upgrade: "
     print "\n".join([pkg.name for pkg in pkgs_to_upgrade])
+
+
                     
-    # TODO: download and check for possible conffile prompts
+    # download
+    list = apt_pkg.GetPkgSourceList()
+    list.ReadMainList()
+    recs = apt_pkg.GetPkgRecords(cache._cache)
+    fetcher = apt_pkg.GetAcquire()
+    pm = apt_pkg.GetPackageManager(cache._depcache)
+    pm.GetArchives(fetcher,list,recs)
+    for item in fetcher.Items:
+        #print "%s -> %s:\n Status: %s Complete: %s IsTrusted: %s" % \
+        #      (item.DescURI, item.DestFile,  item.Status,
+        #       item.Complete,  item.IsTrusted)
+        if item.Status == item.StatError:
+            print "Some error ocured: '%s'" % item.ErrorText
+        print
+    res = fetcher.Run()
+
+    # now check the downloaded debs for conffile conflicts
+    for item in fetcher.Items:
+        print "%s -> %s:\n Status: %s Complete: %s IsTrusted: %s" % \
+              (item.DescURI, item.DestFile,  item.Status,
+               item.Complete,  item.IsTrusted)
+        if item.Status == item.StatError:
+            print "Some error ocured: '%s'" % item.ErrorText
+        if item.Complete == False:
+            print "No error, still nothing downloaded"
+        print
+        # check_conffile_prompt(item.DestFile) 
