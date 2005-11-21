@@ -158,7 +158,7 @@ if __name__ == "__main__":
         if item.Status == item.StatError:
             print "Some error ocured: '%s'" % item.ErrorText
         if item.Complete == False:
-            print "The package '%s' failed to download, aborting" % pkgname_from_deb(item.DestFile))
+            print "The package '%s' failed to download, aborting" % pkgname_from_deb(item.DestFile)
             sys.exit(1)
         if item.IsTrusted == False:
             blacklisted_pkgs.append(pkgname_from_deb(item.DestFile))
