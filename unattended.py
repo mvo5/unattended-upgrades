@@ -30,10 +30,10 @@ def check_changes_for_sanity(cache, allowed_origins,blacklist):
     for pkg in cache:
         if pkg.markedDelete:
             return False
-        if pkg in blacklist:
-            return False
         if pkg.markedInstall or pkg.markedUpgrade:
             if not is_allowed_origin(pkg, allowed_origins):
+                return False
+            if pkg.name in blacklist:
                 return False
     return True
 
@@ -186,7 +186,7 @@ if __name__ == "__main__":
                  pkgs_to_upgrade.append(pkg)
             else:
                 if debug:
-                    print "kicking '%s' from the list of packages" % pkg
+                    print "kicking '%s' from the list of packages" % pkg.name
                 cache.clear()
                 for pkg2 in pkgs_to_upgrade:
                     pkg2.markUpgrade()
