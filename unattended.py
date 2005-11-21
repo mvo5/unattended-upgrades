@@ -24,12 +24,13 @@ def is_allowed_origin(pkg, allowed_origins):
             return True
     return False
 
-def check_changes_for_sanity(cache, allowed_origins):
-    # FIXME: check if the archive is trusted!
+def check_changes_for_sanity(cache, allowed_origins,blacklist):
     if cache.brokenCount != 0:
         return False
     for pkg in cache:
         if pkg.markedDelete:
+            return False
+        if pkg in blacklist:
             return False
         if pkg.markedInstall or pkg.markedUpgrade:
             if not is_allowed_origin(pkg, allowed_origins):
@@ -43,20 +44,30 @@ def pkgname_from_deb(debfile):
     return sections["Package"]
 
 def conffile_prompt(destFile):
-    print "check_conffile_prompt('%s')" % destFile
+    if debug:
+        print "check_conffile_prompt('%s')" % destFile
     pkgname = pkgname_from_deb(destFile)
     status_file = apt_pkg.Config.Find("Dir::State::status")
     parse = apt_pkg.ParseTagFile(open(status_file,"r"))
     while parse.Step() == 1:
         if parse.Section.get("Package") == pkgname:
-            print "found pkg: %s" % pkgname
+            if debug:
+                print "found pkg: %s" % pkgname
             if parse.Section.has_key("Conffiles"):
                 conffiles = parse.Section.get("Conffiles")
                 # Conffiles:
                 # /etc/bash_completion.d/m-a c7780fab6b14d75ca54e11e992a6c11c
                 for line in string.split(conffiles,"\n"):
-                    (file, md5) = string.split(string.strip(line))
-                    if os.path.exists(file):
+                    if debug:
+                        print line
+                    l = string.split(string.strip(line))
+                    file = l[0]
+                    md5 = l[1]
+                    if len(l) > 2:
+                        obs = l[2]
+                    else:
+                        obs = None
+                    if os.path.exists(file) and obs != "obsolete":
                         current_md5 = apt_pkg.md5sum(open(file).read())
                         if current_md5 != md5:
                             return True
@@ -83,38 +94,49 @@ if __name__ == "__main__":
         apt_pkg.Config.Set("Dir::Cache::archives",dir)
 
         # FIXME: add tests for the conffile_prompt code
-        #if conffile_prompt(sys.argv[1]):
-        #    print "will prompt"
-        #else:
-        #    print "wont prompt"
-        #sys.exit(1)
+        if len(args) > 0:
+            if conffile_prompt(args[0]):
+                print "will prompt"
+            else:
+                print "wont prompt"
+            sys.exit(1)
 
-
-    # get a cache
-    cache = MyCache()
 
     # FIXME: figure with with lsb_release
-    allowed_origins = [("Ubuntu","breezy-security")]
+    allowed_origins = [("Ubuntu","breezy-security"),
+                       ("Ubuntu","dapper")
+                       ]
+    # pkgs that are (for some reason) not save to install
+    blacklisted_pkgs = []
+    
+    # get a cache
+    cache = MyCache()
 
     # find out about the packages that are upgradable (in a allowed_origin)
     pkgs_to_upgrade = []
     for pkg in cache:
+        if debug and pkg.isUpgradable:
+            print "Checking: %s (%s)" % (pkg.name,pkg.candidateOrigin.archive)
         if pkg.isUpgradable and \
                is_allowed_origin(pkg,allowed_origins):
-            pkg.markUpgrade()
-            if check_changes_for_sanity(cache, allowed_origins):
-                 pkgs_to_upgrade.append(pkg)
+            try:
+                pkg.markUpgrade()
+                if check_changes_for_sanity(cache, allowed_origins,
+                                            blacklisted_pkgs):
+                    pkgs_to_upgrade.append(pkg)
+            except SystemError:
+                # can't upgrade
+                pass
             else:
                 cache.clear()
                 for pkg2 in pkgs_to_upgrade:
                     pkg2.markUpgrade()
 
-    
-    print "pkgs to upgrade: "
-    print "\n".join([pkg.name for pkg in pkgs_to_upgrade])
+    if debug:
+        print "pkgs that look like they should be upgraded: "
+        print "\n".join([pkg.name for pkg in pkgs_to_upgrade])
 
-
-                    
+           
     # download
     list = apt_pkg.GetPkgSourceList()
     list.ReadMainList()
@@ -125,28 +147,51 @@ if __name__ == "__main__":
         fetcher = apt_pkg.GetAcquire()
     pm = apt_pkg.GetPackageManager(cache._depcache)
     pm.GetArchives(fetcher,list,recs)
-    #for item in fetcher.Items:
-    #    #print "%s -> %s:\n Status: %s Complete: %s IsTrusted: %s" % \
-    #    #      (item.DescURI, item.DestFile,  item.Status,
-    #    #       item.Complete,  item.IsTrusted)
-    #    if item.Status == item.StatError:
-    #        print "Some error ocured: '%s'" % item.ErrorText
-    #    #print
     res = fetcher.Run()
 
     # now check the downloaded debs for conffile conflicts
     for item in fetcher.Items:
-        print "%s -> %s:\n Status: %s Complete: %s IsTrusted: %s" % \
-              (item.DescURI, item.DestFile,  item.Status,
-               item.Complete,  item.IsTrusted)
+        if debug:
+            print "%s -> %s:\n Status: %s Complete: %s IsTrusted: %s" % \
+                  (item.DescURI, item.DestFile,  item.Status,
+                   item.Complete,  item.IsTrusted)
         if item.Status == item.StatError:
             print "Some error ocured: '%s'" % item.ErrorText
         if item.Complete == False:
-            print "No error, still nothing downloaded"
-            continue
+            print "The package '%s' failed to download, aborting" % pkgname_from_deb(item.DestFile))
+            sys.exit(1)
+        if item.IsTrusted == False:
+            blacklisted_pkgs.append(pkgname_from_deb(item.DestFile))
         if conffile_prompt(item.DestFile):
             # FIXME: skip package (means to re-run the whole marking again
             # and making sure that the package will not be pulled in by
             # some other package again!
-            print "pkg '%s' has conffile prompt" % pkgname_from_deb(item.DestFile)
-            
+            if(debug):
+                print "pkg '%s' has conffile prompt" % pkgname_from_deb(item.DestFile)
+            blacklisted_pkgs.append(pkgname_from_deb(item.DestFile))
+
+    if debug:
+        print "blacklist: %s" % blacklisted_pkgs
+    # find out about the packages that are upgradable (in a allowed_origin)
+    if len(blacklisted_pkgs) > 0:
+        cache.clear()
+        old_pkgs_to_upgrade = pkgs_to_upgrade[:]
+        pkgs_to_upgrade = []
+        for pkg in old_pkgs_to_upgrade:
+            if debug:
+                print "Checking (blacklist): %s" % (pkg.name)
+            pkg.markUpgrade()
+            if check_changes_for_sanity(cache, allowed_origins,
+                                        blacklisted_pkgs):
+                 pkgs_to_upgrade.append(pkg)
+            else:
+                if debug:
+                    print "kicking '%s' from the list of packages" % pkg
+                cache.clear()
+                for pkg2 in pkgs_to_upgrade:
+                    pkg2.markUpgrade()
+
+    if debug:
+        print "InstCount=%i DelCount=%i BrokenCout=%i" % (cache._depcache.InstCount, cache._depcache.DelCount, cache._depcache.BrokenCount)
+        print "pkgs that are really upgraded: "
+        print "\n".join([pkg.name for pkg in pkgs_to_upgrade])
