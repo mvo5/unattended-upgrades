@@ -1,13 +1,16 @@
 #!/usr/bin/python2.4
 
-import apt, apt_pkg, apt_inst
+import apt_pkg, apt_inst
 import sys, os, string
 from optparse import OptionParser
+
+import warnings
+warnings.filterwarnings("ignore", "apt API not stable yet", FutureWarning)
+import apt
 
 class MyCache(apt.Cache):
     def __init__(self):
         apt.Cache.__init__(self)
-        self.brokenCount = self._depcache.BrokenCount
     def clear(self):
         for pkg in cache:
             pkg.markKeep()
@@ -24,8 +27,8 @@ def is_allowed_origin(pkg, allowed_origins):
             return True
     return False
 
-def check_changes_for_sanity(cache, allowed_origins,blacklist):
-    if cache.brokenCount != 0:
+def check_changes_for_sanity(cache, allowed_origins, blacklist):
+    if cache._depcache.BrokenCount != 0:
         return False
     for pkg in cache:
         if pkg.markedDelete:
@@ -138,27 +141,26 @@ if __name__ == "__main__":
 
            
     # download
-    list = apt_pkg.GetPkgSourceList()
-    list.ReadMainList()
-    recs = apt_pkg.GetPkgRecords(cache._cache)
     if debug:
         fetcher = apt_pkg.GetAcquire(apt.progress.TextFetchProgress())
     else:
         fetcher = apt_pkg.GetAcquire()
+    list = apt_pkg.GetPkgSourceList()
+    list.ReadMainList()
+    recs = cache._records
     pm = apt_pkg.GetPackageManager(cache._depcache)
     pm.GetArchives(fetcher,list,recs)
     res = fetcher.Run()
 
-    # now check the downloaded debs for conffile conflicts
+    # now check the downloaded debs for conffile conflicts and build
+    # a blacklist
     for item in fetcher.Items:
         if debug:
-            print "%s -> %s:\n Status: %s Complete: %s IsTrusted: %s" % \
-                  (item.DescURI, item.DestFile,  item.Status,
-                   item.Complete,  item.IsTrusted)
+            print item
         if item.Status == item.StatError:
-            print "Some error ocured: '%s'" % item.ErrorText
+            print "A error ocured: '%s'" % item.ErrorText
         if item.Complete == False:
-            print "The package '%s' failed to download, aborting" % pkgname_from_deb(item.DestFile)
+            print "The URI '%s' failed to download, aborting" % item.DescURI
             sys.exit(1)
         if item.IsTrusted == False:
             blacklisted_pkgs.append(pkgname_from_deb(item.DestFile))
@@ -170,6 +172,9 @@ if __name__ == "__main__":
                 print "pkg '%s' has conffile prompt" % pkgname_from_deb(item.DestFile)
             blacklisted_pkgs.append(pkgname_from_deb(item.DestFile))
 
+
+    # redo the selection about the packages to upgrade based on the new
+    # blacklist
     if debug:
         print "blacklist: %s" % blacklisted_pkgs
     # find out about the packages that are upgradable (in a allowed_origin)
@@ -195,3 +200,38 @@ if __name__ == "__main__":
         print "InstCount=%i DelCount=%i BrokenCout=%i" % (cache._depcache.InstCount, cache._depcache.DelCount, cache._depcache.BrokenCount)
         print "pkgs that are really upgraded: "
         print "\n".join([pkg.name for pkg in pkgs_to_upgrade])
+
+
+    # do the install now!
+    # set debconf to NON_INTERACTIVE, redirect output
+
+    # redirect to log
+    #REDIRECT_INPUT = "/tmp/lala" # os.devnull
+    #import resource		# Resource usage information.
+    #maxfd = resource.getrlimit(resource.RLIMIT_NOFILE)[1]
+    #if (maxfd == resource.RLIM_INFINITY):
+    #    maxfd = MAXFD
+    #for fd in range(3):
+    #    try:
+    #        os.close(fd)
+    #    except OSError:	# ERROR, fd wasn't open to begin with (ignored)
+    #        pass
+    #os.open(REDIRECT_INPUT, os.O_RDWR)	# standard input (0)
+    #os.dup2(0,1)
+    #os.dup2(0, 2)			# standard error (2)
+
+    # create a new package-manager. the blacklist may have changed
+    # the markings in the depcache
+    if debug:
+        apt_pkg.Config.Set("Debug::pkgDPkgPM","1")
+    pm = apt_pkg.GetPackageManager(cache._depcache)
+    pm.GetArchives(fetcher,list,recs)
+    try:
+        res = pm.DoInstall()
+    except SystemError,e:
+        print "ayyiieee: (%s)" % e
+                
+    if res == False:
+        print "cache.commit() failed"
+    else:
+        print "cache.commit() success"
