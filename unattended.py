@@ -1,12 +1,13 @@
 #!/usr/bin/python2.4
 
 import apt_pkg, apt_inst
-import sys, os, string
+import sys, os, string, datetime
 from optparse import OptionParser
 
 import warnings
 warnings.filterwarnings("ignore", "apt API not stable yet", FutureWarning)
 import apt
+import logging
 
 class MyCache(apt.Cache):
     def __init__(self):
@@ -47,22 +48,19 @@ def pkgname_from_deb(debfile):
     return sections["Package"]
 
 def conffile_prompt(destFile):
-    if debug:
-        print "check_conffile_prompt('%s')" % destFile
+    logging.debug("check_conffile_prompt('%s')" % destFile)
     pkgname = pkgname_from_deb(destFile)
     status_file = apt_pkg.Config.Find("Dir::State::status")
     parse = apt_pkg.ParseTagFile(open(status_file,"r"))
     while parse.Step() == 1:
         if parse.Section.get("Package") == pkgname:
-            if debug:
-                print "found pkg: %s" % pkgname
+            logging.debug("found pkg: %s" % pkgname)
             if parse.Section.has_key("Conffiles"):
                 conffiles = parse.Section.get("Conffiles")
                 # Conffiles:
                 # /etc/bash_completion.d/m-a c7780fab6b14d75ca54e11e992a6c11c
                 for line in string.split(conffiles,"\n"):
-                    if debug:
-                        print line
+                    logging.debug("conffile line: %s", line)
                     l = string.split(string.strip(line))
                     file = l[0]
                     md5 = l[1]
@@ -79,38 +77,44 @@ def conffile_prompt(destFile):
 
 if __name__ == "__main__":
 
-    # options
+    # init the logging
+    logdir = apt_pkg.Config.FindDir("APT::UnattendedUpgrades::LogDir",
+                                    "/var/log/unattended-upgrades/")
+    logfile = logdir+apt_pkg.Config.Find("APT::UnattendedUpgrades::LogFile",
+                                         "unattended-upgrades.log")
+    logging.basicConfig(level=logging.INFO,
+                        format='%(asctime)s %(levelname)s %(message)s',
+                        filename=logfile,
+                        filemode='w')
+
+    # init the options
     parser = OptionParser()
     parser.add_option("-d", "--debug",
                       action="store_true", dest="debug", default=False,
                       help="print debug messages")
     (options, args) = parser.parse_args()
-    debug = options.debug
+    if options.debug:
+        logging.getLogger().setLevel(logging.DEBUG)
+        pass
 
-    if debug:
-        dir = "/tmp/pyapt-test"
-        try:
-            os.mkdir(dir)
-            os.mkdir(dir+"/partial")
-        except OSError:
-            pass
-        apt_pkg.Config.Set("Dir::Cache::archives",dir)
-
-        # FIXME: add tests for the conffile_prompt code
-        if len(args) > 0:
-            if conffile_prompt(args[0]):
-                print "will prompt"
-            else:
-                print "wont prompt"
-            sys.exit(1)
+    #dldir = "/tmp/pyapt-test"
+    #try:
+    #    os.mkdir(dldir)
+    #    os.mkdir(dldir+"/partial")
+    #except OSError:
+    #    pass
+    #apt_pkg.Config.Set("Dir::Cache::archives",dldir)
 
 
     # FIXME: figure with with lsb_release
+    # and/or a apt.Config var
     allowed_origins = [("Ubuntu","breezy-security"),
                        ("Ubuntu","dapper")
                        ]
     # pkgs that are (for some reason) not save to install
     blacklisted_pkgs = []
+
+    logging.info("Starting unattended upgrades script")
     
     # get a cache
     cache = MyCache()
@@ -118,8 +122,8 @@ if __name__ == "__main__":
     # find out about the packages that are upgradable (in a allowed_origin)
     pkgs_to_upgrade = []
     for pkg in cache:
-        if debug and pkg.isUpgradable:
-            print "Checking: %s (%s)" % (pkg.name,pkg.candidateOrigin.archive)
+        if options.debug and pkg.isUpgradable:
+            logging.debug("Checking: %s (%s)" % (pkg.name,pkg.candidateOrigin.archive))
         if pkg.isUpgradable and \
                is_allowed_origin(pkg,allowed_origins):
             try:
@@ -135,13 +139,11 @@ if __name__ == "__main__":
                 for pkg2 in pkgs_to_upgrade:
                     pkg2.markUpgrade()
 
-    if debug:
-        print "pkgs that look like they should be upgraded: "
-        print "\n".join([pkg.name for pkg in pkgs_to_upgrade])
-
+    pkgs = "\n".join([pkg.name for pkg in pkgs_to_upgrade])
+    logging.debug("pkgs that look like they should be upgraded: %s" % pkgs)
            
-    # download
-    if debug:
+    # download what looks good
+    if options.debug:
         fetcher = apt_pkg.GetAcquire(apt.progress.TextFetchProgress())
     else:
         fetcher = apt_pkg.GetAcquire()
@@ -155,8 +157,7 @@ if __name__ == "__main__":
     # now check the downloaded debs for conffile conflicts and build
     # a blacklist
     for item in fetcher.Items:
-        if debug:
-            print item
+        logging.debug("%s" % item)
         if item.Status == item.StatError:
             print "A error ocured: '%s'" % item.ErrorText
         if item.Complete == False:
@@ -168,70 +169,73 @@ if __name__ == "__main__":
             # FIXME: skip package (means to re-run the whole marking again
             # and making sure that the package will not be pulled in by
             # some other package again!
-            if(debug):
-                print "pkg '%s' has conffile prompt" % pkgname_from_deb(item.DestFile)
+            logging.debug("pkg '%s' has conffile prompt" % pkgname_from_deb(item.DestFile))
             blacklisted_pkgs.append(pkgname_from_deb(item.DestFile))
 
 
     # redo the selection about the packages to upgrade based on the new
     # blacklist
-    if debug:
-        print "blacklist: %s" % blacklisted_pkgs
+    logging.debug("blacklist: %s" % blacklisted_pkgs)
     # find out about the packages that are upgradable (in a allowed_origin)
     if len(blacklisted_pkgs) > 0:
         cache.clear()
         old_pkgs_to_upgrade = pkgs_to_upgrade[:]
         pkgs_to_upgrade = []
         for pkg in old_pkgs_to_upgrade:
-            if debug:
-                print "Checking (blacklist): %s" % (pkg.name)
+            logging.debug("Checking (blacklist): %s" % (pkg.name))
             pkg.markUpgrade()
             if check_changes_for_sanity(cache, allowed_origins,
                                         blacklisted_pkgs):
                  pkgs_to_upgrade.append(pkg)
             else:
-                if debug:
-                    print "kicking '%s' from the list of packages" % pkg.name
+                logging.info("package '%s' not upgraded" % pkg.name)
                 cache.clear()
                 for pkg2 in pkgs_to_upgrade:
                     pkg2.markUpgrade()
 
-    if debug:
-        print "InstCount=%i DelCount=%i BrokenCout=%i" % (cache._depcache.InstCount, cache._depcache.DelCount, cache._depcache.BrokenCount)
-        print "pkgs that are really upgraded: "
-        print "\n".join([pkg.name for pkg in pkgs_to_upgrade])
+    logging.debug("InstCount=%i DelCount=%i BrokenCout=%i" % (cache._depcache.InstCount, cache._depcache.DelCount, cache._depcache.BrokenCount))
 
+    # check what we have
+    if len(pkgs_to_upgrade) == 0:
+        logging.info("No packages found that can be upgraded unattended")
+        sys.exit(0)    
 
-    # do the install now!
+    # do the install based on the new list of pkgs
+    pkgs = " ".join([pkg.name for pkg in pkgs_to_upgrade])
+    logging.info("Packages that are upgraded: %s" % pkgs)
+
     # set debconf to NON_INTERACTIVE, redirect output
-
+    os.putenv("DEBIAN_FRONTEND","noninteractive");
+    os.putenv("APT_LISTCHANGES_FRONTEND","none");
+    
     # redirect to log
-    #REDIRECT_INPUT = "/tmp/lala" # os.devnull
-    #import resource		# Resource usage information.
-    #maxfd = resource.getrlimit(resource.RLIMIT_NOFILE)[1]
-    #if (maxfd == resource.RLIM_INFINITY):
-    #    maxfd = MAXFD
-    #for fd in range(3):
-    #    try:
-    #        os.close(fd)
-    #    except OSError:	# ERROR, fd wasn't open to begin with (ignored)
-    #        pass
-    #os.open(REDIRECT_INPUT, os.O_RDWR)	# standard input (0)
-    #os.dup2(0,1)
-    #os.dup2(0, 2)			# standard error (2)
+    REDIRECT_INPUT = os.devnull
+    fd = os.open(REDIRECT_INPUT, os.O_RDWR)
+    os.dup2(fd,0)
+
+    now = datetime.datetime.now()
+    logfile_dpkg = logdir+'unattended-upgrades-dpkg_%s.log' % now.isoformat('_')
+    logging.info("Writing dpkg log to '%s'" % logfile_dpkg)
+    fd = os.open(logfile_dpkg,os.O_RDWR|os.O_CREAT)
+    os.dup2(fd,1)
+    os.dup2(fd,2)
 
     # create a new package-manager. the blacklist may have changed
     # the markings in the depcache
-    if debug:
+    if options.debug:
         apt_pkg.Config.Set("Debug::pkgDPkgPM","1")
+    #apt_pkg.Config.Set("Debug::pkgDPkgPM","1")    
     pm = apt_pkg.GetPackageManager(cache._depcache)
     pm.GetArchives(fetcher,list,recs)
     try:
         res = pm.DoInstall()
     except SystemError,e:
-        print "ayyiieee: (%s)" % e
+        logging.error("Installing the upgrades failed!")
+        logging.error("error message: '%s'" % e)
+        res = False
                 
     if res == False:
-        print "cache.commit() failed"
+        logging.error("dpkg returned a error! See '%s' for details" % logfile_dpkg)
     else:
-        print "cache.commit() success"
+        logging.info("All upgrades installed")
+
