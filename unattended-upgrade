@@ -8,6 +8,7 @@
 import apt_pkg, apt_inst
 import sys, os, string, datetime
 from optparse import OptionParser
+from subprocess import Popen, PIPE
 
 import warnings
 warnings.filterwarnings("ignore", "apt API not stable yet", FutureWarning)
@@ -110,16 +111,21 @@ if __name__ == "__main__":
     #    pass
     #apt_pkg.Config.Set("Dir::Cache::archives",dldir)
 
-
-    # FIXME: figure with with lsb_release
     # and/or a apt.Config var
-    allowed_origins = [("Ubuntu","breezy-security"),
-                       ("Ubuntu","dapper")
-                       ]
+    allowed_origins = []
+
     # pkgs that are (for some reason) not save to install
     blacklisted_pkgs = []
 
     logging.info("Starting unattended upgrades script")
+
+    # read the distro from lsb_release
+    p = Popen(["/bin/lsb_release","-c","-s"],stdout=PIPE)
+    p.wait()
+    distro = string.strip(p.stdout.readline())
+    allowed_origins.append("%s-security" % distro)
+    origins = " ".join(allowed_origins)
+    logging.info("Allowed origins are: %s" % origins)
     
     # get a cache
     cache = MyCache()

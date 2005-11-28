@@ -1,6 +1,6 @@
-* package must create dir /var/log/unattended-upgrades
 * package make have some logrotate magic in place for both
   unattended-upgrades.log and unatteded-upgrades-dpkg_$(date).log
-* don't hardcode allowed_origins
+* allow to override allowed_origins with some apt var (currently
+  uses lsb_release)
 * add option to ignore trust?
 * integrate into APT::Periodic somehow
