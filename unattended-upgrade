@@ -1,4 +1,9 @@
 #!/usr/bin/python2.4
+#
+# (c) 2005 Canonical
+# Author: Michael Vogt <michael.vogt@ubuntu.com>
+#
+# Released under the GPL
 
 import apt_pkg, apt_inst
 import sys, os, string, datetime

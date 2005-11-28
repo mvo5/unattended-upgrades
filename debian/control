@@ -1,0 +1,14 @@
+Source: unattended-upgrades
+Section: admin
+Priority: optional
+Maintainer: Michael Vogt <michael.vogt@ubuntu.com>
+Build-Depends: debhelper (>= 4.0.0), python, python-dev
+Standards-Version: 3.6.1.1
+
+Package: unattended-upgrades
+Architecture: all
+Depends: python, ${shlibs:Depends}, python2.4-apt (>= 0.6.14ubuntu2)
+Description: Install security upgrades automatically 
+ This package will download and install security upgrades automatically
+ and unattended. It will take care to only install packages from the 
+ configured origin and will check for conffile prompts.

@@ -1,0 +1,5 @@
+unattended-upgrades (0.0+bzr20051128) dapper; urgency=low
+
+  * initial version
+
+ -- Michael Vogt <michael.vogt@ubuntu.com>  Mon, 28 Nov 2005 17:04:41 +0100
