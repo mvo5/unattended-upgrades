@@ -111,7 +111,7 @@ if __name__ == "__main__":
     #    pass
     #apt_pkg.Config.Set("Dir::Cache::archives",dldir)
 
-    # and/or a apt.Config var
+    # make it possible to ovverride this with a apt.Config variable
     allowed_origins = []
 
     # pkgs that are (for some reason) not save to install

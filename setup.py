@@ -8,7 +8,10 @@ import os
 setup(name='unattended-upgrades', version='0.1',
       scripts=['unattended-upgrade'],
       data_files=[('../etc/apt.conf.d/',
-                   ["data/60unattended-upgrades"])]
+                   ["data/60unattended-upgrades"]),
+                  ('../etc/logrotate.d/',
+                   ["data/logrotate.d/unattended-upgrade"])
+                  ]
       )
 
 

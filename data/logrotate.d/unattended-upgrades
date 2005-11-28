@@ -1,0 +1,7 @@
+/var/log/unattended-upgrades/unattended-upgrades.log {
+  rotate 6
+  monthly
+  compress
+  missingok
+  notifempty
+}
