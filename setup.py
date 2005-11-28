@@ -10,7 +10,7 @@ setup(name='unattended-upgrades', version='0.1',
       data_files=[('../etc/apt.conf.d/',
                    ["data/60unattended-upgrades"]),
                   ('../etc/logrotate.d/',
-                   ["data/logrotate.d/unattended-upgrade"])
+                   ["data/logrotate.d/unattended-upgrades"])
                   ]
       )
 
