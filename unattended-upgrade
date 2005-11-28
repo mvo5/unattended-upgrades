@@ -121,7 +121,9 @@ if __name__ == "__main__":
 
     # read the distro from lsb_release
     p = Popen(["/bin/lsb_release","-c","-s"],stdout=PIPE)
-    p.wait()
+    res = p.wait()
+    if res != 0:
+        log.error("lsb_release returned exitcode: %i " % res)
     distro = string.strip(p.stdout.readline())
     allowed_origins.append("%s-security" % distro)
     origins = " ".join(allowed_origins)
