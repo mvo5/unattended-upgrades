@@ -90,8 +90,7 @@ if __name__ == "__main__":
                                          "unattended-upgrades.log")
     logging.basicConfig(level=logging.INFO,
                         format='%(asctime)s %(levelname)s %(message)s',
-                        filename=logfile,
-                        filemode='w')
+                        filename=logfile)
 
     # init the options
     parser = OptionParser()
