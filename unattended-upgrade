@@ -112,6 +112,7 @@ if __name__ == "__main__":
     #apt_pkg.Config.Set("Dir::Cache::archives",dldir)
 
     # make it possible to ovverride this with a apt.Config variable
+    # format (origin, archive), e.g. ("Ubuntu","dapper-security")
     allowed_origins = []
 
     # pkgs that are (for some reason) not save to install
@@ -124,8 +125,14 @@ if __name__ == "__main__":
     res = p.wait()
     if res != 0:
         log.error("lsb_release returned exitcode: %i " % res)
-    distro = string.strip(p.stdout.readline())
-    allowed_origins.append("%s-security" % distro)
+    archive = string.strip(p.stdout.readline())
+    p = Popen(["/bin/lsb_release","-i","-s"],stdout=PIPE)
+    res = p.wait()
+    if res != 0:
+        log.error("lsb_release returned exitcode: %i " % res)
+    distributor = string.strip(p.stdout.readline())
+
+    allowed_origins.append((distributor,"%s-security" % archive))
     origins = " ".join(allowed_origins)
     logging.info("Allowed origins are: %s" % origins)
     

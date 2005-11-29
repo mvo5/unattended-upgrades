@@ -1,1 +1,1 @@
-APT::Periodic::Post-Run-Hook {"/usr/bin/unattended-upgrade";};
+APT::Periodic::Post-Update-Hook {"/usr/bin/unattended-upgrade";};
