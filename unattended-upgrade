@@ -133,7 +133,10 @@ if __name__ == "__main__":
     distributor = string.strip(p.stdout.readline())
 
     allowed_origins.append((distributor,"%s-security" % archive))
-    origins = " ".join(allowed_origins)
+    # display available origin
+    origins = ""
+    for (origin, archive) in allowed_origins:
+        origins += "(%s,%s) " % (origin, archive)
     logging.info("Allowed origins are: %s" % origins)
     
     # get a cache
@@ -254,7 +257,7 @@ if __name__ == "__main__":
         logging.error("error message: '%s'" % e)
         res = False
                 
-    if res == False:
+    if res == pm.ResultFailed:
         logging.error("dpkg returned a error! See '%s' for details" % logfile_dpkg)
     else:
         logging.info("All upgrades installed")
