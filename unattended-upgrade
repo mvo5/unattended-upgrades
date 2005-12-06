@@ -27,11 +27,10 @@ class MyCache(apt.Cache):
         
 
 def is_allowed_origin(pkg, allowed_origins):
-    origin = pkg.candidateOrigin
-    #print origin
-    for allowed in allowed_origins:
-        if origin.origin == allowed[0] and origin.archive == allowed[1]:
-            return True
+    for origin in pkg.candidateOrigin:
+        for allowed in allowed_origins:
+            if origin.origin == allowed[0] and origin.archive == allowed[1]:
+                return True
     return False
 
 def check_changes_for_sanity(cache, allowed_origins, blacklist):
