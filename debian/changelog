@@ -1,3 +1,9 @@
+unattended-upgrades (0.1ubuntu1) dapper; urgency=low
+
+  * work with the latest python-apt api (ubuntu: #38958)
+
+ -- Michael Vogt <michael.vogt@ubuntu.com>  Mon,  8 May 2006 17:28:38 +0200
+
 unattended-upgrades (0.0+bzr20051201) dapper; urgency=low
 
   * initial version
