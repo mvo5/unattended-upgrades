@@ -98,7 +98,7 @@ binary-arch: build install
 arch-build:
 	rm -rf debian/arch-build
 	mkdir -p debian/arch-build/$(PKG)-$(DEBVER)
-	tar cf - `bzr inventory` | (cd debian/arch-build/$(PKG)-$(DEBVER);tar xf -)
+	tar -c --no-recursion -f - `bzr inventory` | (cd debian/arch-build/$(PKG)-$(DEBVER);tar xf -)
 	(cd debian/arch-build/$(PKG)-$(DEBVER) && $(DEB_BUILD_PROG))
 
 
