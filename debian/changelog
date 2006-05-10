@@ -2,6 +2,7 @@ unattended-upgrades (0.1ubuntu2) dapper; urgency=low
 
   * unattended-upgrade:
     - fix log output (ubuntu: #43773)
+    - fix configuration by providing a example config (ubuntu: #43778)
 
  -- Michael Vogt <michael.vogt@ubuntu.com>  Wed, 10 May 2006 20:20:54 +0200
 

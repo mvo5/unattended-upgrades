@@ -1,0 +1,10 @@
+// allowed (origin, archive) pairs
+Unattended-Upgrade::Allowed-Origins {
+	"Ubuntu dapper-security";
+//	"Ubuntu dapper-updates";
+};
+
+// never update the packages in this list
+Unattended-Upgrade::Package-Blacklist {
+//	"vim";
+};

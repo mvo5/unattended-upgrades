@@ -7,4 +7,12 @@ that can't be fetched from security and it will check for
 conffile prompts before the install and keep the package back
 that creates them. 
 
+By default it will only install only from the the (Ubuntu,
+dapper-security) repository. But this can be changed with the 
+"Unattended-Upgrade::Allowed-Origins" apt configuration list.
+It can be configured to allow any (origin, archive) combination
+(those values are taken from the "Release" file on the archive 
+server). It is recommended to use the default (only security updates
+from Ubuntu).
+
 See https://wiki.ubuntu.com/AutomaticUpdates for details.

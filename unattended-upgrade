@@ -109,33 +109,17 @@ if __name__ == "__main__":
     #    pass
     #apt_pkg.Config.Set("Dir::Cache::archives",dldir)
 
-    # make it possible to ovverride this with a apt.Config variable
     # format (origin, archive), e.g. ("Ubuntu","dapper-security")
-    allowed_origins = []
+    allowed_origins = map(string.split, apt_pkg.Config.ValueList("Unattended-Upgrade::Allowed-Origins"))
 
     # pkgs that are (for some reason) not save to install
-    blacklisted_pkgs = []
+    blacklisted_pkgs = apt_pkg.Config.ValueList("Unattended-Upgrade::Package-Blacklist")
+    logging.info("Initial blacklisted packages: %s", "".join(blacklisted_pkgs))
 
     logging.info("Starting unattended upgrades script")
 
-    # read the distro from lsb_release
-    p = Popen(["/bin/lsb_release","-c","-s"],stdout=PIPE)
-    res = p.wait()
-    if res != 0:
-        log.error("lsb_release returned exitcode: %i " % res)
-    archive = string.strip(p.stdout.readline())
-    p = Popen(["/bin/lsb_release","-i","-s"],stdout=PIPE)
-    res = p.wait()
-    if res != 0:
-        log.error("lsb_release returned exitcode: %i " % res)
-    distributor = string.strip(p.stdout.readline())
-
-    allowed_origins.append((distributor,"%s-security" % archive))
     # display available origin
-    origins = ""
-    for (origin, archive) in allowed_origins:
-        origins += "(%s,%s) " % (origin, archive)
-    logging.info("Allowed origins are: %s" % origins)
+    logging.info("Allowed origins are: %s" % map(str,allowed_origins))
     
     # get a cache
     cache = MyCache()
