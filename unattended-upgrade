@@ -144,7 +144,7 @@ if __name__ == "__main__":
     pkgs_to_upgrade = []
     for pkg in cache:
         if options.debug and pkg.isUpgradable:
-            logging.debug("Checking: %s (%s)" % (pkg.name,pkg.candidateOrigin.archive))
+            logging.debug("Checking: %s (%s)" % (pkg.name,map(str, pkg.candidateOrigin)))
         if pkg.isUpgradable and \
                is_allowed_origin(pkg,allowed_origins):
             try:
