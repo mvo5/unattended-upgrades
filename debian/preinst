@@ -1,0 +1,27 @@
+#! /bin/sh
+
+rm_conffile() {
+  CONFFILE="$1"
+  if [ -e "$CONFFILE" ]; then
+   md5sum="`md5sum \"$CONFFILE\" | sed -e \"s/ .*//\"`"
+   old_md5sum="`sed -n -e \"/^Conffiles:/,/^[^ ]/{\\\\' $CONFFILE'{s/.* //;p}}\" /var/lib/dpkg/status`"
+   if [ "$md5sum" != "$old_md5sum" ]; then
+     echo "Obsolete conffile $CONFFILE has been modified by you."
+     echo "Saving as $CONFFILE.dpkg-bak ..."
+     mv -f "$CONFFILE" "$CONFFILE".bak
+   else
+     echo "Removing obsolete conffile $CONFFILE ..."
+     rm -f "$CONFFILE"
+   fi
+ fi
+}
+
+
+case "$1" in
+install|upgrade)
+    if dpkg --compare-versions "$2" le "0.1ubuntu2"; then
+	rm_conffile  /etc/apt.conf.d/60unattended-upgrades
+    fi
+esac
+
+#DEBHELPER#

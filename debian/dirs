@@ -1,4 +1,4 @@
 usr/bin
 var/log/unattended-upgrades
 etc/logrotate.d
-etc/apt.conf.d
+etc/apt/apt.conf.d
