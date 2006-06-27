@@ -1,3 +1,9 @@
+unattended-upgrades (0.1ubuntu4) edgy; urgency=low
+
+  * added misssing apt-utils dependency
+
+ -- Michael Vogt <michael.vogt@ubuntu.com>  Tue, 27 Jun 2006 09:36:43 +0200
+
 unattended-upgrades (0.1ubuntu3) dapper; urgency=low
 
   * debian/dirs: /etc/apt.conf.d -> /etc/apt/apt.conf.d (Ubuntu: #44172)
