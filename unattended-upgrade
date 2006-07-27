@@ -19,8 +19,7 @@ class MyCache(apt.Cache):
     def __init__(self):
         apt.Cache.__init__(self)
     def clear(self):
-        for pkg in cache:
-            pkg.markKeep()
+        self._depcache.Init()
         assert self._depcache.InstCount == 0 and \
                self._depcache.BrokenCount == 0 \
                and self._depcache.DelCount == 0

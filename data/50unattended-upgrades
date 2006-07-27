@@ -1,7 +1,7 @@
 // allowed (origin, archive) pairs
 Unattended-Upgrade::Allowed-Origins {
-	"Ubuntu dapper-security";
-//	"Ubuntu dapper-updates";
+	"Ubuntu edgy-security";
+//	"Ubuntu edgy-updates";
 };
 
 // never update the packages in this list

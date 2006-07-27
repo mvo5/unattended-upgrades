@@ -1,3 +1,19 @@
+unattended-upgrades (0.1ubuntu6) edgy; urgency=low
+
+  * debian/control:
+    - only depend on python-apt
+
+ -- Michael Vogt <michael.vogt@ubuntu.com>  Thu, 27 Jul 2006 15:03:46 +0200
+
+unattended-upgrades (0.1ubuntu5) edgy; urgency=low
+
+  * data/apt-check.py:
+    - fix in the clear() method
+  * data/50unattended-upgrades:
+    - updated to include edgy as default 
+
+ -- Michael Vogt <michael.vogt@ubuntu.com>  Tue,  4 Jul 2006 11:23:09 +0200
+
 unattended-upgrades (0.1ubuntu4) edgy; urgency=low
 
   * added misssing apt-utils dependency
