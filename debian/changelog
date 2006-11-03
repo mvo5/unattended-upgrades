@@ -1,3 +1,10 @@
+unattended-upgrades (0.21ubuntu0) feisty; urgency=low
+
+  * data/50unattended-upgrades:
+    - updated for feisty
+
+ -- Michael Vogt <michael.vogt@ubuntu.com>  Fri,  3 Nov 2006 22:31:02 +0100
+
 unattended-upgrades (0.1ubuntu6) edgy; urgency=low
 
   * debian/control:

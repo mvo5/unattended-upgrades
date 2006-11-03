@@ -1,7 +1,7 @@
 // allowed (origin, archive) pairs
 Unattended-Upgrade::Allowed-Origins {
-	"Ubuntu edgy-security";
-//	"Ubuntu edgy-updates";
+	"Ubuntu feisty-security";
+//	"Ubuntu feisty-updates";
 };
 
 // never update the packages in this list
