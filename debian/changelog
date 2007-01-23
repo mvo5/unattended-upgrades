@@ -1,3 +1,17 @@
+unattended-upgrades (0.22ubuntu1) feisty; urgency=low
+
+  * be more careful about checking if we actually have a 
+    candidateOrigin (lp: #81055)
+
+ -- Michael Vogt <michael.vogt@ubuntu.com>  Tue, 23 Jan 2007 11:38:44 +0100
+
+unattended-upgrades (0.22ubuntu0) feisty; urgency=low
+
+  * improved the description
+  * added "Unattended-Upgrade::Mail" mail notification
+
+ -- Michael Vogt <michael.vogt@ubuntu.com>  Fri,  8 Dec 2006 22:40:42 +0100
+
 unattended-upgrades (0.21ubuntu0) feisty; urgency=low
 
   * data/50unattended-upgrades:

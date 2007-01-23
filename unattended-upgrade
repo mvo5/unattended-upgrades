@@ -14,6 +14,7 @@ import warnings
 warnings.filterwarnings("ignore", "apt API not stable yet", FutureWarning)
 import apt
 import logging
+import subprocess
 
 class MyCache(apt.Cache):
     def __init__(self):
@@ -26,6 +27,8 @@ class MyCache(apt.Cache):
         
 
 def is_allowed_origin(pkg, allowed_origins):
+    if not pkg.candidateOrigin:
+        return False
     for origin in pkg.candidateOrigin:
         for allowed in allowed_origins:
             if origin.origin == allowed[0] and origin.archive == allowed[1]:
@@ -243,3 +246,17 @@ if __name__ == "__main__":
     else:
         logging.info("All upgrades installed")
 
+    # check if we need to send a mail
+    email = apt_pkg.Config.Find("Unattended-Upgrade::Mail", "")
+    if email != "":
+        logging.debug("Sending mail with '%s' to '%s'" % (logfile_dpkg, email))
+        mail = subprocess.Popen(["mail",
+                                 "-s","unattended-upgrades result",email],
+                                stdin=subprocess.PIPE)
+        s = "Unattended upgrade returned: %s\n\n" % (res != pm.ResultFailed)
+        s += open(logfile_dpkg).read()
+        mail.stdin.write(s)
+        mail.stdin.close()
+        ret = mail.wait()
+        logging.debug("mail returned: %s" % ret)
+    
