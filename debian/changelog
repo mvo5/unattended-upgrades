@@ -1,3 +1,10 @@
+unattended-upgrades (0.22ubuntu2) feisty; urgency=low
+
+  * fail if not runing as root (LP#72514)
+  * do not crash if a archive can not be found (LP#72249)
+
+ -- Michael Vogt <michael.vogt@ubuntu.com>  Thu, 22 Mar 2007 17:14:47 +0100
+
 unattended-upgrades (0.22ubuntu1) feisty; urgency=low
 
   * be more careful about checking if we actually have a 

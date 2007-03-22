@@ -84,6 +84,10 @@ def conffile_prompt(destFile):
 
 if __name__ == "__main__":
 
+    if os.getuid() != 0:
+        print "You need to be root to run this application"
+        sys.exit(1)
+
     # init the logging
     logdir = apt_pkg.Config.FindDir("APT::UnattendedUpgrades::LogDir",
                                     "/var/log/unattended-upgrades/")
@@ -158,7 +162,10 @@ if __name__ == "__main__":
     list.ReadMainList()
     recs = cache._records
     pm = apt_pkg.GetPackageManager(cache._depcache)
-    pm.GetArchives(fetcher,list,recs)
+    try:
+        pm.GetArchives(fetcher,list,recs)
+    except SystemError, e:
+        logging.error("GetArchives() failed: '%s'" % e)
     res = fetcher.Run()
 
     # now check the downloaded debs for conffile conflicts and build
