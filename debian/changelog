@@ -1,3 +1,9 @@
+unattended-upgrades (0.23ubuntu3) feisty-proposed; urgency=low
+
+  * added missing README (thanks to siretart)
+
+ -- Michael Vogt <michael.vogt@ubuntu.com>  Tue, 24 Apr 2007 11:26:48 +0200
+
 unattended-upgrades (0.22ubuntu2) feisty; urgency=low
 
   * fail if not runing as root (LP#72514)
