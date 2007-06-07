@@ -1,4 +1,4 @@
-unattended-upgrades (0.25ubuntu2) gutsy; urgency=low
+unattended-upgrades (0.25.1) gutsy; urgency=low
 
   * documentation updated
 
