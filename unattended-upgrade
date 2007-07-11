@@ -129,6 +129,10 @@ if __name__ == "__main__":
     
     # get a cache
     cache = MyCache()
+    if cache._depcache.BrokenCount > 0:
+        print "Cache has broken packages, exiting"
+        logging.error("Cache has broken packages, exiting")
+        sys.exit(1)
 
     # find out about the packages that are upgradable (in a allowed_origin)
     pkgs_to_upgrade = []

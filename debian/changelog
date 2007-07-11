@@ -1,3 +1,10 @@
+unattended-upgrades (0.25.2ubuntu1) gutsy; urgency=low
+
+  * do not run with broken cache
+  * use ubuntu version number to keep auto-sync from coming for us
+
+ -- Michael Vogt <michael.vogt@ubuntu.com>  Wed, 11 Jul 2007 11:19:49 +0100
+
 unattended-upgrades (0.25.1) gutsy; urgency=low
 
   * documentation updated
@@ -12,7 +19,7 @@ unattended-upgrades (0.25ubuntu1) gutsy; urgency=low
 
 unattended-upgrades (0.23ubuntu3) feisty-proposed; urgency=low
 
-  * added missing README (thanks to siretart)
+  * added missing README (thanks to siretart, LP#109564)
 
  -- Michael Vogt <michael.vogt@ubuntu.com>  Tue, 24 Apr 2007 11:26:48 +0200
 
