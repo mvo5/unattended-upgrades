@@ -1,3 +1,10 @@
+unattended-upgrades (0.25.3ubuntu1) gutsy; urgency=low
+
+  * merged patch from Tuomas Jormola to detect if 
+    dpkg --force-conf(new|old) is set (LP: #135247)
+
+ -- Michael Vogt <michael.vogt@ubuntu.com>  Tue, 11 Sep 2007 21:37:13 +0200
+
 unattended-upgrades (0.25.2ubuntu1) gutsy; urgency=low
 
   * do not run with broken cache

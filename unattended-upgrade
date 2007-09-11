@@ -5,8 +5,14 @@
 #
 # Released under the GPL
 
-import apt_pkg, apt_inst
-import sys, os, string, datetime
+import apt_inst
+import apt_pkg
+
+import sys
+import os
+import string
+import datetime
+
 from optparse import OptionParser
 from subprocess import Popen, PIPE
 
@@ -21,9 +27,9 @@ class MyCache(apt.Cache):
         apt.Cache.__init__(self)
     def clear(self):
         self._depcache.Init()
-        assert self._depcache.InstCount == 0 and \
-               self._depcache.BrokenCount == 0 \
-               and self._depcache.DelCount == 0
+        assert (self._depcache.InstCount == 0 and 
+                self._depcache.BrokenCount == 0 and
+		self._depcache.DelCount == 0)
         
 
 def is_allowed_origin(pkg, allowed_origins):
@@ -80,6 +86,17 @@ def conffile_prompt(destFile):
                         if current_md5 != md5:
                             return True
     return False
+
+
+def dpkg_conffile_prompt():
+    if not apt_pkg.Config.has_key("DPkg::Options"):
+        return True
+    options = apt_pkg.Config.ValueList("DPkg::Options")
+    for option in map(string.strip, options):
+        if (option == "--force-confold" or
+	    option == "--force-confnew"):
+            return False
+    return True
 
 
 if __name__ == "__main__":
@@ -139,8 +156,8 @@ if __name__ == "__main__":
     for pkg in cache:
         if options.debug and pkg.isUpgradable:
             logging.debug("Checking: %s (%s)" % (pkg.name,map(str, pkg.candidateOrigin)))
-        if pkg.isUpgradable and \
-               is_allowed_origin(pkg,allowed_origins):
+        if (pkg.isUpgradable and 
+	    is_allowed_origin(pkg,allowed_origins)):
             try:
                 pkg.markUpgrade()
                 if check_changes_for_sanity(cache, allowed_origins,
@@ -172,44 +189,47 @@ if __name__ == "__main__":
         logging.error("GetArchives() failed: '%s'" % e)
     res = fetcher.Run()
 
-    # now check the downloaded debs for conffile conflicts and build
-    # a blacklist
-    for item in fetcher.Items:
-        logging.debug("%s" % item)
-        if item.Status == item.StatError:
-            print "A error ocured: '%s'" % item.ErrorText
-        if item.Complete == False:
-            print "The URI '%s' failed to download, aborting" % item.DescURI
-            sys.exit(1)
-        if item.IsTrusted == False:
-            blacklisted_pkgs.append(pkgname_from_deb(item.DestFile))
-        if conffile_prompt(item.DestFile):
-            # FIXME: skip package (means to re-run the whole marking again
-            # and making sure that the package will not be pulled in by
-            # some other package again!
-            logging.debug("pkg '%s' has conffile prompt" % pkgname_from_deb(item.DestFile))
-            blacklisted_pkgs.append(pkgname_from_deb(item.DestFile))
+    if dpkg_conffile_prompt():
+        # now check the downloaded debs for conffile conflicts and build
+        # a blacklist
+        for item in fetcher.Items:
+            logging.debug("%s" % item)
+            if item.Status == item.StatError:
+                print "A error ocured: '%s'" % item.ErrorText
+            if item.Complete == False:
+                print "The URI '%s' failed to download, aborting" % item.DescURI
+                sys.exit(1)
+            if item.IsTrusted == False:
+                blacklisted_pkgs.append(pkgname_from_deb(item.DestFile))
+            if conffile_prompt(item.DestFile):
+                # FIXME: skip package (means to re-run the whole marking again
+                # and making sure that the package will not be pulled in by
+                # some other package again!
+                logging.debug("pkg '%s' has conffile prompt" % pkgname_from_deb(item.DestFile))
+                blacklisted_pkgs.append(pkgname_from_deb(item.DestFile))
 
 
-    # redo the selection about the packages to upgrade based on the new
-    # blacklist
-    logging.debug("blacklist: %s" % blacklisted_pkgs)
-    # find out about the packages that are upgradable (in a allowed_origin)
-    if len(blacklisted_pkgs) > 0:
-        cache.clear()
-        old_pkgs_to_upgrade = pkgs_to_upgrade[:]
-        pkgs_to_upgrade = []
-        for pkg in old_pkgs_to_upgrade:
-            logging.debug("Checking (blacklist): %s" % (pkg.name))
-            pkg.markUpgrade()
-            if check_changes_for_sanity(cache, allowed_origins,
-                                        blacklisted_pkgs):
-                 pkgs_to_upgrade.append(pkg)
-            else:
-                logging.info("package '%s' not upgraded" % pkg.name)
-                cache.clear()
-                for pkg2 in pkgs_to_upgrade:
-                    pkg2.markUpgrade()
+        # redo the selection about the packages to upgrade based on the new
+        # blacklist
+        logging.debug("blacklist: %s" % blacklisted_pkgs)
+        # find out about the packages that are upgradable (in a allowed_origin)
+        if len(blacklisted_pkgs) > 0:
+            cache.clear()
+            old_pkgs_to_upgrade = pkgs_to_upgrade[:]
+            pkgs_to_upgrade = []
+            for pkg in old_pkgs_to_upgrade:
+                logging.debug("Checking (blacklist): %s" % (pkg.name))
+                pkg.markUpgrade()
+                if check_changes_for_sanity(cache, allowed_origins,
+                                            blacklisted_pkgs):
+                     pkgs_to_upgrade.append(pkg)
+                else:
+                    logging.info("package '%s' not upgraded" % pkg.name)
+                    cache.clear()
+                    for pkg2 in pkgs_to_upgrade:
+                        pkg2.markUpgrade()
+    else:
+        logging.debug("dpkg is configured not to cause conffile prompts")
 
     logging.debug("InstCount=%i DelCount=%i BrokenCout=%i" % (cache._depcache.InstCount, cache._depcache.DelCount, cache._depcache.BrokenCount))
 
