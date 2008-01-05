@@ -10,7 +10,7 @@ unattended-upgrades (0.38) jaunty; urgency=low
     - added eu.po translation (closes: #508984)
     - added ja.po translation (closes: #509748)
 
- --
+ -- Michael Vogt <michael.vogt@ubuntu.com>  Sat, 05 Jan 2008 10:38:34 +0100
 
 unattended-upgrades (0.37) jaunty; urgency=low
 
