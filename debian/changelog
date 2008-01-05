@@ -3,6 +3,7 @@ unattended-upgrades (0.38) jaunty; urgency=low
   * debian/po:
     - add ru.po debian template (closes: #509032)
     - add eu.po debian template (closes: #508983)
+    - add fr.po debian template (closes: #508389)
   * po/eu.po:
     - added eu.po translation (closes: #508984)
 
