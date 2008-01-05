@@ -8,6 +8,7 @@ unattended-upgrades (0.38) jaunty; urgency=low
     - add fi.po debian template (closes: #509370)
   * po/eu.po:
     - added eu.po translation (closes: #508984)
+    - added ja.po translation (closes: #509748)
 
  --
 
