@@ -1,3 +1,9 @@
+unattended-upgrades (0.26ubuntu1) hardy; urgency=low
+
+  * updated for hardy
+
+ -- Michael Vogt <michael.vogt@ubuntu.com>  Tue, 05 Feb 2008 13:36:18 +0100
+
 unattended-upgrades (0.25.3ubuntu1) gutsy; urgency=low
 
   * merged patch from Tuomas Jormola to detect if 

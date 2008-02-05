@@ -1,7 +1,7 @@
 // allowed (origin, archive) pairs
 Unattended-Upgrade::Allowed-Origins {
-	"Ubuntu gutsy-security";
-//	"Ubuntu gutsy-updates";
+	"Ubuntu hardy-security";
+//	"Ubuntu hardy-updates";
 };
 
 // never update the packages in this list
