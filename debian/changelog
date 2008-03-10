@@ -1,4 +1,4 @@
-unattended-upgrades (0.27ubuntu1) hardy; urgency=low
+unattended-upgrades (0.30ubuntu1) hardy; urgency=low
 
   [ John Edwards ]
   * fix missing spaces in the log file (LP: #136452)
@@ -13,6 +13,7 @@ unattended-upgrades (0.27ubuntu1) hardy; urgency=low
   * show packages that are held back from the upgrade because of
     conffile prompt in the log as a warning (LP: #133551)
   * create logdir if it does not exist (LP: #87338)
+  * fix error when installing from file:// uris (LP: #56832)
   
  -- Michael Vogt <michael.vogt@ubuntu.com>  Mon, 10 Mar 2008 11:57:17 +0100
 
