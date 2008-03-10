@@ -40,8 +40,12 @@ apt configuration:
 "Unattended-Upgrade::Allowed-Origins"
 "Unattended-Upgrade::Package-Blacklist"
 "Unattended-Upgrade::Mail"
+
 See https://wiki.ubuntu.com/AutomaticUpdates for more details about
 this feature.
+
+If you use the mail feature, make sure that /usr/bin/mail is available
+and working (usually the mailx package is required).
 
 A example configuration that will install from the
 hardy-security and hardy-updates repositories daily:

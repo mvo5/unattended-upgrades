@@ -9,6 +9,7 @@ Standards-Version: 3.7.2
 Package: unattended-upgrades
 Architecture: all
 Depends: python, ${shlibs:Depends}, python-apt (>= 0.6.14ubuntu2), apt-utils
+Suggests: mailx
 Description: Install security upgrades automatically 
  This package will download and install security upgrades automatically
  and unattended. It will take care to only install packages from the 

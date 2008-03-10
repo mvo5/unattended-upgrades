@@ -1,6 +1,6 @@
-#!/usr/bin/python2.4
+#!/usr/bin/python
 #
-# (c) 2005 Canonical
+# (c) 2005-2008 Canonical
 # Author: Michael Vogt <michael.vogt@ubuntu.com>
 #
 # Released under the GPL
@@ -98,22 +98,7 @@ def dpkg_conffile_prompt():
             return False
     return True
 
-
-if __name__ == "__main__":
-
-    if os.getuid() != 0:
-        print "You need to be root to run this application"
-        sys.exit(1)
-
-    # init the logging
-    logdir = apt_pkg.Config.FindDir("APT::UnattendedUpgrades::LogDir",
-                                    "/var/log/unattended-upgrades/")
-    logfile = logdir+apt_pkg.Config.Find("APT::UnattendedUpgrades::LogFile",
-                                         "unattended-upgrades.log")
-    logging.basicConfig(level=logging.INFO,
-                        format='%(asctime)s %(levelname)s %(message)s',
-                        filename=logfile)
-
+def main():
     # init the options
     parser = OptionParser()
     parser.add_option("-d", "--debug",
@@ -280,8 +265,12 @@ if __name__ == "__main__":
     # check if we need to send a mail
     email = apt_pkg.Config.Find("Unattended-Upgrade::Mail", "")
     if email != "":
+        if not os.path.exists("/usr/bin/mail"):
+            logging.error("No '/usr/bin/mail', can not send mail. "
+                          "You probably want to install the 'mailx' package.")
+            return
         logging.debug("Sending mail with '%s' to '%s'" % (logfile_dpkg, email))
-        mail = subprocess.Popen(["mail",
+        mail = subprocess.Popen(["/usr/bin/mail",
                                  "-s","unattended-upgrades result",email],
                                 stdin=subprocess.PIPE)
         s = "Unattended upgrade returned: %s\n\n" % (res != pm.ResultFailed)
@@ -290,4 +279,21 @@ if __name__ == "__main__":
         mail.stdin.close()
         ret = mail.wait()
         logging.debug("mail returned: %s" % ret)
-    
+
+
+if __name__ == "__main__":
+
+    if os.getuid() != 0:
+        print "You need to be root to run this application"
+        sys.exit(1)
+
+    # init the logging
+    logdir = apt_pkg.Config.FindDir("APT::UnattendedUpgrades::LogDir",
+                                    "/var/log/unattended-upgrades/")
+    logfile = logdir+apt_pkg.Config.Find("APT::UnattendedUpgrades::LogFile",
+                                         "unattended-upgrades.log")
+    logging.basicConfig(level=logging.INFO,
+                        format='%(asctime)s %(levelname)s %(message)s',
+                        filename=logfile)
+    # run the main code
+    main()
