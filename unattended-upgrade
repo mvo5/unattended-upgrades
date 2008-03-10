@@ -190,7 +190,7 @@ def main():
                 # FIXME: skip package (means to re-run the whole marking again
                 # and making sure that the package will not be pulled in by
                 # some other package again!
-                logging.debug("pkg '%s' has conffile prompt" % pkgname_from_deb(item.DestFile))
+                logging.warning("pkg '%s' has conffile prompt and needs to be upgraded manually" % pkgname_from_deb(item.DestFile))
                 blacklisted_pkgs.append(pkgname_from_deb(item.DestFile))
 
 

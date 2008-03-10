@@ -10,6 +10,8 @@ unattended-upgrades (0.27ubuntu1) hardy; urgency=low
     thanks to Christer Edwards for the suggestions
   * add "mailx" to suggests (LP: #137994)
   * show propper log output if mail is not available (LP: #137994)
+  * show packages that are held back from the upgrade because of
+    conffile prompt in the log as a warning (LP: #133551)
   
  -- Michael Vogt <michael.vogt@ubuntu.com>  Mon, 10 Mar 2008 11:57:17 +0100
 

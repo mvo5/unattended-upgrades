@@ -7,8 +7,11 @@ that can't be fetched from security and it will check for conffile
 prompts before the install and holds back the package that creates
 them. 
 
-To activate this script you need to ensure that the apt configuration
-contains the following lines:
+== Setup ==
+
+The unattended-upgrades package will *not* act unless it is enabled
+explicitly.  To activate this script you need to ensure that the apt
+configuration contains the following lines:
 
 APT::Periodic::Update-Package-Lists "1";
 APT::Periodic::Unattended-Upgrade "1";
@@ -19,6 +22,8 @@ setup /etc/apt/apt.conf.d/10periodic. Just edit this file then to fit
 your needs. If you do not have this file, just create it or
 create/edit /etc/apt/apt.conf - you can check your configuration by
 running "apt-config dump".
+
+== Options ==
 
 By default it will only install from the the (Ubuntu, hardy-security)
 repository. This can be changed with the
@@ -46,6 +51,18 @@ this feature.
 
 If you use the mail feature, make sure that /usr/bin/mail is available
 and working (usually the mailx package is required).
+
+== Debugging ==
+
+If something goes wrong or if you want to report a bug about the way
+the script works its a good idea to run:
+$ sudo o unattended-upgrade --debug
+
+and look at the resulting logfile in:
+/var/log/unattended-upgrades/unattended-upgrades.log 
+then. It will contain additional debug information.
+
+== Config example ==
 
 A example configuration that will install from the
 hardy-security and hardy-updates repositories daily:
