@@ -6,6 +6,7 @@ unattended-upgrades (0.27ubuntu1) hardy; urgency=low
 
   [ Michael Vogt ]
   * README improved based on Johns suggestions (thanks!)
+  * fix grammer and dated reference to dapper (LP: #140038)
   
  -- Michael Vogt <michael.vogt@ubuntu.com>  Mon, 10 Mar 2008 11:57:17 +0100
 

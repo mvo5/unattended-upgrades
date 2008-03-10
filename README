@@ -18,8 +18,8 @@ them (if that is possible). If you have update-notifier installed,
 it will setup /etc/apt/apt.conf.d/10periodic. Just edit this
 file then to fit your needs.
 
-By default it will only install only from the the (Ubuntu,
-dapper-security) repository. This can be changed with the
+By default it will only install from the the (Ubuntu, hardy-security)
+repository. This can be changed with the
 "Unattended-Upgrade::Allowed-Origins" apt configuration list.  It can
 be configured to allow any (origin, archive) combination. Those values
 are taken from the "Release" file on the archive server. It is
