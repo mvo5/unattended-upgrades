@@ -8,6 +8,7 @@
 
 
 PKG=unattended-upgrades
+DIST=$(shell /usr/bin/lsb_release -c -s)
 DEBVER=$(shell dpkg-parsechangelog |sed -n -e '/^Version:/s/^Version: //p')
 DEB_BUILD_PROG:=debuild --preserve-envvar PATH --preserve-envvar CCACHE_DIR -us -uc $(DEB_BUILD_PROG_OPTS)
 
@@ -96,6 +97,12 @@ binary-arch: build install
 
 
 arch-build:
+	# update the default distro
+	sed -i "s/\"Ubuntu\ [a-z]*-security\"\;/\"Ubuntu $(DIST)-security\"\;/" data/50unattended-upgrades
+	sed -i  "s/\"Ubuntu\ [a-z]*-updates\"\;/\"Ubuntu $(DIST)-updates\"\;/" data/50unattended-upgrades
+	
+
+	# now do the rest
 	rm -rf debian/arch-build
 	mkdir -p debian/arch-build/$(PKG)-$(DEBVER)
 	tar -c --no-recursion -f - `bzr inventory` | (cd debian/arch-build/$(PKG)-$(DEBVER);tar xf -)
