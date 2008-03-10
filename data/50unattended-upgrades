@@ -1,10 +1,17 @@
-// allowed (origin, archive) pairs
+// Automaticall upgrade packages from these (origin, archive) pairs
 Unattended-Upgrade::Allowed-Origins {
 	"Ubuntu hardy-security";
 //	"Ubuntu hardy-updates";
 };
 
-// never update the packages in this list
+// List of packages to not update
 Unattended-Upgrade::Package-Blacklist {
 //	"vim";
+//	"libc6";
+//	"libc6-dev";
+//	"libc6-i686";
 };
+
+// Send email to this address for problems or packages upgrades
+// If empty or unset then no email is sent
+//Unattended-Upgrade::Mail "root@localhost";

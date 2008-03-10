@@ -1,3 +1,14 @@
+unattended-upgrades (0.27ubuntu1) hardy; urgency=low
+
+  [ John Edwards ]
+  * fix missing spaces in the log file (LP: #136452)
+  * add better comments and examples to data/50unattended-upgrades
+
+  [ Michael Vogt ]
+  * README improved based on Johns suggestions (thanks!)
+  
+ -- Michael Vogt <michael.vogt@ubuntu.com>  Mon, 10 Mar 2008 11:57:17 +0100
+
 unattended-upgrades (0.26ubuntu1) hardy; urgency=low
 
   * updated for hardy

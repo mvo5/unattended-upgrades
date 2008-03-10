@@ -40,3 +40,35 @@ apt configuration:
 "Unattended-Upgrade::Mail"
 See https://wiki.ubuntu.com/AutomaticUpdates for more details about
 this feature.
+
+A example configuration that will install from the
+hardy-security and hardy-updates repositories daily:
+
+------------------------------8<--------------------------------------
+// Automaticall upgrade packages from these (origin, archive) pairs
+Unattended-Upgrade::Allowed-Origins {
+	"Ubuntu gutsy-security";
+	"Ubuntu gutsy-updates";
+};
+ 
+// List of packages to not update
+Unattended-Upgrade::Package-Blacklist {
+//	"vim";
+	"libc6";
+	"libc6-dev";
+	"libc6-i686";
+};
+
+// Send email to this address for problems or packages upgrades
+// If empty or unset then no email is sent
+//Unattended-Upgrade::Mail "root@localhost";
+
+// These APT::Periodic settings mean that each day the /etc/cron.daily/apt 
+// cron job will the update package list, download packages and then run 
+// unattended-grade to install them. 
+// Lock/Stamp files are in /var/lib/apt/periodic/
+APT::Periodic::Update-Package-Lists "1";
+APT::Periodic::Download-Upgradeable-Packages "1";
+APT::Periodic::Unattended-Upgrade "1";
+
+------------------------------8<--------------------------------------

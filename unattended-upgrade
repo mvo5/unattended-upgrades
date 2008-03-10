@@ -137,7 +137,7 @@ if __name__ == "__main__":
 
     # pkgs that are (for some reason) not save to install
     blacklisted_pkgs = apt_pkg.Config.ValueList("Unattended-Upgrade::Package-Blacklist")
-    logging.info("Initial blacklisted packages: %s", "".join(blacklisted_pkgs))
+    logging.info("Initial blacklisted packages: %s", " ".join(blacklisted_pkgs))
 
     logging.info("Starting unattended upgrades script")
 
