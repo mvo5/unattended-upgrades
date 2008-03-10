@@ -7,16 +7,18 @@ that can't be fetched from security and it will check for conffile
 prompts before the install and holds back the package that creates
 them. 
 
-To activate this script you need a current apt and then setup
-/etc/apt/apt.conf to include:
+To activate this script you need to ensure that the apt configuration
+contains the following lines:
 
 APT::Periodic::Update-Package-Lists "1";
 APT::Periodic::Unattended-Upgrade "1";
 
-This means that it will check for upates every day and install
-them (if that is possible). If you have update-notifier installed,
-it will setup /etc/apt/apt.conf.d/10periodic. Just edit this
-file then to fit your needs.
+This means that it will check for upates every day and install them
+(if that is possible). If you have update-notifier installed, it will
+setup /etc/apt/apt.conf.d/10periodic. Just edit this file then to fit
+your needs. If you do not have this file, just create it or
+create/edit /etc/apt/apt.conf - you can check your configuration by
+running "apt-config dump".
 
 By default it will only install from the the (Ubuntu, hardy-security)
 repository. This can be changed with the
@@ -72,3 +74,4 @@ APT::Periodic::Download-Upgradeable-Packages "1";
 APT::Periodic::Unattended-Upgrade "1";
 
 ------------------------------8<--------------------------------------
+
