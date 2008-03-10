@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 
 from distutils.core import setup
+from DistUtilsExtra.command import *
 import glob
 import os
 
@@ -12,7 +13,9 @@ setup(name='unattended-upgrades', version='0.1',
                    ["data/50unattended-upgrades"]),
                   ('../etc/logrotate.d/',
                    ["data/logrotate.d/unattended-upgrades"])
-                  ]
+                  ],
+      cmdclass = { "build" : build_extra.build_extra,
+                   "build_i18n" :  build_i18n.build_i18n }
       )
 
 

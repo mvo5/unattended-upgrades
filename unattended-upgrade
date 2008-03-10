@@ -22,6 +22,9 @@ import apt
 import logging
 import subprocess
 
+import gettext
+from gettext import gettext as _
+
 class MyCache(apt.Cache):
     def __init__(self):
         apt.Cache.__init__(self)
@@ -99,11 +102,12 @@ def dpkg_conffile_prompt():
     return True
 
 def main():
+
     # init the options
     parser = OptionParser()
     parser.add_option("-d", "--debug",
                       action="store_true", dest="debug", default=False,
-                      help="print debug messages")
+                      help=_("print debug messages"))
     (options, args) = parser.parse_args()
     if options.debug:
         logging.getLogger().setLevel(logging.DEBUG)
@@ -122,18 +126,18 @@ def main():
 
     # pkgs that are (for some reason) not save to install
     blacklisted_pkgs = apt_pkg.Config.ValueList("Unattended-Upgrade::Package-Blacklist")
-    logging.info("Initial blacklisted packages: %s", " ".join(blacklisted_pkgs))
+    logging.info(_("Initial blacklisted packages: %s"), " ".join(blacklisted_pkgs))
 
-    logging.info("Starting unattended upgrades script")
+    logging.info(_("Starting unattended upgrades script"))
 
     # display available origin
-    logging.info("Allowed origins are: %s" % map(str,allowed_origins))
+    logging.info(_("Allowed origins are: %s") % map(str,allowed_origins))
     
     # get a cache
     cache = MyCache()
     if cache._depcache.BrokenCount > 0:
-        print "Cache has broken packages, exiting"
-        logging.error("Cache has broken packages, exiting")
+        print _("Cache has broken packages, exiting")
+        logging.error(_("Cache has broken packages, exiting"))
         sys.exit(1)
 
     # find out about the packages that are upgradable (in a allowed_origin)
@@ -171,7 +175,7 @@ def main():
     try:
         pm.GetArchives(fetcher,list,recs)
     except SystemError, e:
-        logging.error("GetArchives() failed: '%s'" % e)
+        logging.error(_("GetArchives() failed: '%s'") % e)
     res = fetcher.Run()
 
     if dpkg_conffile_prompt():
@@ -180,9 +184,11 @@ def main():
         for item in fetcher.Items:
             logging.debug("%s" % item)
             if item.Status == item.StatError:
-                print "A error ocured: '%s'" % item.ErrorText
+                print _("An error ocured: '%s'") % item.ErrorText
+                logging.error(_("An error ocured: '%s'") % item.ErrorText)
             if item.Complete == False:
-                print "The URI '%s' failed to download, aborting" % item.DescURI
+                print _("The URI '%s' failed to download, aborting") % item.DescURI
+                logging.error(_("The URI '%s' failed to download, aborting") % item.DescURI)
                 sys.exit(1)
             if item.IsTrusted == False:
                 blacklisted_pkgs.append(pkgname_from_deb(item.DestFile))
@@ -190,7 +196,7 @@ def main():
                 # FIXME: skip package (means to re-run the whole marking again
                 # and making sure that the package will not be pulled in by
                 # some other package again!
-                logging.warning("pkg '%s' has conffile prompt and needs to be upgraded manually" % pkgname_from_deb(item.DestFile))
+                logging.warning(_("Package '%s' has conffile prompt and needs to be upgraded manually") % pkgname_from_deb(item.DestFile))
                 blacklisted_pkgs.append(pkgname_from_deb(item.DestFile))
 
 
@@ -209,7 +215,7 @@ def main():
                                             blacklisted_pkgs):
                      pkgs_to_upgrade.append(pkg)
                 else:
-                    logging.info("package '%s' not upgraded" % pkg.name)
+                    logging.info(_("package '%s' not upgraded") % pkg.name)
                     cache.clear()
                     for pkg2 in pkgs_to_upgrade:
                         pkg2.markUpgrade()
@@ -220,12 +226,12 @@ def main():
 
     # check what we have
     if len(pkgs_to_upgrade) == 0:
-        logging.info("No packages found that can be upgraded unattended")
+        logging.info(_("No packages found that can be upgraded unattended"))
         sys.exit(0)    
 
     # do the install based on the new list of pkgs
     pkgs = " ".join([pkg.name for pkg in pkgs_to_upgrade])
-    logging.info("Packages that are upgraded: %s" % pkgs)
+    logging.info(_("Packages that are upgraded: %s" % pkgs))
 
     # set debconf to NON_INTERACTIVE, redirect output
     os.putenv("DEBIAN_FRONTEND","noninteractive");
@@ -238,7 +244,7 @@ def main():
 
     now = datetime.datetime.now()
     logfile_dpkg = logdir+'unattended-upgrades-dpkg_%s.log' % now.isoformat('_')
-    logging.info("Writing dpkg log to '%s'" % logfile_dpkg)
+    logging.info(_("Writing dpkg log to '%s'") % logfile_dpkg)
     fd = os.open(logfile_dpkg,os.O_RDWR|os.O_CREAT)
     os.dup2(fd,1)
     os.dup2(fd,2)
@@ -250,7 +256,7 @@ def main():
     # the markings in the depcache
     pm = apt_pkg.GetPackageManager(cache._depcache)
     if not pm.GetArchives(fetcher,list,recs):
-        logging.error("pm.GetArchives() failed")
+        logging.error(_("pm.GetArchives() failed"))
     # run the fetcher again (otherwise local file:// 
     # URIs are unhappy (see LP: #56832)
     res = fetcher.Run()
@@ -258,27 +264,27 @@ def main():
     try:
         res = pm.DoInstall()
     except SystemError,e:
-        logging.error("Installing the upgrades failed!")
-        logging.error("error message: '%s'" % e)
+        logging.error(_("Installing the upgrades failed!"))
+        logging.error(_("error message: '%s'") % e)
         res = False
                 
     if res == pm.ResultFailed:
-        logging.error("dpkg returned a error! See '%s' for details" % logfile_dpkg)
+        logging.error(_("dpkg returned a error! See '%s' for details") % logfile_dpkg)
     else:
-        logging.info("All upgrades installed")
+        logging.info(_("All upgrades installed"))
 
     # check if we need to send a mail
     email = apt_pkg.Config.Find("Unattended-Upgrade::Mail", "")
     if email != "":
         if not os.path.exists("/usr/bin/mail"):
-            logging.error("No '/usr/bin/mail', can not send mail. "
-                          "You probably want to install the 'mailx' package.")
+            logging.error(_("No '/usr/bin/mail', can not send mail. "
+                            "You probably want to install the 'mailx' package."))
             return
         logging.debug("Sending mail with '%s' to '%s'" % (logfile_dpkg, email))
         mail = subprocess.Popen(["/usr/bin/mail",
                                  "-s","unattended-upgrades result",email],
                                 stdin=subprocess.PIPE)
-        s = "Unattended upgrade returned: %s\n\n" % (res != pm.ResultFailed)
+        s = _("Unattended upgrade returned: %s\n\n") % (res != pm.ResultFailed)
         s += open(logfile_dpkg).read()
         mail.stdin.write(s)
         mail.stdin.close()
@@ -287,9 +293,13 @@ def main():
 
 
 if __name__ == "__main__":
+    localesApp="unattended-upgrades"
+    localesDir="/usr/share/locale"
+    gettext.bindtextdomain(localesApp, localesDir)
+    gettext.textdomain(localesApp)
 
     if os.getuid() != 0:
-        print "You need to be root to run this application"
+        print _("You need to be root to run this application")
         sys.exit(1)
     
     if not os.path.exists("/var/log/unattended-upgrades"):

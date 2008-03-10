@@ -1,3 +1,9 @@
+unattended-upgrades (0.31ubuntu1) hardy; urgency=low
+
+  * fix i18n and add build-dependency to python-distutils-extra
+
+ -- 
+
 unattended-upgrades (0.30ubuntu1) hardy; urgency=low
 
   [ John Edwards ]

@@ -3,7 +3,7 @@ Section: admin
 Priority: optional
 Maintainer: Michael Vogt <michael.vogt@ubuntu.com>
 Build-Depends: debhelper (>= 5.0.37.2)
-Build-Depends-Indep: python, python-dev
+Build-Depends-Indep: python, python-dev, python-distutils-extra
 Standards-Version: 3.7.2
 
 Package: unattended-upgrades
