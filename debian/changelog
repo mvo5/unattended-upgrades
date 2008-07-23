@@ -1,11 +1,12 @@
-unattended-upgrades (0.31ubuntu1) hardy; urgency=low
+unattended-upgrades (0.31ubuntu1) intrepid; urgency=low
 
+  [ Michael Vogt ]
   * fix i18n and add build-dependency to python-distutils-extra
 
   [ Brian Murray ]
   * string fix for "Automatically" in 50unattended-upgrades (LP: #209049)
 
- -- 
+ -- Michael Vogt <michael.vogt@ubuntu.com>  Wed, 23 Jul 2008 19:39:05 +0200
 
 unattended-upgrades (0.30ubuntu1) hardy; urgency=low
 
