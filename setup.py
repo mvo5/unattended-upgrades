@@ -12,7 +12,9 @@ setup(name='unattended-upgrades', version='0.1',
 		  ('../etc/apt/apt.conf.d/',
                    ["data/50unattended-upgrades"]),
                   ('../etc/logrotate.d/',
-                   ["data/logrotate.d/unattended-upgrades"])
+                   ["data/logrotate.d/unattended-upgrades"]),
+                  ('../usr/share/unattended-upgrades/',
+                   ["data/10auto-upgrades"])
                   ],
       cmdclass = { "build" : build_extra.build_extra,
                    "build_i18n" :  build_i18n.build_i18n }
