@@ -1,3 +1,12 @@
+unattended-upgrades (0.32ubuntu1) intrepid; urgency=low
+
+  * Add debconf question to ask whether automatic updates should be configured
+    by default: add debconf template, postinst and postrm scripts that uses
+    ucf to manage /etc/apt/apt.conf.d/20auto-upgrades since we don't want to
+    enable automatic updates by default. (LP: #84918)
+
+ -- Mathias Gug <mathiaz@ubuntu.com>  Wed, 08 Oct 2008 21:01:52 -0400
+
 unattended-upgrades (0.31ubuntu1) intrepid; urgency=low
 
   [ Michael Vogt ]
