@@ -1,3 +1,9 @@
+unattended-upgrades (0.32ubuntu2) intrepid; urgency=low
+
+  * Updated for intrepid (and updated gutsy references too!)
+
+ -- Sarah Hobbs <hobbsee@ubuntu.com>  Mon, 13 Oct 2008 22:40:21 +1100
+
 unattended-upgrades (0.32ubuntu1) intrepid; urgency=low
 
   * Add debconf question to ask whether automatic updates should be configured

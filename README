@@ -25,7 +25,7 @@ running "apt-config dump".
 
 == Options ==
 
-By default it will only install from the the (Ubuntu, hardy-security)
+By default it will only install from the the (Ubuntu, intrepid-security)
 repository. This can be changed with the
 "Unattended-Upgrade::Allowed-Origins" apt configuration list.  It can
 be configured to allow any (origin, archive) combination. Those values
@@ -65,13 +65,13 @@ then. It will contain additional debug information.
 == Config example ==
 
 A example configuration that will install from the
-hardy-security and hardy-updates repositories daily:
+intrepid-security and intrepid-updates repositories daily:
 
 ------------------------------8<--------------------------------------
 // Automaticall upgrade packages from these (origin, archive) pairs
 Unattended-Upgrade::Allowed-Origins {
-	"Ubuntu gutsy-security";
-	"Ubuntu gutsy-updates";
+	"Ubuntu intrepid-security";
+	"Ubuntu intrepid-updates";
 };
  
 // List of packages to not update

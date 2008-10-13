@@ -1,7 +1,7 @@
 // Automatically upgrade packages from these (origin, archive) pairs
 Unattended-Upgrade::Allowed-Origins {
-	"Ubuntu hardy-security";
-//	"Ubuntu hardy-updates";
+	"Ubuntu intrepid-security";
+//	"Ubuntu intrepid-updates";
 };
 
 // List of packages to not update
