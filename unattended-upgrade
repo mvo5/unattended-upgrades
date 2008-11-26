@@ -293,8 +293,8 @@ def main():
             return
         logging.debug("Sending mail with '%s' to '%s'" % (logfile_dpkg, email))
         mail = subprocess.Popen(["/usr/bin/mail",
-                                 "-s",
-                                 "unattended-upgrades result for %s" % host(),
+                                 "-s", _("unattended-upgrades result "
+                                         "for '%s'") % host(), 
                                  email],
                                 stdin=subprocess.PIPE)
         s = _("Unattended upgrade returned: %s\n\n") % (res != pm.ResultFailed)
