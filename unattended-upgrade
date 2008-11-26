@@ -107,6 +107,9 @@ def rewind_cache(pkgs_to_upgrade):
     for pkg2 in pkgs_to_upgrade:
         pkg2.markUpgrade()
 
+def host():
+    return os.uname()[1]
+
 def main():
 
     # init the options
@@ -290,7 +293,9 @@ def main():
             return
         logging.debug("Sending mail with '%s' to '%s'" % (logfile_dpkg, email))
         mail = subprocess.Popen(["/usr/bin/mail",
-                                 "-s","unattended-upgrades result",email],
+                                 "-s",
+                                 "unattended-upgrades result for %s" % host(),
+                                 email],
                                 stdin=subprocess.PIPE)
         s = _("Unattended upgrade returned: %s\n\n") % (res != pm.ResultFailed)
         s += open(logfile_dpkg).read()

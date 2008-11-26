@@ -2,6 +2,8 @@ unattended-upgrades (0.36) unstable; urgency=low
 
   * make cache calculations quicker (thanks to Ben Hutchings,
     closes #475610)
+  * add hostname in mail header, thanks to  Arthur de Jong
+    (closes: #502171)
 
  --
 
