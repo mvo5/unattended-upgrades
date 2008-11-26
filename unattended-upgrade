@@ -110,6 +110,16 @@ def rewind_cache(pkgs_to_upgrade):
 def host():
     return os.uname()[1]
 
+# *sigh* textwrap is nice, but it breaks "linux-image" into two
+# seperate lines
+def wrap(t, width=70, subsequent_indent=""):
+    out = ""
+    for s in t.split():
+        if (len(out)-out.rfind("\n")) + len(s) > width:
+            out += "\n" + subsequent_indent
+        out += s + " "
+    return out
+
 def main():
 
     # init the options
@@ -136,7 +146,6 @@ def main():
     # pkgs that are (for some reason) not save to install
     blacklisted_pkgs = apt_pkg.Config.ValueList("Unattended-Upgrade::Package-Blacklist")
     logging.info(_("Initial blacklisted packages: %s"), " ".join(blacklisted_pkgs))
-
     logging.info(_("Starting unattended upgrades script"))
 
     # display available origin
@@ -153,6 +162,7 @@ def main():
 
     # find out about the packages that are upgradable (in a allowed_origin)
     pkgs_to_upgrade = []
+    pkgs_kept_back = []
     for pkg in cache:
         if options.debug and pkg.isUpgradable:
             logging.debug("Checking: %s (%s)" % (pkg.name,map(str, pkg.candidateOrigin)))
@@ -166,10 +176,13 @@ def main():
                 else:
                     logging.debug("sanity check failed")
                     rewind_cache(pkgs_to_upgrade)
+                    pkgs_kept_back.append(pkg)
             except SystemError, e:
                 # can't upgrade
                 logging.warning(_("package '%s' upgradable but fails to be marked for upgrade (%s)") % e)
                 rewind_cache(pkgs_to_ugprade)
+                pkgs_kept_back.append(pkg)
+                
 
     pkgs = "\n".join([pkg.name for pkg in pkgs_to_upgrade])
     logging.debug("pkgs that look like they should be upgraded: %s" % pkgs)
@@ -298,6 +311,15 @@ def main():
                                  email],
                                 stdin=subprocess.PIPE)
         s = _("Unattended upgrade returned: %s\n\n") % (res != pm.ResultFailed)
+        s += _("Packages that are upgraded:\n")
+        s += " " + wrap(pkgs, 70, " ")
+        s += "\n"
+        if pkgs_kept_back:
+            s += _("Packages with upgradable origin but kept back:\n")
+            s += " " + wrap(" ".join([pkg.name for pkg in pkgs_kept_back]), 70, " ")
+            s += "\n"
+        s += "\n"
+        s += _("Package installation log:")
         s += open(logfile_dpkg).read()
         mail.stdin.write(s)
         mail.stdin.close()

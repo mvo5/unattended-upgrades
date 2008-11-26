@@ -4,6 +4,8 @@ unattended-upgrades (0.36) unstable; urgency=low
     closes #475610)
   * add hostname in mail header, thanks to  Arthur de Jong
     (closes: #502171)
+  * better email summary of the performed actions
+    (closes: #502351)
 
  --
 
