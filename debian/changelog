@@ -1,3 +1,21 @@
+unattended-upgrades (0.36debian1) unstable; urgency=low
+
+  * merge from ubuntu
+
+ -- Michael Vogtn <mvo@debian.org>  Wed, 26 Nov 2008 21:36:26 +0100
+
+unattended-upgrades (0.36) jaunty; urgency=low
+
+  * make cache calculations quicker (thanks to Ben Hutchings,
+    closes #475610)
+  * add hostname in mail header, thanks to  Arthur de Jong
+    (closes: #502171, LP: #245417)
+  * better email summary of the performed actions
+    (closes: #502351)
+  * be more robust against failures to read the deb (LP: #227448)
+
+ -- Michael Vogt <michael.vogt@ubuntu.com>  Wed, 26 Nov 2008 21:31:42 +0100
+
 unattended-upgrades (0.35debian1) unstable; urgency=low
 
   * merge from ubuntu (new upstream release)
