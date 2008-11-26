@@ -8,7 +8,7 @@ Standards-Version: 3.7.2
 
 Package: unattended-upgrades
 Architecture: all
-Depends: python, ${shlibs:Depends}, python-apt (>= 0.6.14ubuntu2), apt-utils, ucf
+Depends: python, ${shlibs:Depends}, python-apt (>= 0.7), apt-utils (>= 0.7), ucf
 Suggests: mailx
 Description: Install security upgrades automatically 
  This package will download and install security upgrades automatically
