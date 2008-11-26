@@ -1,7 +1,7 @@
 Template: unattended-upgrades/enable_auto_updates
 Type: boolean
 Default: false
-_Description: Should this system automatically download and install security updates?
+_Description: Should this system automatically download and install stable updates?
  Applying updates on a frequent basis is an important part of keeping your
  system secure. By default, updates need to be applied manually using package 
  management tools. Alternatively, you can choose to have this system 
