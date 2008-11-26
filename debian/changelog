@@ -1,3 +1,11 @@
+unattended-upgrades (0.35) jaunty; urgency=low
+
+  * updated for jaunty
+  * improved README to make it clerer where the values of
+    (origin, archive) come from (thanks to 
+
+ -- Michael Vogt <michael.vogt@ubuntu.com>  Wed, 26 Nov 2008 10:44:31 +0100
+
 unattended-upgrades (0.32ubuntu2) intrepid; urgency=low
 
   * Updated for intrepid (and updated gutsy references too!)

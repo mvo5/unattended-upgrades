@@ -25,12 +25,16 @@ running "apt-config dump".
 
 == Options ==
 
-By default it will only install from the the (Ubuntu, intrepid-security)
+By default it will only install from the the (Ubuntu, jaunty-security)
 repository. This can be changed with the
 "Unattended-Upgrade::Allowed-Origins" apt configuration list.  It can
 be configured to allow any (origin, archive) combination. Those values
-are taken from the "Release" file on the archive server. It is
-recommended to use the default (only security updates from Ubuntu).
+are taken from the "Release" file on the archive server, e.g.
+http://security.ubuntu.com/ubuntu/dists/hardy/Release
+
+The value of "origin" is taken from the "Origin:" header in the file, 
+the value of "archive" is taken from the "Suite:" header.
+It is recommended to use the default (only security updates from Ubuntu).
 
 All operations will be logged in /var/log/unattended-upgrades/. This
 includes the dpkg output as well.
@@ -65,13 +69,13 @@ then. It will contain additional debug information.
 == Config example ==
 
 A example configuration that will install from the
-intrepid-security and intrepid-updates repositories daily:
+jaunty-security and jaunty-updates repositories daily:
 
 ------------------------------8<--------------------------------------
 // Automaticall upgrade packages from these (origin, archive) pairs
 Unattended-Upgrade::Allowed-Origins {
-	"Ubuntu intrepid-security";
-	"Ubuntu intrepid-updates";
+	"Ubuntu jaunty-security";
+	"Ubuntu jaunty-updates";
 };
  
 // List of packages to not update
