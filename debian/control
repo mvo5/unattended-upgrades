@@ -1,7 +1,7 @@
 Source: unattended-upgrades
 Section: admin
 Priority: optional
-Maintainer: Michael Vogt <michael.vogt@ubuntu.com>
+Maintainer: Michael Vogt <mvo@debian.org>
 Build-Depends: debhelper (>= 5.0.37.2), po-debconf
 Build-Depends-Indep: python, python-dev, python-distutils-extra
 Standards-Version: 3.7.2

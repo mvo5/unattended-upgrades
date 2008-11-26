@@ -1,7 +1,8 @@
 unattended-upgrades (0.35debian1) unstable; urgency=low
 
-  * merge from ubuntu
-  * add debconf prompt
+  * merge from ubuntu (new upstream release)
+  * add debconf prompt (priority medium) that asks if auto 
+    updates should be enabled
 
  -- Michael Vogt <mvo@debian.org>  Wed, 26 Nov 2008 10:46:08 +0100
 
