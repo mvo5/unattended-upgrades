@@ -1,3 +1,10 @@
+unattended-upgrades (0.36) unstable; urgency=low
+
+  * make cache calculations quicker (thanks to Ben Hutchings,
+    closes #475610)
+
+ --
+
 unattended-upgrades (0.35) jaunty; urgency=low
 
   * updated for jaunty

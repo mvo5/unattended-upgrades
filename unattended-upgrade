@@ -101,6 +101,12 @@ def dpkg_conffile_prompt():
             return False
     return True
 
+def rewind_cache(pkgs_to_upgrade):
+    " set the cache back to the state with packages_to_upgrade "
+    cache.clear()
+    for pkg2 in pkgs_to_upgrade:
+        pkg2.markUpgrade()
+
 def main():
 
     # init the options
@@ -139,6 +145,8 @@ def main():
         print _("Cache has broken packages, exiting")
         logging.error(_("Cache has broken packages, exiting"))
         sys.exit(1)
+    # speed things up with latest apt
+    actiongroup = apt_pkg.GetPkgActionGroup(cache._depcache)
 
     # find out about the packages that are upgradable (in a allowed_origin)
     pkgs_to_upgrade = []
@@ -152,13 +160,13 @@ def main():
                 if check_changes_for_sanity(cache, allowed_origins,
                                             blacklisted_pkgs):
                     pkgs_to_upgrade.append(pkg)
-            except SystemError:
+                else:
+                    logging.debug("sanity check failed")
+                    rewind_cache(pkgs_to_upgrade)
+            except SystemError, e:
                 # can't upgrade
-                pass
-            else:
-                cache.clear()
-                for pkg2 in pkgs_to_upgrade:
-                    pkg2.markUpgrade()
+                logging.warning(_("package '%s' upgradable but fails to be marked for upgrade (%s)") % e)
+                rewind_cache(pkgs_to_ugprade)
 
     pkgs = "\n".join([pkg.name for pkg in pkgs_to_upgrade])
     logging.debug("pkgs that look like they should be upgraded: %s" % pkgs)
