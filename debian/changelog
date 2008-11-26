@@ -2,7 +2,7 @@ unattended-upgrades (0.36debian1) unstable; urgency=low
 
   * merge from ubuntu
 
- -- Michael Vogtn <mvo@debian.org>  Wed, 26 Nov 2008 21:36:26 +0100
+ -- Michael Vogt <mvo@debian.org>  Wed, 26 Nov 2008 21:36:26 +0100
 
 unattended-upgrades (0.36) jaunty; urgency=low
 
