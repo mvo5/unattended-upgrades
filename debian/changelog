@@ -1,4 +1,4 @@
-unattended-upgrades (0.35~debian1) unstable; urgency=low
+unattended-upgrades (0.35debian1) unstable; urgency=low
 
   * merge from ubuntu
   * add debconf prompt
