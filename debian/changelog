@@ -77,6 +77,20 @@ unattended-upgrades (0.25.2ubuntu1) gutsy; urgency=low
 
  -- Michael Vogt <michael.vogt@ubuntu.com>  Wed, 11 Jul 2007 11:19:49 +0100
 
+unattended-upgrades (0.25.1debian1-0.1) unstable; urgency=low
+
+  * Non-Maintainter Update (BSP)
+  * Add dependency on apt (>=0.7) 
+    (closes: #475611)
+
+ -- Bas Zoetekouw <bas@debian.org>  Sat, 14 Jun 2008 14:55:51 +0200
+
+unattended-upgrades (0.25.1debian1) unstable; urgency=low
+
+  * documentation updated
+
+ -- Michael Vogt <mvo@debian.org>  Thu, 07 Jun 2007 13:36:47 +0200
+  
 unattended-upgrades (0.25.1) gutsy; urgency=low
 
   * documentation updated
@@ -89,6 +103,12 @@ unattended-upgrades (0.25ubuntu1) gutsy; urgency=low
 
  -- Michael Vogt <michael.vogt@ubuntu.com>  Wed, 16 May 2007 15:21:11 +0200
 
+unattended-upgrades (0.24debian1) unstable; urgency=low
+
+  * new upstream version
+
+ -- Michael Vogt <mvo@debian.org>  Tue, 24 Apr 2007 23:34:15 +0200
+  
 unattended-upgrades (0.23ubuntu3) feisty-proposed; urgency=low
 
   * added missing README (thanks to siretart, LP#109564)
@@ -122,6 +142,12 @@ unattended-upgrades (0.21ubuntu0) feisty; urgency=low
     - updated for feisty
 
  -- Michael Vogt <michael.vogt@ubuntu.com>  Fri,  3 Nov 2006 22:31:02 +0100
+
+unattended-upgrades (0.2) unstable; urgency=low
+
+  * initial debian upload
+
+ -- Michael Vogt <mvo@debian.org>  Mon,  2 Oct 2006 11:06:50 +0200
 
 unattended-upgrades (0.1ubuntu6) edgy; urgency=low
 
