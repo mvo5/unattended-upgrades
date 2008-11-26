@@ -6,6 +6,7 @@ unattended-upgrades (0.36) unstable; urgency=low
     (closes: #502171)
   * better email summary of the performed actions
     (closes: #502351)
+  * be more robust against failures to read the deb (LP: #227448)
 
  --
 

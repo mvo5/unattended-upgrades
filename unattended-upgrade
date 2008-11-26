@@ -59,9 +59,14 @@ def check_changes_for_sanity(cache, allowed_origins, blacklist):
 
 def pkgname_from_deb(debfile):
     # FIXME: add error checking here
-    control = apt_inst.debExtractControl(open(debfile))
-    sections = apt_pkg.ParseSection(control)
-    return sections["Package"]
+    try:
+        control = apt_inst.debExtractControl(open(debfile))
+        sections = apt_pkg.ParseSection(control)
+        return sections["Package"]
+    except SystemError, e:
+        logging.error("failed to read deb file '%s' (%s)" % (debfile, e))
+        # dumb fallback
+        return debfile.split("_")[0]
 
 def conffile_prompt(destFile):
     logging.debug("check_conffile_prompt('%s')" % destFile)
