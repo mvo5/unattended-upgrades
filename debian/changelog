@@ -1,3 +1,10 @@
+unattended-upgrades (0.35~debian1) unstable; urgency=low
+
+  * merge from ubuntu
+  * add debconf prompt
+
+ -- Michael Vogt <mvo@debian.org>  Wed, 26 Nov 2008 10:46:08 +0100
+
 unattended-upgrades (0.35) jaunty; urgency=low
 
   * updated for jaunty
