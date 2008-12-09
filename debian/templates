@@ -1,8 +1,17 @@
+# These templates have been reviewed by the debian-l10n-english
+# team
+#
+# If modifications/additions/rewording are needed, please ask
+# debian-l10n-english@lists.debian.org for advice.
+#
+# Even minor modifications require translation updates and such
+# changes should be coordinated with translators and reviewers.
+
 Template: unattended-upgrades/enable_auto_updates
 Type: boolean
 Default: false
-_Description: Should this system automatically download and install security updates?
- Applying updates on a frequent basis is an important part of keeping your
- system secure. By default, updates need to be applied manually using package 
+_Description: Automatically download and install stable updates?
+ Applying updates on a frequent basis is an important part of keeping
+ systems secure. By default, updates need to be applied manually using package 
  management tools. Alternatively, you can choose to have this system 
  automatically download and install security updates.

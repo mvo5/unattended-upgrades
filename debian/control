@@ -8,12 +8,13 @@ Standards-Version: 3.7.2
 
 Package: unattended-upgrades
 Architecture: all
-Depends: python, ${shlibs:Depends}, python-apt (>= 0.7), apt-utils (>= 0.7), ucf
+Depends: python, ${shlibs:Depends}, python-apt (>= 0.7), apt-utils (>= 0.7), apt (>= 0.7), ucf
 Suggests: mailx
-Description: Install security upgrades automatically 
- This package will download and install security upgrades automatically
- and unattended. It will take care to only install packages from the 
- configured origin and will check for conffile prompts.
- . 
- This script is the backend for the APT::Periodic::Unattended-Upgrade 
+Description: automatic installation of security upgrades
+ This package can download and install security upgrades automatically
+ and unattended, taking care to only install packages from the
+ configured APT source, and checking for dpkg prompts about
+ configuration file changes.
+ .
+ This script is the backend for the APT::Periodic::Unattended-Upgrade
  option.
