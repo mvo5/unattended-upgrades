@@ -274,7 +274,7 @@ def main():
     now = datetime.datetime.now()
     logfile_dpkg = logdir+'unattended-upgrades-dpkg_%s.log' % now.isoformat('_')
     logging.info(_("Writing dpkg log to '%s'") % logfile_dpkg)
-    fd = os.open(logfile_dpkg,os.O_RDWR|os.O_CREAT)
+    fd = os.open(logfile_dpkg, os.O_RDWR|os.O_CREAT, 0644)
     os.dup2(fd,1)
     os.dup2(fd,2)
     

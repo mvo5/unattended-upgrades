@@ -6,6 +6,9 @@ unattended-upgrades (0.37) jaunty; urgency=low
     - add sv.po debian template (closes: #508225)
   * debian/po/it.po:
     - add it.po debian template (closes: #508193)
+  * unattended-upgrade:
+    - better default permissions of the install log
+      (closes: #507638)
 
  --
 
