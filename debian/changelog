@@ -4,6 +4,8 @@ unattended-upgrades (0.37) jaunty; urgency=low
     debian-l10 team (closes: #508136)
   * debian/po/sv.po:
     - add sv.po debian template (closes: #508225)
+  * debian/po/it.po:
+    - add it.po debian template (closes: #508193)
 
  --
 
