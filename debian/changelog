@@ -12,6 +12,13 @@ unattended-upgrades (0.36debian1) unstable; urgency=low
     debian-l10 team (closes: #508136)
   * debian/po/sv.po:
     - add sv.po debian template (closes: #508225)
+  * debian/po/it.po:
+    - add it.po debian template (closes: #508193)
+  * unattended-upgrade:
+    - better default permissions of the install log
+      (closes: #507638)
+    - only disable apt-listchanges if it is not set to
+      'mail' (closes: #507639)
 
  -- Michael Vogt <mvo@debian.org>  Tue, 09 Dec 2008 01:45:31 +0100
 

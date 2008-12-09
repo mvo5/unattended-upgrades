@@ -1,0 +1,36 @@
+# Translation of unattended-upgrades debconf templates to Italian
+# This file is distributed under the same license as the unattended-upgrades package.
+# Luca Monducci <luca.mo@tiscali.it>, 2008.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: unattended-upgrades 0.35debian2 debconf\n"
+"Report-Msgid-Bugs-To: unattended-upgrades@packages.debian.org\n"
+"POT-Creation-Date: 2008-12-08 18:38+0100\n"
+"PO-Revision-Date: 2008-12-08 20:35+0100\n"
+"Last-Translator: Luca Monducci <luca.mo@tiscali.it>\n"
+"Language-Team: Italian <debian-l10n-italian@lists.debian.org>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+
+#. Type: boolean
+#. Description
+#: ../templates:2001
+msgid "Automatically download and install stable updates?"
+msgstr "Scaricare e installare automaticamente gli aggiornamenti?"
+
+#. Type: boolean
+#. Description
+#: ../templates:2001
+msgid ""
+"Applying updates on a frequent basis is an important part of keeping systems "
+"secure. By default, updates need to be applied manually using package  "
+"management tools. Alternatively, you can choose to have this system  "
+"automatically download and install security updates."
+msgstr ""
+"L'applicazione a cadenza regolare degli aggiornamenti è una parte importante "
+"per la sicurezza del proprio sistema. Normalmente gli aggiornamenti devono "
+"essere applicati manualmente usando gli strumenti di gestione dei pacchetti; "
+"in alternativa è possibile utilizzare questo sistema per scaricare e "
+"installare automaticamente gli aggiornamenti di sicurezza."
