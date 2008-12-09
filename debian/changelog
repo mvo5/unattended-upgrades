@@ -9,6 +9,8 @@ unattended-upgrades (0.37) jaunty; urgency=low
   * unattended-upgrade:
     - better default permissions of the install log
       (closes: #507638)
+    - only disable apt-listchanges if it is not set to
+      'mail' (closes: #507639)
 
  --
 

@@ -12,6 +12,7 @@ import sys
 import os
 import string
 import datetime
+import ConfigParser
 
 from optparse import OptionParser
 from subprocess import Popen, PIPE
@@ -125,8 +126,24 @@ def wrap(t, width=70, subsequent_indent=""):
         out += s + " "
     return out
 
-def main():
+def setup_apt_listchanges():
+    " deal with apt-listchanges "
+    conf = "/etc/apt/listchanges.conf"
+    if os.path.exists(conf):
+        # check if mail is used by apt-listchanges
+        cf = ConfigParser.ConfigParser()
+        cf.read(conf)
+        if cf.has_section("apt") and cf.has_option("apt","frontend"):
+            frontend = cf.get("apt","frontend")
+            if frontend == "mail" and os.path.exists("/usr/sbin/sendmail"):
+                # mail frontend and sendmail, we are fine
+                logging.debug("apt-listchanges is set to mail frontend, ignoring")
+                return
+    # setup env (to play it safe) and return
+    os.putenv("APT_LISTCHANGES_FRONTEND","none");
+    
 
+def main():
     # init the options
     parser = OptionParser()
     parser.add_option("-d", "--debug",
@@ -264,7 +281,7 @@ def main():
 
     # set debconf to NON_INTERACTIVE, redirect output
     os.putenv("DEBIAN_FRONTEND","noninteractive");
-    os.putenv("APT_LISTCHANGES_FRONTEND","none");
+    setup_apt_listchanges()
     
     # redirect to log
     REDIRECT_INPUT = os.devnull
