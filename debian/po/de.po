@@ -1,0 +1,36 @@
+# Translation of unattended-upgrades debconf templates to German
+# Copyright (C) Helge Kreutzmann <debian@helgefjell.de>, 2008.
+# This file is distributed under the same license as the unattended-upgrades package.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: unattended-upgrades 0.35debian2\n"
+"Report-Msgid-Bugs-To: unattended-upgrades@packages.debian.org\n"
+"POT-Creation-Date: 2008-12-08 18:38+0100\n"
+"PO-Revision-Date: 2008-12-09 18:19+0100\n"
+"Last-Translator: Helge Kreutzmann <debian@helgefjell.de>\n"
+"Language-Team: de <debian-l10n-german@lists.debian.org>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+
+#. Type: boolean
+#. Description
+#: ../templates:2001
+msgid "Automatically download and install stable updates?"
+msgstr "Aktualisierungen für Stable automatisch herunterladen und installieren?"
+
+#. Type: boolean
+#. Description
+#: ../templates:2001
+msgid ""
+"Applying updates on a frequent basis is an important part of keeping systems "
+"secure. By default, updates need to be applied manually using package  "
+"management tools. Alternatively, you can choose to have this system  "
+"automatically download and install security updates."
+msgstr ""
+"Das regelmäßige Anwenden von Aktualisierungen ist ein wichtiger Beitrag zu "
+"einem sicherem System. Standardmäßig müssen Aktualisierungen mit den "
+"Paketwerkzeugen manuell eingespielt werden. Alternativ können Sie auswählen, "
+"dass dieses System automatisch die Sicherheitsaktualisierungen herunterlädt "
+"und installiert."

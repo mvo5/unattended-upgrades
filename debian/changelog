@@ -14,6 +14,12 @@ unattended-upgrades (0.36debian1) unstable; urgency=low
     - add sv.po debian template (closes: #508225)
   * debian/po/it.po:
     - add it.po debian template (closes: #508193)
+  * debian/po/ja.po:
+    - add ja.po debian template (closes: #508564)
+  * debian/po/de.po:
+    - add de.po debian template (closes: #508481)
+  * po/fr.po:
+    - add fr.po translation (closes: #508390)
   * unattended-upgrade:
     - better default permissions of the install log
       (closes: #507638)
