@@ -8,8 +8,8 @@ unattended-upgrades (0.37) jaunty; urgency=low
     - add it.po debian template (closes: #508193)
   * debian/po/ja.po:
     - add ja.po debian template (closes: #508564)
-  * debian/po/fr.po:
-    - add fr.po debian template (closes: #508390)
+  * po/fr.po:
+    - add fr.po translation (closes: #508390)
   * unattended-upgrade:
     - better default permissions of the install log
       (closes: #507638)
