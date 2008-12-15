@@ -1,0 +1,38 @@
+# translation of unattended-upgrades debconf to Portuguese
+# Copyright (C) 2008 the unattended-upgrades's copyright holder
+# This file is distributed under the same license as the unattended-upgrades package.
+#
+# António Moreira <antoniocostamoreira@gmail.com>, 2008.
+msgid ""
+msgstr ""
+"Project-Id-Version: unattended-upgrades 0.35debian2\n"
+"Report-Msgid-Bugs-To: unattended-upgrades@packages.debian.org\n"
+"POT-Creation-Date: 2008-12-08 18:38+0100\n"
+"PO-Revision-Date: 2008-12-14 11:49+0000\n"
+"Last-Translator: António Moreira <antoniocostamoreira@gmail.com>\n"
+"Language-Team: Portuguese <traduz@debianpt.org>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+
+#. Type: boolean
+#. Description
+#: ../templates:2001
+msgid "Automatically download and install stable updates?"
+msgstr "Transferir e instalar automaticamente actualizações estáveis?"
+
+#. Type: boolean
+#. Description
+#: ../templates:2001
+msgid ""
+"Applying updates on a frequent basis is an important part of keeping systems "
+"secure. By default, updates need to be applied manually using package  "
+"management tools. Alternatively, you can choose to have this system  "
+"automatically download and install security updates."
+msgstr ""
+"Aplicar actualizações regularmente é uma parte importante para manter os "
+"sistemas seguros. Por regra, as actualizações precisam de ser aplicadas "
+"manualmente usando ferramentas de gestão de pacotes. Em alternativa, você pode "
+"escolher ter este sistema a descarregar e instalar automaticamente as "
+"actualizações de segurança."
+
