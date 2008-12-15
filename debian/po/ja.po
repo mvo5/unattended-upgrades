@@ -6,8 +6,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: unattended-upgrades 0.35debian1\n"
 "Report-Msgid-Bugs-To: unattended-upgrades@packages.debian.org\n"
-"POT-Creation-Date: 2008-11-26 20:18+0100\n"
-"PO-Revision-Date: 2008-12-07 19:53+0900\n"
+"POT-Creation-Date: 2008-12-11 07:17+0100\n"
+"PO-Revision-Date: 2008-12-13 17:33+0900\n"
 "Last-Translator: Hideki Yamane (Debian-JP) <henrich@debian.or.jp>\n"
 "Language-Team: Japanese <debian-japanese@lists.debian.org>\n"
 "MIME-Version: 1.0\n"
@@ -16,21 +16,20 @@ msgstr ""
 
 #. Type: boolean
 #. Description
-#: ../templates:1001
-msgid "Should this system automatically download and install stable updates?"
-msgstr "安定版の更新を自動的にダウンロードしてインストールするよう、このシステムを設定しますか?"
+#: ../templates:2001
+msgid "Automatically download and install stable updates?"
+msgstr "自動的に安定版の更新をダウンロードしてインストールしますか?"
 
 #. Type: boolean
 #. Description
-#: ../templates:1001
+#: ../templates:2001
 msgid ""
-"Applying updates on a frequent basis is an important part of keeping your "
-"system secure. By default, updates need to be applied manually using "
-"package  management tools. Alternatively, you can choose to have this "
-"system  automatically download and install security updates."
+"Applying updates on a frequent basis is an important part of keeping systems "
+"secure. By default, updates need to be applied manually using package "
+"management tools. Alternatively, you can choose to have this system "
+"automatically download and install security updates."
 msgstr ""
-"更新の適用を頻繁に実施するのは、あなたのシステムを安全に保つために重要なことです。"
-"標準の状態では、更新の適用はパッケージ管理ツールを使って手動で行う必要があります。"
-"別のやり方として、セキュリティ更新を自動的にダウンロードしてインストールするよう、"
-"このシステムを設定するようにもできます。"
-
+"更新の適用を頻繁に実施するのは、システムを安全に保つために重要なことです。"
+"標準の状態では、更新の適用はパッケージ管理ツールを使って手動で行う必要"
+"があります。別のやり方として、セキュリティ更新を自動的にダウンロードしてイン"
+"ストールするよう、このシステムを設定するようにもできます。"
