@@ -1,3 +1,13 @@
+unattended-upgrades (0.38) jaunty; urgency=low
+
+  * debian/po:
+    - add ru.po debian template (closes: #509032)
+    - add eu.po debian template (closes: #508983)
+  * po/eu.po:
+    - added eu.po translation (closes: #508984)
+
+ --
+
 unattended-upgrades (0.37) jaunty; urgency=low
 
   * better debconf template and description (thanks to the 
@@ -22,7 +32,7 @@ unattended-upgrades (0.37) jaunty; urgency=low
     - only disable apt-listchanges if it is not set to
       'mail' (closes: #507639)
 
- --
+ -- Michael Vogt <michael.vogt@ubuntu.com>  Mon, 15 Dec 2008 09:46:42 +0100
 
 unattended-upgrades (0.36) jaunty; urgency=low
 
