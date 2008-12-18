@@ -1,3 +1,13 @@
+unattended-upgrades (0.37debian1) unstable; urgency=low
+
+  * debian/po:
+    - add ru.po debian template (closes: #509032)
+    - add eu.po debian template (closes: #508983)
+  * po/eu.po:
+    - added eu.po translation (closes: #508984)
+
+ -- Michael Vogt <michael.vogt@ubuntu.com>  Thu, 18 Dec 2008 10:57:07 +0100
+
 unattended-upgrades (0.36debian1) unstable; urgency=low
 
   * merge from ubuntu:
