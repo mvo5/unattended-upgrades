@@ -1,0 +1,39 @@
+# unattended-upgrades po-debconf file
+# Copyright (C) 2008
+# This file is distributed under the same license as the unattended-upgrades package.
+# Michael Vogt <mvo@debian.org>, 2008
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: 0.35debian1\n"
+"Report-Msgid-Bugs-To: unattended-upgrades@packages.debian.org\n"
+"POT-Creation-Date: 2009-01-05 10:34+0100\n"
+"PO-Revision-Date: 2008-12-03 12:00+0200\n"
+"Last-Translator: Steve Petruzzello <dlist@bluewin.ch>\n"
+"Language-Team: French <debian-l10n-french@lists.debian.org>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+
+#. Type: boolean
+#. Description
+#: ../templates:2001
+msgid "Automatically download and install stable updates?"
+msgstr ""
+"Faut-il automatiquement télécharger et installer les mises à jour de la "
+"version stable ?"
+
+#. Type: boolean
+#. Description
+#: ../templates:2001
+msgid ""
+"Applying updates on a frequent basis is an important part of keeping systems "
+"secure. By default, updates need to be applied manually using package  "
+"management tools. Alternatively, you can choose to have this system  "
+"automatically download and install security updates."
+msgstr ""
+"Il est important de mettre régulièrement son système à jour pour maintenir "
+"un haut niveau de sécurité. Par défaut, les mises à jour doivent être "
+"appliquées manuellement à l'aide d'un outil de gestion de paquets. À "
+"l'inverse, vous pouvez choisir d'automatiser ce processus avec unattended-"
+"upgrades."
