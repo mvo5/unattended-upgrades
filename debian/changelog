@@ -1,3 +1,10 @@
+unattended-upgrades (0.39) UNRELEASED; urgency=low
+
+  * debian/po/fr.po:
+    - updated french translation (closes: #511373)
+
+ --
+
 unattended-upgrades (0.38) jaunty; urgency=low
 
   * debian/po:

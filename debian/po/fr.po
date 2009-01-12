@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: 0.35debian1\n"
 "Report-Msgid-Bugs-To: unattended-upgrades@packages.debian.org\n"
-"POT-Creation-Date: 2008-11-26 20:18+0100\n"
+"POT-Creation-Date: 2009-01-05 10:34+0100\n"
 "PO-Revision-Date: 2008-12-03 12:00+0200\n"
 "Last-Translator: Steve Petruzzello <dlist@bluewin.ch>\n"
 "Language-Team: French <debian-l10n-french@lists.debian.org>\n"
@@ -17,7 +17,7 @@ msgstr ""
 
 #. Type: boolean
 #. Description
-#: ../templates:1001
+#: ../templates:2001
 msgid "Automatically download and install stable updates?"
 msgstr ""
 "Faut-il automatiquement télécharger et installer les mises à jour de la "
@@ -25,12 +25,12 @@ msgstr ""
 
 #. Type: boolean
 #. Description
-#: ../templates:1001
+#: ../templates:2001
 msgid ""
-"Applying updates on a frequent basis is an important part of keeping your "
-"system secure. By default, updates need to be applied manually using "
-"package  management tools. Alternatively, you can choose to have this "
-"system  automatically download and install security updates."
+"Applying updates on a frequent basis is an important part of keeping systems "
+"secure. By default, updates need to be applied manually using package  "
+"management tools. Alternatively, you can choose to have this system  "
+"automatically download and install security updates."
 msgstr ""
 "Il est important de mettre régulièrement son système à jour pour maintenir "
 "un haut niveau de sécurité. Par défaut, les mises à jour doivent être "
