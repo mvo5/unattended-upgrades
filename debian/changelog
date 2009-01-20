@@ -2,6 +2,8 @@ unattended-upgrades (0.39) UNRELEASED; urgency=low
 
   * debian/po/fr.po:
     - updated french translation (closes: #511373)
+  * debian/po/es.po:
+    - added spanish translation (closes: #512213)
 
  --
 
