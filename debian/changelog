@@ -3,6 +3,16 @@ unattended-upgrades (0.38debian1) UNRELEASED; urgency=low
   * Merge from Ubuntu
   * debian/po:
     - updated french translation (closes: #511373)
+  * debian/po:
+    - add es.po spanish translation (closes: #512213)
+    - add ru.po debian template (closes: #509032)
+    - add eu.po debian template (closes: #508983)
+
+ --
+
+unattended-upgrades (0.38) jaunty; urgency=low
+
+  * debian/po:
     - add fr.po debian template (closes: #508389)
     - add ja.po debian template (closes: #509343)
     - add fi.po debian template (closes: #509370)

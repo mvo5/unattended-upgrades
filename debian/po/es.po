@@ -1,0 +1,65 @@
+# unattended-upgrades po-debconf translation to Spanish.
+# Copyright (C) 2007 Software in the Public Interest, SPI Inc.
+# This file is distributed under the same license as the unattended-upgrades package.
+#
+#  Changes:
+# - Initial translation
+#       Fernando González de Requena <fgrequena@gmail.com>, 2009.
+# -Reviewers:
+#	Javier Fernandez-Sanguino <jfs@debian.org>
+#
+#  Traductores, si no conoce el formato PO, merece la pena leer la 
+#  documentación de gettext, especialmente las secciones dedicadas a este
+#  formato, por ejemplo ejecutando:
+#         info -n '(gettext)PO Files'
+#         info -n '(gettext)Header Entry'
+#
+# Equipo de traducción al español, por favor lean antes de traducir
+# los siguientes documentos:
+#
+# - El proyecto de traducción de Debian al español
+#   http://www.debian.org/intl/spanish/
+#   especialmente las notas y normas de traducción en
+#   http://www.debian.org/intl/spanish/notas
+#
+# - La guía de traducción de po's de debconf:
+#   /usr/share/doc/po-debconf/README-trans
+#   o http://www.debian.org/intl/l10n/po-debconf/README-trans
+#
+# Si tiene dudas o consultas sobre esta traducción consulte con el último
+# traductor (campo Last-Translator) y ponga en copia a la lista de
+# traducción de Debian al español (<debian-l10n-spanish@lists.debian.org>)
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: unattended-upgrades 0.37debian1\n"
+"Report-Msgid-Bugs-To: unattended-upgrades@packages.debian.org\n"
+"POT-Creation-Date: 2009-01-05 10:34+0100\n"
+"PO-Revision-Date: 2009-01-06 18:08+0200\n"
+"Last-Translator: Fernando González de Requena <fgrequena@gmail.com>\n"
+"Language-Team: Debian Spanish <debian-l10n-spanish@lists.debian.org>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+
+#. Type: boolean
+#. Description
+#: ../templates:2001
+msgid "Automatically download and install stable updates?"
+msgstr ""
+"¿Desea descargar e instalar automáticamente las actualizaciones "
+"de la versión estable?"
+
+#. Type: boolean
+#. Description
+#: ../templates:2001
+msgid ""
+"Applying updates on a frequent basis is an important part of keeping systems "
+"secure. By default, updates need to be applied manually using package  "
+"management tools. Alternatively, you can choose to have this system  "
+"automatically download and install security updates."
+msgstr ""
+"Para mantener el sistema seguro es importante instalar las actualizaciones "
+"regularmente. Por omisión, para poder realizar una actualización tiene que utilizar "
+"una herramienta de gestión de paquetes. Como alternativa, puede elegir que el "
+"sistema descargue e instale automáticamente las actualizaciones de seguridad."
