@@ -9,7 +9,7 @@ unattended-upgrades (0.39) jaunty; urgency=low
     - add --install-layout=deb to avoid that the binaries and
       the locales get installed into /usr/local
 
- -- Michael Vogt <michael.vogt@ubuntu.com>  Mon, 02 Mar 2009 10:34:46 +0100
+ -- Michael Vogt <michael.vogt@ubuntu.com>  Mon, 02 Mar 2009 10:46:33 +0100
 
 unattended-upgrades (0.38) jaunty; urgency=low
 
