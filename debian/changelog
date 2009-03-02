@@ -1,11 +1,15 @@
-unattended-upgrades (0.39) UNRELEASED; urgency=low
+unattended-upgrades (0.39) jaunty; urgency=low
 
   * debian/po/fr.po:
     - updated french translation (closes: #511373)
   * debian/po/es.po:
     - added spanish translation (closes: #512213)
+  * fix crash in rewind_packages (closes: #517510)
+  * debian/rules:
+    - add --install-layout=deb to avoid that the binaries and
+      the locales get installed into /usr/local
 
- --
+ -- Michael Vogt <michael.vogt@ubuntu.com>  Mon, 02 Mar 2009 10:34:46 +0100
 
 unattended-upgrades (0.38) jaunty; urgency=low
 
@@ -19,7 +23,7 @@ unattended-upgrades (0.38) jaunty; urgency=low
     - added eu.po translation (closes: #508984)
     - added ja.po translation (closes: #509748)
 
- -- Michael Vogt <michael.vogt@ubuntu.com>  Sat, 05 Jan 2008 10:38:34 +0100
+ -- Michael Vogt <michael.vogt@ubuntu.com>  Sat, 05 Jan 2009 10:38:34 +0100
 
 unattended-upgrades (0.37) jaunty; urgency=low
 

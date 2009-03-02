@@ -59,7 +59,7 @@ install: build
 	dh_installdirs
 
 	# Add here commands to install the package into debian/$(PKG).
-	./setup.py install --prefix=$(CURDIR)/debian/$(PKG)/usr
+	./setup.py install --prefix=$(CURDIR)/debian/$(PKG)/usr --install-layout=deb
 
 
 # Build architecture-independent files here.
