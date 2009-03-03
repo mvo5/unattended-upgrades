@@ -26,10 +26,14 @@ unattended-upgrades (0.37debian1) unstable; urgency=low
   * debian/po:
     - add ru.po debian template (closes: #509032)
     - add eu.po debian template (closes: #508983)
+    - add fr.po debian template (closes: #508389)
+    - add ja.po debian template (closes: #509343)
+    - add fi.po debian template (closes: #509370)
   * po/eu.po:
     - added eu.po translation (closes: #508984)
+    - added ja.po translation (closes: #509748)
 
- -- Michael Vogt <michael.vogt@ubuntu.com>  Thu, 18 Dec 2008 10:57:07 +0100
+ -- Michael Vogt <mvo@debian.org>  Mon, 05 Jan 2009 10:34:14 +0100
 
 unattended-upgrades (0.36debian1) unstable; urgency=low
 
