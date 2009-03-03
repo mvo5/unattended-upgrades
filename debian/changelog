@@ -1,13 +1,11 @@
 unattended-upgrades (0.39debian1) unstable; urgency=low
 
-  * New upstream release
+  * Merging new Ubuntu release
 
  -- Michael Vogt <mvo@debian.org>  Tue, 03 Mar 2009 08:38:08 +0100
 
 unattended-upgrades (0.39) jaunty; urgency=low
 
-
-  * Merge from Ubuntu
   * debian/po:
     - updated french translation (closes: #511373)
   * debian/po/es.po:
