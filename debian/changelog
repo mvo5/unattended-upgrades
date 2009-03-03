@@ -1,14 +1,23 @@
-unattended-upgrades (0.38debian1) UNRELEASED; urgency=low
+unattended-upgrades (0.39debian1) unstable; urgency=low
+
+  * New upstream release
+
+ -- Michael Vogt <mvo@debian.org>  Tue, 03 Mar 2009 08:38:08 +0100
+
+unattended-upgrades (0.39) jaunty; urgency=low
+
 
   * Merge from Ubuntu
   * debian/po:
     - updated french translation (closes: #511373)
-  * debian/po:
-    - add es.po spanish translation (closes: #512213)
-    - add ru.po debian template (closes: #509032)
-    - add eu.po debian template (closes: #508983)
+  * debian/po/es.po:
+    - added spanish translation (closes: #512213)
+  * fix crash in rewind_packages (closes: #517510)
+  * debian/rules:
+    - add --install-layout=deb to avoid that the binaries and
+      the locales get installed into /usr/local
 
- --
+ -- Michael Vogt <michael.vogt@ubuntu.com>  Mon, 02 Mar 2009 10:51:23 +0100
 
 unattended-upgrades (0.38) jaunty; urgency=low
 

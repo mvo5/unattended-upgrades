@@ -107,7 +107,7 @@ def dpkg_conffile_prompt():
             return False
     return True
 
-def rewind_cache(pkgs_to_upgrade):
+def rewind_cache(cache, pkgs_to_upgrade):
     " set the cache back to the state with packages_to_upgrade "
     cache.clear()
     for pkg2 in pkgs_to_upgrade:
@@ -197,12 +197,12 @@ def main():
                     pkgs_to_upgrade.append(pkg)
                 else:
                     logging.debug("sanity check failed")
-                    rewind_cache(pkgs_to_upgrade)
+                    rewind_cache(cache, pkgs_to_upgrade)
                     pkgs_kept_back.append(pkg)
             except SystemError, e:
                 # can't upgrade
                 logging.warning(_("package '%s' upgradable but fails to be marked for upgrade (%s)") % e)
-                rewind_cache(pkgs_to_ugprade)
+                rewind_cache(cache, pkgs_to_ugprade)
                 pkgs_kept_back.append(pkg)
                 
 
