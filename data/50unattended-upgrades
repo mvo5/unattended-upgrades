@@ -1,7 +1,7 @@
 // Automatically upgrade packages from these (origin, archive) pairs
 Unattended-Upgrade::Allowed-Origins {
 	"Debian stable";
-//	"Debian lenny-proposed-updates";
+//	"Debian squeeze-proposed-updates";
 };
 
 // List of packages to not update
