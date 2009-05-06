@@ -1,3 +1,10 @@
+unattended-upgrades (0.41) UNRELEASEDkarmic; urgency=low
+
+  * fix lintian warnings
+  * add man-page (closes: #394277)
+
+ -- Michael Vogt <michael.vogt@ubuntu.com>  Wed, 06 May 2009 22:20:29 +0200
+
 unattended-upgrades (0.40ubuntu1) karmic; urgency=low
 
   * data/50unattended-upgrades:
