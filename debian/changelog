@@ -1,4 +1,4 @@
-unattended-upgrades (0.40) karmic; urgency=low
+unattended-upgrades (0.40ubuntu1) karmic; urgency=low
 
   * data/50unattended-upgrades:
     - updated for karmic
