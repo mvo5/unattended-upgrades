@@ -1,7 +1,7 @@
 // Automatically upgrade packages from these (origin, archive) pairs
 Unattended-Upgrade::Allowed-Origins {
-	"Ubuntu jaunty-security";
-//	"Ubuntu jaunty-updates";
+	"Ubuntu karmic-security";
+//	"Ubuntu karmic-updates";
 };
 
 // List of packages to not update
