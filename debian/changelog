@@ -1,3 +1,11 @@
+unattended-upgrades (0.39debian2) UNRELEASEDunstable; urgency=low
+
+  * unattended-upgrade:
+    - use the new python-apt apt.Package.Version class when
+      checking for the candidate origin (closes: #526791)
+
+ -- Michael Vogt <michael.vogt@ubuntu.com>  Wed, 06 May 2009 08:18:50 +0200
+
 unattended-upgrades (0.39debian1) unstable; urgency=low
 
   * Merging new Ubuntu release
