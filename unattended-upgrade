@@ -37,9 +37,9 @@ class MyCache(apt.Cache):
         
 
 def is_allowed_origin(pkg, allowed_origins):
-    if not pkg.candidateOrigin:
+    if not pkg.candidate:
         return False
-    for origin in pkg.candidateOrigin:
+    for origin in pkg.candidate.origins:
         for allowed in allowed_origins:
             if origin.origin == allowed[0] and origin.archive == allowed[1]:
                 return True
@@ -187,7 +187,7 @@ def main():
     pkgs_kept_back = []
     for pkg in cache:
         if options.debug and pkg.isUpgradable:
-            logging.debug("Checking: %s (%s)" % (pkg.name,map(str, pkg.candidateOrigin)))
+            logging.debug("Checking: %s (%s)" % (pkg.name, map(str, pkg.candidate.origins)))
         if (pkg.isUpgradable and 
 	    is_allowed_origin(pkg,allowed_origins)):
             try:

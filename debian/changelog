@@ -1,9 +1,14 @@
-unattended-upgrades (0.40) UNRELEASEDkarmic; urgency=low
+unattended-upgrades (0.40) karmic; urgency=low
 
   * data/50unattended-upgrades:
     - updated for karmic
+  * unattended-upgrade:
+    - use the new python-apt API to avoid deprecation 
+      warnings
+  * debian/control:
+    - update depends on python-apt to (>= 0.7.9)
 
- -- Michael Vogt <michael.vogt@ubuntu.com>  Wed, 06 May 2009 08:17:10 +0200
+ -- Michael Vogt <michael.vogt@ubuntu.com>  Wed, 06 May 2009 21:54:16 +0200
 
 unattended-upgrades (0.39) jaunty; urgency=low
 
