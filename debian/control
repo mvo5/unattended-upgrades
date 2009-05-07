@@ -4,12 +4,12 @@ Priority: optional
 Maintainer: Michael Vogt <mvo@debian.org>
 Build-Depends: debhelper (>= 5.0.37.2), po-debconf
 Build-Depends-Indep: python, python-dev, python-distutils-extra
-Standards-Version: 3.7.2
+Standards-Version: 3.8.0
 
 Package: unattended-upgrades
 Architecture: all
-Depends: ${shlibs:Depends}, python, python-apt (>= 0.7.9), 
- apt-utils (>= 0.7), apt (>= 0.7), ucf
+Depends: ${shlibs:Depends}, ${misc:Depends}, debconf, python, 
+ python-apt (>= 0.7.9), apt-utils (>= 0.7), apt (>= 0.7), ucf
 Suggests: mailx
 Description: automatic installation of security upgrades
  This package can download and install security upgrades automatically

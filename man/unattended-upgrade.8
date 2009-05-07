@@ -1,0 +1,54 @@
+.\"                                      Hey, EMACS: -*- nroff -*-
+.\" First parameter, NAME, should be all caps
+.\" Second parameter, SECTION, should be 1-8, maybe w/ subsection
+.\" other parameters are allowed: see man(7), man(1)
+.TH unattended-upgrade 8 "May 4, 2009"
+.\" Please adjust this date whenever revising the manpage.
+.\"
+.\" Some roff macros, for reference:
+.\" .nh        disable hyphenation
+.\" .hy        enable hyphenation
+.\" .ad l      left justify
+.\" .ad b      justify to both left and right margins
+.\" .nf        disable filling
+.\" .fi        enable filling
+.\" .br        insert line break
+.\" .sp <n>    insert n+1 empty lines
+.\" for manpage-specific macros, see man(7)
+.SH NAME
+unattended-upgrade \- automatic installation of security (and other) upgrades
+.SH SYNOPSIS
+\fBunattended-upgrade\fP [options]
+.br
+.SH DESCRIPTION
+This program can download and install security upgrades automatically
+and unattended, taking care to only install packages from the
+configured APT source, and checking for dpkg prompts about
+configuration file changes. All output is logged to
+/var/log/unattended-ugprades.log. 
+.br
+This script is the backend for the APT::Periodic::Unattended-Upgrade
+option.
+.SH OPTIONS
+unattended-upgrade accepts the following options
+.TP
+\fB-h\fR, \fB\-\-help\fR
+help output
+.TP
+\fB-d\fR, \fB\-\-debug\fR
+extra debug output into /var/log/unattended-upgrades.log
+.SH CONFIGURATION
+The configuration is done via the apt configuration mechanism, the
+default configuration file can be found at 
+/etc/apt/apt.conf.d/50unattended-upgrades
+.SH AUTHORS
+unattended-upgrade is written by Michael Vogt <mvo@ubuntu.com>
+.PP
+This manual page was originally written by Michael Vogt <mvo@ubuntu.com> 
+.SH COPYRIGHT
+Copyright  (C)  2005-2009 Canonical
+.PP
+There is NO warranty.  
+You may redistribute this software under the terms of  the  GNU
+General  Public License.  For more information about these matters, see
+the files named COPYING.
