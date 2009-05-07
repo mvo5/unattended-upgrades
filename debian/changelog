@@ -1,18 +1,35 @@
 unattended-upgrades (0.40ubuntu1) karmic; urgency=low
 
-  * data/50unattended-upgrades:
     - updated for karmic
   * unattended-upgrade:
     - use the new python-apt API to avoid deprecation 
       warnings
+  * data/50unattended-upgrades:
+    - updated for karmic
   * debian/control:
     - update depends on python-apt to (>= 0.7.9)
-
+  
  -- Michael Vogt <michael.vogt@ubuntu.com>  Wed, 06 May 2009 21:54:16 +0200
+  
+unattended-upgrades (0.40debian1) unstable; urgency=low
+
+  * unattended-upgrade:
+    - use the new python-apt apt.Package.Version class when
+      checking for the candidate origin (closes: #526791)
+  * data/50unattended-upgrades:
+    - updated for squeeze
+
+ -- Michael Vogt <mvo@debian.org>  Wed, 06 May 2009 08:18:50 +0200
+
+unattended-upgrades (0.39debian1) unstable; urgency=low
+
+  * Merging new Ubuntu release
+
+ -- Michael Vogt <mvo@debian.org>  Tue, 03 Mar 2009 08:38:08 +0100
 
 unattended-upgrades (0.39) jaunty; urgency=low
 
-  * debian/po/fr.po:
+  * debian/po:
     - updated french translation (closes: #511373)
   * debian/po/es.po:
     - added spanish translation (closes: #512213)
@@ -26,6 +43,17 @@ unattended-upgrades (0.39) jaunty; urgency=low
 unattended-upgrades (0.38) jaunty; urgency=low
 
   * debian/po:
+    - add fr.po debian template (closes: #508389)
+    - add ja.po debian template (closes: #509343)
+    - add fi.po debian template (closes: #509370)
+  * po/:
+    - added ja.po translation (closes: #509748)
+  
+ -- Michael Vogt <mvo@debian.org>  Mon, 12 Jan 2009 09:34:16 +0100
+
+unattended-upgrades (0.37debian1) unstable; urgency=low
+
+  * debian/po:
     - add ru.po debian template (closes: #509032)
     - add eu.po debian template (closes: #508983)
     - add fr.po debian template (closes: #508389)
@@ -35,10 +63,18 @@ unattended-upgrades (0.38) jaunty; urgency=low
     - added eu.po translation (closes: #508984)
     - added ja.po translation (closes: #509748)
 
- -- Michael Vogt <michael.vogt@ubuntu.com>  Sat, 05 Jan 2009 10:38:34 +0100
+ -- Michael Vogt <mvo@debian.org>  Mon, 05 Jan 2009 10:34:14 +0100
 
-unattended-upgrades (0.37) jaunty; urgency=low
+unattended-upgrades (0.36debian1) unstable; urgency=low
 
+  * merge from ubuntu:
+    * make cache calculations quicker (thanks to Ben Hutchings,
+      closes #475610)
+    * add hostname in mail header, thanks to  Arthur de Jong
+      (closes: #502171, LP: #245417)
+    * better email summary of the performed actions
+      (closes: #502351)
+    * be more robust against failures to read the deb (LP: #227448)
   * better debconf template and description (thanks to the 
     debian-l10 team (closes: #508136)
   * debian/po/sv.po:
@@ -61,7 +97,7 @@ unattended-upgrades (0.37) jaunty; urgency=low
     - only disable apt-listchanges if it is not set to
       'mail' (closes: #507639)
 
- -- Michael Vogt <michael.vogt@ubuntu.com>  Mon, 15 Dec 2008 09:46:42 +0100
+ -- Michael Vogt <mvo@debian.org>  Tue, 09 Dec 2008 01:45:31 +0100
 
 unattended-upgrades (0.36) jaunty; urgency=low
 
@@ -74,6 +110,14 @@ unattended-upgrades (0.36) jaunty; urgency=low
   * be more robust against failures to read the deb (LP: #227448)
 
  -- Michael Vogt <michael.vogt@ubuntu.com>  Wed, 26 Nov 2008 21:31:42 +0100
+
+unattended-upgrades (0.35debian1) unstable; urgency=low
+
+  * merge from ubuntu (new upstream release)
+  * add debconf prompt (priority medium) that asks if auto 
+    updates should be enabled
+
+ -- Michael Vogt <mvo@debian.org>  Wed, 26 Nov 2008 10:46:08 +0100
 
 unattended-upgrades (0.35) jaunty; urgency=low
 
@@ -147,6 +191,20 @@ unattended-upgrades (0.25.2ubuntu1) gutsy; urgency=low
 
  -- Michael Vogt <michael.vogt@ubuntu.com>  Wed, 11 Jul 2007 11:19:49 +0100
 
+unattended-upgrades (0.25.1debian1-0.1) unstable; urgency=low
+
+  * Non-Maintainter Update (BSP)
+  * Add dependency on apt (>=0.7) 
+    (closes: #475611)
+
+ -- Bas Zoetekouw <bas@debian.org>  Sat, 14 Jun 2008 14:55:51 +0200
+
+unattended-upgrades (0.25.1debian1) unstable; urgency=low
+
+  * documentation updated
+
+ -- Michael Vogt <mvo@debian.org>  Thu, 07 Jun 2007 13:36:47 +0200
+  
 unattended-upgrades (0.25.1) gutsy; urgency=low
 
   * documentation updated
@@ -159,6 +217,12 @@ unattended-upgrades (0.25ubuntu1) gutsy; urgency=low
 
  -- Michael Vogt <michael.vogt@ubuntu.com>  Wed, 16 May 2007 15:21:11 +0200
 
+unattended-upgrades (0.24debian1) unstable; urgency=low
+
+  * new upstream version
+
+ -- Michael Vogt <mvo@debian.org>  Tue, 24 Apr 2007 23:34:15 +0200
+  
 unattended-upgrades (0.23ubuntu3) feisty-proposed; urgency=low
 
   * added missing README (thanks to siretart, LP#109564)
@@ -192,6 +256,12 @@ unattended-upgrades (0.21ubuntu0) feisty; urgency=low
     - updated for feisty
 
  -- Michael Vogt <michael.vogt@ubuntu.com>  Fri,  3 Nov 2006 22:31:02 +0100
+
+unattended-upgrades (0.2) unstable; urgency=low
+
+  * initial debian upload
+
+ -- Michael Vogt <mvo@debian.org>  Mon,  2 Oct 2006 11:06:50 +0200
 
 unattended-upgrades (0.1ubuntu6) edgy; urgency=low
 
