@@ -8,6 +8,9 @@ unattended-upgrades (0.41) UNRELEASED; urgency=low
     - updated, thanks to Yuri Kozlov, closes: #527111
   * debian/po/eu.po:
     - updated, thanks to Piarres Beobide, closes: #513436
+  * debian/links
+    - add symlink to make binary name and package name match, 
+      closes: #428965
 
  -- Michael Vogt <michael.vogt@ubuntu.com>  Wed, 06 May 2009 22:20:29 +0200
 
