@@ -214,12 +214,12 @@ def main():
                 else:
                     logging.debug("sanity check failed")
                     rewind_cache(cache, pkgs_to_upgrade)
-                    pkgs_kept_back.append(pkg)
+                    pkgs_kept_back.append(pkg.name)
             except SystemError, e:
                 # can't upgrade
                 logging.warning(_("package '%s' upgradable but fails to be marked for upgrade (%s)") % e)
                 rewind_cache(cache, pkgs_to_ugprade)
-                pkgs_kept_back.append(pkg)
+                pkgs_kept_back.append(pkg.name)
                 
 
     pkgs = "\n".join([pkg.name for pkg in pkgs_to_upgrade])
@@ -260,6 +260,7 @@ def main():
                 # some other package again!
                 logging.warning(_("Package '%s' has conffile prompt and needs to be upgraded manually") % pkgname_from_deb(item.DestFile))
                 blacklisted_pkgs.append(pkgname_from_deb(item.DestFile))
+                pkgs_kept_back.append(pkgname_from_deb(item.DestFile))
 
 
         # redo the selection about the packages to upgrade based on the new
@@ -277,6 +278,8 @@ def main():
                                             blacklisted_pkgs):
                      pkgs_to_upgrade.append(pkg)
                 else:
+                    if not (pkg.name in pkgs_kept_back):
+                        pkgs_kept_back.append(pkg.name)
                     logging.info(_("package '%s' not upgraded") % pkg.name)
                     cache.clear()
                     for pkg2 in pkgs_to_upgrade:
@@ -286,8 +289,8 @@ def main():
 
     logging.debug("InstCount=%i DelCount=%i BrokenCout=%i" % (cache._depcache.InstCount, cache._depcache.DelCount, cache._depcache.BrokenCount))
 
-    # check what we have
-    if len(pkgs_to_upgrade) == 0:
+    # exit if there is nothing to do and nothing to report
+    if (len(pkgs_to_upgrade) == 0) and (len(pkgs_kept_back) == 0):
         logging.info(_("No packages found that can be upgraded unattended"))
         sys.exit(0)    
 
@@ -354,7 +357,7 @@ def main():
         s += "\n"
         if pkgs_kept_back:
             s += _("Packages with upgradable origin but kept back:\n")
-            s += " " + wrap(" ".join([pkg.name for pkg in pkgs_kept_back]), 70, " ")
+            s += " " + wrap(" ".join(pkgs_kept_back), 70, " ")
             s += "\n"
         s += "\n"
         s += _("Package installation log:")

@@ -5,6 +5,8 @@ unattended-upgrades (0.41debian1) unstable; urgency=low
   * debian/po/cs.po:
     - updated Czech translation (thanks to Vítězslav Kotrla)
       closes: #532136
+  * add kept back packages to the status email (thanks to
+    Maximilian Gaukler, closes: #526505)
 
  -- Michael Vogt <mvo@debian.org>  Wed, 10 Jun 2009 20:36:39 +0200
 
