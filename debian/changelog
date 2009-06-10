@@ -1,3 +1,13 @@
+unattended-upgrades (0.41debian1) unstable; urgency=low
+
+  * fix lintian warnings
+  * add man-page (closes: #394277)
+  * debian/po/cs.po:
+    - updated Czech translation (thanks to Vítězslav Kotrla)
+      closes: #532136
+
+ -- Michael Vogt <mvo@debian.org>  Wed, 10 Jun 2009 20:36:39 +0200
+
 unattended-upgrades (0.40debian1) unstable; urgency=low
 
   * unattended-upgrade:

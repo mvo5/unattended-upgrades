@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: 0.35\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2008-03-10 15:28+0100\n"
+"POT-Creation-Date: 2009-05-06 10:52+0200\n"
 "PO-Revision-Date: 2008-11-27 12:00+0200\n"
 "Last-Translator: Steve Petruzzello <dlist@bluewin.ch>\n"
 "Language-Team: French <debian-l10n-french@lists.debian.org>\n"
@@ -15,91 +15,110 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 
-#: ../unattended-upgrade:108
+#: ../unattended-upgrade:151
 msgid "print debug messages"
 msgstr "Afficher les messages de débogage"
 
-#: ../unattended-upgrade:127
+#: ../unattended-upgrade:170
 #, c-format
 msgid "Initial blacklisted packages: %s"
 msgstr "Paquets initialement sur la liste noire : %s"
 
-#: ../unattended-upgrade:129
+#: ../unattended-upgrade:171
 msgid "Starting unattended upgrades script"
 msgstr "Démarrage du script de mise à jour automatique"
 
-#: ../unattended-upgrade:132
+#: ../unattended-upgrade:174
 #, c-format
 msgid "Allowed origins are: %s"
 msgstr "Les origines permises sont : %s"
 
-#: ../unattended-upgrade:137 ../unattended-upgrade:138
+#: ../unattended-upgrade:179 ../unattended-upgrade:180
 msgid "Cache has broken packages, exiting"
 msgstr "Le cache contient des paquets cassés, abandon"
 
-#: ../unattended-upgrade:176
+#: ../unattended-upgrade:204
+#, c-format
+msgid "package '%s' upgradable but fails to be marked for upgrade (%s)"
+msgstr ""
+
+#: ../unattended-upgrade:224
 #, c-format
 msgid "GetArchives() failed: '%s'"
 msgstr "Echec de GetArchives() : '%s'"
 
-#: ../unattended-upgrade:185 ../unattended-upgrade:186
+#: ../unattended-upgrade:233 ../unattended-upgrade:234
 #, c-format
 msgid "An error ocured: '%s'"
 msgstr "Une erreur s'est produite : '%s'"
 
-#: ../unattended-upgrade:188 ../unattended-upgrade:189
+#: ../unattended-upgrade:236 ../unattended-upgrade:237
 #, c-format
 msgid "The URI '%s' failed to download, aborting"
 msgstr "Echec du téléchargement à l'URI '%s', abandon"
 
-#: ../unattended-upgrade:197
+#: ../unattended-upgrade:245
 #, c-format
 msgid "Package '%s' has conffile prompt and needs to be upgraded manually"
 msgstr ""
-"Le paquet '%s' provoque un conflit de fichiers de configuration et nécessite une mise à jour manuelle"
+"Le paquet '%s' provoque un conflit de fichiers de configuration et nécessite "
+"une mise à jour manuelle"
 
-#: ../unattended-upgrade:216
+#: ../unattended-upgrade:264
 #, c-format
 msgid "package '%s' not upgraded"
 msgstr "Le paquet '%s' n'a pas été mis à jour"
 
-#: ../unattended-upgrade:227
+#: ../unattended-upgrade:275
 msgid "No packages found that can be upgraded unattended"
 msgstr "Aucun paquet à mettre à jour automatiquement"
 
-#: ../unattended-upgrade:232
+#: ../unattended-upgrade:280
 #, c-format
 msgid "Packages that are upgraded: %s"
 msgstr "Paquets mis à jour : %s"
 
-#: ../unattended-upgrade:245
+#: ../unattended-upgrade:293
 #, c-format
 msgid "Writing dpkg log to '%s'"
 msgstr "Écriture du journal de dpkg dans '%s'"
 
-#: ../unattended-upgrade:257
+#: ../unattended-upgrade:305
 msgid "pm.GetArchives() failed"
 msgstr "Echec de pm.GetArchives()"
 
-#: ../unattended-upgrade:265
+#: ../unattended-upgrade:313
 msgid "Installing the upgrades failed!"
 msgstr "Échec de l'installation des mises à jour"
 
-#: ../unattended-upgrade:266
+#: ../unattended-upgrade:314
 #, c-format
 msgid "error message: '%s'"
 msgstr "Message d'erreur : '%s'"
 
-#: ../unattended-upgrade:270
+#: ../unattended-upgrade:318
 #, c-format
 msgid "dpkg returned a error! See '%s' for details"
 msgstr "Dpkg a retourné une erreur. Voir « %s » pour les détails"
 
-#: ../unattended-upgrade:272
+#: ../unattended-upgrade:320
 msgid "All upgrades installed"
 msgstr "Toutes les mises à jour ont été installées"
 
-#: ../unattended-upgrade:285
+#: ../unattended-upgrade:326
+msgid ""
+"No '/usr/bin/mail', can not send mail. You probably want to install the "
+"'mailx' package."
+msgstr ""
+
+#: ../unattended-upgrade:331
+#, fuzzy, c-format
+msgid "unattended-upgrades result for '%s'"
+msgstr ""
+"La mise à jour automatique a retourné : %s\n"
+"\n"
+
+#: ../unattended-upgrade:335
 #, c-format
 msgid ""
 "Unattended upgrade returned: %s\n"
@@ -108,7 +127,20 @@ msgstr ""
 "La mise à jour automatique a retourné : %s\n"
 "\n"
 
-#: ../unattended-upgrade:296
+#: ../unattended-upgrade:336
+#, fuzzy
+msgid "Packages that are upgraded:\n"
+msgstr "Paquets mis à jour : %s"
+
+#: ../unattended-upgrade:340
+msgid "Packages with upgradable origin but kept back:\n"
+msgstr ""
+
+#: ../unattended-upgrade:344
+msgid "Package installation log:"
+msgstr ""
+
+#: ../unattended-upgrade:359
 msgid "You need to be root to run this application"
 msgstr ""
 "Vous devez posséder les privilèges du superutilisateur pour exécuter cette "
