@@ -1,0 +1,37 @@
+# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the unattended-upgrades package.
+# Vítězslav Kotrla <vitezslav.kotrla@gmail.com>, 2009.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: PACKAGE VERSION\n"
+"Report-Msgid-Bugs-To: unattended-upgrades@packages.debian.org\n"
+"POT-Creation-Date: 2009-05-06 22:11+0200\n"
+"PO-Revision-Date: 2009-06-06 22:11+0200\n"
+"Last-Translator: Vítězslav Kotrla <vitezslav.kotrla@gmail.com>\n"
+"Language-Team: Czech <debian-l10n-czech@lists.debian.org>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"X-Generator: KBabel 1.11.4\n"
+
+#. Type: boolean
+#. Description
+#: ../templates:2001
+msgid "Automatically download and install stable updates?"
+msgstr "Automaticky stahovat a instalovat aktualizace ze stabilní verze Debianu?"
+
+#. Type: boolean
+#. Description
+#: ../templates:2001
+msgid ""
+"Applying updates on a frequent basis is an important part of keeping systems "
+"secure. By default, updates need to be applied manually using package  "
+"management tools. Alternatively, you can choose to have this system  "
+"automatically download and install security updates."
+msgstr ""
+"Pravidelné nasazování aktualizací je důležitou součástí udržování zabezpečení "
+"systému. Normálně je nutné aktualizace nasazovat ručně za použití příslušných "
+"nástrojů pro správu balíčků. Můžete ovšem zvolit, aby tento systém automaticky "
+"sám stahoval a instaloval bezpečnostní aktualizace."
+
