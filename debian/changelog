@@ -1,4 +1,4 @@
-unattended-upgrades (0.41) karmic; urgency=low
+unattended-upgrades (0.41ubuntu1) karmic; urgency=low
 
   * fix lintian warnings
   * add man-page (closes: #394277)
@@ -8,7 +8,7 @@ unattended-upgrades (0.41) karmic; urgency=low
   * add kept back packages to the status email (thanks to
     Maximilian Gaukler, closes: #526505)
 
- -- Michael Vogt <michael.vogt@ubuntu.com>  Fri, 12 Jun 2009 21:16:01 +0200
+ -- Michael Vogt <michael.vogt@ubuntu.com>  Mon, 15 Jun 2009 10:27:51 +0200
 
 unattended-upgrades (0.40ubuntu1) karmic; urgency=low
 
