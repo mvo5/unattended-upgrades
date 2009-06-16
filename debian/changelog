@@ -1,5 +1,7 @@
 unattended-upgrades (0.42) unstable; urgency=low
-  
+
+  * debian/po/sk.po:
+    - new translation, thanks to helix84, closes: #532959
   * debian/po/ru.po:
     - updated, thanks to Yuri Kozlov, closes: #527111
   * debian/po/eu.po:
