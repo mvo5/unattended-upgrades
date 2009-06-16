@@ -1,0 +1,29 @@
+# Slovak translation of unattended-upgrades debconf template.
+# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the udev package.
+# Ivan Masár <helix84@centrum.sk>, 2009.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: unattended-upgrades\n"
+"Report-Msgid-Bugs-To: unattended-upgrades@packages.debian.org\n"
+"POT-Creation-Date: 2009-06-10 21:24+0200\n"
+"PO-Revision-Date: 2009-06-13 10:28+0100\n"
+"Last-Translator: Ivan Masár <helix84@centrum.sk>\n"
+"Language-Team: Slovak <sk-i18n@lists.linux.sk>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+
+#. Type: boolean
+#. Description
+#: ../templates:2001
+msgid "Automatically download and install stable updates?"
+msgstr "Automaticky sťahovať a inštalovať stabilné aktualizácie?"
+
+#. Type: boolean
+#. Description
+#: ../templates:2001
+msgid "Applying updates on a frequent basis is an important part of keeping systems secure. By default, updates need to be applied manually using package  management tools. Alternatively, you can choose to have this system  automatically download and install security updates."
+msgstr "Častá aktualizácia je dôležitou súčasťou udrživania zabezpečeného systému. Štandardne je nutné aktualizácie spúšťať ručne pomocou nástrojov na správu balíkov. Namiesto toho môžete nechať tento systém aby za vás autoamticky sťahoval a inštaloval bezpečnostné aktualizácie."
+

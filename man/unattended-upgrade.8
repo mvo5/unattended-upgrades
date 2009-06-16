@@ -26,9 +26,9 @@ and unattended, taking care to only install packages from the
 configured APT source, and checking for dpkg prompts about
 configuration file changes. All output is logged to
 /var/log/unattended-ugprades.log. 
-.br
+.sp
 This script is the backend for the APT::Periodic::Unattended-Upgrade
-option.
+option and designed to be run from cron (e.g. via /etc/cron.daily/apt).
 .SH OPTIONS
 unattended-upgrade accepts the following options
 .TP
