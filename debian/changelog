@@ -10,7 +10,7 @@ unattended-upgrades (0.42debian1) unstable; urgency=low
     - add symlink to make binary name and package name match, 
       closes: #428965
 
- -- Michael Vogt <mvo@debian.org>  Tue, 16 Jun 2009 11:57:41 +0200
+ -- Michael Vogt <mvo@debian.org>  Thu, 25 Jun 2009 16:07:29 +0200
 
 unattended-upgrades (0.41debian1) unstable; urgency=low
 
