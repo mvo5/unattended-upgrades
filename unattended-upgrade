@@ -86,7 +86,7 @@ def pkgname_from_deb(debfile):
         control = apt_inst.debExtractControl(open(debfile))
         sections = apt_pkg.ParseSection(control)
         return sections["Package"]
-    except SystemError, e:
+    except (IOError, SystemError), e:
         logging.error("failed to read deb file '%s' (%s)" % (debfile, e))
         # dumb fallback
         return debfile.split("_")[0]
