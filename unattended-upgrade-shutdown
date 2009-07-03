@@ -28,9 +28,19 @@ import apt_pkg
 import time
 import sys
 import logging
+import gettext
+
 from optparse import OptionParser
+from gettext import gettext as _
+
 
 if __name__ == "__main__":
+    # setup gettext
+    localesApp="unattended-upgrades"
+    localesDir="/usr/share/locale"
+    gettext.bindtextdomain(localesApp, localesDir)
+    gettext.textdomain(localesApp)
+
     parser = OptionParser()
     parser.add_option("", "--debug",
                       action="store_true", dest="debug", default=False,
