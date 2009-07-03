@@ -223,6 +223,15 @@ def main():
     # display available origin
     logging.info(_("Allowed origins are: %s") % map(str,allowed_origins))
     
+    # check and get lock
+    try:
+        apt_pkg.PkgSystemLock()
+    except SystemError, e:
+        logging.error(_("Lock could not be acquired (another package "
+                        "manager running?)"))
+        print _("Cache lock can not be acquired, exiting")
+        sys.exit(1)
+
     # get a cache
     cache = MyCache()
     if cache._depcache.BrokenCount > 0:
@@ -354,6 +363,8 @@ def main():
     logfile_dpkg = logdir+'unattended-upgrades-dpkg_%s.log' % now.isoformat('_')
     logging.info(_("Writing dpkg log to '%s'") % logfile_dpkg)
     fd = os.open(logfile_dpkg, os.O_RDWR|os.O_CREAT, 0644)
+    old_stdout = os.dup(1)
+    old_stderr = os.dup(2)
     os.dup2(fd,1)
     os.dup2(fd,2)
     
@@ -365,15 +376,25 @@ def main():
     # run the fetcher again (otherwise local file:// 
     # URIs are unhappy (see LP: #56832)
     res = fetcher.Run()
+    # unlock the cache
+    try:
+        apt_pkg.PkgSystemUnLock()
+    except SystemError, e:
+        pass
     # now do the actual install
+    error = None
     try:
         res = pm.DoInstall()
     except SystemError,e:
+        error = e
+        res = pm.ResultFailed
+    finally:
+        os.dup2(old_stdout, 1)
+        os.dup2(old_stderr, 2)
+
+    if res == pm.ResultFailed:
         logging.error(_("Installing the upgrades failed!"))
         logging.error(_("error message: '%s'") % e)
-        res = False
-                
-    if res == pm.ResultFailed:
         logging.error(_("dpkg returned a error! See '%s' for details") % logfile_dpkg)
     else:
         logging.info(_("All upgrades installed"))
