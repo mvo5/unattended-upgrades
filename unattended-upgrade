@@ -66,11 +66,17 @@ def check_changes_for_sanity(cache, allowed_origins, blacklist):
         return False
     for pkg in cache:
         if pkg.markedDelete:
+            logging.debug("pkg '%s' now marked delete" % pkg.name)
             return False
         if pkg.markedInstall or pkg.markedUpgrade:
             if not is_allowed_origin(pkg, allowed_origins):
+                logging.debug("pkg '%s' not in allowed origin" % pkg.name)
                 return False
             if pkg.name in blacklist:
+                logging.debug("pkg '%s' blacklisted" % pkg.name)
+                return False
+            if pkg._pkg.SelectedState == apt_pkg.SelStateHold:
+                logging.debug("pkg '%s' is on hold" % pkg.name)
                 return False
     return True
 
@@ -165,18 +171,15 @@ def main():
     parser.add_option("-d", "--debug",
                       action="store_true", dest="debug", default=False,
                       help=_("print debug messages"))
+    parser.add_option("", "--dry-run",
+                      action="store_true", default=False,
+                      help=_("Simulation, download but do not install"))
     (options, args) = parser.parse_args()
     if options.debug:
-        logging.getLogger().setLevel(logging.DEBUG)
-        pass
-
-    #dldir = "/tmp/pyapt-test"
-    #try:
-    #    os.mkdir(dldir)
-    #    os.mkdir(dldir+"/partial")
-    #except OSError:
-    #    pass
-    #apt_pkg.Config.Set("Dir::Cache::archives",dldir)
+        logger = logging.getLogger()
+        logger.setLevel(logging.DEBUG)
+        stderr_handler = logging.StreamHandler()
+        logger.addHandler(stderr_handler)
 
     # format (origin, archive), e.g. ("Ubuntu","dapper-security")
     allowed_origins = map(string.split, apt_pkg.Config.ValueList("Unattended-Upgrade::Allowed-Origins"))
@@ -293,6 +296,11 @@ def main():
     if (len(pkgs_to_upgrade) == 0) and (len(pkgs_kept_back) == 0):
         logging.info(_("No packages found that can be upgraded unattended"))
         sys.exit(0)    
+
+    # check if we are in dry-run mode
+    if options.dry_run:
+        logging.info("Stopping now because of option --dry-run")
+        return True
 
     # do the install based on the new list of pkgs
     pkgs = " ".join([pkg.name for pkg in pkgs_to_upgrade])

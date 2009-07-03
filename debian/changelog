@@ -1,8 +1,10 @@
 unattended-upgrades (0.43) unstable; urgency=low
 
-  * unattended-upgrade: 
-    - fix crash in ouput, thanks to Joerg Schuetter,
-      closes: #535347
+  * fix crash in ouput, thanks to Joerg Schuetter, closes: #535347
+  * when running in --debug mode, also print debug output to stderr
+  * add --dry-run option to simulate a run, but not actually install
+    something
+  * check for packages on hold and do not upgrade them (closes: #511677)
 
  -- Michael Vogt <michael.vogt@ubuntu.com>  Fri, 03 Jul 2009 09:15:08 +0200
 
