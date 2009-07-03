@@ -334,8 +334,8 @@ def main():
 
     # check if we are in dry-run mode
     if options.dry_run:
-        logging.info("Stopping now because of option --dry-run")
-        return True
+        logging.info("Option --dry-run given, *not* performing real actions")
+        apt_pkg.Config.Set("Debug::pkgDPkgPM","1")
 
     # do the install based on the new list of pkgs
     pkgs = " ".join([pkg.name for pkg in pkgs_to_upgrade])
