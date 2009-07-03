@@ -163,6 +163,37 @@ def setup_apt_listchanges():
                 return
     # setup env (to play it safe) and return
     os.putenv("APT_LISTCHANGES_FRONTEND","none");
+
+def send_summary_mail(pkgs, res, pkgs_kept_back, logfile_dpkg):
+    " send mail (if configured in Unattended-Upgrades::Mail) "
+    email = apt_pkg.Config.Find("Unattended-Upgrade::Mail", "")
+    if not email:
+        return
+    if not os.path.exists("/usr/bin/mail"):
+        logging.error(_("No '/usr/bin/mail', can not send mail. "
+                        "You probably want to install the 'mailx' package."))
+        return
+    logging.debug("Sending mail with '%s' to '%s'" % (logfile_dpkg, email))
+    mail = subprocess.Popen(["/usr/bin/mail",
+                             "-s", _("unattended-upgrades result "
+                                     "for '%s'") % host(), 
+                             email],
+                            stdin=subprocess.PIPE)
+    s = _("Unattended upgrade returned: %s\n\n") % res
+    s += _("Packages that are upgraded:\n")
+    s += " " + wrap(pkgs, 70, " ")
+    s += "\n"
+    if pkgs_kept_back:
+        s += _("Packages with upgradable origin but kept back:\n")
+        s += " " + wrap(" ".join(pkgs_kept_back), 70, " ")
+        s += "\n"
+    s += "\n"
+    s += _("Package installation log:")+"\n"
+    s += open(logfile_dpkg).read()
+    mail.stdin.write(s)
+    mail.stdin.close()
+    ret = mail.wait()
+    logging.debug("mail returned: %s" % ret)
     
 
 def main():
@@ -255,6 +286,10 @@ def main():
                 print _("The URI '%s' failed to download, aborting") % item.DescURI
                 logging.error(_("The URI '%s' failed to download, aborting") % item.DescURI)
                 sys.exit(1)
+            if not os.path.exists(item.DestFile):
+                print _("Download finished, but file '%s' not there?!?" % item.DestFile)
+                logging.error("Download finished, but file '%s' not there?!?" % item.DestFile)
+                sys.exit(1)
             if item.IsTrusted == False:
                 blacklisted_pkgs.append(pkgname_from_deb(item.DestFile))
             if conffile_prompt(item.DestFile):
@@ -346,35 +381,9 @@ def main():
     else:
         logging.info(_("All upgrades installed"))
 
-    # check if we need to send a mail
-    email = apt_pkg.Config.Find("Unattended-Upgrade::Mail", "")
-    if email != "":
-        if not os.path.exists("/usr/bin/mail"):
-            logging.error(_("No '/usr/bin/mail', can not send mail. "
-                            "You probably want to install the 'mailx' package."))
-            return
-        logging.debug("Sending mail with '%s' to '%s'" % (logfile_dpkg, email))
-        mail = subprocess.Popen(["/usr/bin/mail",
-                                 "-s", _("unattended-upgrades result "
-                                         "for '%s'") % host(), 
-                                 email],
-                                stdin=subprocess.PIPE)
-        s = _("Unattended upgrade returned: %s\n\n") % (res != pm.ResultFailed)
-        s += _("Packages that are upgraded:\n")
-        s += " " + wrap(pkgs, 70, " ")
-        s += "\n"
-        if pkgs_kept_back:
-            s += _("Packages with upgradable origin but kept back:\n")
-            s += " " + wrap(" ".join(pkgs_kept_back), 70, " ")
-            s += "\n"
-        s += "\n"
-        s += _("Package installation log:")
-        s += open(logfile_dpkg).read()
-        mail.stdin.write(s)
-        mail.stdin.close()
-        ret = mail.wait()
-        logging.debug("mail returned: %s" % ret)
-
+    # send a mail (if needed)
+    pkg_install_success = (res != pm.ResultFailed)
+    send_summary_mail(pkgs, pkg_install_success, pkgs_kept_back, logfile_dpkg)
 
 if __name__ == "__main__":
     localesApp="unattended-upgrades"
