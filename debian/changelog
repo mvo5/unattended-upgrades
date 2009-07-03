@@ -3,7 +3,9 @@ unattended-upgrades (0.43) unstable; urgency=low
   * fix crash in ouput, thanks to Joerg Schuetter, closes: #535347
   * when running in --debug mode, also print debug output to stderr
   * add --dry-run option to simulate a run, but not actually install
-    something
+    something 
+  * when running with --debug, install packages instead of just
+    simulating the install, --dry-run is avaialble for simulation
   * check for packages on hold and do not upgrade them (closes: #511677)
   * deal better with failures in pkgname_from_deb() (LP: #305046)
 

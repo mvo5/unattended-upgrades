@@ -357,9 +357,6 @@ def main():
     os.dup2(fd,1)
     os.dup2(fd,2)
     
-    # enable debugging
-    if options.debug:
-        apt_pkg.Config.Set("Debug::pkgDPkgPM","1")
     # create a new package-manager. the blacklist may have changed
     # the markings in the depcache
     pm = apt_pkg.GetPackageManager(cache._depcache)
