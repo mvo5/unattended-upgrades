@@ -391,6 +391,9 @@ def main():
         apt_pkg.PkgSystemUnLock()
     except SystemError, e:
         pass
+    # lock for the shutdown check - its fine if the system
+    # is shutdown while downloading but not so much while installing
+    apt_pkg.GetLock("/var/run/unattended-upgrades.lock")
     # now do the actual install
     error = None
     try:

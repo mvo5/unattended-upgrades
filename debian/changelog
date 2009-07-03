@@ -1,4 +1,4 @@
-unattended-upgrades (0.43) unstable; urgency=low
+unattended-upgrades (0.50) unstable; urgency=low
 
   * fix crash in ouput, thanks to Joerg Schuetter, closes: #535347
   * when running in --debug mode, also print debug output to stderr
@@ -12,6 +12,8 @@ unattended-upgrades (0.43) unstable; urgency=low
   * fix locking problem (LP: #359010)
   * Contain unattended-upgrades log in the status mail as well 
     (LP: #245422)
+  * ensure that unattended-upgrade is finished on shutdown 
+    (LP: #191514)
 
  -- Michael Vogt <michael.vogt@ubuntu.com>  Fri, 03 Jul 2009 09:15:08 +0200
 

@@ -1,0 +1,65 @@
+#!/usr/bin/python
+# Copyright (c) 2009 Canonical Ltd
+#
+# AUTHOR:
+# Michael Vogt <mvo@ubuntu.com>
+#
+# unattended-upgrade-shutdown - helper that checks if a 
+# unattended-upgrade is in progress and waits until it exists
+#
+# This file is part of unattended-upgrades 
+#
+# unattended-upgrades is free software; you can redistribute it and/or
+# modify it under the terms of the GNU General Public License as published
+# by the Free Software Foundation; either version 2 of the License, or (at
+# your option) any later version.
+#
+# unattended-upgrades is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+# General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with unattended-upgrades; if not, write to the Free Software
+# Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+#
+
+import apt_pkg
+import time
+import sys
+import logging
+from optparse import OptionParser
+
+if __name__ == "__main__":
+    parser = OptionParser()
+    parser.add_option("", "--debug",
+                      action="store_true", dest="debug", default=False,
+                      help="print debug messages")
+    parser.add_option("", "--delay", default=10,
+                      help="delay in minutes to wait for unattended-upgrades")
+    parser.add_option("", "--lock-file", 
+                      default="/var/run/unattended-upgrades.lock",
+                      help="lock file location")
+    (options, args) = parser.parse_args()
+    
+    # setup logging
+    level = logging.INFO
+    if options.debug:
+        level = logging.DEBUG
+    logging.basicConfig(level=level, format="%(levelname)s - %(message)s")
+
+    # run
+    start_time = time.time()
+    while True: 
+        res = apt_pkg.GetLock(options.lock_file)
+        logging.debug("GetLock returned %i" % res)
+        if res > 0:
+            logging.debug("Lock not taken")
+            sys.exit(0)
+	# wait a some seconds and try again
+        logging.warning(_("Unattended-upgrade in progress, sleeping for 5s"))
+	time.sleep(5)
+	if (time.time() - start_time) > options.delay*60:
+            logging.warning(_("Giving up on lockfile after %s delay") % options.delay)
+            sys.exit(1)
+    sys.exit(0)
