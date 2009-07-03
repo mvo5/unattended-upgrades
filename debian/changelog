@@ -1,3 +1,11 @@
+unattended-upgrades (0.43) unstable; urgency=low
+
+  * unattended-upgrade: 
+    - fix crash in ouput, thanks to Joerg Schuetter,
+      closes: #535347
+
+ -- Michael Vogt <michael.vogt@ubuntu.com>  Fri, 03 Jul 2009 09:15:08 +0200
+
 unattended-upgrades (0.42) unstable; urgency=low
 
   * debian/po/sk.po:

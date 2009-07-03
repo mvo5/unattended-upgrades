@@ -217,7 +217,7 @@ def main():
                     pkgs_kept_back.append(pkg.name)
             except SystemError, e:
                 # can't upgrade
-                logging.warning(_("package '%s' upgradable but fails to be marked for upgrade (%s)") % e)
+                logging.warning(_("package '%s' upgradable but fails to be marked for upgrade (%s)") % (pkg.name, e))
                 rewind_cache(cache, pkgs_to_ugprade)
                 pkgs_kept_back.append(pkg.name)
                 
