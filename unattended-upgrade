@@ -30,6 +30,7 @@ import string
 import datetime
 import ConfigParser
 
+from StringIO import StringIO
 from optparse import OptionParser
 from subprocess import Popen, PIPE
 
@@ -66,11 +67,17 @@ def check_changes_for_sanity(cache, allowed_origins, blacklist):
         return False
     for pkg in cache:
         if pkg.markedDelete:
+            logging.debug("pkg '%s' now marked delete" % pkg.name)
             return False
         if pkg.markedInstall or pkg.markedUpgrade:
             if not is_allowed_origin(pkg, allowed_origins):
+                logging.debug("pkg '%s' not in allowed origin" % pkg.name)
                 return False
             if pkg.name in blacklist:
+                logging.debug("pkg '%s' blacklisted" % pkg.name)
+                return False
+            if pkg._pkg.SelectedState == apt_pkg.SelStateHold:
+                logging.debug("pkg '%s' is on hold" % pkg.name)
                 return False
     return True
 
@@ -80,7 +87,7 @@ def pkgname_from_deb(debfile):
         control = apt_inst.debExtractControl(open(debfile))
         sections = apt_pkg.ParseSection(control)
         return sections["Package"]
-    except SystemError, e:
+    except (IOError, SystemError), e:
         logging.error("failed to read deb file '%s' (%s)" % (debfile, e))
         # dumb fallback
         return debfile.split("_")[0]
@@ -157,6 +164,40 @@ def setup_apt_listchanges():
                 return
     # setup env (to play it safe) and return
     os.putenv("APT_LISTCHANGES_FRONTEND","none");
+
+def send_summary_mail(pkgs, res, pkgs_kept_back, mem_log, logfile_dpkg):
+    " send mail (if configured in Unattended-Upgrades::Mail) "
+    email = apt_pkg.Config.Find("Unattended-Upgrade::Mail", "")
+    if not email:
+        return
+    if not os.path.exists("/usr/bin/mail"):
+        logging.error(_("No '/usr/bin/mail', can not send mail. "
+                        "You probably want to install the 'mailx' package."))
+        return
+    logging.debug("Sending mail with '%s' to '%s'" % (logfile_dpkg, email))
+    mail = subprocess.Popen(["/usr/bin/mail",
+                             "-s", _("unattended-upgrades result "
+                                     "for '%s'") % host(), 
+                             email],
+                            stdin=subprocess.PIPE)
+    s = _("Unattended upgrade returned: %s\n\n") % res
+    s += _("Packages that are upgraded:\n")
+    s += " " + wrap(pkgs, 70, " ")
+    s += "\n"
+    if pkgs_kept_back:
+        s += _("Packages with upgradable origin but kept back:\n")
+        s += " " + wrap(" ".join(pkgs_kept_back), 70, " ")
+        s += "\n"
+    s += "\n"
+    s += _("Package installation log:")+"\n"
+    s += open(logfile_dpkg).read()
+    s += "\n\n"
+    s += _("Unattended-upgrades log:\n")
+    s += mem_log.getvalue()
+    mail.stdin.write(s)
+    mail.stdin.close()
+    ret = mail.wait()
+    logging.debug("mail returned: %s" % ret)
     
 
 def main():
@@ -165,18 +206,21 @@ def main():
     parser.add_option("-d", "--debug",
                       action="store_true", dest="debug", default=False,
                       help=_("print debug messages"))
+    parser.add_option("", "--dry-run",
+                      action="store_true", default=False,
+                      help=_("Simulation, download but do not install"))
     (options, args) = parser.parse_args()
-    if options.debug:
-        logging.getLogger().setLevel(logging.DEBUG)
-        pass
 
-    #dldir = "/tmp/pyapt-test"
-    #try:
-    #    os.mkdir(dldir)
-    #    os.mkdir(dldir+"/partial")
-    #except OSError:
-    #    pass
-    #apt_pkg.Config.Set("Dir::Cache::archives",dldir)
+    # setup logging
+    logger = logging.getLogger()
+    mem_log = StringIO()
+    if options.debug:
+        logger.setLevel(logging.DEBUG)
+        stderr_handler = logging.StreamHandler()
+        logger.addHandler(stderr_handler)
+    if apt_pkg.Config.Find("Unattended-Upgrade::Mail", ""):
+        mem_log_handler = logging.StreamHandler(mem_log)
+        logger.addHandler(mem_log_handler)
 
     # format (origin, archive), e.g. ("Ubuntu","dapper-security")
     allowed_origins = map(string.split, apt_pkg.Config.ValueList("Unattended-Upgrade::Allowed-Origins"))
@@ -189,6 +233,15 @@ def main():
     # display available origin
     logging.info(_("Allowed origins are: %s") % map(str,allowed_origins))
     
+    # check and get lock
+    try:
+        apt_pkg.PkgSystemLock()
+    except SystemError, e:
+        logging.error(_("Lock could not be acquired (another package "
+                        "manager running?)"))
+        print _("Cache lock can not be acquired, exiting")
+        sys.exit(1)
+
     # get a cache
     cache = MyCache()
     if cache._depcache.BrokenCount > 0:
@@ -217,7 +270,7 @@ def main():
                     pkgs_kept_back.append(pkg.name)
             except SystemError, e:
                 # can't upgrade
-                logging.warning(_("package '%s' upgradable but fails to be marked for upgrade (%s)") % e)
+                logging.warning(_("package '%s' upgradable but fails to be marked for upgrade (%s)") % (pkg.name, e))
                 rewind_cache(cache, pkgs_to_ugprade)
                 pkgs_kept_back.append(pkg.name)
                 
@@ -251,6 +304,10 @@ def main():
             if item.Complete == False:
                 print _("The URI '%s' failed to download, aborting") % item.DescURI
                 logging.error(_("The URI '%s' failed to download, aborting") % item.DescURI)
+                sys.exit(1)
+            if not os.path.exists(item.DestFile):
+                print _("Download finished, but file '%s' not there?!?" % item.DestFile)
+                logging.error("Download finished, but file '%s' not there?!?" % item.DestFile)
                 sys.exit(1)
             if item.IsTrusted == False:
                 blacklisted_pkgs.append(pkgname_from_deb(item.DestFile))
@@ -294,6 +351,11 @@ def main():
         logging.info(_("No packages found that can be upgraded unattended"))
         sys.exit(0)    
 
+    # check if we are in dry-run mode
+    if options.dry_run:
+        logging.info("Option --dry-run given, *not* performing real actions")
+        apt_pkg.Config.Set("Debug::pkgDPkgPM","1")
+
     # do the install based on the new list of pkgs
     pkgs = " ".join([pkg.name for pkg in pkgs_to_upgrade])
     logging.info(_("Packages that are upgraded: %s" % pkgs))
@@ -311,12 +373,11 @@ def main():
     logfile_dpkg = logdir+'unattended-upgrades-dpkg_%s.log' % now.isoformat('_')
     logging.info(_("Writing dpkg log to '%s'") % logfile_dpkg)
     fd = os.open(logfile_dpkg, os.O_RDWR|os.O_CREAT, 0644)
+    old_stdout = os.dup(1)
+    old_stderr = os.dup(2)
     os.dup2(fd,1)
     os.dup2(fd,2)
     
-    # enable debugging
-    if options.debug:
-        apt_pkg.Config.Set("Debug::pkgDPkgPM","1")
     # create a new package-manager. the blacklist may have changed
     # the markings in the depcache
     pm = apt_pkg.GetPackageManager(cache._depcache)
@@ -325,48 +386,35 @@ def main():
     # run the fetcher again (otherwise local file:// 
     # URIs are unhappy (see LP: #56832)
     res = fetcher.Run()
+    # unlock the cache
+    try:
+        apt_pkg.PkgSystemUnLock()
+    except SystemError, e:
+        pass
+    # lock for the shutdown check - its fine if the system
+    # is shutdown while downloading but not so much while installing
+    apt_pkg.GetLock("/var/run/unattended-upgrades.lock")
     # now do the actual install
+    error = None
     try:
         res = pm.DoInstall()
     except SystemError,e:
+        error = e
+        res = pm.ResultFailed
+    finally:
+        os.dup2(old_stdout, 1)
+        os.dup2(old_stderr, 2)
+
+    if res == pm.ResultFailed:
         logging.error(_("Installing the upgrades failed!"))
         logging.error(_("error message: '%s'") % e)
-        res = False
-                
-    if res == pm.ResultFailed:
         logging.error(_("dpkg returned a error! See '%s' for details") % logfile_dpkg)
     else:
         logging.info(_("All upgrades installed"))
 
-    # check if we need to send a mail
-    email = apt_pkg.Config.Find("Unattended-Upgrade::Mail", "")
-    if email != "":
-        if not os.path.exists("/usr/bin/mail"):
-            logging.error(_("No '/usr/bin/mail', can not send mail. "
-                            "You probably want to install the 'mailx' package."))
-            return
-        logging.debug("Sending mail with '%s' to '%s'" % (logfile_dpkg, email))
-        mail = subprocess.Popen(["/usr/bin/mail",
-                                 "-s", _("unattended-upgrades result "
-                                         "for '%s'") % host(), 
-                                 email],
-                                stdin=subprocess.PIPE)
-        s = _("Unattended upgrade returned: %s\n\n") % (res != pm.ResultFailed)
-        s += _("Packages that are upgraded:\n")
-        s += " " + wrap(pkgs, 70, " ")
-        s += "\n"
-        if pkgs_kept_back:
-            s += _("Packages with upgradable origin but kept back:\n")
-            s += " " + wrap(" ".join(pkgs_kept_back), 70, " ")
-            s += "\n"
-        s += "\n"
-        s += _("Package installation log:")
-        s += open(logfile_dpkg).read()
-        mail.stdin.write(s)
-        mail.stdin.close()
-        ret = mail.wait()
-        logging.debug("mail returned: %s" % ret)
-
+    # send a mail (if needed)
+    pkg_install_success = (res != pm.ResultFailed)
+    send_summary_mail(pkgs, pkg_install_success, pkgs_kept_back, mem_log, logfile_dpkg)
 
 if __name__ == "__main__":
     localesApp="unattended-upgrades"

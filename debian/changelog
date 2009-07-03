@@ -1,3 +1,22 @@
+unattended-upgrades (0.50ubuntu1) karmic; urgency=low
+
+  * fix crash in ouput, thanks to Joerg Schuetter, closes: #535347
+  * when running in --debug mode, also print debug output to stderr
+  * add --dry-run option to simulate a run, but not actually install
+    something 
+  * when running with --debug, install packages instead of just
+    simulating the install, --dry-run is avaialble for simulation
+  * check for packages on hold and do not upgrade them (closes: #511677)
+  * deal better with failures in pkgname_from_deb() (LP: #305046)
+  * improved the README some more (LP: #311052)
+  * fix locking problem (LP: #359010)
+  * Contain unattended-upgrades log in the status mail as well 
+    (LP: #245422)
+  * ensure that unattended-upgrade is finished on shutdown 
+    (LP: #191514)
+
+ -- Michael Vogt <michael.vogt@ubuntu.com>  Fri, 03 Jul 2009 09:15:08 +0200
+
 unattended-upgrades (0.42ubuntu1) karmic; urgency=low
 
   * debian/po/sk.po:
