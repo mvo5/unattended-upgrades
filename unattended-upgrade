@@ -30,6 +30,7 @@ import string
 import datetime
 import ConfigParser
 
+from StringIO import StringIO
 from optparse import OptionParser
 from subprocess import Popen, PIPE
 
@@ -164,7 +165,7 @@ def setup_apt_listchanges():
     # setup env (to play it safe) and return
     os.putenv("APT_LISTCHANGES_FRONTEND","none");
 
-def send_summary_mail(pkgs, res, pkgs_kept_back, logfile_dpkg):
+def send_summary_mail(pkgs, res, pkgs_kept_back, mem_log, logfile_dpkg):
     " send mail (if configured in Unattended-Upgrades::Mail) "
     email = apt_pkg.Config.Find("Unattended-Upgrade::Mail", "")
     if not email:
@@ -190,6 +191,9 @@ def send_summary_mail(pkgs, res, pkgs_kept_back, logfile_dpkg):
     s += "\n"
     s += _("Package installation log:")+"\n"
     s += open(logfile_dpkg).read()
+    s += "\n\n"
+    s += _("Unattended-upgrades log:\n")
+    s += mem_log.getvalue()
     mail.stdin.write(s)
     mail.stdin.close()
     ret = mail.wait()
@@ -206,11 +210,17 @@ def main():
                       action="store_true", default=False,
                       help=_("Simulation, download but do not install"))
     (options, args) = parser.parse_args()
+
+    # setup logging
+    logger = logging.getLogger()
+    mem_log = StringIO()
     if options.debug:
-        logger = logging.getLogger()
         logger.setLevel(logging.DEBUG)
         stderr_handler = logging.StreamHandler()
         logger.addHandler(stderr_handler)
+    if apt_pkg.Config.Find("Unattended-Upgrade::Mail", ""):
+        mem_log_handler = logging.StreamHandler(mem_log)
+        logger.addHandler(mem_log_handler)
 
     # format (origin, archive), e.g. ("Ubuntu","dapper-security")
     allowed_origins = map(string.split, apt_pkg.Config.ValueList("Unattended-Upgrade::Allowed-Origins"))
@@ -401,7 +411,7 @@ def main():
 
     # send a mail (if needed)
     pkg_install_success = (res != pm.ResultFailed)
-    send_summary_mail(pkgs, pkg_install_success, pkgs_kept_back, logfile_dpkg)
+    send_summary_mail(pkgs, pkg_install_success, pkgs_kept_back, mem_log, logfile_dpkg)
 
 if __name__ == "__main__":
     localesApp="unattended-upgrades"

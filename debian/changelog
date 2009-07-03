@@ -10,6 +10,8 @@ unattended-upgrades (0.43) unstable; urgency=low
   * deal better with failures in pkgname_from_deb() (LP: #305046)
   * improved the README some more (LP: #311052)
   * fix locking problem (LP: #359010)
+  * Contain unattended-upgrades log in the status mail as well 
+    (LP: #245422)
 
  -- Michael Vogt <michael.vogt@ubuntu.com>  Fri, 03 Jul 2009 09:15:08 +0200
 
