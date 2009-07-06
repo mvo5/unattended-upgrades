@@ -79,7 +79,7 @@ if __name__ == "__main__":
             sys.exit(0)
 	# wait a some seconds and try again
         msg = _("Unattended-upgrade in progress during shutdown, "
-                "sleeping for 5s"))
+                "sleeping for 5s")
         logging.warning(msg)
         do_usplash(msg)
 	time.sleep(5)

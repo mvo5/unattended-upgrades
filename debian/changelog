@@ -1,6 +1,7 @@
 unattended-upgrades (0.50ubuntu2) UNRELEASED; urgency=low
 
   * Add sanity-check on clean to prevent uploads with Python syntax errors.
+  * Fix syntax error in unattended-upgrades-shutdown (LP: #396134).
 
  -- Colin Watson <cjwatson@ubuntu.com>  Mon, 06 Jul 2009 17:27:28 +0100
 
