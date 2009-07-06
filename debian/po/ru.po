@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: unattended-upgrades 0.39debian1\n"
 "Report-Msgid-Bugs-To: unattended-upgrades@packages.debian.org\n"
-"POT-Creation-Date: 2009-03-03 08:48+0100\n"
+"POT-Creation-Date: 2009-07-06 17:32+0100\n"
 "PO-Revision-Date: 2009-04-19 10:58+0400\n"
 "Last-Translator: Yuri Kozlov <yuray@komyakino.ru>\n"
 "Language-Team: Russian <debian-l10n-russian@lists.debian.org>\n"
@@ -16,22 +16,19 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "X-Generator: KBabel 1.11.4\n"
-"Plural-Forms:  nplurals=3; plural=(n%10==1 && n%100!=11 ? 0 : n%10>=2 && n%10<=4 && (n%100<10 || n%100>=20) ? 1 : 2);\n"
+"Plural-Forms:  nplurals=3; plural=(n%10==1 && n%100!=11 ? 0 : n%10>=2 && n%"
+"10<=4 && (n%100<10 || n%100>=20) ? 1 : 2);\n"
 
 #. Type: boolean
 #. Description
 #: ../templates:2001
 msgid "Automatically download and install stable updates?"
-msgstr "Скачивать и устанавливать обновления стабильного выпуска автоматически?"
+msgstr ""
+"Скачивать и устанавливать обновления стабильного выпуска автоматически?"
 
 #. Type: boolean
 #. Description
 #: ../templates:2001
-#| msgid ""
-#| "Applying updates on a frequent basis is an important part of keeping "
-#| "systems secure. By default, updates need to be applied manually using "
-#| "package management tools. Alternatively, you can choose to have this "
-#| "system automatically download and install security updates."
 msgid ""
 "Applying updates on a frequent basis is an important part of keeping systems "
 "secure. By default, updates need to be applied manually using package  "
@@ -39,7 +36,6 @@ msgid ""
 "automatically download and install security updates."
 msgstr ""
 "Регулярная установка обновлений является важной частью обеспечения "
-"безопасности системы. По умолчанию, обновления нужно устанавливать вручную "
-"с помощью инструментов управления пакетами. Но сейчас можно указать, чтобы "
+"безопасности системы. По умолчанию, обновления нужно устанавливать вручную с "
+"помощью инструментов управления пакетами. Но сейчас можно указать, чтобы "
 "обновления безопасности скачивались и устанавливались автоматически."
-

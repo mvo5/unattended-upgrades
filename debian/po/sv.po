@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: unattended-upgrades\n"
 "Report-Msgid-Bugs-To: unattended-upgrades@packages.debian.org\n"
-"POT-Creation-Date: 2008-12-08 18:38+0100\n"
+"POT-Creation-Date: 2009-07-06 17:32+0100\n"
 "PO-Revision-Date: 2008-12-09 16:27+0100\n"
 "Last-Translator: Martin Bagge <brother@bsnet.se>\n"
 "Language-Team: swedish <debian-l10n-swedish@lists.debian.org>\n"
@@ -19,19 +19,19 @@ msgstr ""
 #. Type: boolean
 #. Description
 #: ../templates:2001
-#| msgid ""
-#| "Should this system automatically download and install stable updates?"
 msgid "Automatically download and install stable updates?"
 msgstr "Ska stabila uppdateringar laddas hem och installeras automatiskt?"
 
 #. Type: boolean
 #. Description
 #: ../templates:2001
-#| msgid ""
-#| "Applying updates on a frequent basis is an important part of keeping your "
-#| "system secure. By default, updates need to be applied manually using "
-#| "package  management tools. Alternatively, you can choose to have this "
-#| "system  automatically download and install security updates."
-msgid "Applying updates on a frequent basis is an important part of keeping systems secure. By default, updates need to be applied manually using package  management tools. Alternatively, you can choose to have this system  automatically download and install security updates."
-msgstr "Att installera uppdateringar är en viktig del i att hålla systemet säkert. Standardinställningen är att uppdateringar måste installeras manuellt via en pakethanterare. Alternativet är att du kan låta systemet automatiskt ladda hem och installera säkerhetsuppdateringar."
-
+msgid ""
+"Applying updates on a frequent basis is an important part of keeping systems "
+"secure. By default, updates need to be applied manually using package  "
+"management tools. Alternatively, you can choose to have this system  "
+"automatically download and install security updates."
+msgstr ""
+"Att installera uppdateringar är en viktig del i att hålla systemet säkert. "
+"Standardinställningen är att uppdateringar måste installeras manuellt via en "
+"pakethanterare. Alternativet är att du kan låta systemet automatiskt ladda "
+"hem och installera säkerhetsuppdateringar."

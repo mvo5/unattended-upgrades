@@ -1,12 +1,12 @@
 # Copyright (C) 2008 Michael Vogt <michael.vogt@ubuntu.com>
 # This file is distributed under the same license as the unattended-upgrades package.
 # Hideki Yamane (Debian-JP) <henrich@debian.or.jp>, 2008.
-#
+# 
 msgid ""
 msgstr ""
 "Project-Id-Version: unattended-upgrades 0.36debian1\n"
 "Report-Msgid-Bugs-To: unattended-upgrades@packages.debian.org\n"
-"POT-Creation-Date: 2008-12-15 09:43+0100\n"
+"POT-Creation-Date: 2009-07-06 17:32+0100\n"
 "PO-Revision-Date: 2008-12-21 22:32+0900\n"
 "Last-Translator: Hideki Yamane (Debian-JP) <henrich@debian.or.jp>\n"
 "Language-Team: Japanese <debian-japanese@lists.debian.org>\n"
