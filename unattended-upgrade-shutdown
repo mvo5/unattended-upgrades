@@ -29,10 +29,18 @@ import time
 import sys
 import logging
 import gettext
+import subprocess
+import os.path
 
 from optparse import OptionParser
 from gettext import gettext as _
 
+def do_usplash():
+    if os.path.exists("/sbin/usplash_write"):
+        logging.debug("Running usplash_write")
+        subprocess.call(["/sbin/usplash_write","TEXT",
+                         _("Unattended-upgrade in progress, sleeping for 5s")])
+        subprocess.call(["/sbin/usplash_write","PULSATE"])
 
 if __name__ == "__main__":
     # setup gettext
@@ -68,6 +76,7 @@ if __name__ == "__main__":
             sys.exit(0)
 	# wait a some seconds and try again
         logging.warning(_("Unattended-upgrade in progress, sleeping for 5s"))
+        do_usplash()
 	time.sleep(5)
 	if (time.time() - start_time) > options.delay*60:
             logging.warning(_("Giving up on lockfile after %s delay") % options.delay)
