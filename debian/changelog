@@ -15,7 +15,7 @@ unattended-upgrades (0.50ubuntu1) karmic; urgency=low
   * ensure that unattended-upgrade is finished on shutdown 
     (LP: #191514)
 
- -- Michael Vogt <michael.vogt@ubuntu.com>  Fri, 03 Jul 2009 09:15:08 +0200
+ -- Michael Vogt <michael.vogt@ubuntu.com>  Mon, 06 Jul 2009 09:26:48 +0200
 
 unattended-upgrades (0.42ubuntu1) karmic; urgency=low
 
