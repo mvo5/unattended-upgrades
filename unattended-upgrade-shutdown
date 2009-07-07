@@ -66,8 +66,11 @@ if __name__ == "__main__":
         level = logging.DEBUG
     logging.basicConfig(level=level, format="%(levelname)s - %(message)s")
     logger = logging.getLogger()
-    logger.addHandler(logging.handlers.SysLogHandler(
-            "/dev/log", logging.handlers.SysLogHandler.LOG_DAEMON))
+    try:
+        logger.addHandler(logging.handlers.SysLogHandler(
+                "/dev/log", logging.handlers.SysLogHandler.LOG_DAEMON))
+    except Exception, e:
+        logging.debug("failed to setup syslog logger: %s" % e)
 
     # run
     start_time = time.time()

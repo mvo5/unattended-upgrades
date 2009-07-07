@@ -3,6 +3,10 @@ unattended-upgrades (0.51) unstable; urgency=low
   [ Colin Watson ]
   * Add sanity-check on clean to prevent uploads with Python syntax errors.
   * Fix syntax error in unattended-upgrades-shutdown (LP: #396134).
+  
+  [ Michael Vogt ]
+  * unattended-upgrade-shutdown:
+    - deal with syslog not avaiable (LP: #396263)
 
  -- Michael Vogt <michael.vogt@ubuntu.com>  Tue, 07 Jul 2009 08:03:49 +0200
 
