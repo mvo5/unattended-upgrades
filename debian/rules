@@ -11,6 +11,7 @@ PKG=unattended-upgrades
 DIST=$(shell /usr/bin/lsb_release -c -s)
 DEBVER=$(shell dpkg-parsechangelog |sed -n -e '/^Version:/s/^Version: //p')
 DEB_BUILD_PROG:=debuild --preserve-envvar PATH --preserve-envvar CCACHE_DIR -us -uc $(DEB_BUILD_PROG_OPTS)
+PYVER=$(shell pyversions -dv)
 
 
 
@@ -45,6 +46,17 @@ clean:
 	# Add here commands to clean up after the build process.
 	#-$(MAKE) clean
 	./setup.py clean --all
+
+	# Sanity-check before upload.
+	set -e; if [ -e /usr/lib/python$(PYVER)/py_compile.py ]; then \
+		for f in unattended-upgrade unattended-upgrade-shutdown; do \
+			ln -nsf $$f $$f.py; \
+			python$(PYVER) /usr/lib/python$(PYVER)/py_compile.py \
+				$$f.py; \
+			rm -f $$f.py; \
+		done; \
+	fi
+
 	find . -name "*.so" -exec rm {} \;
 	find . -name "*.o" -exec rm {} \;
 	find . -name "*.pyc" -exec rm {} \;
