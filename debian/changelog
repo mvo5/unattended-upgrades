@@ -7,6 +7,9 @@ unattended-upgrades (0.51) unstable; urgency=low
   [ Michael Vogt ]
   * unattended-upgrade-shutdown:
     - deal with syslog not avaiable (LP: #396263)
+  * pm/sleep.d/10_unatteded-upgrades-hibernate:
+    - add script to ensure that installing is finished when
+      hibernating (LP: #191514)
 
  -- Michael Vogt <michael.vogt@ubuntu.com>  Tue, 07 Jul 2009 08:03:49 +0200
 

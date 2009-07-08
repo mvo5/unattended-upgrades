@@ -1,0 +1,33 @@
+#!/bin/sh
+
+# Action script ensure that unattended-upgrades is finished 
+# before a hibernate 
+#
+# Copyright: Copyright (c) 2009 Michael Vogt
+# License:   GPL-2
+#
+
+PATH=/sbin:/usr/sbin:/bin:/usr/bin
+
+if [ ! -x /usr/share/unattended-upgrades/unattended-upgrade-shutdown ]; then
+	exit 0
+fi
+
+SELF=unattended-upgrades-hibernate
+COMMAND=
+IFPLUGD_IFACE=
+
+# pm-action(8) - <action> <suspend method>
+#
+# On suspend|hibernate, disconnect any wpa-roam managed interfaces,
+# reconnect it on resume.
+
+case "${1}" in
+        hibernate)
+         	python /usr/share/unattended-upgrades/unattended-upgrade-shutdown       
+                ;;
+        resume|thaw)
+		# nothing
+                ;;
+esac
+
