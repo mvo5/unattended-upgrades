@@ -1,4 +1,4 @@
-unattended-upgrades (0.51buntu1) karmic; urgency=low
+unattended-upgrades (0.51ubuntu1) karmic; urgency=low
 
   * unattended-upgrade-shutdown:
     - deal with syslog not avaiable (LP: #396263)
