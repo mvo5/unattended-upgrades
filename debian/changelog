@@ -1,3 +1,13 @@
+unattended-upgrades (0.51buntu1) karmic; urgency=low
+
+  * unattended-upgrade-shutdown:
+    - deal with syslog not avaiable (LP: #396263)
+  * pm/sleep.d/10_unatteded-upgrades-hibernate:
+    - add script to ensure that installing is finished when
+      hibernating (LP: #191514)
+
+ -- Michael Vogt <michael.vogt@ubuntu.com>  Fri, 10 Jul 2009 10:20:47 +0200
+
 unattended-upgrades (0.50ubuntu2) karmic; urgency=low
 
   * Add sanity-check on clean to prevent uploads with Python syntax errors.
