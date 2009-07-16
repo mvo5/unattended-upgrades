@@ -1,3 +1,11 @@
+unattended-upgrades (0.52) unstable; urgency=low
+
+  * Add new option "Unattended-Upgrade::Automatic-Reboot" that 
+    will automatically reboot without confirmation if the upgrade
+    requires a reboot (off by default) LP: #400018
+
+ -- Michael Vogt <michael.vogt@ubuntu.com>  Thu, 16 Jul 2009 16:32:47 +0200
+
 unattended-upgrades (0.51) unstable; urgency=low
 
   [ Colin Watson ]

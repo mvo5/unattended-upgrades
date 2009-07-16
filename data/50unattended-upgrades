@@ -17,3 +17,8 @@ Unattended-Upgrade::Package-Blacklist {
 // have a working mail setup on your system. The package 'mailx'
 // must be installed or anything that provides /usr/bin/mail.
 //Unattended-Upgrade::Mail "root@localhost";
+
+
+// Automatically reboot *WITHOUT CONFIRMATION* if a 
+// the file /var/run/reboot-required is found after the upgrade 
+//Unattended-Upgrade::Automatic-Reboot "false";
