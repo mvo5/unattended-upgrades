@@ -21,6 +21,11 @@ set -e
 
 case "$1" in
     configure)
+	# *sigh* typo in filename in version 0.51ubuntu1
+	if [ -e /etc/pm/sleep.d/10_unatteded-upgrades-hibernate ]; then
+	    rm -f /etc/pm/sleep.d/10_unatteded-upgrades-hibernate
+	fi
+
     db_get unattended-upgrades/enable_auto_updates || true
     if [ "${RET}" = "true" ]; then
 	NEWFILE="/usr/share/unattended-upgrades/20auto-upgrades"

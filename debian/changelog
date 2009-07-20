@@ -3,6 +3,7 @@ unattended-upgrades (0.52ubuntu1) karmic; urgency=low
   * Add new option "Unattended-Upgrade::Automatic-Reboot" that 
     will automatically reboot without confirmation if the upgrade
     requires a reboot (off by default) LP: #400018
+  * fix typo in filename (LP: #397810)
 
  -- Michael Vogt <michael.vogt@ubuntu.com>  Mon, 20 Jul 2009 13:36:14 +0200
 

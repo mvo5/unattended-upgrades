@@ -19,7 +19,7 @@ setup(name='unattended-upgrades', version='0.1',
                   ('../usr/share/man/man8/',
                    ["man/unattended-upgrade.8"]),
                   ('../etc/pm/sleep.d/',
-                   ["pm/sleep.d/10_unatteded-upgrades-hibernate"])
+                   ["pm/sleep.d/10_unattended-upgrades-hibernate"])
                   ],
       cmdclass = { "build" : build_extra.build_extra,
                    "build_i18n" :  build_i18n.build_i18n }
