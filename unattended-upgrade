@@ -416,6 +416,13 @@ def main():
     pkg_install_success = (res != pm.ResultFailed)
     send_summary_mail(pkgs, pkg_install_success, pkgs_kept_back, mem_log, logfile_dpkg)
 
+    # auto-reboot (if required and the config for this is set
+    if (apt_pkg.Config.FindB("Unattended-Upgrade::Automatic-Reboot", False) and
+        os.path.exists("/var/run/reboot-required")):
+        logging.warning("Found /var/run/reboot-required, rebooting")
+        subprocess.call(["/sbin/reboot"])
+        
+
 if __name__ == "__main__":
     localesApp="unattended-upgrades"
     localesDir="/usr/share/locale"
