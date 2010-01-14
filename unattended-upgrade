@@ -254,6 +254,8 @@ def main():
     # find out about the packages that are upgradable (in a allowed_origin)
     pkgs_to_upgrade = []
     pkgs_kept_back = []
+    pkgs_auto_removable = set([pkg.name for pkg in cache 
+                               if pkg.isAutoRemovable])
     for pkg in cache:
         if options.debug and pkg.isUpgradable:
             logging.debug("Checking: %s (%s)" % (pkg.name, map(str, pkg.candidate.origins)))
@@ -343,6 +345,16 @@ def main():
                         pkg2.markUpgrade()
     else:
         logging.debug("dpkg is configured not to cause conffile prompts")
+
+    # do auto-remove
+    if apt_pkg.Config.FindB("Unattended-Upgrade::Remove-Unused-Dependencies", False):
+        now_auto_removable = set([pkg.name for pkg in cache 
+                               if pkg.isAutoRemovable])
+        for pkgname in now_auto_removable-pkgs_auto_removable:
+            logging.debug("marking %s for remove" % pkgname)
+            cache[pkgname].markDelete()
+        logging.info(_("Packages that are auto removed: '%s'") %
+                     " ".join(now_auto_removable-pkgs_auto_removable))
 
     logging.debug("InstCount=%i DelCount=%i BrokenCout=%i" % (cache._depcache.InstCount, cache._depcache.DelCount, cache._depcache.BrokenCount))
 

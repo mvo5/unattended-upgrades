@@ -1,6 +1,9 @@
 unattended-upgrades (0.55ubuntu1) lucid; urgency=low
 
   * updated for lucid
+  * add new "Unattended-Upgrade::Remove-Unused-Dependencies"
+    option that is off by default to allow removal of new unused
+    dependencies
 
  -- Michael Vogt <michael.vogt@ubuntu.com>  Thu, 14 Jan 2010 16:42:06 +0100
 
