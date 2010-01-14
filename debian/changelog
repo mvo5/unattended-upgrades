@@ -7,6 +7,7 @@ unattended-upgrades (0.55ubuntu1) lucid; urgency=low
   * data/50unattended-upgrades:
     - add example setting for the apt bandwidth limit option
       (closes: #557258)
+  * fix bug in conffile prompt check
 
  -- Michael Vogt <michael.vogt@ubuntu.com>  Thu, 14 Jan 2010 16:42:06 +0100
 

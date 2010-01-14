@@ -107,16 +107,37 @@ def conffile_prompt(destFile):
                 for line in string.split(conffiles,"\n"):
                     logging.debug("conffile line: %s", line)
                     l = string.split(string.strip(line))
-                    file = l[0]
+                    conf_file = l[0]
                     md5 = l[1]
                     if len(l) > 2:
                         obs = l[2]
                     else:
                         obs = None
-                    if os.path.exists(file) and obs != "obsolete":
-                        current_md5 = apt_pkg.md5sum(open(file).read())
-                        if current_md5 != md5:
-                            return True
+                    # ignore if conffile is obsolete or does not exist
+                    if obs == "obsolete" or not os.path.exists(conf_file):
+                        return False
+                    # get conffile value from pkg
+                    pkg_conffiles = apt_inst.debExtractControl(
+                        open(destFile), "conffiles").split("\n")
+                    if not conf_file in pkg_conffiles:
+                        return False
+                    # calculate md5sum from the deb
+                    dpkg_cmd = ["dpkg-deb","--fsys-tarfile",destFile]
+                    tar_cmd = ["tar","-x","-O", "-f","-", "."+conf_file]
+                    md5_cmd = ["md5sum"]
+                    dpkg_p = Popen(dpkg_cmd, stdout=PIPE)
+                    tar_p = Popen(tar_cmd, stdin=dpkg_p.stdout, stdout=PIPE)
+                    md5_p = Popen(md5_cmd, stdin=tar_p.stdout, stdout=PIPE)
+                    pkg_md5sum = md5_p.communicate()[0].split()[0]
+                    # the md5sum in the deb is unchanged, this will not 
+                    # trigger a conffile prompt
+                    if pkg_md5sum == md5:
+                        return False
+                    # now test against the installed file
+                    current_md5 = apt_pkg.md5sum(open(conf_file).read())
+                    logging.debug("current md5: %s" % current_md5)
+                    if current_md5 != md5:
+                        return True
     return False
 
 
