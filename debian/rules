@@ -81,16 +81,10 @@ binary-indep: build install
 	dh_installdocs
 	dh_installexamples
 #	dh_install
-#	dh_installmenu
 	dh_installdebconf	
-#	dh_installlogrotate
-#	dh_installemacsen
-#	dh_installpam
+	dh_installlogrotate
 	dh_installmime
-	dh_desktop
 	dh_installinit --no-start -- start 10 0 6 .
-#	dh_installcron
-#	dh_installinfo
 	dh_installman
 	dh_link
 	dh_strip
