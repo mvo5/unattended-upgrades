@@ -120,8 +120,15 @@ def conffile_prompt(destFile):
                     pkg_conffiles = apt_inst.debExtractControl(
                         open(destFile), "conffiles").split("\n")
                     if not conf_file in pkg_conffiles:
+                        logging.debug("'%s' not in package conffiles '%s'" % (conf_file, pkg_conffiles))
                         return False
-                    # calculate md5sum from the deb
+                    # test against the installed file
+                    current_md5 = apt_pkg.md5sum(open(conf_file).read())
+                    logging.debug("current md5: %s" % current_md5)
+                    # hashes are the same, no conffile prompt
+                    if current_md5 == md5:
+                        return False
+                    # calculate md5sum from the deb (may take a bit)
                     dpkg_cmd = ["dpkg-deb","--fsys-tarfile",destFile]
                     tar_cmd = ["tar","-x","-O", "-f","-", "."+conf_file]
                     md5_cmd = ["md5sum"]
@@ -129,15 +136,15 @@ def conffile_prompt(destFile):
                     tar_p = Popen(tar_cmd, stdin=dpkg_p.stdout, stdout=PIPE)
                     md5_p = Popen(md5_cmd, stdin=tar_p.stdout, stdout=PIPE)
                     pkg_md5sum = md5_p.communicate()[0].split()[0]
+                    logging.debug("pkg_md5sum: %s" % pkg_md5sum)
                     # the md5sum in the deb is unchanged, this will not 
                     # trigger a conffile prompt
                     if pkg_md5sum == md5:
                         return False
-                    # now test against the installed file
-                    current_md5 = apt_pkg.md5sum(open(conf_file).read())
-                    logging.debug("current md5: %s" % current_md5)
-                    if current_md5 != md5:
-                        return True
+                    # if we made it to this point:
+                    #  current_md5 != pkg_md5sum != md5
+                    # and that will trigger a conffile prompt
+                    return True
     return False
 
 
