@@ -1,0 +1,7 @@
+Package: test-package
+Status: install ok installed
+Architecture: all
+Version: 1.0
+Conffiles:
+ /etc/configuration-file 26b99d59ac8f5ecd3375107755ee8527
+
