@@ -92,7 +92,8 @@ def pkgname_from_deb(debfile):
         # dumb fallback
         return debfile.split("_")[0]
 
-def conffile_prompt(destFile):
+# prefix is *only* needed for the build-in tests
+def conffile_prompt(destFile, prefix=""):
     logging.debug("check_conffile_prompt('%s')" % destFile)
     pkgname = pkgname_from_deb(destFile)
     status_file = apt_pkg.Config.Find("Dir::State::status")
@@ -114,7 +115,7 @@ def conffile_prompt(destFile):
                     else:
                         obs = None
                     # ignore if conffile is obsolete or does not exist
-                    if obs == "obsolete" or not os.path.exists(conf_file):
+                    if obs == "obsolete" or not os.path.exists(prefix+conf_file):
                         return False
                     # get conffile value from pkg
                     pkg_conffiles = apt_inst.debExtractControl(
@@ -123,7 +124,7 @@ def conffile_prompt(destFile):
                         logging.debug("'%s' not in package conffiles '%s'" % (conf_file, pkg_conffiles))
                         return False
                     # test against the installed file
-                    current_md5 = apt_pkg.md5sum(open(conf_file).read())
+                    current_md5 = apt_pkg.md5sum(open(prefix+conf_file).read())
                     logging.debug("current md5: %s" % current_md5)
                     # hashes are the same, no conffile prompt
                     if current_md5 == md5:

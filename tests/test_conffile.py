@@ -12,12 +12,21 @@ class TestConffilePrompt(unittest.TestCase):
         apt_pkg.Config.Set("Dir::State::status", "./var/lib/dpkg/status")
 
     def testWillPrompt(self):
+        # conf-test 0.9 is installed, 1.1 gets installed
+        # they both have different config files
         test_pkg = "./packages/conf-test-package_1.1.deb"
-        self.assertTrue(conffile_prompt(test_pkg), 
+        self.assertTrue(conffile_prompt(test_pkg, prefix="./"), 
                         "conffile prompt detection incorrect")
-
+    
+    def testWillNotPrompt(self):
+        # conf-test 0.9 is installed, 1.0 gets installed
+        # they both have the same config files
+        test_pkg = "./packages/conf-test-package_1.0.deb"
+        self.assertFalse(conffile_prompt(test_pkg, prefix="./"), 
+                        "conffile prompt detection incorrect")
+        
 
 if __name__ == "__main__":
-    #logging.basicConfig(level=logging.DEBUG)
+    logging.basicConfig(level=logging.DEBUG)
     unittest.main()
 
