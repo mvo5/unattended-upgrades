@@ -5,4 +5,4 @@ Version: 0.9
 Conffiles:
  /etc/not-available-config-file  99b99d59ac8f5ecd3375107755ee8599
  /etc/configuration-file 26b99d59ac8f5ecd3375107755ee8527
-
+ /etc/not-available-config-file2  88b99d59ac8f5ecd3375107755ee8588
