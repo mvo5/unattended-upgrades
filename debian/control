@@ -5,12 +5,13 @@ Maintainer: Michael Vogt <michael.vogt@ubuntu.com>
 Build-Depends: debhelper (>= 5.0.37.2), po-debconf
 Build-Depends-Indep: python, python-distutils-extra
 Standards-Version: 3.8.3
+Vcs-Bzr: http://code.launchpad.net/~ubuntu-core-dev/unattended-upgrades/ubuntu/
 
 Package: unattended-upgrades
 Architecture: all
 Depends: ${shlibs:Depends}, ${misc:Depends}, debconf, python, 
  python-apt (>= 0.7.9), apt-utils (>= 0.7), apt (>= 0.7), ucf
-Suggests: mailx
+Suggests: bsd-mailx
 Description: automatic installation of security upgrades
  This package can download and install security upgrades automatically
  and unattended, taking care to only install packages from the

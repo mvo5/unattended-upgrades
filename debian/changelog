@@ -1,3 +1,15 @@
+unattended-upgrades (0.55ubuntu3) UNRELEASED; urgency=low
+
+  * add Vcs-Bzr header
+
+ -- Michael Vogt <michael.vogt@ubuntu.com>  Thu, 21 Jan 2010 18:42:36 +0100
+
+unattended-upgrades (0.55ubuntu2) lucid; urgency=low
+
+  * Suggest bsd-mailx instead of mailx as mailx is a transitional package.
+
+ -- Loïc Minier <loic.minier@ubuntu.com>  Thu, 21 Jan 2010 10:25:12 +0100
+
 unattended-upgrades (0.55ubuntu1) lucid; urgency=low
 
   * updated for lucid
