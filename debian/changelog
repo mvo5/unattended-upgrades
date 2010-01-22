@@ -1,6 +1,10 @@
 unattended-upgrades (0.55ubuntu3) UNRELEASED; urgency=low
 
+  [ Michael Vogt ]
   * add Vcs-Bzr header
+
+  [ Loïc Minier ]
+  * Fix typo in README.
 
  -- Michael Vogt <michael.vogt@ubuntu.com>  Thu, 21 Jan 2010 18:42:36 +0100
 
