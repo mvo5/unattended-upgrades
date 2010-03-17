@@ -42,6 +42,11 @@ def do_usplash(msg):
         subprocess.call(["/sbin/usplash_write","TEXT", msg])
         subprocess.call(["/sbin/usplash_write","PULSATE"])
 
+def do_plymouth(msg):
+    if os.path.exists("/bin/plymouth"):
+        logging.debug("Running plymouth --text")
+        subprocess.call(["/bin/plymouth","--text", msg])
+
 if __name__ == "__main__":
     # setup gettext
     localesApp="unattended-upgrades"
@@ -85,6 +90,7 @@ if __name__ == "__main__":
                 "sleeping for 5s")
         logging.warning(msg)
         do_usplash(msg)
+        do_plymouth(msg)
 	time.sleep(5)
 	if (time.time() - start_time) > options.delay*60:
             logging.warning(_("Giving up on lockfile after %s delay") % options.delay)

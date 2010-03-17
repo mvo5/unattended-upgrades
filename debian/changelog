@@ -2,6 +2,9 @@ unattended-upgrades (0.55ubuntu3) UNRELEASED; urgency=low
 
   [ Michael Vogt ]
   * add Vcs-Bzr header
+  * unattended-upgrade-shutdown:
+    - add information to plymouth shutdown screen if a 
+      unattended-upgrade is in progress (LP: #506709)
 
   [ Loïc Minier ]
   * Fix typo in README.
