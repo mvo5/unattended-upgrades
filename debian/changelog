@@ -9,7 +9,7 @@ unattended-upgrades (0.55ubuntu3) UNRELEASED; urgency=low
   [ Loïc Minier ]
   * Fix typo in README.
 
- -- Michael Vogt <michael.vogt@ubuntu.com>  Thu, 21 Jan 2010 18:42:36 +0100
+ -- Michael Vogt <michael.vogt@ubuntu.com>  Wed, 17 Mar 2010 17:47:08 +0100
 
 unattended-upgrades (0.55ubuntu2) lucid; urgency=low
 
