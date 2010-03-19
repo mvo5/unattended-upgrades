@@ -45,7 +45,7 @@ def do_usplash(msg):
 def do_plymouth(msg):
     if os.path.exists("/bin/plymouth"):
         logging.debug("Running plymouth --text")
-        subprocess.call(["/bin/plymouth","--text", msg])
+        subprocess.call(["/bin/plymouth","message", "--text", msg])
 
 if __name__ == "__main__":
     # setup gettext
