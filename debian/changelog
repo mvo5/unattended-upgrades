@@ -1,4 +1,4 @@
-unattended-upgrades (0.55ubuntu3) UNRELEASED; urgency=low
+unattended-upgrades (0.55ubuntu3) lucid; urgency=low
 
   [ Michael Vogt ]
   * add Vcs-Bzr header
