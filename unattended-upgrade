@@ -44,7 +44,7 @@ from gettext import gettext as _
 
 class MyCache(apt.Cache):
     def __init__(self):
-        apt.Cache.__init__(self)
+        apt.Cache.__init__(self, apt.progress.base.OpProgress())
     def clear(self):
         self._depcache.init()
         assert (self._depcache.inst_count == 0 and
