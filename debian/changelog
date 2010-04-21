@@ -1,3 +1,10 @@
+unattended-upgrades (0.42debian2) UNRELEASED; urgency=low
+
+  * apply patch by Julian Andres Klode to move to the new
+    python-apt 0.8 API (closes: #572088)
+
+ -- Michael Vogt <mvo@debian.org>  Wed, 21 Apr 2010 10:19:05 +0200
+
 unattended-upgrades (0.42debian1) unstable; urgency=low
 
   * debian/po/sk.po:
