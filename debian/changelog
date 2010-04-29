@@ -1,3 +1,11 @@
+unattended-upgrades (0.55ubuntu4) lucid-proposed; urgency=low
+
+  * unattended-upgrade:
+    - fix rewind_cache if a pkg fails to get marked for upgrade 
+      (LP: #571734)
+
+ -- Michael Vogt <michael.vogt@ubuntu.com>  Thu, 29 Apr 2010 16:39:45 +0200
+
 unattended-upgrades (0.55ubuntu3) lucid; urgency=low
 
   [ Michael Vogt ]
