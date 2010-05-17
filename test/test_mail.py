@@ -41,7 +41,7 @@ class TestSendSummaryMail(unittest.TestCase):
         open("./reboot-required","w").write("")
         send_summary_mail(*self._return_mock_data())
         self.assertTrue("[reboot required]" in open("mail.txt").read())
-
+        
     def testSummaryMailNoReboot(self):
         # setup mail
         apt_pkg.Config.set("Unattended-Upgrade::Mail", "root")
