@@ -20,7 +20,13 @@ class TestSendSummaryMail(unittest.TestCase):
         # mock-mail binary that creates a mail.txt file
         unattended_upgrade.MAIL_BINARY = "./mock-mail"
 
+    def tearDown(self):
+        for f in ["mail.txt", "reboot-required", "apt-term.log"]:
+            if os.path.exists(f):
+                os.unlink(f)
+
     def _return_mock_data(self):
+        """ return input tuple for send_summary_mail """
         pkgs = "\n".join(["2vcard"])
         res = True
         pkgs_kept_back = []
