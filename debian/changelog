@@ -1,11 +1,11 @@
-unattended-upgrades (0.55ubuntu5) UNRELEASEDmaverick; urgency=low
+unattended-upgrades (0.60ubuntu1) maverick; urgency=low
 
   * Include reboot required notification in sent emails (LP: #415202)
     and add test for it (thanks to Paul Elliott for the initial patch)
   * allow ${distro_id} and ${distro_codename} in 
     Unattended-Upgrade::Allowed-Origins and update conffile to it
 
- -- Michael Vogt <michael.vogt@ubuntu.com>  Thu, 13 May 2010 11:47:12 +0200
+ -- Michael Vogt <michael.vogt@ubuntu.com>  Mon, 17 May 2010 15:19:21 +0200
 
 unattended-upgrades (0.55ubuntu4) lucid-proposed; urgency=low
 
