@@ -19,6 +19,8 @@ class TestSendSummaryMail(unittest.TestCase):
         unattended_upgrade.REBOOT_REQUIRED_FILE = "./reboot-required"
         # mock-mail binary that creates a mail.txt file
         unattended_upgrade.MAIL_BINARY = "./mock-mail"
+        # setup mail
+        apt_pkg.Config.set("Unattended-Upgrade::Mail", "root")
 
     def tearDown(self):
         for f in ["mail.txt", "reboot-required", "apt-term.log"]:
@@ -35,20 +37,24 @@ class TestSendSummaryMail(unittest.TestCase):
         open("./apt-term.log", "w").write("logfile_dpkg text")
         return (pkgs, res, pkgs_kept_back, mem_log, logfile_dpkg)
 
+    def _verify_common_mail_content(self, mail_txt):
+        self.assertTrue("logfile_dpkg text" in mail_txt)
+        self.assertTrue("mem_log text" in mail_txt)
+        self.assertTrue("Packages that are upgraded:\n 2vcard" in mail_txt)
+
     def testSummaryMailReboot(self):
-        # setup mail
-        apt_pkg.Config.set("Unattended-Upgrade::Mail", "root")
         open("./reboot-required","w").write("")
         send_summary_mail(*self._return_mock_data())
-        self.assertTrue("[reboot required]" in open("mail.txt").read())
+        os.unlink("./reboot-required")
+        mail_txt = open("mail.txt").read()
+        self.assertTrue("[reboot required]" in mail_txt)
+        self._verify_common_mail_content(mail_txt)
         
     def testSummaryMailNoReboot(self):
-        # setup mail
-        apt_pkg.Config.set("Unattended-Upgrade::Mail", "root")
-        if os.path.exists("./reboot-required"):
-            os.unlink("./reboot-required")
         send_summary_mail(*self._return_mock_data())
-        self.assertFalse("[reboot required]" in open("mail.txt").read())
+        mail_txt = open("mail.txt").read()
+        self.assertFalse("[reboot required]" in mail_txt)
+        self._verify_common_mail_content(mail_txt)
 
 if __name__ == "__main__":
     logging.basicConfig(level=logging.DEBUG)
