@@ -38,6 +38,7 @@ import warnings
 warnings.filterwarnings("ignore", "apt API not stable yet", FutureWarning)
 import apt
 import logging
+import lsb_release
 import subprocess
 
 import gettext
@@ -46,6 +47,8 @@ from gettext import gettext as _
 # the reboot required flag file used by packages
 REBOOT_REQUIRED_FILE = "/var/run/reboot-required"
 MAIL_BINARY = "/usr/bin/mail"
+DISTRO_CODENAME = lsb_release.get_distro_information()['CODENAME']
+DISTRO_ID = lsb_release.get_distro_information()['ID']
 
 class MyCache(apt.Cache):
     def __init__(self):
@@ -55,7 +58,34 @@ class MyCache(apt.Cache):
         assert (self._depcache.InstCount == 0 and 
                 self._depcache.BrokenCount == 0 and
 		self._depcache.DelCount == 0)
-        
+    
+def substitute(line):
+    """ substitude known mappings and return a new string 
+
+    Currently supported "${distro-release}
+    """
+    mapping = {"distro_codename" : get_distro_codename(),
+               "distro_id" : get_distro_id(),
+              }
+    return string.Template(line).substitute(mapping)
+    
+def get_distro_codename():
+    return DISTRO_CODENAME
+
+def get_distro_id():
+    return DISTRO_ID
+
+def get_allowed_origins():
+    """ return a list of allowed origins from apt.conf
+
+    This will take substitutions (like distro_id) into account.
+    """
+    allowed_origins = []
+    for s in apt_pkg.Config.ValueList("Unattended-Upgrade::Allowed-Origins"):
+        (distro_id, distro_codename) = s.split()
+        allowed_origins.append((substitute(distro_id), 
+                                substitute(distro_codename)))
+    return allowed_origins
 
 def is_allowed_origin(pkg, allowed_origins):
     if not pkg.candidate:
@@ -261,7 +291,7 @@ def main():
         logger.addHandler(mem_log_handler)
 
     # format (origin, archive), e.g. ("Ubuntu","dapper-security")
-    allowed_origins = map(string.split, apt_pkg.Config.ValueList("Unattended-Upgrade::Allowed-Origins"))
+    allowed_origins = get_allowed_origins()
 
     # pkgs that are (for some reason) not save to install
     blacklisted_pkgs = apt_pkg.Config.ValueList("Unattended-Upgrade::Package-Blacklist")
