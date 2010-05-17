@@ -1,0 +1,4 @@
+#!/bin/sh
+
+echo $2 > mail.txt
+cat - -- >> mail.txt

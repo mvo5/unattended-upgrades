@@ -43,6 +43,10 @@ import subprocess
 import gettext
 from gettext import gettext as _
 
+# the reboot required flag file used by packages
+REBOOT_REQUIRED_FILE = "/var/run/reboot-required"
+MAIL_BINARY = "/usr/bin/mail"
+
 class MyCache(apt.Cache):
     def __init__(self):
         apt.Cache.__init__(self)
@@ -200,20 +204,20 @@ def send_summary_mail(pkgs, res, pkgs_kept_back, mem_log, logfile_dpkg):
     email = apt_pkg.Config.Find("Unattended-Upgrade::Mail", "")
     if not email:
         return
-    if not os.path.exists("/usr/bin/mail"):
+    if not os.path.exists(MAIL_BINARY):
         logging.error(_("No '/usr/bin/mail', can not send mail. "
                         "You probably want to install the 'mailx' package."))
         return
     # Check if reboot-required flag is present
     logging.debug("Sending mail with '%s' to '%s'" % (logfile_dpkg, email))
-    if os.path.isfile('/var/run/reboot-required'):
+    if os.path.isfile(REBOOT_REQUIRED_FILE):
         subject = _("[reboot required] unattended-upgrades result for '%s'") % host()
     else:
         subject = _("unattended-upgrades result for '%s'") % host()
-    mail = subprocess.Popen(["/usr/bin/mail", "-s", subject,
+    mail = subprocess.Popen([MAIL_BINARY, "-s", subject,
                              email], stdin=subprocess.PIPE)
     s = _("Unattended upgrade returned: %s\n\n") % res
-    if reboot_required:
+    if os.path.isfile(REBOOT_REQUIRED_FILE):
         s += _("Warning: A reboot is required to complete this upgrade.\n\n")
     s += _("Packages that are upgraded:\n")
     s += " " + wrap(pkgs, 70, " ")
@@ -464,8 +468,8 @@ def main():
 
     # auto-reboot (if required and the config for this is set
     if (apt_pkg.Config.FindB("Unattended-Upgrade::Automatic-Reboot", False) and
-        os.path.exists("/var/run/reboot-required")):
-        logging.warning("Found /var/run/reboot-required, rebooting")
+        os.path.exists(REBOOT_REQUIRED_FILE)):
+        logging.warning("Found %s, rebooting" % REBOOT_REQUIRED_FILE)
         subprocess.call(["/sbin/reboot"])
         
 

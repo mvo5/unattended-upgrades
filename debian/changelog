@@ -1,7 +1,7 @@
-unattended-upgrades (0.55ubuntu5) maverick; urgency=low
+unattended-upgrades (0.55ubuntu5) UNRELEASEDmaverick; urgency=low
 
-  [ Paul Elliott ]
   * Include reboot required notification in sent emails (LP: #415202)
+    and add test for it (thanks to Paul Elliott for the initial patch)
 
  -- Michael Vogt <michael.vogt@ubuntu.com>  Thu, 13 May 2010 11:47:12 +0200
 
