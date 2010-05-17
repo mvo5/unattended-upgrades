@@ -204,13 +204,17 @@ def send_summary_mail(pkgs, res, pkgs_kept_back, mem_log, logfile_dpkg):
         logging.error(_("No '/usr/bin/mail', can not send mail. "
                         "You probably want to install the 'mailx' package."))
         return
+    # Check if reboot-required flag is present
     logging.debug("Sending mail with '%s' to '%s'" % (logfile_dpkg, email))
-    mail = subprocess.Popen(["/usr/bin/mail",
-                             "-s", _("unattended-upgrades result "
-                                     "for '%s'") % host(), 
-                             email],
-                            stdin=subprocess.PIPE)
+    if os.path.isfile('/var/run/reboot-required'):
+        subject = _("[reboot required] unattended-upgrades result for '%s'") % host()
+    else:
+        subject = _("unattended-upgrades result for '%s'") % host()
+    mail = subprocess.Popen(["/usr/bin/mail", "-s", subject,
+                             email], stdin=subprocess.PIPE)
     s = _("Unattended upgrade returned: %s\n\n") % res
+    if reboot_required:
+        s += _("Warning: A reboot is required to complete this upgrade.\n\n")
     s += _("Packages that are upgraded:\n")
     s += " " + wrap(pkgs, 70, " ")
     s += "\n"
