@@ -153,8 +153,9 @@ def conffile_prompt(destFile, prefix=""):
                         continue
                     # get conffile value from pkg
                     pkg_conffiles = apt_inst.debExtractControl(
-                        open(destFile), "conffiles").split("\n")
-                    if not conf_file in pkg_conffiles:
+                        open(destFile), "conffiles")
+                    if (not pkg_conffiles or 
+                        not conf_file in pkg_conffiles.split("\n")):
                         logging.debug("'%s' not in package conffiles '%s'" % (conf_file, pkg_conffiles))
                         continue
                     # test against the installed file
