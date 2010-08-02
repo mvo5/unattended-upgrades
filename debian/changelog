@@ -1,8 +1,10 @@
-unattended-upgrades (0.60ubuntu3) UNRELEASED; urgency=low
+unattended-upgrades (0.60ubuntu3) maverick; urgency=low
 
   * merged changes from debian-sid
+  * fix crash when the old package had a conffile but that 
+    disappears in the new pacakge
 
- -- Michael Vogt <michael.vogt@ubuntu.com>  Mon, 02 Aug 2010 10:46:57 +0200
+ -- Michael Vogt <michael.vogt@ubuntu.com>  Mon, 02 Aug 2010 12:08:21 +0200
 
 unattended-upgrades (0.60ubuntu2) maverick; urgency=low
 
