@@ -2,7 +2,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: unattended-upgrades\n"
 "Report-Msgid-Bugs-To: unattended-upgrades@packages.debian.org\n"
-"POT-Creation-Date: 2008-12-11 07:17+0100\n"
+"POT-Creation-Date: 2009-07-06 17:32+0100\n"
 "PO-Revision-Date: \n"
 "Last-Translator: Esko Arajärvi <edu@iki.fi>\n"
 "Language-Team: Finnish <debian-l10n-finnish@lists.debian.org>\n"
@@ -16,11 +16,25 @@ msgstr ""
 #. Description
 #: ../templates:2001
 msgid "Automatically download and install stable updates?"
-msgstr "Ladataanko ja asennetaanko vakaan jakelun päivitykset automaattisesti? "
+msgstr ""
+"Ladataanko ja asennetaanko vakaan jakelun päivitykset automaattisesti? "
 
 #. Type: boolean
 #. Description
 #: ../templates:2001
-msgid "Applying updates on a frequent basis is an important part of keeping systems secure. By default, updates need to be applied manually using package management tools. Alternatively, you can choose to have this system automatically download and install security updates."
-msgstr "Tietoturvan kannalta on tärkeää, että järjestelmää päivitetään säännöllisesti. Oletusarvoisesti päivitykset täytyy asentaa käsin käyttäen pakettienhallintatyökaluja. Tämän ohjelmiston avulla tietoturvapäivitykset voidaan ladata ja asentaa automaattisesti."
-
+#, fuzzy
+#| msgid ""
+#| "Applying updates on a frequent basis is an important part of keeping "
+#| "systems secure. By default, updates need to be applied manually using "
+#| "package management tools. Alternatively, you can choose to have this "
+#| "system automatically download and install security updates."
+msgid ""
+"Applying updates on a frequent basis is an important part of keeping systems "
+"secure. By default, updates need to be applied manually using package  "
+"management tools. Alternatively, you can choose to have this system  "
+"automatically download and install security updates."
+msgstr ""
+"Tietoturvan kannalta on tärkeää, että järjestelmää päivitetään "
+"säännöllisesti. Oletusarvoisesti päivitykset täytyy asentaa käsin käyttäen "
+"pakettienhallintatyökaluja. Tämän ohjelmiston avulla tietoturvapäivitykset "
+"voidaan ladata ja asentaa automaattisesti."

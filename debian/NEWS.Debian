@@ -1,0 +1,11 @@
+unattended-upgrades (0.50) unstable; urgency=low
+
+  When running with the --debug switch, previous versions of
+  unattended-upgrades would just print what they do, but not
+  actually perform any dpkg actions like installing or upgrading. 
+  
+  This behavior has *changed* in version 0.50 it will now 
+  install/upgrade. There is a new option called "--dry-run" to 
+  get this behavior back.
+
+ -- Michael Vogt <mvo@debian.org>  Fri, 03 Jul 2009 09:15:08 +0200

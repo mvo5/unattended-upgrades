@@ -1,3 +1,135 @@
+unattended-upgrades (0.61~pre1) UNRELEASED; urgency=low
+
+  * merged changes from debian-sid
+
+ -- Michael Vogt <mvo@debian.org>  Mon, 02 Aug 2010 10:46:57 +0200
+
+unattended-upgrades (0.60ubuntu3) UNRELEASED; urgency=low
+
+  * merged changes from debian-sid
+
+ -- Michael Vogt <michael.vogt@ubuntu.com>  Mon, 02 Aug 2010 10:46:57 +0200
+
+unattended-upgrades (0.60ubuntu2) maverick; urgency=low
+
+  * debian/control:
+    - add missing lsb-release dependency
+  * debian/control:
+    - depend on python-apt (>= 0.7.90)
+  * unattended-upgrade:
+    - port to python-apt 0.8 API
+
+ -- Michael Vogt <michael.vogt@ubuntu.com>  Mon, 02 Aug 2010 10:29:46 +0200
+
+unattended-upgrades (0.60ubuntu1) maverick; urgency=low
+
+  * Include reboot required notification in sent emails (LP: #415202)
+    and add test for it (thanks to Paul Elliott for the initial patch)
+  * allow ${distro_id} and ${distro_codename} in 
+    Unattended-Upgrade::Allowed-Origins and update conffile to it
+
+ -- Michael Vogt <michael.vogt@ubuntu.com>  Mon, 17 May 2010 15:19:21 +0200
+
+unattended-upgrades (0.55ubuntu4) lucid-proposed; urgency=low
+
+  * unattended-upgrade:
+    - fix rewind_cache if a pkg fails to get marked for upgrade 
+      (LP: #571734)
+
+ -- Michael Vogt <michael.vogt@ubuntu.com>  Thu, 29 Apr 2010 16:39:45 +0200
+
+unattended-upgrades (0.55ubuntu3) lucid; urgency=low
+
+  [ Michael Vogt ]
+  * add Vcs-Bzr header
+  * unattended-upgrade-shutdown:
+    - add information to plymouth shutdown screen if a 
+      unattended-upgrade is in progress (LP: #506709)
+
+  [ Loïc Minier ]
+  * Fix typo in README.
+
+ -- Michael Vogt <michael.vogt@ubuntu.com>  Wed, 17 Mar 2010 17:47:08 +0100
+
+unattended-upgrades (0.55ubuntu2) lucid; urgency=low
+
+  * Suggest bsd-mailx instead of mailx as mailx is a transitional package.
+
+ -- Loïc Minier <loic.minier@ubuntu.com>  Thu, 21 Jan 2010 10:25:12 +0100
+
+unattended-upgrades (0.55ubuntu1) lucid; urgency=low
+
+  * updated for lucid
+  * add new "Unattended-Upgrade::Remove-Unused-Dependencies"
+    option that is off by default to allow removal of new unused
+    dependencies
+  * data/50unattended-upgrades:
+    - add example setting for the apt bandwidth limit option
+      (closes: #557258)
+  * fix bug in conffile prompt check (LP: #336558)
+  * lintian fixes
+
+ -- Michael Vogt <michael.vogt@ubuntu.com>  Fri, 15 Jan 2010 13:27:53 +0100
+
+unattended-upgrades (0.52ubuntu1) karmic; urgency=low
+
+  * Add new option "Unattended-Upgrade::Automatic-Reboot" that 
+    will automatically reboot without confirmation if the upgrade
+    requires a reboot (off by default) LP: #400018
+  * fix typo in filename (LP: #397810)
+
+ -- Michael Vogt <michael.vogt@ubuntu.com>  Mon, 20 Jul 2009 13:36:14 +0200
+
+unattended-upgrades (0.51ubuntu1) karmic; urgency=low
+
+  * unattended-upgrade-shutdown:
+    - deal with syslog not avaiable (LP: #396263)
+  * pm/sleep.d/10_unatteded-upgrades-hibernate:
+    - add script to ensure that installing is finished when
+      hibernating (LP: #191514)
+
+ -- Michael Vogt <michael.vogt@ubuntu.com>  Fri, 10 Jul 2009 10:20:47 +0200
+
+unattended-upgrades (0.50ubuntu2) karmic; urgency=low
+
+  * Add sanity-check on clean to prevent uploads with Python syntax errors.
+  * Fix syntax error in unattended-upgrades-shutdown (LP: #396134).
+
+ -- Colin Watson <cjwatson@ubuntu.com>  Mon, 06 Jul 2009 17:34:25 +0100
+
+unattended-upgrades (0.50ubuntu1) karmic; urgency=low
+
+  * fix crash in ouput, thanks to Joerg Schuetter, closes: #535347
+  * when running in --debug mode, also print debug output to stderr
+  * add --dry-run option to simulate a run, but not actually install
+    something 
+  * when running with --debug, install packages instead of just
+    simulating the install, --dry-run is avaialble for simulation
+  * check for packages on hold and do not upgrade them (closes: #511677)
+  * deal better with failures in pkgname_from_deb() (LP: #305046)
+  * improved the README some more (LP: #311052)
+  * fix locking problem (LP: #359010)
+  * Contain unattended-upgrades log in the status mail as well 
+    (LP: #245422)
+  * ensure that unattended-upgrade is finished on shutdown 
+    (LP: #191514)
+
+ -- Michael Vogt <michael.vogt@ubuntu.com>  Mon, 06 Jul 2009 09:26:48 +0200
+
+unattended-upgrades (0.42ubuntu1) karmic; urgency=low
+
+  * debian/po/sk.po:
+    - new translation, thanks to helix84, closes: #532959
+  * debian/po/ru.po:
+    - updated, thanks to Yuri Kozlov, closes: #527111
+  * debian/po/eu.po:
+    - updated, thanks to Piarres Beobide, closes: #513436
+  * debian/links
+    - add symlink to make binary name and package name match, 
+      closes: #428965
+
+ -- Michael Vogt <michael.vogt@ubuntu.com>  Tue, 16 Jun 2009 11:52:32 +0200
+
 unattended-upgrades (0.42debian2) UNRELEASED; urgency=low
 
   * apply patch by Julian Andres Klode to move to the new
@@ -19,6 +151,18 @@ unattended-upgrades (0.42debian1) unstable; urgency=low
 
  -- Michael Vogt <mvo@debian.org>  Thu, 25 Jun 2009 16:07:29 +0200
 
+unattended-upgrades (0.41ubuntu1) karmic; urgency=low
+
+  * fix lintian warnings
+  * add man-page (closes: #394277)
+  * debian/po/cs.po:
+    - updated Czech translation (thanks to Vítězslav Kotrla)
+      closes: #532136
+  * add kept back packages to the status email (thanks to
+    Maximilian Gaukler, closes: #526505)
+
+ -- Michael Vogt <michael.vogt@ubuntu.com>  Mon, 15 Jun 2009 10:27:51 +0200
+
 unattended-upgrades (0.41debian1) unstable; urgency=low
 
   * fix lintian warnings
@@ -30,6 +174,18 @@ unattended-upgrades (0.41debian1) unstable; urgency=low
     Maximilian Gaukler, closes: #526505)
 
  -- Michael Vogt <mvo@debian.org>  Wed, 10 Jun 2009 20:36:39 +0200
+
+unattended-upgrades (0.40ubuntu1) karmic; urgency=low
+
+  * data/50unattended-upgrades:
+    - updated for karmic
+  * unattended-upgrade:
+    - use the new python-apt API to avoid deprecation 
+      warnings
+  * debian/control:
+    - update depends on python-apt to (>= 0.7.9)
+
+ -- Michael Vogt <michael.vogt@ubuntu.com>  Wed, 06 May 2009 21:54:16 +0200
 
 unattended-upgrades (0.40debian1) unstable; urgency=low
 
@@ -49,7 +205,7 @@ unattended-upgrades (0.39debian1) unstable; urgency=low
 
 unattended-upgrades (0.39) jaunty; urgency=low
 
-  * debian/po:
+  * debian/po/fr.po:
     - updated french translation (closes: #511373)
   * debian/po/es.po:
     - added spanish translation (closes: #512213)
@@ -63,13 +219,16 @@ unattended-upgrades (0.39) jaunty; urgency=low
 unattended-upgrades (0.38) jaunty; urgency=low
 
   * debian/po:
+    - add ru.po debian template (closes: #509032)
+    - add eu.po debian template (closes: #508983)
     - add fr.po debian template (closes: #508389)
     - add ja.po debian template (closes: #509343)
     - add fi.po debian template (closes: #509370)
-  * po/:
+  * po/eu.po:
+    - added eu.po translation (closes: #508984)
     - added ja.po translation (closes: #509748)
-  
- -- Michael Vogt <mvo@debian.org>  Mon, 12 Jan 2009 09:34:16 +0100
+
+ -- Michael Vogt <michael.vogt@ubuntu.com>  Sat, 05 Jan 2009 10:38:34 +0100
 
 unattended-upgrades (0.37debian1) unstable; urgency=low
 
@@ -84,6 +243,32 @@ unattended-upgrades (0.37debian1) unstable; urgency=low
     - added ja.po translation (closes: #509748)
 
  -- Michael Vogt <mvo@debian.org>  Mon, 05 Jan 2009 10:34:14 +0100
+
+unattended-upgrades (0.37) jaunty; urgency=low
+
+  * better debconf template and description (thanks to the 
+    debian-l10 team (closes: #508136)
+  * debian/po/sv.po:
+    - add sv.po debian template (closes: #508225)
+  * debian/po/it.po:
+    - add it.po debian template (closes: #508193)
+  * debian/po/ja.po:
+    - add ja.po debian template (closes: #508564)
+  * debian/po/de.po:
+    - add de.po debian template (closes: #508481)
+  * po/fr.po:
+    - add fr.po translation (closes: #508390)
+  * po/cs.po:
+    - add cs.po translation (closes: #508702)
+  * po/pt.po:
+    - add pt.po translation (closes: #508705)
+  * unattended-upgrade:
+    - better default permissions of the install log
+      (closes: #507638)
+    - only disable apt-listchanges if it is not set to
+      'mail' (closes: #507639)
+
+ -- Michael Vogt <michael.vogt@ubuntu.com>  Mon, 15 Dec 2008 09:46:42 +0100
 
 unattended-upgrades (0.36debian1) unstable; urgency=low
 

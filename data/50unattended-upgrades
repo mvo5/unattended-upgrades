@@ -1,7 +1,9 @@
 // Automatically upgrade packages from these (origin, archive) pairs
 Unattended-Upgrade::Allowed-Origins {
-	"Debian stable";
-//	"Debian squeeze-proposed-updates";
+	"${distro_id} stable";
+	"${distro_id} ${distro_codename}-security";
+//	"${distro_id} ${distro_codename}-updates";
+//	"${distro_id} ${distro_codename}-proposed-updates";
 };
 
 // List of packages to not update
@@ -17,3 +19,16 @@ Unattended-Upgrade::Package-Blacklist {
 // have a working mail setup on your system. The package 'mailx'
 // must be installed or anything that provides /usr/bin/mail.
 //Unattended-Upgrade::Mail "root@localhost";
+
+// Do automatic removal of new unused dependencies after the upgrade
+// (equivalent to apt-get autoremove)
+//Unattended-Upgrade::Remove-Unused-Dependencies "false";
+
+// Automatically reboot *WITHOUT CONFIRMATION* if a 
+// the file /var/run/reboot-required is found after the upgrade 
+//Unattended-Upgrade::Automatic-Reboot "false";
+
+
+// Use apt bandwidth limit feature, this example limits the download
+// speed to 70kb/sec
+//Acquire::http::Dl-Limit "70";

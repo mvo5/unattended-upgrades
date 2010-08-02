@@ -14,9 +14,12 @@ setup(name='unattended-upgrades', version='0.1',
                   ('../etc/logrotate.d/',
                    ["data/logrotate.d/unattended-upgrades"]),
                   ('../usr/share/unattended-upgrades/',
-                   ["data/20auto-upgrades"]),
+                   ["data/20auto-upgrades",
+                    "unattended-upgrade-shutdown"]),
                   ('../usr/share/man/man8/',
                    ["man/unattended-upgrade.8"]),
+                  ('../etc/pm/sleep.d/',
+                   ["pm/sleep.d/10_unattended-upgrades-hibernate"])
                   ],
       cmdclass = { "build" : build_extra.build_extra,
                    "build_i18n" :  build_i18n.build_i18n }

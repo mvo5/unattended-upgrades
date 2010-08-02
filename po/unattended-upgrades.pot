@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2008-03-10 15:28+0100\n"
+"POT-Creation-Date: 2009-07-03 12:21+0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -16,96 +16,145 @@ msgstr ""
 "Content-Type: text/plain; charset=CHARSET\n"
 "Content-Transfer-Encoding: 8bit\n"
 
-#: ../unattended-upgrade:108
-msgid "print debug messages"
+#: ../unattended-upgrade:174
+msgid ""
+"No '/usr/bin/mail', can not send mail. You probably want to install the "
+"'mailx' package."
 msgstr ""
 
-#: ../unattended-upgrade:127
+#: ../unattended-upgrade:179
 #, c-format
-msgid "Initial blacklisted packages: %s"
+msgid "unattended-upgrades result for '%s'"
 msgstr ""
 
-#: ../unattended-upgrade:129
-msgid "Starting unattended upgrades script"
-msgstr ""
-
-#: ../unattended-upgrade:132
-#, c-format
-msgid "Allowed origins are: %s"
-msgstr ""
-
-#: ../unattended-upgrade:137 ../unattended-upgrade:138
-msgid "Cache has broken packages, exiting"
-msgstr ""
-
-#: ../unattended-upgrade:176
-#, c-format
-msgid "GetArchives() failed: '%s'"
-msgstr ""
-
-#: ../unattended-upgrade:185 ../unattended-upgrade:186
-#, c-format
-msgid "An error ocured: '%s'"
-msgstr ""
-
-#: ../unattended-upgrade:188 ../unattended-upgrade:189
-#, c-format
-msgid "The URI '%s' failed to download, aborting"
-msgstr ""
-
-#: ../unattended-upgrade:197
-#, c-format
-msgid "Package '%s' has conffile prompt and needs to be upgraded manually"
-msgstr ""
-
-#: ../unattended-upgrade:216
-#, c-format
-msgid "package '%s' not upgraded"
-msgstr ""
-
-#: ../unattended-upgrade:227
-msgid "No packages found that can be upgraded unattended"
-msgstr ""
-
-#: ../unattended-upgrade:232
-#, c-format
-msgid "Packages that are upgraded: %s"
-msgstr ""
-
-#: ../unattended-upgrade:245
-#, c-format
-msgid "Writing dpkg log to '%s'"
-msgstr ""
-
-#: ../unattended-upgrade:257
-msgid "pm.GetArchives() failed"
-msgstr ""
-
-#: ../unattended-upgrade:265
-msgid "Installing the upgrades failed!"
-msgstr ""
-
-#: ../unattended-upgrade:266
-#, c-format
-msgid "error message: '%s'"
-msgstr ""
-
-#: ../unattended-upgrade:270
-#, c-format
-msgid "dpkg returned a error! See '%s' for details"
-msgstr ""
-
-#: ../unattended-upgrade:272
-msgid "All upgrades installed"
-msgstr ""
-
-#: ../unattended-upgrade:285
+#: ../unattended-upgrade:183
 #, c-format
 msgid ""
 "Unattended upgrade returned: %s\n"
 "\n"
 msgstr ""
 
-#: ../unattended-upgrade:296
+#: ../unattended-upgrade:184
+msgid "Packages that are upgraded:\n"
+msgstr ""
+
+#: ../unattended-upgrade:188
+msgid "Packages with upgradable origin but kept back:\n"
+msgstr ""
+
+#: ../unattended-upgrade:192
+msgid "Package installation log:"
+msgstr ""
+
+#: ../unattended-upgrade:195
+msgid "Unattended-upgrades log:\n"
+msgstr ""
+
+#: ../unattended-upgrade:208
+msgid "print debug messages"
+msgstr ""
+
+#: ../unattended-upgrade:211
+msgid "Simulation, download but do not install"
+msgstr ""
+
+#: ../unattended-upgrade:230
+#, c-format
+msgid "Initial blacklisted packages: %s"
+msgstr ""
+
+#: ../unattended-upgrade:231
+msgid "Starting unattended upgrades script"
+msgstr ""
+
+#: ../unattended-upgrade:234
+#, c-format
+msgid "Allowed origins are: %s"
+msgstr ""
+
+#: ../unattended-upgrade:241
+msgid "Lock could not be acquired (another package manager running?)"
+msgstr ""
+
+#: ../unattended-upgrade:243
+msgid "Cache lock can not be acquired, exiting"
+msgstr ""
+
+#: ../unattended-upgrade:249 ../unattended-upgrade:250
+msgid "Cache has broken packages, exiting"
+msgstr ""
+
+#: ../unattended-upgrade:274
+#, c-format
+msgid "package '%s' upgradable but fails to be marked for upgrade (%s)"
+msgstr ""
+
+#: ../unattended-upgrade:294
+#, c-format
+msgid "GetArchives() failed: '%s'"
+msgstr ""
+
+#: ../unattended-upgrade:303 ../unattended-upgrade:304
+#, c-format
+msgid "An error ocured: '%s'"
+msgstr ""
+
+#: ../unattended-upgrade:306 ../unattended-upgrade:307
+#, c-format
+msgid "The URI '%s' failed to download, aborting"
+msgstr ""
+
+#: ../unattended-upgrade:310
+#, c-format
+msgid "Download finished, but file '%s' not there?!?"
+msgstr ""
+
+#: ../unattended-upgrade:319
+#, c-format
+msgid "Package '%s' has conffile prompt and needs to be upgraded manually"
+msgstr ""
+
+#: ../unattended-upgrade:341
+#, c-format
+msgid "package '%s' not upgraded"
+msgstr ""
+
+#: ../unattended-upgrade:352
+msgid "No packages found that can be upgraded unattended"
+msgstr ""
+
+#: ../unattended-upgrade:362
+#, c-format
+msgid "Packages that are upgraded: %s"
+msgstr ""
+
+#: ../unattended-upgrade:375
+#, c-format
+msgid "Writing dpkg log to '%s'"
+msgstr ""
+
+#: ../unattended-upgrade:386
+msgid "pm.GetArchives() failed"
+msgstr ""
+
+#: ../unattended-upgrade:407
+msgid "Installing the upgrades failed!"
+msgstr ""
+
+#: ../unattended-upgrade:408
+#, c-format
+msgid "error message: '%s'"
+msgstr ""
+
+#: ../unattended-upgrade:409
+#, c-format
+msgid "dpkg returned a error! See '%s' for details"
+msgstr ""
+
+#: ../unattended-upgrade:411
+msgid "All upgrades installed"
+msgstr ""
+
+#: ../unattended-upgrade:424
 msgid "You need to be root to run this application"
 msgstr ""

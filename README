@@ -2,7 +2,15 @@ Unattended upgrades
 -------------------
 
 This script can install security upgrades automatically and
-unattended. It will not install packages that require dependencies
+unattended. However, it is not enabled by default. Most users 
+enable it via the Software Sources programm (available in 
+System/Administration), which has a simple radiobutton in the UI 
+for enabling unattended upgrades. 
+
+If you would prefer to enable it from the command line, run 
+"sudo dpkg-reconfigure -plow unattended-upgrades".
+
+It will not install packages that require dependencies
 that can't be fetched from security and it will check for conffile
 prompts before the install and holds back the package that creates
 them. 
@@ -11,7 +19,8 @@ them.
 
 The unattended-upgrades package will *not* act unless it is enabled
 explicitly.  To activate this script you need to ensure that the apt
-configuration contains the following lines:
+configuration contains the following lines (this can be done via the
+graphical "Software Source" program or via dpkg-reconfigure):
 
 APT::Periodic::Update-Package-Lists "1";
 APT::Periodic::Unattended-Upgrade "1";
@@ -50,9 +59,6 @@ apt configuration:
 "Unattended-Upgrade::Package-Blacklist"
 "Unattended-Upgrade::Mail"
 
-See https://wiki.ubuntu.com/AutomaticUpdates for more details about
-this feature.
-
 If you use the mail feature, make sure that /usr/bin/mail is available
 and working (usually the mailx package is required).
 
@@ -60,7 +66,7 @@ and working (usually the mailx package is required).
 
 If something goes wrong or if you want to report a bug about the way
 the script works its a good idea to run:
-$ sudo o unattended-upgrade --debug
+$ sudo unattended-upgrade --debug --dry-run
 
 and look at the resulting logfile in:
 /var/log/unattended-upgrades/unattended-upgrades.log 
