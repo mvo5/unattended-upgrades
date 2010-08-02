@@ -27,8 +27,8 @@ class TestSubstitude(unittest.TestCase):
 
     def test_get_allowed_origins_with_substitute(self):
         """ test if substitute for get_allowed_origins works """
-        apt_pkg.Config.Clear("Unattended-Upgrade::Allowed-Origins")
-        apt_pkg.Config.Set("Unattended-Upgrade::Allowed-Origins::",
+        apt_pkg.config.clear("Unattended-Upgrade::Allowed-Origins")
+        apt_pkg.config.set("Unattended-Upgrade::Allowed-Origins::",
                            "${distro_id} ${distro_codename}-security")
         l = get_allowed_origins()
         self.assertTrue(("MyDistroID","nacked-security") in l)

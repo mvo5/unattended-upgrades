@@ -20,7 +20,7 @@ class TestSendSummaryMail(unittest.TestCase):
         # mock-mail binary that creates a mail.txt file
         unattended_upgrade.MAIL_BINARY = "./mock-mail"
         # setup mail
-        apt_pkg.Config.set("Unattended-Upgrade::Mail", "root")
+        apt_pkg.config.set("Unattended-Upgrade::Mail", "root")
 
     def tearDown(self):
         for f in ["mail.txt", "reboot-required", "apt-term.log"]:

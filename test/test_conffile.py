@@ -9,7 +9,7 @@ from unattended_upgrade import conffile_prompt
 
 class TestConffilePrompt(unittest.TestCase):
     def setUp(self):
-        apt_pkg.Config.Set("Dir::State::status", "./var/lib/dpkg/status")
+        apt_pkg.config.set("Dir::State::status", "./var/lib/dpkg/status")
 
     def testWillPrompt(self):
         # conf-test 0.9 is installed, 1.1 gets installed
