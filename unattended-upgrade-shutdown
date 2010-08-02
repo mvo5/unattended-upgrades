@@ -80,7 +80,7 @@ if __name__ == "__main__":
     # run
     start_time = time.time()
     while True: 
-        res = apt_pkg.GetLock(options.lock_file)
+        res = apt_pkg.get_lock(options.lock_file)
         logging.debug("GetLock returned %i" % res)
         if res > 0:
             logging.debug("Lock not taken")
