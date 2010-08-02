@@ -1,9 +1,13 @@
-unattended-upgrades (0.60ubuntu2) UNRELEASEDmaverick; urgency=low
+unattended-upgrades (0.60ubuntu2) maverick; urgency=low
 
   * debian/control:
     - add missing lsb-release dependency
+  * debian/control:
+    - depend on python-apt (>= 0.7.90)
+  * unattended-upgrade:
+    - port to python-apt 0.8 API
 
- -- Michael Vogt <michael.vogt@ubuntu.com>  Mon, 17 May 2010 15:22:57 +0200
+ -- Michael Vogt <michael.vogt@ubuntu.com>  Mon, 02 Aug 2010 10:29:46 +0200
 
 unattended-upgrades (0.60ubuntu1) maverick; urgency=low
 
