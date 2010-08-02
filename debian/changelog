@@ -1,8 +1,8 @@
-unattended-upgrades (0.61~pre1) UNRELEASED; urgency=low
+unattended-upgrades (0.61) UNRELEASED; urgency=low
 
-  * merged changes from debian-sid
+  * merged changes from the ubuntu branch
 
- -- Michael Vogt <mvo@debian.org>  Mon, 02 Aug 2010 10:46:57 +0200
+ -- Michael Vogt <mvo@debian.org>  Mon, 02 Aug 2010 11:08:57 +0200
 
 unattended-upgrades (0.60ubuntu3) UNRELEASED; urgency=low
 
