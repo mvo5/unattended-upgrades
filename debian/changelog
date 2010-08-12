@@ -1,3 +1,10 @@
+unattended-upgrades (0.62) UNRELEASED; urgency=low
+
+  * updated Russian program translation, thanks to
+    Yuri Kozlov, closes: #592646
+
+ -- Michael Vogt <michael.vogt@ubuntu.com>  Thu, 12 Aug 2010 19:03:49 +0200
+
 unattended-upgrades (0.61) unstable; urgency=low
 
   * merged changes from the ubuntu branch

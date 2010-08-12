@@ -1,0 +1,173 @@
+# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the PACKAGE package.
+#
+# Yuri Kozlov <yuray@komyakino.ru>, 2010.
+msgid ""
+msgstr ""
+"Project-Id-Version: \n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2009-07-03 12:21+0200\n"
+"PO-Revision-Date: 2010-08-11 21:59+0400\n"
+"Last-Translator: Yuri Kozlov <yuray@komyakino.ru>\n"
+"Language-Team: Russian <debian-l10n-russian@lists.debian.org>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"X-Generator: Lokalize 1.0\n"
+"Plural-Forms: nplurals=3; plural=(n%10==1 && n%100!=11 ? 0 : n%10>=2 && "
+"n%10<=4 && (n%100<10 || n%100>=20) ? 1 : 2);\n"
+
+#: ../unattended-upgrade:174
+msgid ""
+"No '/usr/bin/mail', can not send mail. You probably want to install the "
+"'mailx' package."
+msgstr ""
+"Нет программы /usr/bin/mail, невозможно послать почту. Вероятно, лучше "
+"установить пакет mailx."
+
+#: ../unattended-upgrade:179
+#, c-format
+msgid "unattended-upgrades result for '%s'"
+msgstr "Результат unattended-upgrades для %s"
+
+#: ../unattended-upgrade:183
+#, c-format
+msgid ""
+"Unattended upgrade returned: %s\n"
+"\n"
+msgstr ""
+"Результат необслуживаемой установки: %s\n"
+"\n"
+
+#: ../unattended-upgrade:184
+msgid "Packages that are upgraded:\n"
+msgstr "Обновлённые пакеты:\n"
+
+#: ../unattended-upgrade:188
+msgid "Packages with upgradable origin but kept back:\n"
+msgstr ""
+"Пакеты, обновлённые в источнике, но оставленные теми же в системе:\n"
+
+#: ../unattended-upgrade:192
+msgid "Package installation log:"
+msgstr "Журнал установки пакетов:"
+
+#: ../unattended-upgrade:195
+msgid "Unattended-upgrades log:\n"
+msgstr "Журнал unattended-upgrades:\n"
+
+#: ../unattended-upgrade:208
+msgid "print debug messages"
+msgstr "выводить отладочные сообщения"
+
+#: ../unattended-upgrade:211
+msgid "Simulation, download but do not install"
+msgstr "Имитация, скачивать но не устанавливать"
+
+#: ../unattended-upgrade:230
+#, c-format
+msgid "Initial blacklisted packages: %s"
+msgstr "Пакеты в чёрном списке изначально: %s"
+
+#: ../unattended-upgrade:231
+msgid "Starting unattended upgrades script"
+msgstr "Запускаются сценарии необслуживаемой установки"
+
+#: ../unattended-upgrade:234
+#, c-format
+msgid "Allowed origins are: %s"
+msgstr "Разрешённые источники: %s"
+
+#: ../unattended-upgrade:241
+msgid "Lock could not be acquired (another package manager running?)"
+msgstr ""
+"Не удалось выполнить блокировку (запущен ещё один менеджер пакетов?)"
+
+#: ../unattended-upgrade:243
+msgid "Cache lock can not be acquired, exiting"
+msgstr "Не удалось выполнить блокировку кэша, завершение работы"
+
+#: ../unattended-upgrade:249 ../unattended-upgrade:250
+msgid "Cache has broken packages, exiting"
+msgstr "В кэше сломанные пакеты, завершение работы"
+
+#: ../unattended-upgrade:274
+#, c-format
+msgid "package '%s' upgradable but fails to be marked for upgrade (%s)"
+msgstr ""
+"пакет %s можно обновить, но его не удалось пометить как обновляемый (%s)"
+
+#: ../unattended-upgrade:294
+#, c-format
+msgid "GetArchives() failed: '%s'"
+msgstr "GetArchives() завершилась с ошибкой: '%s'"
+
+#: ../unattended-upgrade:303 ../unattended-upgrade:304
+#, c-format
+msgid "An error ocured: '%s'"
+msgstr "Произошла ошибка: %s"
+
+#: ../unattended-upgrade:306 ../unattended-upgrade:307
+#, c-format
+msgid "The URI '%s' failed to download, aborting"
+msgstr "Невозможно скачать URI '%s', останов"
+
+#: ../unattended-upgrade:310
+#, c-format
+msgid "Download finished, but file '%s' not there?!?"
+msgstr "Скачивание завершено, но файла %s нет?!?"
+
+#: ../unattended-upgrade:319
+#, c-format
+msgid "Package '%s' has conffile prompt and needs to be upgraded manually"
+msgstr ""
+"В пакете %s есть conffile с вводом от пользователя и его нужно "
+"обновлять вручную"
+
+#: ../unattended-upgrade:341
+#, c-format
+msgid "package '%s' not upgraded"
+msgstr "пакет %s не обновлён"
+
+#: ../unattended-upgrade:352
+msgid "No packages found that can be upgraded unattended"
+msgstr ""
+"Пакеты, для которых можно выполнить необслуживаемое обновление, не "
+"найдены"
+
+#: ../unattended-upgrade:362
+#, c-format
+msgid "Packages that are upgraded: %s"
+msgstr "Обновлённые пакеты: %s"
+
+#: ../unattended-upgrade:375
+#, c-format
+msgid "Writing dpkg log to '%s'"
+msgstr "Журнал dpkg записывается в %s"
+
+#: ../unattended-upgrade:386
+msgid "pm.GetArchives() failed"
+msgstr "pm.GetArchives() завершилась с ошибкой"
+
+#: ../unattended-upgrade:407
+msgid "Installing the upgrades failed!"
+msgstr "Установка обновлений завершилась с ошибкой!"
+
+#: ../unattended-upgrade:408
+#, c-format
+msgid "error message: '%s'"
+msgstr "сообщение об ошибке: %s"
+
+#: ../unattended-upgrade:409
+#, c-format
+msgid "dpkg returned a error! See '%s' for details"
+msgstr "dpkg завершилась с ошибкой! Подробности смотрите в %s"
+
+#: ../unattended-upgrade:411
+msgid "All upgrades installed"
+msgstr "Все обновления установлены"
+
+#: ../unattended-upgrade:424
+msgid "You need to be root to run this application"
+msgstr "Вы должны быть root для запуска этого приложения"
+
