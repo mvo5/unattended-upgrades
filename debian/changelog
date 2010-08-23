@@ -1,7 +1,12 @@
 unattended-upgrades (0.62) UNRELEASED; urgency=low
 
+  [ Michael Vogt ]
   * updated Russian program translation, thanks to
     Yuri Kozlov, closes: #592646
+
+  [ Alex Owen ]
+  * allow ":" as seperator in Unattended-Upgrade::Allowed-Origins
+    (closes: #536754) 
 
  -- Michael Vogt <michael.vogt@ubuntu.com>  Thu, 12 Aug 2010 19:03:49 +0200
 

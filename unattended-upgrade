@@ -1,5 +1,5 @@
 #!/usr/bin/python
-# Copyright (c) 2005-2009 Canonical Ltd
+# Copyright (c) 2005-2010 Canonical Ltd
 #
 # AUTHOR:
 # Michael Vogt <mvo@ubuntu.com>
@@ -82,7 +82,11 @@ def get_allowed_origins():
     """
     allowed_origins = []
     for s in apt_pkg.config.value_list("Unattended-Upgrade::Allowed-Origins"):
-        (distro_id, distro_codename) = s.split()
+        # if there is a ":" use that as seperator, else use spaces
+        if ":" in s:
+            (distro_id, distro_codename) = s.split(':')
+        else:
+            (distro_id, distro_codename) = s.split()
         allowed_origins.append((substitute(distro_id), 
                                 substitute(distro_codename)))
     return allowed_origins
