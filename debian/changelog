@@ -3,7 +3,8 @@ unattended-upgrades (0.62) UNRELEASED; urgency=low
   [ Michael Vogt ]
   * updated Russian program translation, thanks to
     Yuri Kozlov, closes: #592646
-  * updated pt_BR translations, thanks to Sergio Cipolla
+  * updated pt_BR translations, thanks to Sergio Cipolla,
+    closes: #593755
 
   [ Alex Owen ]
   * allow ":" as seperator in Unattended-Upgrade::Allowed-Origins
