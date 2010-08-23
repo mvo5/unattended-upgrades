@@ -1,0 +1,161 @@
+msgid ""
+msgstr ""
+"Project-Id-Version: unattended-upgrades-0.61\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2009-07-03 12:21+0200\n"
+"PO-Revision-Date: \n"
+"Last-Translator: Sérgio Cipolla <secipolla@gmail.com>\n"
+"Language-Team: \n"
+"Language: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"X-Poedit-Language: Portuguese\n"
+"X-Poedit-Country: BRAZIL\n"
+
+#: ../unattended-upgrade:174
+msgid "No '/usr/bin/mail', can not send mail. You probably want to install the 'mailx' package."
+msgstr "Nenhum '/usr/bin/mail', incapaz de enviar email. Você provavelmente gostaria de instalar o pacote 'mailx'."
+
+#: ../unattended-upgrade:179
+#, c-format
+msgid "unattended-upgrades result for '%s'"
+msgstr "Resultado da atualização desacompanhada para '%s'"
+
+#: ../unattended-upgrade:183
+#, c-format
+msgid ""
+"Unattended upgrade returned: %s\n"
+"\n"
+msgstr ""
+"A atualização desacompanhada retornou: %s\n"
+"\n"
+
+#: ../unattended-upgrade:184
+msgid "Packages that are upgraded:\n"
+msgstr "Pacotes atualizados:\n"
+
+#: ../unattended-upgrade:188
+msgid "Packages with upgradable origin but kept back:\n"
+msgstr "Pacotes atualizáveis na origem mas mantidos na versão atual:\n"
+
+#: ../unattended-upgrade:192
+msgid "Package installation log:"
+msgstr "Relatório de instalação de pacotes:"
+
+#: ../unattended-upgrade:195
+msgid "Unattended-upgrades log:\n"
+msgstr "Relatório da atualização desacompanhada:\n"
+
+#: ../unattended-upgrade:208
+msgid "print debug messages"
+msgstr "imprimir mensagens de depuração"
+
+#: ../unattended-upgrade:211
+msgid "Simulation, download but do not install"
+msgstr "Simulação, baixar mas não instalar"
+
+#: ../unattended-upgrade:230
+#, c-format
+msgid "Initial blacklisted packages: %s"
+msgstr "Pacotes inicialmente na lista negra: %s"
+
+#: ../unattended-upgrade:231
+msgid "Starting unattended upgrades script"
+msgstr "Iniciando o script da atualização desacompanhada"
+
+#: ../unattended-upgrade:234
+#, c-format
+msgid "Allowed origins are: %s"
+msgstr "São origens permitidas: %s"
+
+#: ../unattended-upgrade:241
+msgid "Lock could not be acquired (another package manager running?)"
+msgstr "O lock não pôde ser obtido (outro gerenciador de pacotes em funcionamento?)"
+
+#: ../unattended-upgrade:243
+msgid "Cache lock can not be acquired, exiting"
+msgstr "O lock do cache não pode ser obtido, saindo"
+
+#: ../unattended-upgrade:249
+#: ../unattended-upgrade:250
+msgid "Cache has broken packages, exiting"
+msgstr "O cache tem pacotes quebrados, saindo"
+
+#: ../unattended-upgrade:274
+#, c-format
+msgid "package '%s' upgradable but fails to be marked for upgrade (%s)"
+msgstr "o pacote '%s' é atualizável mas falha ao ser marcado para atualização (%s)"
+
+#: ../unattended-upgrade:294
+#, c-format
+msgid "GetArchives() failed: '%s'"
+msgstr "GetArchives() falhou: '%s'"
+
+#: ../unattended-upgrade:303
+#: ../unattended-upgrade:304
+#, c-format
+msgid "An error ocured: '%s'"
+msgstr "Ocorreu um erro; '%s'"
+
+#: ../unattended-upgrade:306
+#: ../unattended-upgrade:307
+#, c-format
+msgid "The URI '%s' failed to download, aborting"
+msgstr "O URI '%s' falhou no download, abortando"
+
+#: ../unattended-upgrade:310
+#, c-format
+msgid "Download finished, but file '%s' not there?!?"
+msgstr "Download terminado, mas o arquivo '%s' não está lá?!?"
+
+#: ../unattended-upgrade:319
+#, c-format
+msgid "Package '%s' has conffile prompt and needs to be upgraded manually"
+msgstr "O pacote '%s' possui um diálogo conffile e necessita ser atualizado manualmente"
+
+#: ../unattended-upgrade:341
+#, c-format
+msgid "package '%s' not upgraded"
+msgstr "o pacote '%s' não foi atualizado"
+
+#: ../unattended-upgrade:352
+msgid "No packages found that can be upgraded unattended"
+msgstr "Não foi encontrado nenhum pacote que possa ser atualizado desacompanhadamente"
+
+#: ../unattended-upgrade:362
+#, c-format
+msgid "Packages that are upgraded: %s"
+msgstr "Pacotes atualizados: %s"
+
+#: ../unattended-upgrade:375
+#, c-format
+msgid "Writing dpkg log to '%s'"
+msgstr "Escrevendo o relatório do dpkg em '%s'"
+
+#: ../unattended-upgrade:386
+msgid "pm.GetArchives() failed"
+msgstr "pm.GetArchives() falhou"
+
+#: ../unattended-upgrade:407
+msgid "Installing the upgrades failed!"
+msgstr "Falha ao instalar as atualizações!"
+
+#: ../unattended-upgrade:408
+#, c-format
+msgid "error message: '%s'"
+msgstr "mensagem de erro: '%s'"
+
+#: ../unattended-upgrade:409
+#, c-format
+msgid "dpkg returned a error! See '%s' for details"
+msgstr "O dpkg retornou um erro! Veja '%s' para mais detalhes"
+
+#: ../unattended-upgrade:411
+msgid "All upgrades installed"
+msgstr "Todas as atualizações instaladas"
+
+#: ../unattended-upgrade:424
+msgid "You need to be root to run this application"
+msgstr "Você precisa ser root para executar este aplicativo"
+
