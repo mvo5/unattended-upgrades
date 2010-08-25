@@ -8,4 +8,4 @@ unattended-upgrades (0.50) unstable; urgency=low
   install/upgrade. There is a new option called "--dry-run" to 
   get this behavior back.
 
- -- Michael Vogt <michael.vogt@ubuntu.com>  Fri, 03 Jul 2009 09:15:08 +0200
+ -- Michael Vogt <mvo@debian.org>  Fri, 03 Jul 2009 09:15:08 +0200

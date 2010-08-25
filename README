@@ -43,7 +43,9 @@ http://security.ubuntu.com/ubuntu/dists/hardy/Release
 
 The value of "origin" is taken from the "Origin:" header in the file, 
 the value of "archive" is taken from the "Suite:" header.
-It is recommended to use the default (only security updates from Ubuntu).
+It is recommended to use the default (only security updates).
+The new syntax is to colon seperate ":" the origin archive pair the old 
+space seperated syntax will still work if no colon is found .
 
 All operations will be logged in /var/log/unattended-upgrades/. This
 includes the dpkg output as well.
@@ -80,8 +82,8 @@ jaunty-security and jaunty-updates repositories daily:
 ------------------------------8<--------------------------------------
 // Automaticall upgrade packages from these (origin, archive) pairs
 Unattended-Upgrade::Allowed-Origins {
-	"Ubuntu jaunty-security";
-	"Ubuntu jaunty-updates";
+	"Ubuntu:jaunty-security";
+	"Ubuntu:jaunty-updates";
 };
  
 // List of packages to not update
