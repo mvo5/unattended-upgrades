@@ -1,4 +1,11 @@
-unattended-upgrades (0.61ubuntu1) maverick; urgency=low
+unattended-upgrades (0.62ubuntu1) maverick; urgency=low
+
+  * merged fixes from debian/sid, notably allowing ":"
+    as seperator for (origin, archive)
+
+ -- Michael Vogt <michael.vogt@ubuntu.com>  Thu, 26 Aug 2010 18:45:07 +0200
+
+unattended-upgrades (0.62) unstable; urgency=low
 
   [ Michael Vogt ]
   * updated Russian program translation, thanks to
@@ -10,7 +17,7 @@ unattended-upgrades (0.61ubuntu1) maverick; urgency=low
   * allow ":" as seperator in Unattended-Upgrade::Allowed-Origins
     (closes: #536754) 
 
- -- Michael Vogt <michael.vogt@ubuntu.com>  Wed, 25 Aug 2010 22:34:46 +0200
+ -- Michael Vogt <mvo@debian.org>  Thu, 26 Aug 2010 18:41:06 +0200
 
 unattended-upgrades (0.61) unstable; urgency=low
 
