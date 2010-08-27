@@ -553,6 +553,10 @@ if __name__ == "__main__":
     if not os.path.exists("/var/log/unattended-upgrades"):
         os.makedirs("/var/log/unattended-upgrades")
 
+    # nice & ionce
+    os.nice(19)
+    subprocess.call(["ionice","-c3", "-p",str(os.getpid())])
+
     # init the logging
     logdir = apt_pkg.config.find_dir("APT::UnattendedUpgrades::LogDir",
                                     "/var/log/unattended-upgrades/")
