@@ -104,10 +104,11 @@ def upgrade_in_minimal_steps(cache, pkgs_to_upgrade):
     # setup signal handler
     signal.signal(signal.SIGINT, sigint_handler)
 
-    smallest_partition = set()
+    # to upgrade contains the package names
     to_upgrade = set(pkgs_to_upgrade)
     while True:
         # find smallest set
+        smallest_partition = to_upgrade
         for pkgname in to_upgrade:
             if SIGINT_STOP_REQUEST:
                 logging.warn("SIGINT recieved, stopping")
@@ -119,19 +120,18 @@ def upgrade_in_minimal_steps(cache, pkgs_to_upgrade):
                 pkg.mark_install()
             else:
                 continue
-            changes = cache.get_changes()
+            changes = [pkg.name for pkg in cache.get_changes()]
             if len(changes) == 1:
                 logging.debug("found leaf package %s" % pkg.name)
-                smallest_parition = changes
+                smallest_partition = changes
                 break
-            if (len(smallest_partition) == 0 or
-                len(changes) < len(smallest_partition)):
+            if len(changes) < len(smallest_partition):
                 logging.debug("found  partition of size %s (%s)" % (len(changes), changes))
                 smallest_partition = changes
             cache.clear()
         # apply changes
         logging.debug("applying set %s" % smallest_partition)
-        rewind_cache(cache, smallest_partition)
+        rewind_cache(cache, [cache[name] for name in smallest_partition])
         try:
             cache.commit()
             cache.open()
@@ -139,7 +139,7 @@ def upgrade_in_minimal_steps(cache, pkgs_to_upgrade):
             logging.error(_("Installing the upgrades failed!"))
             logging.error(_("error message: '%s'") % e)
             return False
-        to_upgrade = to_upgrade-set([pkg.name for pkg in changes])
+        to_upgrade = to_upgrade-set(smallest_partition)
         logging.debug("left to upgrade %s" % to_upgrade)
         if len(to_upgrade) == 0:
             logging.info(_("All upgrades installed"))
