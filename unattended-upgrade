@@ -52,12 +52,12 @@ DISTRO_CODENAME = lsb_release.get_distro_information()['CODENAME']
 DISTRO_ID = lsb_release.get_distro_information()['ID']
 
 # set from the sigint signal handler
-SIGINT_STOP_REQUEST=False
+SIGNAL_STOP_REQUEST=False
 
-def sigint_handler(signal, frame):
+def signal_handler(signal, frame):
     logging.warn("SIGINT recieved")
-    global SIGINT_STOP_REQUEST
-    SIGINT_STOP_REQUEST=True
+    global SIGNAL_STOP_REQUEST
+    SIGNAL_STOP_REQUEST=True
 
 class MyCache(apt.Cache):
     def __init__(self):
@@ -102,7 +102,7 @@ def get_allowed_origins():
 
 def upgrade_in_minimal_steps(cache, pkgs_to_upgrade):
     # setup signal handler
-    signal.signal(signal.SIGINT, sigint_handler)
+    signal.signal(signal.SIGUSR1, signal_handler)
 
     # to upgrade contains the package names
     to_upgrade = set(pkgs_to_upgrade)
@@ -110,8 +110,8 @@ def upgrade_in_minimal_steps(cache, pkgs_to_upgrade):
         # find smallest set
         smallest_partition = to_upgrade
         for pkgname in to_upgrade:
-            if SIGINT_STOP_REQUEST:
-                logging.warn("SIGINT recieved, stopping")
+            if SIGNAL_STOP_REQUEST:
+                logging.warn("SIGNAL recieved, stopping")
                 return True
             pkg = cache[pkgname]
             if pkg.is_upgradable:
