@@ -130,15 +130,17 @@ def upgrade_in_minimal_steps(cache, pkgs_to_upgrade):
                 smallest_partition = changes
             cache.clear()
         # apply changes
-        rewind_cache(cache, changes)
+        logging.debug("applying set %s" % smallest_partition)
+        rewind_cache(cache, smallest_partition)
         try:
             cache.commit()
+            cache.open()
         except Exception, e:
             logging.error(_("Installing the upgrades failed!"))
             logging.error(_("error message: '%s'") % e)
             return False
-        cache.open()
         to_upgrade = to_upgrade-set([pkg.name for pkg in changes])
+        logging.debug("left to upgrade %s" % to_upgrade)
         if len(to_upgrade) == 0:
             logging.info(_("All upgrades installed"))
             break
