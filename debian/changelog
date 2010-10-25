@@ -1,3 +1,11 @@
+unattended-upgrades (0.62.1ubuntu1) UNRELEASED; urgency=low
+
+  * debian/unattended-upgrades.init:
+    - fix default stop value, thanks to Petter Reinholdtsen,
+      closes: #593987
+
+ -- Michael Vogt <michael.vogt@ubuntu.com>  Mon, 25 Oct 2010 09:27:36 -0400
+
 unattended-upgrades (0.62ubuntu1) maverick; urgency=low
 
   * merged fixes from debian/sid, notably allowing ":"
