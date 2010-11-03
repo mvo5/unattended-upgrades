@@ -41,11 +41,14 @@ be configured to allow any (origin, archive) combination. Those values
 are taken from the "Release" file on the archive server, e.g.
 http://security.ubuntu.com/ubuntu/dists/hardy/Release
 
-The value of "origin" is taken from the "Origin:" header in the file, 
-the value of "archive" is taken from the "Suite:" header.
-It is recommended to use the default (only security updates).
-The new syntax is to colon seperate ":" the origin archive pair the old 
-space seperated syntax will still work if no colon is found .
+The value of "origin" is taken from the "Origin:" header in the file,
+the value of "archive" is taken from the "Suite:" header. This is also
+available via the "apt-cache policy" command (without further
+argument). E.g. security is listed there as "o=Debian" and "a=stable".
+
+It is recommended to use the default (only security updates).  The new
+syntax is to colon seperate ":" the origin archive pair the old space
+seperated syntax will still work if no colon is found .
 
 All operations will be logged in /var/log/unattended-upgrades/. This
 includes the dpkg output as well.
