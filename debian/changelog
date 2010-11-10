@@ -1,4 +1,4 @@
-unattended-upgrades (0.63ubuntu1) UNRELEASED; urgency=low
+unattended-upgrades (0.63ubuntu1) natty; urgency=low
 
   * debian/unattended-upgrades.init:
     - fix default stop value, thanks to Petter Reinholdtsen,
@@ -9,8 +9,13 @@ unattended-upgrades (0.63ubuntu1) UNRELEASED; urgency=low
       to Steffen Kittel)
   * test/test_mail.py:
     - add test for Unattended-Upgrade::MailOnlyOnError feature
+  * README:
+    - improve description for the Allowed-Origins option
+  * test/Makefile:
+    - run test on bzr-buildpackage and fail if one of the tests
+      fail
 
- -- Michael Vogt <michael.vogt@ubuntu.com>  Mon, 25 Oct 2010 09:27:36 -0400
+ -- Michael Vogt <michael.vogt@ubuntu.com>  Wed, 10 Nov 2010 15:18:37 +0100
 
 unattended-upgrades (0.62ubuntu1) maverick; urgency=low
 
