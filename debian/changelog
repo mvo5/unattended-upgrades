@@ -1,8 +1,12 @@
-unattended-upgrades (0.62.1ubuntu1) UNRELEASED; urgency=low
+unattended-upgrades (0.63ubuntu1) UNRELEASED; urgency=low
 
   * debian/unattended-upgrades.init:
     - fix default stop value, thanks to Petter Reinholdtsen,
       closes: #593987
+  * unattended-upgrade:
+    - add new Unattended-Upgrade::MailOnlyOnError option that will
+      make the script only send a mail when a error occured (thanks
+      to Steffen Kittel)
 
  -- Michael Vogt <michael.vogt@ubuntu.com>  Mon, 25 Oct 2010 09:27:36 -0400
 

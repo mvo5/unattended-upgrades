@@ -3,6 +3,7 @@
 all: check
 
 check:
+	set -e; \
 	find . -name 'test_*.py' | \
 	while read file; do \
 	    if [ -x $$file ]; then \

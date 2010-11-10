@@ -243,6 +243,11 @@ def send_summary_mail(pkgs, res, pkgs_kept_back, mem_log, logfile_dpkg):
         logging.error(_("No '/usr/bin/mail', can not send mail. "
                         "You probably want to install the 'mailx' package."))
         return
+    # if the operation was successful and the user has requested to get
+    # mails on on errors, just exit here
+    if (res and
+        apt_pkg.config.find_b("Unattended-Upgrade::MailOnlyOnError", False)):
+	return
     # Check if reboot-required flag is present
     logging.debug("Sending mail with '%s' to '%s'" % (logfile_dpkg, email))
     if os.path.isfile(REBOOT_REQUIRED_FILE):
