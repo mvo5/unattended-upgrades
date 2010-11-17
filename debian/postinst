@@ -33,13 +33,6 @@ case "$1" in
 	    ucf --three-way --debconf-ok "$NEWFILE" "$CONFIG"
 	    ucfr unattended-upgrades "$CONFIG"
         fi
-
-        # Recover from incorrect init.d script header in versions < 0.62.1
-        if dpkg --compare-versions "$2" lt "0.62.1" \
-            && [ -f /etc/rc0.d/S[0-9][0-9]unattended-upgrades ] \
-            && [ -f /etc/rc6.d/S[0-9][0-9]unattended-upgrades ] ; then
-            update-rc.d -f unattended-upgrades remove
-        fi
     ;;
 
     abort-upgrade|abort-remove|abort-deconfigure)
