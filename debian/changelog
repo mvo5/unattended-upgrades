@@ -1,3 +1,13 @@
+unattended-upgrades (0.62.1) UNRELEASED; urgency=low
+
+  * debian/postinst:
+    - fixup incorrect LSB Default-Start and Stop values
+  * debian/unattended-upgrades.init:
+    - fix default stop value, thanks to Petter Reinholdtsen,
+      closes: #593987
+
+ -- Michael Vogt <mvo@debian.org>  Wed, 17 Nov 2010 16:57:26 +0100
+
 unattended-upgrades (0.62) unstable; urgency=low
 
   [ Michael Vogt ]

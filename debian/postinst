@@ -26,13 +26,20 @@ case "$1" in
 	    rm -f /etc/pm/sleep.d/10_unatteded-upgrades-hibernate
 	fi
 
-    db_get unattended-upgrades/enable_auto_updates || true
-    if [ "${RET}" = "true" ]; then
-	NEWFILE="/usr/share/unattended-upgrades/20auto-upgrades"
-	CONFIG="/etc/apt/apt.conf.d/20auto-upgrades"
-	ucf --three-way --debconf-ok "$NEWFILE" "$CONFIG"
-	ucfr unattended-upgrades "$CONFIG"
-    fi
+        db_get unattended-upgrades/enable_auto_updates || true
+        if [ "${RET}" = "true" ]; then
+	    NEWFILE="/usr/share/unattended-upgrades/20auto-upgrades"
+	    CONFIG="/etc/apt/apt.conf.d/20auto-upgrades"
+	    ucf --three-way --debconf-ok "$NEWFILE" "$CONFIG"
+	    ucfr unattended-upgrades "$CONFIG"
+        fi
+
+        # Recover from incorrect init.d script header in versions < 0.62.1
+        if dpkg --compare-versions "$2" le "0.62.1" \
+            && [ -f /etc/rc0.d/S[0-9][0-9]unattended-upgrades ] \
+            && [ -f /etc/rc6.d/S[0-9][0-9]unattended-upgrades ] ; then
+            update-rc.d -f unattended-upgrades remove
+        fi
     ;;
 
     abort-upgrade|abort-remove|abort-deconfigure)

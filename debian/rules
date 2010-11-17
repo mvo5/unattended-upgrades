@@ -84,7 +84,7 @@ binary-indep: build install
 	dh_installdebconf	
 	dh_installlogrotate
 	dh_installmime
-	dh_installinit --no-start -- start 10 0 6 .
+	dh_installinit --no-start -- stop 10 0 6 .
 	dh_installman
 	dh_link
 	dh_strip
