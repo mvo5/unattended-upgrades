@@ -24,6 +24,15 @@ unattended-upgrades (0.63ubuntu1) natty; urgency=low
 
  -- Michael Vogt <michael.vogt@ubuntu.com>  Wed, 10 Nov 2010 15:18:37 +0100
 
+unattended-upgrades (0.62.2) unstable; urgency=low
+
+  * debian/postinst:
+    - add fixup code for installs with incorrect values from
+      the stop value (really closes: #593987), thanks to
+      Peter Reinholdtsen
+
+ -- Michael Vogt <mvo@debian.org>  Thu, 18 Nov 2010 09:00:44 +0100
+
 unattended-upgrades (0.62.1) unstable; urgency=low
 
   * debian/unattended-upgrades.init:
