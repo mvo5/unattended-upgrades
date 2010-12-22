@@ -1,9 +1,14 @@
 unattended-upgrades (0.65ubuntu1) UNRELEASED; urgency=low
 
+  [ Michael Vogt ]
   * debian/po/pt_BR.po:
     - updated, thanks to Adriano Rafael Gomes (closes: #607403)
 
- -- Michael Vogt <michael.vogt@ubuntu.com>  Mon, 20 Dec 2010 09:49:31 +0100
+  [ Nobuto MURATA ]
+  * data/50unattended-upgrades:
+    - adapt repository format for Ubuntu, LP: #691886
+
+ -- Nobuto MURATA <nobuto@nobuto-murata.org>  Wed, 22 Dec 2010 09:51:08 -0500
 
 unattended-upgrades (0.64ubuntu1) natty; urgency=low
 
