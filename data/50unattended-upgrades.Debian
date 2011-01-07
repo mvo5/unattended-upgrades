@@ -1,9 +1,8 @@
 // Automatically upgrade packages from these (origin, archive) pairs
 Unattended-Upgrade::Allowed-Origins {
 	"${distro_id} stable";
-	"${distro_id} ${distro_codename}-security";
-//	"${distro_id} ${distro_codename}-updates";
 //	"${distro_id} ${distro_codename}-proposed-updates";
+//	"${distro_id} testing";
 };
 
 // List of packages to not update
