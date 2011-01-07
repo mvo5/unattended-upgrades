@@ -1,4 +1,4 @@
-unattended-upgrades (0.65ubuntu1) UNRELEASED; urgency=low
+unattended-upgrades (0.65ubuntu1) natty; urgency=low
 
   [ Michael Vogt ]
   * debian/po/pt_BR.po:
@@ -14,7 +14,7 @@ unattended-upgrades (0.65ubuntu1) UNRELEASED; urgency=low
   * data/50unattended-upgrades.Ubuntu:
     - adapt repository format for Ubuntu, LP: #691886
 
- -- Nobuto MURATA <nobuto@nobuto-murata.org>  Wed, 22 Dec 2010 09:51:08 -0500
+ -- Michael Vogt <michael.vogt@ubuntu.com>  Fri, 07 Jan 2011 15:57:20 +0100
 
 unattended-upgrades (0.64ubuntu1) natty; urgency=low
 
