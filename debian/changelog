@@ -1,3 +1,9 @@
+unattended-upgrades (0.65ubuntu2) natty; urgency=low
+
+  * add missing lsb-release build-depends
+
+ -- Michael Vogt <michael.vogt@ubuntu.com>  Fri, 07 Jan 2011 19:00:05 +0100
+
 unattended-upgrades (0.65ubuntu1) natty; urgency=low
 
   [ Michael Vogt ]
