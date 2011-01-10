@@ -1,3 +1,11 @@
+unattended-upgrades (0.66ubuntu1) UNRELEASED; urgency=low
+
+  * pm/sleep.d/10_unattended-upgrades-hibernate:
+    - remove some unneeded lines from the script, thanks to
+      Seth Arnold (LP: #595792)
+
+ -- Michael Vogt <michael.vogt@ubuntu.com>  Mon, 10 Jan 2011 17:39:15 +0100
+
 unattended-upgrades (0.65ubuntu2) natty; urgency=low
 
   * add missing lsb-release build-depends
