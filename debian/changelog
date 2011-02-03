@@ -16,6 +16,8 @@ unattended-upgrades (0.70) UNRELEASED; urgency=low
     - fixed outdated ubuntu centric info (closes: #611675)
   * po/fr.po:
     - updated, thanks to Steve Petruzzello (closes: #597606)
+  * data/50unattended-upgrades.Debian:
+    - add oldstable example (closes: #515980)
 
  -- Michael Vogt <michael.vogt@ubuntu.com>  Thu, 03 Feb 2011 20:48:31 +0100
 
