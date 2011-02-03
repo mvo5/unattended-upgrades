@@ -24,11 +24,12 @@
 import apt_inst
 import apt_pkg
 
-import sys
+import ConfigParser
+import datetime
+import re
 import os
 import string
-import datetime
-import ConfigParser
+import sys
 
 from StringIO import StringIO
 from optparse import OptionParser
@@ -148,9 +149,10 @@ def check_changes_for_sanity(cache, allowed_origins, blacklist):
             if not is_allowed_origin(pkg, allowed_origins):
                 logging.debug("pkg '%s' not in allowed origin" % pkg.name)
                 return False
-            if pkg.name in blacklist:
-                logging.debug("pkg '%s' blacklisted" % pkg.name)
-                return False
+            for blacklist_regexp in blacklist:
+                if re.match(blacklist_regexp, pkg.name):
+                    logging.debug("pkg '%s' blacklisted" % pkg.name)
+                    return False
             if pkg._pkg.selected_state == apt_pkg.SELSTATE_HOLD:
                 logging.debug("pkg '%s' is on hold" % pkg.name)
                 return False
