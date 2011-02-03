@@ -34,7 +34,7 @@ running "apt-config dump".
 
 == Options ==
 
-By default it will only install from the the (Ubuntu, jaunty-security)
+By default it will only install from the the stable and security
 repository. This can be changed with the
 "Unattended-Upgrade::Allowed-Origins" apt configuration list.  It can
 be configured to allow any (origin, archive) combination. Those values

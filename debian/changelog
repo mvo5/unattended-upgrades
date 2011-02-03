@@ -12,6 +12,8 @@ unattended-upgrades (0.70) UNRELEASED; urgency=low
       "origin=Debian,label=Debian-Security,component=main,site=security.debian.org"
   * make Package-Blacklist a regexp (thanks to Raymond Lee) and add
     test
+  * README:
+    - fixed outdated ubuntu centric info (closes: #611675)
 
  -- Michael Vogt <michael.vogt@ubuntu.com>  Thu, 03 Feb 2011 20:48:31 +0100
 
