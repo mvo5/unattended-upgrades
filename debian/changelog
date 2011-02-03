@@ -1,10 +1,15 @@
-unattended-upgrades (0.66ubuntu1) UNRELEASED; urgency=low
+unattended-upgrades (0.70) UNRELEASED; urgency=low
 
   * pm/sleep.d/10_unattended-upgrades-hibernate:
     - remove some unneeded lines from the script, thanks to
       Seth Arnold (LP: #595792)
   * test/test_mail.py:
     - add tests for apt-listchanges.conf parser
+  * unattended-upgrade:
+    - add new Unattended-Upgrade::Origins-Pattern option that is much
+      more flexible than the previous Allowed-Origins. It supports 
+      match patterns like:
+      "origin=Debian,label=Debian-Security,component=main,site=security.debian.org"
 
  -- Michael Vogt <michael.vogt@ubuntu.com>  Thu, 03 Feb 2011 20:48:31 +0100
 

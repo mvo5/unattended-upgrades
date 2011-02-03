@@ -76,11 +76,8 @@ def get_distro_codename():
 def get_distro_id():
     return DISTRO_ID
 
-def get_allowed_origins():
-    """ return a list of allowed origins from apt.conf
-
-    This will take substitutions (like distro_id) into account.
-    """
+def get_allowed_origins_legacy():
+    """ legacy support for old Allowed-Origins var """
     allowed_origins = []
     for s in apt_pkg.config.value_list("Unattended-Upgrade::Allowed-Origins"):
         # if there is a ":" use that as seperator, else use spaces
@@ -88,16 +85,55 @@ def get_allowed_origins():
             (distro_id, distro_codename) = s.split(':')
         else:
             (distro_id, distro_codename) = s.split()
-        allowed_origins.append((substitute(distro_id), 
-                                substitute(distro_codename)))
+        # convert to new format
+        allowed_origins.append("o=%s,a=%s" % (substitute(distro_id), 
+                                              substitute(distro_codename)))
     return allowed_origins
+
+def get_allowed_origins():
+    """ return a list of allowed origins from apt.conf
+
+    This will take substitutions (like distro_id) into account.
+    """
+    allowed_origins = get_allowed_origins_legacy()
+    for s in apt_pkg.config.value_list("Unattended-Upgrade::Origins-Pattern"):
+        allowed_origins.append(substitute(s))
+    return allowed_origins
+
+def match_whitelist_string(whitelist, origin):
+    """
+    take a whitelist string in the form "origin=Debian,label=Debian-Security"
+    and match against the given python-apt origin. A empty whitelist string
+    never matches anything.
+    """
+    whitelist = whitelist.strip()
+    if whitelist == "":
+        logging.warn("empty match string matches nothing")
+        return False
+    res = True
+    for token in whitelist.split(","):
+        (what, value) = [s.strip() for s in token.split("=")]
+        #logging.debug("matching '%s'='%s' against '%s'" % (what, value, origin))
+        # first char is apt-cache policy output, send is the name
+        # in the Release file
+        if what in ("o", "origin"):
+            res &= (value == origin.origin)
+        elif what in ("l", "label"):
+            res &= (value == origin.label)
+        elif what in ("a", "suite", "archive"):
+            res &= (value == origin.archive)
+        elif what in ("c", "component"):
+            res &= (value == origin.component)
+        elif what in ("site",):
+            res &= (value == origin.site)
+    return res
 
 def is_allowed_origin(pkg, allowed_origins):
     if not pkg.candidate:
         return False
     for origin in pkg.candidate.origins:
         for allowed in allowed_origins:
-            if origin.origin == allowed[0] and origin.archive == allowed[1]:
+            if match_whitelist_string(allowed, origin):
                 return True
     return False
 
