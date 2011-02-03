@@ -14,6 +14,8 @@ unattended-upgrades (0.70) UNRELEASED; urgency=low
     test
   * README:
     - fixed outdated ubuntu centric info (closes: #611675)
+  * po/fr.po:
+    - updated, thanks to Steve Petruzzello (closes: #597606)
 
  -- Michael Vogt <michael.vogt@ubuntu.com>  Thu, 03 Feb 2011 20:48:31 +0100
 

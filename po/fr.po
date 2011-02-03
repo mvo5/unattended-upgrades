@@ -8,7 +8,7 @@ msgstr ""
 "Project-Id-Version: 0.35\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2009-05-06 10:52+0200\n"
-"PO-Revision-Date: 2008-11-27 12:00+0200\n"
+"PO-Revision-Date: 2010-09-07 12:00+0200\n"
 "Last-Translator: Steve Petruzzello <dlist@bluewin.ch>\n"
 "Language-Team: French <debian-l10n-french@lists.debian.org>\n"
 "MIME-Version: 1.0\n"
@@ -40,7 +40,7 @@ msgstr "Le cache contient des paquets cassés, abandon"
 #: ../unattended-upgrade:204
 #, c-format
 msgid "package '%s' upgradable but fails to be marked for upgrade (%s)"
-msgstr ""
+msgstr "Le paquet '%s' peut être mis à niveau mais échoue à être marqué comme tel (%s)"
 
 #: ../unattended-upgrade:224
 #, c-format
@@ -109,14 +109,11 @@ msgstr "Toutes les mises à jour ont été installées"
 msgid ""
 "No '/usr/bin/mail', can not send mail. You probably want to install the "
 "'mailx' package."
-msgstr ""
+msgstr "L'exécutable « /usr/bin/mail » est introuvable, impossible d'envoyer un courrier électronique. Veuillez installer le paquet « mailx »."
 
 #: ../unattended-upgrade:331
-#, fuzzy, c-format
 msgid "unattended-upgrades result for '%s'"
-msgstr ""
-"La mise à jour automatique a retourné : %s\n"
-"\n"
+msgstr "unattended-upgrades a retourné : %s"
 
 #: ../unattended-upgrade:335
 #, c-format
@@ -128,17 +125,16 @@ msgstr ""
 "\n"
 
 #: ../unattended-upgrade:336
-#, fuzzy
 msgid "Packages that are upgraded:\n"
 msgstr "Paquets mis à jour : %s"
 
 #: ../unattended-upgrade:340
 msgid "Packages with upgradable origin but kept back:\n"
-msgstr ""
+msgstr "Paquets susceptibles d'une mise à niveau mais maintenus dans leur état actuel :\n"
 
 #: ../unattended-upgrade:344
 msgid "Package installation log:"
-msgstr ""
+msgstr "Journal d'installation du paquet :"
 
 #: ../unattended-upgrade:359
 msgid "You need to be root to run this application"
