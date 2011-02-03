@@ -10,7 +10,8 @@ import sys
 from StringIO import StringIO
 
 import unattended_upgrade
-from unattended_upgrade import send_summary_mail
+import unattended_upgrade
+from unattended_upgrade import send_summary_mail, setup_apt_listchanges
 
 class TestSendSummaryMail(unittest.TestCase):
 
@@ -77,6 +78,18 @@ class TestSendSummaryMail(unittest.TestCase):
         self._verify_common_mail_content(mail_txt)
         self.assertTrue("Unattended upgrade returned: False" in mail_txt)
         self.assertTrue(os.path.exists("mail.txt"))
+
+    def test_apt_listchanges(self):
+        # test with mail as frontend
+        os.environ["APT_LISTCHANGES_FRONTEND"] = "canary"
+        unattended_upgrade.SENDMAIL_BINARY="/bin/true"
+        setup_apt_listchanges("./data/listchanges.conf.mail")
+        self.assertEqual(os.environ["APT_LISTCHANGES_FRONTEND"], "canary")
+        # test with pager as frontend
+        os.environ["APT_LISTCHANGES_FRONTEND"] = "canary"
+        unattended_upgrade.SENDMAIL_BINARY="/bin/true"
+        setup_apt_listchanges("./data/listchanges.conf.pager")
+        self.assertEqual(os.environ["APT_LISTCHANGES_FRONTEND"], "none")
 
 if __name__ == "__main__":
     logging.basicConfig(level=logging.DEBUG)

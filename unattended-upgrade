@@ -47,6 +47,7 @@ from gettext import gettext as _
 # the reboot required flag file used by packages
 REBOOT_REQUIRED_FILE = "/var/run/reboot-required"
 MAIL_BINARY = "/usr/bin/mail"
+SENDMAIL_BINARY = "/usr/sbin/sendmail"
 DISTRO_CODENAME = lsb_release.get_distro_information()['CODENAME']
 DISTRO_ID = lsb_release.get_distro_information()['ID']
 
@@ -62,7 +63,7 @@ class MyCache(apt.Cache):
 def substitute(line):
     """ substitude known mappings and return a new string 
 
-    Currently supported "${distro-release}
+    Currently supported ${distro-release}
     """
     mapping = {"distro_codename" : get_distro_codename(),
                "distro_id" : get_distro_id(),
@@ -218,21 +219,20 @@ def wrap(t, width=70, subsequent_indent=""):
         out += s + " "
     return out
 
-def setup_apt_listchanges():
-    " deal with apt-listchanges "
-    conf = "/etc/apt/listchanges.conf"
+def setup_apt_listchanges(conf="/etc/apt/listchanges.conf"):
+    """ deal with apt-listchanges """
     if os.path.exists(conf):
         # check if mail is used by apt-listchanges
         cf = ConfigParser.ConfigParser()
         cf.read(conf)
-        if cf.has_section("apt") and cf.has_option("apt","frontend"):
+        if cf.has_section("apt") and cf.has_option("apt", "frontend"):
             frontend = cf.get("apt","frontend")
-            if frontend == "mail" and os.path.exists("/usr/sbin/sendmail"):
+            if frontend == "mail" and os.path.exists(SENDMAIL_BINARY):
                 # mail frontend and sendmail, we are fine
                 logging.debug("apt-listchanges is set to mail frontend, ignoring")
                 return
     # setup env (to play it safe) and return
-    os.putenv("APT_LISTCHANGES_FRONTEND","none");
+    os.environ["APT_LISTCHANGES_FRONTEND"] = "none"
 
 def send_summary_mail(pkgs, res, pkgs_kept_back, mem_log, logfile_dpkg):
     " send mail (if configured in Unattended-Upgrades::Mail) "
