@@ -9,7 +9,10 @@ unattended-upgrades (0.70) UNRELEASED; urgency=low
     - add new Unattended-Upgrade::Origins-Pattern option that is much
       more flexible than the previous Allowed-Origins. It supports 
       match patterns like:
-      "origin=Debian,label=Debian-Security,component=main,site=security.debian.org"
+      "origin=Debian,label=Debian-Security,component=main"
+      "site=security.debian.org"
+    - add support for escaping, so "origin=Google\, Inc,suite=stable"
+      is possible (thanks to Alexander Reichle-Schmehl), closes: #609876
   * make Package-Blacklist a regexp (thanks to Raymond Lee) and add
     test
   * README:

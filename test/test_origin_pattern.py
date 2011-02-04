@@ -53,14 +53,21 @@ class TestOriginPatern(unittest.TestCase):
         self.assertFalse(match_whitelist_string(s, origin))
         s="o=LabelUbuntu,a=no-match"
         self.assertFalse(match_whitelist_string(s, origin))
+        # with escaping
+        origin = self._get_mock_origin("Google, Inc.", archive="stable")
+        # good
+        s="o=Google\, Inc.,a=stable"
+        self.assertTrue(match_whitelist_string(s, origin))
 
     def test_match_whitelist_from_conffile(self):
+        # read some
         apt_pkg.config.clear("Unattended-Upgrade")
         apt_pkg.read_config_file(apt_pkg.config, "./data/50unattended-upgrades.Test")
         allowed_origins = unattended_upgrade.get_allowed_origins()
+        #print allowed_origins
         self.assertTrue("o=aOrigin,a=aArchive" in allowed_origins)
         self.assertTrue("s=aSite,l=aLabel" in allowed_origins)
-
+        self.assertTrue("o=Google\, Inc.,suite=stable" in allowed_origins)
 
     def test_blacklist(self):
         # mock pkg (yeah, complicated)

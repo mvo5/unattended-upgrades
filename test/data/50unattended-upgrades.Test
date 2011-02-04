@@ -2,4 +2,5 @@
 Unattended-Upgrade::Origins-Pattern {
         "o=aOrigin,a=aArchive";
         "s=aSite,l=aLabel";
+        "o=Google\, Inc.,suite=stable";
 };

@@ -103,8 +103,12 @@ def match_whitelist_string(whitelist, origin):
         logging.warn("empty match string matches nothing")
         return False
     res = True
+    # make "\," the html quote equivalent
+    whitelist = whitelist.replace("\,", "%2C")
     for token in whitelist.split(","):
-        (what, value) = [s.strip() for s in token.split("=")]
+        # strip and unquote the "," back
+        (what, value) = [s.strip().replace("%2C",",")
+                         for s in token.split("=")]
         #logging.debug("matching '%s'='%s' against '%s'" % (what, value, origin))
         # first char is apt-cache policy output, send is the name
         # in the Release file
