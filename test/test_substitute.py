@@ -31,7 +31,7 @@ class TestSubstitude(unittest.TestCase):
         apt_pkg.config.set("Unattended-Upgrade::Allowed-Origins::",
                            "${distro_id} ${distro_codename}-security")
         l = get_allowed_origins()
-        self.assertTrue(("MyDistroID","nacked-security") in l)
+        self.assertTrue(("o=MyDistroID,a=nacked-security") in l)
 
 if __name__ == "__main__":
     logging.basicConfig(level=logging.DEBUG)
