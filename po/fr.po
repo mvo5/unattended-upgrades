@@ -126,7 +126,7 @@ msgstr ""
 
 #: ../unattended-upgrade:336
 msgid "Packages that are upgraded:\n"
-msgstr "Paquets mis à jour : %s"
+msgstr "Paquets mis à jour :\n"
 
 #: ../unattended-upgrade:340
 msgid "Packages with upgradable origin but kept back:\n"
