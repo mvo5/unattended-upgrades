@@ -31,11 +31,14 @@ class TestAgainstRealArchive(unittest.TestCase):
         del cache
         # create mock options
         options = MockOptions(debug=False)
+        # ensure apt does not do any post-invoke stuff that fails
+        # (because we are not root)
+        apt_pkg.config.clear("DPkg::Post-Invoke")
         # run unattended-upgrades against fake system
         logdir = os.path.abspath("./aptroot/var/log/")
         logfile = os.path.join(logdir, "unattended-upgrades.log")
         apt_pkg.config.set("APT::UnattendedUpgrades::LogDir", logdir)
-        unattended_upgrade.main(options, "./aptroot")
+        unattended_upgrade.main(options, os.path.abspath("./aptroot"))
         # check if the log file exists
         self.assertTrue(os.path.exists(logfile))
         log = open(logfile).read()
