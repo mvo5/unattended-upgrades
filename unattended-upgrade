@@ -553,7 +553,8 @@ def main(options, rootdir=""):
 
     # send a mail (if needed)
     pkg_install_success = (res != pm.RESULT_FAILED)
-    send_summary_mail(pkgs, pkg_install_success, pkgs_kept_back, mem_log, logfile_dpkg)
+    if not options.dry_run:
+        send_summary_mail(pkgs, pkg_install_success, pkgs_kept_back, mem_log, logfile_dpkg)
 
     # auto-reboot (if required and the config for this is set
     if (apt_pkg.config.find_b("Unattended-Upgrade::Automatic-Reboot", False) and
