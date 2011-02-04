@@ -52,15 +52,6 @@ SENDMAIL_BINARY = "/usr/sbin/sendmail"
 DISTRO_CODENAME = lsb_release.get_distro_information()['CODENAME']
 DISTRO_ID = lsb_release.get_distro_information()['ID']
 
-class MyCache(apt.Cache):
-    def __init__(self):
-        apt.Cache.__init__(self)
-    def clear(self):
-        self._depcache.init()
-        assert (self._depcache.inst_count == 0 and
-                self._depcache.broken_count == 0 and
-		self._depcache.del_count == 0)
-    
 def substitute(line):
     """ substitude known mappings and return a new string 
 
@@ -316,16 +307,32 @@ def send_summary_mail(pkgs, res, pkgs_kept_back, mem_log, logfile_dpkg):
     logging.debug("mail returned: %s" % ret)
     
 
-def main():
-    # init the options
-    parser = OptionParser()
-    parser.add_option("-d", "--debug",
-                      action="store_true", dest="debug", default=False,
-                      help=_("print debug messages"))
-    parser.add_option("", "--dry-run",
-                      action="store_true", default=False,
-                      help=_("Simulation, download but do not install"))
-    (options, args) = parser.parse_args()
+def _setup_alternative_rootdir(rootdir):
+    # clear system unattended-upgrade stuff
+    apt_pkg.config.clear("Unattended-Upgrade")
+    # read rootdir (taken from apt.Cache, but we need to run it
+    # here before the cache gets initialized
+    if os.path.exists(rootdir+"/etc/apt/apt.conf"):
+        apt_pkg.read_config_file(apt_pkg.config,
+                                 rootdir + "/etc/apt/apt.conf")
+    if os.path.isdir(rootdir+"/etc/apt/apt.conf.d"):
+        apt_pkg.read_config_dir(apt_pkg.config,
+                                rootdir + "/etc/apt/apt.conf.d")
+
+def main(options, rootdir=""):
+
+    # useful for testing
+    if rootdir:
+        _setup_alternative_rootdir(rootdir)
+
+    # init the logging
+    logdir = apt_pkg.config.find_dir("APT::UnattendedUpgrades::LogDir",
+                                    "/var/log/unattended-upgrades/")
+    logfile = logdir+apt_pkg.config.find("APT::UnattendedUpgrades::LogFile",
+                                         "unattended-upgrades.log")
+    logging.basicConfig(level=logging.INFO,
+                        format='%(asctime)s %(levelname)s %(message)s',
+                        filename=logfile)
 
     # setup logging
     logger = logging.getLogger()
@@ -359,7 +366,7 @@ def main():
         sys.exit(1)
 
     # get a cache
-    cache = MyCache()
+    cache = apt.Cache(rootdir=rootdir)
     if cache._depcache.broken_count > 0:
         print _("Cache has broken packages, exiting")
         logging.error(_("Cache has broken packages, exiting"))
@@ -477,7 +484,7 @@ def main():
     # exit if there is nothing to do and nothing to report
     if (len(pkgs_to_upgrade) == 0) and (len(pkgs_kept_back) == 0):
         logging.info(_("No packages found that can be upgraded unattended"))
-        sys.exit(0)    
+        return
 
     # check if we are in dry-run mode
     if options.dry_run:
@@ -557,6 +564,16 @@ if __name__ == "__main__":
     gettext.bindtextdomain(localesApp, localesDir)
     gettext.textdomain(localesApp)
 
+    # init the options
+    parser = OptionParser()
+    parser.add_option("-d", "--debug",
+                      action="store_true", dest="debug", default=False,
+                      help=_("print debug messages"))
+    parser.add_option("", "--dry-run",
+                      action="store_true", default=False,
+                      help=_("Simulation, download but do not install"))
+    (options, args) = parser.parse_args()
+
     if os.getuid() != 0:
         print _("You need to be root to run this application")
         sys.exit(1)
@@ -564,13 +581,5 @@ if __name__ == "__main__":
     if not os.path.exists("/var/log/unattended-upgrades"):
         os.makedirs("/var/log/unattended-upgrades")
 
-    # init the logging
-    logdir = apt_pkg.config.find_dir("APT::UnattendedUpgrades::LogDir",
-                                    "/var/log/unattended-upgrades/")
-    logfile = logdir+apt_pkg.config.find("APT::UnattendedUpgrades::LogFile",
-                                         "unattended-upgrades.log")
-    logging.basicConfig(level=logging.INFO,
-                        format='%(asctime)s %(levelname)s %(message)s',
-                        filename=logfile)
     # run the main code
-    main()
+    main(options)

@@ -18,6 +18,11 @@ unattended-upgrades (0.70) UNRELEASED; urgency=low
     - updated, thanks to Steve Petruzzello (closes: #597606)
   * data/50unattended-upgrades.Debian:
     - add oldstable example (closes: #515980)
+  * test/test_against_real_archive.py, test/aptroot:
+    - add regression test that talks against the real lucid archive
+  * unattended-upgrade:
+    - remove MyCache, apt.Cache has all the features we need
+    - add rootdir option to better support automatic testing
 
  -- Michael Vogt <michael.vogt@ubuntu.com>  Thu, 03 Feb 2011 20:48:31 +0100
 
