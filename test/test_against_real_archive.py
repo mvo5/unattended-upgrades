@@ -2,6 +2,7 @@
 
 import apt
 import apt_pkg
+import glob
 import os
 import logging
 import unittest
@@ -17,6 +18,11 @@ class MockOptions():
         self.dry_run = dry_run
 
 class TestAgainstRealArchive(unittest.TestCase):
+
+    def setUp(self):
+        for f in glob.glob("./aptroot/var/log/*"):
+            if os.path.isfile(f):
+                os.remove(f)
 
     def test_against_real_archive(self):
         # get a lucid based cache (test good for 5y)
