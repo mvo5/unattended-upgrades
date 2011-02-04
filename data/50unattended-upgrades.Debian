@@ -1,9 +1,9 @@
 // Automatically upgrade packages from these (origin, archive) pairs
-Unattended-Upgrade::Allowed-Origins {
-	"${distro_id} stable";
-//	"${distro_id} oldstable";
-//	"${distro_id} ${distro_codename}-proposed-updates";
-//	"${distro_id} testing";
+Unattended-Upgrade::Origins-Pattern {
+	"origin=Debian,label=Debian-Security,archive=stable";
+//	"o=Debian,a=stable";
+//	"o=Debian,a=oldstable";
+//	"o={distro_id},a=${distro_codename}-proposed-updates";
 };
 
 // List of packages to not update
