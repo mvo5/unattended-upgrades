@@ -8,7 +8,6 @@ import unittest
 import sys
 
 import unattended_upgrade
-import unattended_upgrade
 from unattended_upgrade import match_whitelist_string, check_changes_for_sanity
 
 class MockOrigin():

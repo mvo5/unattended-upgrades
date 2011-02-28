@@ -323,20 +323,40 @@ def _setup_alternative_rootdir(rootdir):
         apt_pkg.read_config_dir(apt_pkg.config,
                                 rootdir + "/etc/apt/apt.conf.d")
 
+def _setup_logging(options):
+    # init the logging
+    logdir = apt_pkg.config.find_dir(
+        "UnattendedUpgrades::LogDir",
+        # COMPAT only
+        apt_pkg.config.find_dir("APT::UnattendedUpgrades::LogDir",
+                                "/var/log/unattended-upgrades/"))
+    logfile = os.path.join(
+        logdir,
+        apt_pkg.config.find(
+            "UnattendedUpgrades::LogFile",
+            # COMPAT only
+            apt_pkg.config.find("APT::UnattendedUpgrades::LogFile",
+                                "unattended-upgrades.log")))
+
+    logfile = logdir+apt_pkg.config.find("APT::UnattendedUpgrades::LogFile",
+                                         "unattended-upgrades.log")
+    print logfile, os.path.dirname(logfile), bool(options.dry_run)
+    
+    if not options.dry_run and not os.path.exists(os.path.dirname(logfile)):
+        os.makedirs(os.path.dirname(logfile))
+
+    logging.basicConfig(level=logging.INFO,
+                        format='%(asctime)s %(levelname)s %(message)s',
+                        filename=logfile)
+
+
 def main(options, rootdir=""):
 
     # useful for testing
     if rootdir:
         _setup_alternative_rootdir(rootdir)
 
-    # init the logging
-    logdir = apt_pkg.config.find_dir("APT::UnattendedUpgrades::LogDir",
-                                    "/var/log/unattended-upgrades/")
-    logfile = logdir+apt_pkg.config.find("APT::UnattendedUpgrades::LogFile",
-                                         "unattended-upgrades.log")
-    logging.basicConfig(level=logging.INFO,
-                        format='%(asctime)s %(levelname)s %(message)s',
-                        filename=logfile)
+    _setup_logging(options)
 
     # setup logging
     logger = logging.getLogger()
@@ -583,8 +603,5 @@ if __name__ == "__main__":
         print _("You need to be root to run this application")
         sys.exit(1)
     
-    if not os.path.exists("/var/log/unattended-upgrades"):
-        os.makedirs("/var/log/unattended-upgrades")
-
     # run the main code
     main(options)

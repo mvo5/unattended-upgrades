@@ -27,6 +27,13 @@ unattended-upgrades (0.70) UNRELEASED; urgency=low
   * unattended-upgrade:
     - remove MyCache, apt.Cache has all the features we need
     - add rootdir option to better support automatic testing
+  * unattended-upgrade:
+    - create logdir based on configuration, thanks to Arno Schuring
+      (closes: #615486)
+    - support UnattendedUpgrades::LogDir as a config option, but
+      keep APT::UnattendedUpgrades::LogDir as a compat option
+  * test/test_logdir.py:
+    - add test for _setup_logging
 
  -- Michael Vogt <michael.vogt@ubuntu.com>  Thu, 03 Feb 2011 20:48:31 +0100
 
