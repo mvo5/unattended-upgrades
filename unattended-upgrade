@@ -326,22 +326,18 @@ def _setup_alternative_rootdir(rootdir):
 def _setup_logging(options):
     # init the logging
     logdir = apt_pkg.config.find_dir(
-        "UnattendedUpgrades::LogDir",
+        "Unattended-Upgrade::LogDir",
         # COMPAT only
         apt_pkg.config.find_dir("APT::UnattendedUpgrades::LogDir",
                                 "/var/log/unattended-upgrades/"))
     logfile = os.path.join(
         logdir,
         apt_pkg.config.find(
-            "UnattendedUpgrades::LogFile",
+            "Unattended-Upgrade::LogFile",
             # COMPAT only
             apt_pkg.config.find("APT::UnattendedUpgrades::LogFile",
                                 "unattended-upgrades.log")))
 
-    logfile = logdir+apt_pkg.config.find("APT::UnattendedUpgrades::LogFile",
-                                         "unattended-upgrades.log")
-    print logfile, os.path.dirname(logfile), bool(options.dry_run)
-    
     if not options.dry_run and not os.path.exists(os.path.dirname(logfile)):
         os.makedirs(os.path.dirname(logfile))
 

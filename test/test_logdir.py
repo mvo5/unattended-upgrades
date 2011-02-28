@@ -24,7 +24,7 @@ class TestLogdir(unittest.TestCase):
     def test_logdir(self):
         # test log
         logdir = os.path.join(self.tempdir, "mylog")
-        apt_pkg.config.set("UnattendedUpgrades::LogDir", logdir)
+        apt_pkg.config.set("Unattended-Upgrade::LogDir", logdir)
         _setup_logging(self.mock_options)
         self.assertTrue(os.path.exists(logdir))
 
@@ -33,7 +33,7 @@ class TestLogdir(unittest.TestCase):
         # if the new UnaUnattendedUpgrades::LogDir is given
         logdir = os.path.join(self.tempdir, "mylog-use")
         logdir2 = os.path.join(self.tempdir, "mylog-dontuse")
-        apt_pkg.config.set("UnattendedUpgrades::LogDir", logdir)
+        apt_pkg.config.set("Unattended-Upgrade::LogDir", logdir)
         apt_pkg.config.set("APT::UnattendedUpgrades::LogDir", logdir2)
         _setup_logging(self.mock_options)
         self.assertTrue(os.path.exists(logdir))

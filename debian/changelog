@@ -30,8 +30,8 @@ unattended-upgrades (0.70) UNRELEASED; urgency=low
   * unattended-upgrade:
     - create logdir based on configuration, thanks to Arno Schuring
       (closes: #615486)
-    - support UnattendedUpgrades::LogDir as a config option, but
-      keep APT::UnattendedUpgrades::LogDir as a compat option
+    - support Unattended-Upgrade::Log{Dir,File} as a config option, but
+      keep APT::UnattendedUpgrades::Log{Dir,File} for compatiblity
   * test/test_logdir.py:
     - add test for _setup_logging
 
