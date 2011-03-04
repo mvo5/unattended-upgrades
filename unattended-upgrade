@@ -133,6 +133,22 @@ def match_whitelist_string(whitelist, origin):
             res &= (value == origin.site)
     return res
 
+def upgrade_normal(cache, pkgs_to_upgrade, logfile_dpkg):
+    error = None
+    try:
+        res = cache.commit()
+    except SystemError,e:
+        error = e
+        res = apt_pkg.PackageManager.RESULT_FAILED
+    if res == apt_pkg.PackageManager.RESULT_FAILED:
+        logging.error(_("Installing the upgrades failed!"))
+        logging.error(_("error message: '%s'") % error)
+        logging.error(_("dpkg returned a error! See '%s' for details") % \
+                          logfile_dpkg)
+    else:
+        logging.info(_("All upgrades installed"))
+    return (res != apt_pkg.PackageManager.RESULT_FAILED)            
+
 def upgrade_in_minimal_steps(cache, pkgs_to_upgrade):
     # setup signal handler
     signal.signal(signal.SIGUSR1, signal_handler)
@@ -593,39 +609,32 @@ def main(options, rootdir=""):
     os.dup2(fd,1)
     os.dup2(fd,2)
 
-    # lock for the shutdown check - its fine if the system
-    # is shutdown while downloading but not so much while installing
-    apt_pkg.get_lock("/var/run/unattended-upgrades.lock")
+    try:
+        # lock for the shutdown check - its fine if the system
+        # is shutdown while downloading but not so much while installing
+        apt_pkg.get_lock("/var/run/unattended-upgrades.lock")
 
-
-    error = None
-    if options.minimal_upgrade_steps:
-        open("/var/run/unattended-upgrades.pid", "w").write("%s" % os.getpid())
-        # try upgrade all "pkgs" in minimal steps
-        pkg_install_success = upgrade_in_minimal_steps(
-            cache, [pkg.name for pkg in pkgs_to_upgrade])
-    else:
-        # now do the actual install
-        try:
-            res = pm.do_install()
-        except SystemError,e:
-            error = e
-            res = pm.RESULT_FAILED
-        finally:
-            os.dup2(old_stdout, 1)
-            os.dup2(old_stderr, 2)
-        if res == pm.RESULT_FAILED:
-            logging.error(_("Installing the upgrades failed!"))
-            logging.error(_("error message: '%s'") % e)
-            logging.error(_("dpkg returned a error! See '%s' for details") % \
-                              logfile_dpkg)
+        error = None
+        if options.minimal_upgrade_steps:
+            open("/var/run/unattended-upgrades.pid", "w").write("%s" % os.getpid())
+            # try upgrade all "pkgs" in minimal steps
+            pkg_install_success = upgrade_in_minimal_steps(
+                cache, [pkg.name for pkg in pkgs_to_upgrade])
         else:
-            logging.info(_("All upgrades installed"))
-        pkg_install_success = (res != pm.RESULT_FAILED)            
+            pkg_install_success = upgrade_normal(
+                cache, [pkg.name for pkg in pkgs_to_upgrade], logfile_dpkg)
+    except Exception, e:
+        # print unhandled exceptions here this way, while stderr is redirected
+        os.write(old_stderr, "Exception: %s" % e)
+
+    # restore
+    os.dup2(old_stdout, 1)
+    os.dup2(old_stderr, 2)
 
     # send a mail (if needed)
     if not options.dry_run:
-        send_summary_mail(pkgs, pkg_install_success, pkgs_kept_back, mem_log, logfile_dpkg)
+        send_summary_mail(
+            pkgs, pkg_install_success, pkgs_kept_back, mem_log, logfile_dpkg)
 
     # auto-reboot (if required and the config for this is set
     if (apt_pkg.config.find_b("Unattended-Upgrade::Automatic-Reboot", False) and
