@@ -1,0 +1,28 @@
+Package: awstats
+Status: install ok installed
+Priority: extra
+Section: admin
+Installed-Size: 1260
+Maintainer: Ubuntu Core Developers <ubuntu-devel-discuss@lists.ubuntu.com>
+Architecture: all
+Version: 6.9~dfsg-1ubuntu3
+Description: dummy
+
+Package: perl
+Status: install ok installed
+Priority: standard
+Section: perl
+Installed-Size: 18556
+Maintainer: Ubuntu Developers <ubuntu-devel-discuss@lists.ubuntu.com>
+Architecture: amd64
+Version: 5.10.1-17ubuntu1
+Description: Larry Wall's Practical Extraction and Report Language
+ An interpreted scripting language, known among some as "Unix's Swiss
+ Army Chainsaw".
+ .
+ Perl is optimised for scanning arbitrary text files and system
+ administration.  It has built-in extended regular expression matching
+ and replacement, a data-flow mechanism to improve security with
+ setuid scripts and is extensible via modules that can interface to C
+ libraries.
+

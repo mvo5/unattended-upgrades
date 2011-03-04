@@ -1,0 +1,4 @@
+# updates 
+deb http://archive.ubuntu.com/ubuntu/ lucid-updates main restricted
+# security
+deb http://security.ubuntu.com/ubuntu lucid-security main restricted

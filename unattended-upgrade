@@ -24,11 +24,12 @@
 import apt_inst
 import apt_pkg
 
-import sys
+import ConfigParser
+import datetime
+import re
 import os
 import string
-import datetime
-import ConfigParser
+import sys
 
 from StringIO import StringIO
 from optparse import OptionParser
@@ -48,6 +49,7 @@ from gettext import gettext as _
 # the reboot required flag file used by packages
 REBOOT_REQUIRED_FILE = "/var/run/reboot-required"
 MAIL_BINARY = "/usr/bin/mail"
+SENDMAIL_BINARY = "/usr/sbin/sendmail"
 DISTRO_CODENAME = lsb_release.get_distro_information()['CODENAME']
 DISTRO_ID = lsb_release.get_distro_information()['ID']
 
@@ -59,19 +61,10 @@ def signal_handler(signal, frame):
     global SIGNAL_STOP_REQUEST
     SIGNAL_STOP_REQUEST=True
 
-class MyCache(apt.Cache):
-    def __init__(self):
-        apt.Cache.__init__(self)
-    def clear(self):
-        self._depcache.init()
-        assert (self._depcache.inst_count == 0 and
-                self._depcache.broken_count == 0 and
-		self._depcache.del_count == 0)
-    
 def substitute(line):
     """ substitude known mappings and return a new string 
 
-    Currently supported "${distro-release}
+    Currently supported ${distro-release}
     """
     mapping = {"distro_codename" : get_distro_codename(),
                "distro_id" : get_distro_id(),
@@ -84,11 +77,8 @@ def get_distro_codename():
 def get_distro_id():
     return DISTRO_ID
 
-def get_allowed_origins():
-    """ return a list of allowed origins from apt.conf
-
-    This will take substitutions (like distro_id) into account.
-    """
+def get_allowed_origins_legacy():
+    """ legacy support for old Allowed-Origins var """
     allowed_origins = []
     for s in apt_pkg.config.value_list("Unattended-Upgrade::Allowed-Origins"):
         # if there is a ":" use that as seperator, else use spaces
@@ -96,9 +86,52 @@ def get_allowed_origins():
             (distro_id, distro_codename) = s.split(':')
         else:
             (distro_id, distro_codename) = s.split()
-        allowed_origins.append((substitute(distro_id), 
-                                substitute(distro_codename)))
+        # convert to new format
+        allowed_origins.append("o=%s,a=%s" % (substitute(distro_id), 
+                                              substitute(distro_codename)))
     return allowed_origins
+
+def get_allowed_origins():
+    """ return a list of allowed origins from apt.conf
+
+    This will take substitutions (like distro_id) into account.
+    """
+    allowed_origins = get_allowed_origins_legacy()
+    for s in apt_pkg.config.value_list("Unattended-Upgrade::Origins-Pattern"):
+        allowed_origins.append(substitute(s))
+    return allowed_origins
+
+def match_whitelist_string(whitelist, origin):
+    """
+    take a whitelist string in the form "origin=Debian,label=Debian-Security"
+    and match against the given python-apt origin. A empty whitelist string
+    never matches anything.
+    """
+    whitelist = whitelist.strip()
+    if whitelist == "":
+        logging.warn("empty match string matches nothing")
+        return False
+    res = True
+    # make "\," the html quote equivalent
+    whitelist = whitelist.replace("\,", "%2C")
+    for token in whitelist.split(","):
+        # strip and unquote the "," back
+        (what, value) = [s.strip().replace("%2C",",")
+                         for s in token.split("=")]
+        #logging.debug("matching '%s'='%s' against '%s'" % (what, value, origin))
+        # first char is apt-cache policy output, send is the name
+        # in the Release file
+        if what in ("o", "origin"):
+            res &= (value == origin.origin)
+        elif what in ("l", "label"):
+            res &= (value == origin.label)
+        elif what in ("a", "suite", "archive"):
+            res &= (value == origin.archive)
+        elif what in ("c", "component"):
+            res &= (value == origin.component)
+        elif what in ("site",):
+            res &= (value == origin.site)
+    return res
 
 def upgrade_in_minimal_steps(cache, pkgs_to_upgrade):
     # setup signal handler
@@ -133,7 +166,7 @@ def upgrade_in_minimal_steps(cache, pkgs_to_upgrade):
         logging.debug("applying set %s" % smallest_partition)
         rewind_cache(cache, [cache[name] for name in smallest_partition])
         try:
-            cache.commit()
+            res = cache.commit()
             cache.open()
         except Exception, e:
             logging.error(_("Installing the upgrades failed!"))
@@ -151,7 +184,7 @@ def is_allowed_origin(pkg, allowed_origins):
         return False
     for origin in pkg.candidate.origins:
         for allowed in allowed_origins:
-            if origin.origin == allowed[0] and origin.archive == allowed[1]:
+            if match_whitelist_string(allowed, origin):
                 return True
     return False
 
@@ -166,9 +199,10 @@ def check_changes_for_sanity(cache, allowed_origins, blacklist):
             if not is_allowed_origin(pkg, allowed_origins):
                 logging.debug("pkg '%s' not in allowed origin" % pkg.name)
                 return False
-            if pkg.name in blacklist:
-                logging.debug("pkg '%s' blacklisted" % pkg.name)
-                return False
+            for blacklist_regexp in blacklist:
+                if re.match(blacklist_regexp, pkg.name):
+                    logging.debug("pkg '%s' blacklisted" % pkg.name)
+                    return False
             if pkg._pkg.selected_state == apt_pkg.SELSTATE_HOLD:
                 logging.debug("pkg '%s' is on hold" % pkg.name)
                 return False
@@ -273,21 +307,20 @@ def wrap(t, width=70, subsequent_indent=""):
         out += s + " "
     return out
 
-def setup_apt_listchanges():
-    " deal with apt-listchanges "
-    conf = "/etc/apt/listchanges.conf"
+def setup_apt_listchanges(conf="/etc/apt/listchanges.conf"):
+    """ deal with apt-listchanges """
     if os.path.exists(conf):
         # check if mail is used by apt-listchanges
         cf = ConfigParser.ConfigParser()
         cf.read(conf)
-        if cf.has_section("apt") and cf.has_option("apt","frontend"):
+        if cf.has_section("apt") and cf.has_option("apt", "frontend"):
             frontend = cf.get("apt","frontend")
-            if frontend == "mail" and os.path.exists("/usr/sbin/sendmail"):
+            if frontend == "mail" and os.path.exists(SENDMAIL_BINARY):
                 # mail frontend and sendmail, we are fine
                 logging.debug("apt-listchanges is set to mail frontend, ignoring")
                 return
     # setup env (to play it safe) and return
-    os.putenv("APT_LISTCHANGES_FRONTEND","none");
+    os.environ["APT_LISTCHANGES_FRONTEND"] = "none"
 
 def send_summary_mail(pkgs, res, pkgs_kept_back, mem_log, logfile_dpkg):
     " send mail (if configured in Unattended-Upgrades::Mail) "
@@ -298,6 +331,11 @@ def send_summary_mail(pkgs, res, pkgs_kept_back, mem_log, logfile_dpkg):
         logging.error(_("No '/usr/bin/mail', can not send mail. "
                         "You probably want to install the 'mailx' package."))
         return
+    # if the operation was successful and the user has requested to get
+    # mails on on errors, just exit here
+    if (res and
+        apt_pkg.config.find_b("Unattended-Upgrade::MailOnlyOnError", False)):
+	return
     # Check if reboot-required flag is present
     logging.debug("Sending mail with '%s' to '%s'" % (logfile_dpkg, email))
     if os.path.isfile(REBOOT_REQUIRED_FILE):
@@ -328,16 +366,52 @@ def send_summary_mail(pkgs, res, pkgs_kept_back, mem_log, logfile_dpkg):
     logging.debug("mail returned: %s" % ret)
     
 
-def main():
-    # init the options
-    parser = OptionParser()
-    parser.add_option("-d", "--debug",
-                      action="store_true", dest="debug", default=False,
-                      help=_("print debug messages"))
-    parser.add_option("", "--dry-run",
-                      action="store_true", default=False,
-                      help=_("Simulation, download but do not install"))
-    (options, args) = parser.parse_args()
+def _setup_alternative_rootdir(rootdir):
+    # clear system unattended-upgrade stuff
+    apt_pkg.config.clear("Unattended-Upgrade")
+    # read rootdir (taken from apt.Cache, but we need to run it
+    # here before the cache gets initialized
+    if os.path.exists(rootdir+"/etc/apt/apt.conf"):
+        apt_pkg.read_config_file(apt_pkg.config,
+                                 rootdir + "/etc/apt/apt.conf")
+    if os.path.isdir(rootdir+"/etc/apt/apt.conf.d"):
+        apt_pkg.read_config_dir(apt_pkg.config,
+                                rootdir + "/etc/apt/apt.conf.d")
+
+def _get_logdir():
+    logdir= apt_pkg.config.find_dir(
+        "Unattended-Upgrade::LogDir",
+        # COMPAT only
+        apt_pkg.config.find_dir("APT::UnattendedUpgrades::LogDir",
+                                "/var/log/unattended-upgrades/"))
+    return logdir
+
+def _setup_logging(options):
+    # init the logging
+    logdir = _get_logdir()
+    logfile = os.path.join(
+        logdir,
+        apt_pkg.config.find(
+            "Unattended-Upgrade::LogFile",
+            # COMPAT only
+            apt_pkg.config.find("APT::UnattendedUpgrades::LogFile",
+                                "unattended-upgrades.log")))
+
+    if not options.dry_run and not os.path.exists(os.path.dirname(logfile)):
+        os.makedirs(os.path.dirname(logfile))
+
+    logging.basicConfig(level=logging.INFO,
+                        format='%(asctime)s %(levelname)s %(message)s',
+                        filename=logfile)
+
+
+def main(options, rootdir=""):
+
+    # useful for testing
+    if rootdir:
+        _setup_alternative_rootdir(rootdir)
+
+    _setup_logging(options)
 
     # setup logging
     logger = logging.getLogger()
@@ -371,7 +445,7 @@ def main():
         sys.exit(1)
 
     # get a cache
-    cache = MyCache()
+    cache = apt.Cache(rootdir=rootdir)
     if cache._depcache.broken_count > 0:
         print _("Cache has broken packages, exiting")
         logging.error(_("Cache has broken packages, exiting"))
@@ -489,7 +563,7 @@ def main():
     # exit if there is nothing to do and nothing to report
     if (len(pkgs_to_upgrade) == 0) and (len(pkgs_kept_back) == 0):
         logging.info(_("No packages found that can be upgraded unattended"))
-        sys.exit(0)    
+        return
 
     # check if we are in dry-run mode
     if options.dry_run:
@@ -510,7 +584,8 @@ def main():
     os.dup2(fd,0)
 
     now = datetime.datetime.now()
-    logfile_dpkg = logdir+'unattended-upgrades-dpkg_%s.log' % now.isoformat('_')
+    logfile_dpkg = os.path.join(
+        _get_logdir(), 'unattended-upgrades-dpkg_%s.log' % now.isoformat('_'))
     logging.info(_("Writing dpkg log to '%s'") % logfile_dpkg)
     fd = os.open(logfile_dpkg, os.O_RDWR|os.O_CREAT, 0644)
     old_stdout = os.dup(1)
@@ -521,17 +596,36 @@ def main():
     # lock for the shutdown check - its fine if the system
     # is shutdown while downloading but not so much while installing
     apt_pkg.get_lock("/var/run/unattended-upgrades.lock")
-    open("/var/run/unattended-upgrades.pid", "w").write("%s" % os.getpid())
 
-    # try upgrade all "pkgs" in minimal steps
-    pkg_install_success = upgrade_in_minimal_steps(cache, [pkg.name for pkg in pkgs_to_upgrade])
 
-    # restore fds
-    os.dup2(old_stdout, 1)
-    os.dup2(old_stderr, 2)
+    error = None
+    if options.minimal_upgrade_steps:
+        open("/var/run/unattended-upgrades.pid", "w").write("%s" % os.getpid())
+        # try upgrade all "pkgs" in minimal steps
+        pkg_install_success = upgrade_in_minimal_steps(
+            cache, [pkg.name for pkg in pkgs_to_upgrade])
+    else:
+        # now do the actual install
+        try:
+            res = pm.do_install()
+        except SystemError,e:
+            error = e
+            res = pm.RESULT_FAILED
+        finally:
+            os.dup2(old_stdout, 1)
+            os.dup2(old_stderr, 2)
+        if res == pm.RESULT_FAILED:
+            logging.error(_("Installing the upgrades failed!"))
+            logging.error(_("error message: '%s'") % e)
+            logging.error(_("dpkg returned a error! See '%s' for details") % \
+                              logfile_dpkg)
+        else:
+            logging.info(_("All upgrades installed"))
+        pkg_install_success = (res != pm.RESULT_FAILED)            
 
-    # send mail
-    send_summary_mail(pkgs, pkg_install_success, pkgs_kept_back, mem_log, logfile_dpkg)
+    # send a mail (if needed)
+    if not options.dry_run:
+        send_summary_mail(pkgs, pkg_install_success, pkgs_kept_back, mem_log, logfile_dpkg)
 
     # auto-reboot (if required and the config for this is set
     if (apt_pkg.config.find_b("Unattended-Upgrade::Automatic-Reboot", False) and
@@ -546,25 +640,26 @@ if __name__ == "__main__":
     gettext.bindtextdomain(localesApp, localesDir)
     gettext.textdomain(localesApp)
 
+    # init the options
+    parser = OptionParser()
+    parser.add_option("-d", "--debug",
+                      action="store_true", dest="debug", default=False,
+                      help=_("print debug messages"))
+    parser.add_option("", "--dry-run",
+                      action="store_true", default=False,
+                      help=_("Simulation, download but do not install"))
+    parser.add_option("", "--minimal_upgrade_steps",
+                      action="store_true", default=False,
+                      help=_("Upgrade in minimal steps (and allow interrupting with SIGINT"))
+    (options, args) = parser.parse_args()
+
     if os.getuid() != 0:
         print _("You need to be root to run this application")
         sys.exit(1)
-
-    if not os.path.exists("/var/log/unattended-upgrades"):
-        os.makedirs("/var/log/unattended-upgrades")
 
     # nice & ionce
     os.nice(19)
     subprocess.call(["ionice","-c3", "-p",str(os.getpid())])
 
-    # init the logging
-    logdir = apt_pkg.config.find_dir("APT::UnattendedUpgrades::LogDir",
-                                    "/var/log/unattended-upgrades/")
-    logfile = logdir+apt_pkg.config.find("APT::UnattendedUpgrades::LogFile",
-                                         "unattended-upgrades.log")
-    logging.basicConfig(level=logging.INFO,
-                        format='%(asctime)s %(levelname)s %(message)s',
-                        filename=logfile)
-
     # run the main code
-    main()
+    main(options)

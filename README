@@ -34,18 +34,33 @@ running "apt-config dump".
 
 == Options ==
 
-By default it will only install from the the (Ubuntu, jaunty-security)
-repository. This can be changed with the
-"Unattended-Upgrade::Allowed-Origins" apt configuration list.  It can
-be configured to allow any (origin, archive) combination. Those values
-are taken from the "Release" file on the archive server, e.g.
-http://security.ubuntu.com/ubuntu/dists/hardy/Release
+By default it will only install from the the stable and security
+repository. 
 
-The value of "origin" is taken from the "Origin:" header in the file, 
-the value of "archive" is taken from the "Suite:" header.
-It is recommended to use the default (only security updates).
-The new syntax is to colon seperate ":" the origin archive pair the old 
-space seperated syntax will still work if no colon is found .
+This can be changed either with the
+"Unattended-Upgrade::Origins-Pattern" or the 
+"Unattended-Upgrade::Allowed-Origins" apt configuration lists.
+
+The Unattended-Upgrade::Origins-Pattern is a flexible matting
+mechanism. The entries in a single line need to be all matched (its a
+logical AND). If you have multiple patterns one match for the complete
+pattern is enough (logical OR). E.g.:
+
+ Unattended-Upgrade::Origins-Pattern {
+        "origin=Google\, Inc.,suite=aArchive";
+        "site=www.example.com,component=main";
+ };
+
+will upgrade a package if either "origin matches google and
+suite=aArchive" or if the package comes from www.example.com and is in
+the component "main". The apt-cache policy short identifiers
+(o=Debian) are also supported.
+
+For Origins-Pattern its always (origin, archive) The value of "origin"
+is taken from the "Origin:" header in the file, the value of "archive"
+is taken from the "Suite:" header. This is also available via the
+"apt-cache policy" command (without further argument). E.g. security
+is listed there as "o=Debian" and "a=stable".
 
 All operations will be logged in /var/log/unattended-upgrades/. This
 includes the dpkg output as well.
@@ -80,10 +95,9 @@ A example configuration that will install from the
 jaunty-security and jaunty-updates repositories daily:
 
 ------------------------------8<--------------------------------------
-// Automaticall upgrade packages from these (origin, archive) pairs
+// Automaticall upgrade packages from these origin patterns
 Unattended-Upgrade::Allowed-Origins {
-	"Ubuntu:jaunty-security";
-	"Ubuntu:jaunty-updates";
+	"o=Debian,l=Debian-Security,a=stable";
 };
  
 // List of packages to not update

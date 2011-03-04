@@ -1,3 +1,109 @@
+unattended-upgrades (0.70) unstable; urgency=low
+
+  * pm/sleep.d/10_unattended-upgrades-hibernate:
+    - remove some unneeded lines from the script, thanks to
+      Seth Arnold (LP: #595792)
+  * test/test_mail.py:
+    - add tests for apt-listchanges.conf parser
+  * unattended-upgrade:
+    - add new Unattended-Upgrade::Origins-Pattern option that is much
+      more flexible than the previous Allowed-Origins. It supports 
+      match patterns like:
+      "origin=Debian,label=Debian-Security,component=main"
+      "site=security.debian.org"
+    - add support for escaping, so "origin=Google\, Inc,suite=stable"
+      is possible (thanks to Alexander Reichle-Schmehl), closes: #609876
+    - do not send a summary mail in --dry-run mode (closes: #609516)
+  * make Package-Blacklist a regexp (thanks to Raymond Lee) and add
+    test
+  * README:
+    - fixed outdated ubuntu centric info (closes: #611675)
+  * po/fr.po:
+    - updated, thanks to Steve Petruzzello (closes: #597606)
+  * data/50unattended-upgrades.Debian:
+    - add oldstable example (closes: #515980)
+  * test/test_against_real_archive.py, test/aptroot:
+    - add regression test that talks against the real archive
+  * unattended-upgrade:
+    - remove MyCache, apt.Cache has all the features we need
+    - add rootdir option to better support automatic testing
+  * unattended-upgrade:
+    - create logdir based on configuration, thanks to Arno Schuring
+      (closes: #615486)
+    - support Unattended-Upgrade::Log{Dir,File} as a config option, but
+      keep APT::UnattendedUpgrades::Log{Dir,File} for compatiblity
+  * test/test_logdir.py:
+    - add test for _setup_logging
+
+ -- Michael Vogt <mvo@debian.org>  Fri, 04 Mar 2011 13:17:39 +0100
+
+unattended-upgrades (0.65ubuntu2) natty; urgency=low
+
+  * add missing lsb-release build-depends
+
+ -- Michael Vogt <michael.vogt@ubuntu.com>  Fri, 07 Jan 2011 19:00:05 +0100
+
+unattended-upgrades (0.65ubuntu1) natty; urgency=low
+
+  [ Michael Vogt ]
+  * debian/po/pt_BR.po:
+    - updated, thanks to Adriano Rafael Gomes (closes: #607403)
+  * debian/rules:
+    - use different template depending on the build host 
+      (ubuntu,debian)
+    - remove obsolete arch-build target
+  * data/50unattended-upgrades.Debian:
+    - add debian specific template
+
+  [ Nobuto MURATA ]
+  * data/50unattended-upgrades.Ubuntu:
+    - adapt repository format for Ubuntu, LP: #691886
+
+ -- Michael Vogt <michael.vogt@ubuntu.com>  Fri, 07 Jan 2011 15:57:20 +0100
+
+unattended-upgrades (0.64ubuntu1) natty; urgency=low
+
+  * debian/postinst:
+    - fixup incorrect LSB Default-Start and Stop values
+
+ -- Michael Vogt <michael.vogt@ubuntu.com>  Thu, 18 Nov 2010 09:35:39 +0100
+
+unattended-upgrades (0.63ubuntu1) natty; urgency=low
+
+  * debian/unattended-upgrades.init:
+    - fix default stop value, thanks to Petter Reinholdtsen,
+      closes: #593987
+  * unattended-upgrade:
+    - add new Unattended-Upgrade::MailOnlyOnError option that will
+      make the script only send a mail when a error occured (thanks
+      to Steffen Kittel)
+  * test/test_mail.py:
+    - add test for Unattended-Upgrade::MailOnlyOnError feature
+  * README:
+    - improve description for the Allowed-Origins option
+  * test/Makefile:
+    - run test on bzr-buildpackage and fail if one of the tests
+      fail
+
+ -- Michael Vogt <michael.vogt@ubuntu.com>  Wed, 10 Nov 2010 15:18:37 +0100
+
+unattended-upgrades (0.62.2) unstable; urgency=low
+
+  * debian/postinst:
+    - add fixup code for installs with incorrect values from
+      the stop value (really closes: #593987), thanks to
+      Peter Reinholdtsen
+
+ -- Michael Vogt <mvo@debian.org>  Thu, 18 Nov 2010 09:00:44 +0100
+
+unattended-upgrades (0.62.1) unstable; urgency=low
+
+  * debian/unattended-upgrades.init:
+    - fix default stop value, thanks to Petter Reinholdtsen,
+      closes: #593987
+
+ -- Michael Vogt <mvo@debian.org>  Wed, 17 Nov 2010 21:26:10 +0100
+
 unattended-upgrades (0.62ubuntu1) maverick; urgency=low
 
   * merged fixes from debian/sid, notably allowing ":"

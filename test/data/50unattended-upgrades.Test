@@ -1,0 +1,6 @@
+// Automatically upgrade packages from these (origin, archive) pairs
+Unattended-Upgrade::Origins-Pattern {
+        "o=aOrigin,a=aArchive";
+        "s=aSite,l=aLabel";
+        "o=Google\, Inc.,suite=stable";
+};

@@ -2,7 +2,7 @@ Source: unattended-upgrades
 Section: admin
 Priority: optional
 Maintainer: Michael Vogt <michael.vogt@ubuntu.com>
-Build-Depends: debhelper (>= 5.0.37.2), po-debconf
+Build-Depends: debhelper (>= 5.0.37.2), po-debconf, lsb-release
 Build-Depends-Indep: python, python-distutils-extra
 Standards-Version: 3.8.3
 Vcs-Bzr: http://code.launchpad.net/~ubuntu-core-dev/unattended-upgrades/ubuntu/
