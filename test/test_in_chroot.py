@@ -33,6 +33,7 @@ class MockOptions(object):
 class TestUnattendedUpgrade(unittest.TestCase):
 
     def _create_new_debootstrap_tarball(self, tarball, target):
+        print "creating initial test tarball, this is needed only once"
         # force i386
         subprocess.call(["debootstrap",
                          "--arch=i386",
@@ -71,7 +72,6 @@ class TestUnattendedUpgrade(unittest.TestCase):
         if not os.path.exists(TARBALL):
             self._create_new_debootstrap_tarball(TARBALL, target)
         # create new
-        os.mkdir(target)
         self._unpack_debootstrap_tarball(TARBALL, target)
         open(os.path.join(target, "etc/apt/apt.conf"), "w").write(
             'APT::Architecture "i386";')
