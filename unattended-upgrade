@@ -156,7 +156,6 @@ def upgrade_normal(cache, pkgs_to_upgrade, logfile_dpkg):
     try:
         with Unlocked():
             res = cache.commit()
-        print "result from cache.commit: ", res
     except SystemError,e:
         error = e
     if res:
@@ -638,7 +637,8 @@ def main(options, rootdir=""):
         # is shutdown while downloading but not so much while installing
         apt_pkg.get_lock("/var/run/unattended-upgrades.lock")
 
-        if options.minimal_upgrade_steps:
+        if (options.minimal_upgrade_steps or 
+            apt_pkg.config.find_b("Unattended-Upgrades::MinimalSteps", False)):
             open("/var/run/unattended-upgrades.pid", "w").write("%s" % os.getpid())
             # try upgrade all "pkgs" in minimal steps
             pkg_install_success = upgrade_in_minimal_steps(

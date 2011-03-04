@@ -26,7 +26,7 @@ deb-src http://security.ubuntu.com/ubuntu/ lucid-security main restricted
 TARBALL="lucid-i386.tgz"
 
 class MockOptions(object):
-    debug = False
+    debug = True
     dry_run = False
     minimal_upgrade_steps = False
 
