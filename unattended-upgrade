@@ -149,7 +149,7 @@ def upgrade_normal(cache, pkgs_to_upgrade, logfile_dpkg):
         logging.info(_("All upgrades installed"))
     return (res != apt_pkg.PackageManager.RESULT_FAILED)            
 
-def upgrade_in_minimal_steps(cache, pkgs_to_upgrade):
+def upgrade_in_minimal_steps(cache, pkgs_to_upgrade, logfile_dpkg=""):
     # setup signal handler
     signal.signal(signal.SIGUSR1, signal_handler)
 
@@ -187,6 +187,8 @@ def upgrade_in_minimal_steps(cache, pkgs_to_upgrade):
         except Exception, e:
             logging.error(_("Installing the upgrades failed!"))
             logging.error(_("error message: '%s'") % e)
+            logging.error(_("dpkg returned a error! See '%s' for details") % \
+                              logfile_dpkg)
             return False
         to_upgrade = to_upgrade-set(smallest_partition)
         logging.debug("left to upgrade %s" % to_upgrade)
@@ -614,12 +616,11 @@ def main(options, rootdir=""):
         # is shutdown while downloading but not so much while installing
         apt_pkg.get_lock("/var/run/unattended-upgrades.lock")
 
-        error = None
         if options.minimal_upgrade_steps:
             open("/var/run/unattended-upgrades.pid", "w").write("%s" % os.getpid())
             # try upgrade all "pkgs" in minimal steps
             pkg_install_success = upgrade_in_minimal_steps(
-                cache, [pkg.name for pkg in pkgs_to_upgrade])
+                cache, [pkg.name for pkg in pkgs_to_upgrade], logfile_dpkg)
         else:
             pkg_install_success = upgrade_normal(
                 cache, [pkg.name for pkg in pkgs_to_upgrade], logfile_dpkg)
