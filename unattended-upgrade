@@ -323,13 +323,17 @@ def _setup_alternative_rootdir(rootdir):
         apt_pkg.read_config_dir(apt_pkg.config,
                                 rootdir + "/etc/apt/apt.conf.d")
 
-def _setup_logging(options):
-    # init the logging
-    logdir = apt_pkg.config.find_dir(
+def _get_logdir():
+    logdir= apt_pkg.config.find_dir(
         "Unattended-Upgrade::LogDir",
         # COMPAT only
         apt_pkg.config.find_dir("APT::UnattendedUpgrades::LogDir",
                                 "/var/log/unattended-upgrades/"))
+    return logdir
+
+def _setup_logging(options):
+    # init the logging
+    logdir = _get_logdir()
     logfile = os.path.join(
         logdir,
         apt_pkg.config.find(
@@ -525,7 +529,8 @@ def main(options, rootdir=""):
     os.dup2(fd,0)
 
     now = datetime.datetime.now()
-    logfile_dpkg = logdir+'unattended-upgrades-dpkg_%s.log' % now.isoformat('_')
+    logfile_dpkg = os.path.join(
+        _get_logdir(), 'unattended-upgrades-dpkg_%s.log' % now.isoformat('_'))
     logging.info(_("Writing dpkg log to '%s'") % logfile_dpkg)
     fd = os.open(logfile_dpkg, os.O_RDWR|os.O_CREAT, 0644)
     old_stdout = os.dup(1)
