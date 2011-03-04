@@ -56,6 +56,23 @@ DISTRO_ID = lsb_release.get_distro_information()['ID']
 # set from the sigint signal handler
 SIGNAL_STOP_REQUEST=False
 
+
+class Unlocked:
+    """ context manager for unlocking the apt lock while cache.commit()
+        is run 
+    """
+    def __enter__(self):
+        try:
+            apt_pkg.pkgsystem_unlock()
+        except:
+            pass
+    def __exit__(self, exc_type, exc_value, exc_tb):
+        try:
+            apt_pkg.pkgsystem_unlock()
+        except:
+            pass
+
+
 def signal_handler(signal, frame):
     logging.warn("SIGINT recieved")
     global SIGNAL_STOP_REQUEST
@@ -135,19 +152,21 @@ def match_whitelist_string(whitelist, origin):
 
 def upgrade_normal(cache, pkgs_to_upgrade, logfile_dpkg):
     error = None
+    res = False
     try:
-        res = cache.commit()
+        with Unlocked():
+            res = cache.commit()
+        print "result from cache.commit: ", res
     except SystemError,e:
         error = e
-        res = apt_pkg.PackageManager.RESULT_FAILED
-    if res == apt_pkg.PackageManager.RESULT_FAILED:
+    if res:
+        logging.info(_("All upgrades installed"))
+    else:
         logging.error(_("Installing the upgrades failed!"))
         logging.error(_("error message: '%s'") % error)
         logging.error(_("dpkg returned a error! See '%s' for details") % \
                           logfile_dpkg)
-    else:
-        logging.info(_("All upgrades installed"))
-    return (res != apt_pkg.PackageManager.RESULT_FAILED)            
+    return res
 
 def upgrade_in_minimal_steps(cache, pkgs_to_upgrade, logfile_dpkg=""):
     # setup signal handler
@@ -182,7 +201,10 @@ def upgrade_in_minimal_steps(cache, pkgs_to_upgrade, logfile_dpkg=""):
         logging.debug("applying set %s" % smallest_partition)
         rewind_cache(cache, [cache[name] for name in smallest_partition])
         try:
-            res = cache.commit()
+            with Unlocked():
+                res = cache.commit()
+                if not res:
+                    raise Exception("cache.commit() returned false")
             cache.open()
         except Exception, e:
             logging.error(_("Installing the upgrades failed!"))
