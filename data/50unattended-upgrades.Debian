@@ -14,6 +14,12 @@ Unattended-Upgrade::Package-Blacklist {
 //	"libc6-i686";
 };
 
+// Split the upgrade into the smallest possible chunks so that
+// they can be interrupted with SIGUSR1. This makes the upgrade
+// a bit slower but it has the benefit that shutdown while a upgrade
+// is running is possible (with a small delay)
+//Unattended-Upgrades::MinimalSteps "true";
+
 // Send email to this address for problems or packages upgrades
 // If empty or unset then no email is sent, make sure that you
 // have a working mail setup on your system. The package 'mailx'

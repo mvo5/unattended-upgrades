@@ -26,6 +26,7 @@
 
 import apt_pkg
 import time
+import signal
 import sys
 import logging
 import logging.handlers
@@ -85,6 +86,11 @@ if __name__ == "__main__":
         if res > 0:
             logging.debug("Lock not taken")
             sys.exit(0)
+        # signal unattended-upgrades to stop
+        p = "/var/run/unattended-upgrades.pid"
+        if os.path.exists(p):
+            pid = int(open(p).read())
+            os.kill(pid, signal.SIGUSR1)
 	# wait a some seconds and try again
         msg = _("Unattended-upgrade in progress during shutdown, "
                 "sleeping for 5s")

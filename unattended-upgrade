@@ -40,6 +40,7 @@ warnings.filterwarnings("ignore", "apt API not stable yet", FutureWarning)
 import apt
 import logging
 import lsb_release
+import signal
 import subprocess
 
 import gettext
@@ -51,6 +52,31 @@ MAIL_BINARY = "/usr/bin/mail"
 SENDMAIL_BINARY = "/usr/sbin/sendmail"
 DISTRO_CODENAME = lsb_release.get_distro_information()['CODENAME']
 DISTRO_ID = lsb_release.get_distro_information()['ID']
+
+# set from the sigint signal handler
+SIGNAL_STOP_REQUEST=False
+
+
+class Unlocked:
+    """ context manager for unlocking the apt lock while cache.commit()
+        is run 
+    """
+    def __enter__(self):
+        try:
+            apt_pkg.pkgsystem_unlock()
+        except:
+            pass
+    def __exit__(self, exc_type, exc_value, exc_tb):
+        try:
+            apt_pkg.pkgsystem_unlock()
+        except:
+            pass
+
+
+def signal_handler(signal, frame):
+    logging.warn("SIGINT recieved")
+    global SIGNAL_STOP_REQUEST
+    SIGNAL_STOP_REQUEST=True
 
 def substitute(line):
     """ substitude known mappings and return a new string 
@@ -123,6 +149,74 @@ def match_whitelist_string(whitelist, origin):
         elif what in ("site",):
             res &= (value == origin.site)
     return res
+
+def upgrade_normal(cache, pkgs_to_upgrade, logfile_dpkg):
+    error = None
+    res = False
+    try:
+        with Unlocked():
+            res = cache.commit()
+    except SystemError,e:
+        error = e
+    if res:
+        logging.info(_("All upgrades installed"))
+    else:
+        logging.error(_("Installing the upgrades failed!"))
+        logging.error(_("error message: '%s'") % error)
+        logging.error(_("dpkg returned a error! See '%s' for details") % \
+                          logfile_dpkg)
+    return res
+
+def upgrade_in_minimal_steps(cache, pkgs_to_upgrade, logfile_dpkg=""):
+    # setup signal handler
+    signal.signal(signal.SIGUSR1, signal_handler)
+
+    # to upgrade contains the package names
+    to_upgrade = set(pkgs_to_upgrade)
+    while True:
+        # find smallest set
+        smallest_partition = to_upgrade
+        for pkgname in to_upgrade:
+            if SIGNAL_STOP_REQUEST:
+                logging.warn("SIGNAL recieved, stopping")
+                return True
+            pkg = cache[pkgname]
+            if pkg.is_upgradable:
+                pkg.mark_upgrade()
+            elif not pkg.is_installed:
+                pkg.mark_install()
+            else:
+                continue
+            changes = [pkg.name for pkg in cache.get_changes()]
+            if len(changes) == 1:
+                logging.debug("found leaf package %s" % pkg.name)
+                smallest_partition = changes
+                break
+            if len(changes) < len(smallest_partition):
+                logging.debug("found  partition of size %s (%s)" % (len(changes), changes))
+                smallest_partition = changes
+            cache.clear()
+        # apply changes
+        logging.debug("applying set %s" % smallest_partition)
+        rewind_cache(cache, [cache[name] for name in smallest_partition])
+        try:
+            with Unlocked():
+                res = cache.commit()
+                if not res:
+                    raise Exception("cache.commit() returned false")
+            cache.open()
+        except Exception, e:
+            logging.error(_("Installing the upgrades failed!"))
+            logging.error(_("error message: '%s'") % e)
+            logging.error(_("dpkg returned a error! See '%s' for details") % \
+                              logfile_dpkg)
+            return False
+        to_upgrade = to_upgrade-set(smallest_partition)
+        logging.debug("left to upgrade %s" % to_upgrade)
+        if len(to_upgrade) == 0:
+            logging.info(_("All upgrades installed"))
+            break
+    return True
 
 def is_allowed_origin(pkg, allowed_origins):
     if not pkg.candidate:
@@ -537,45 +631,33 @@ def main(options, rootdir=""):
     old_stderr = os.dup(2)
     os.dup2(fd,1)
     os.dup2(fd,2)
-    
-    # create a new package-manager. the blacklist may have changed
-    # the markings in the depcache
-    pm = apt_pkg.PackageManager(cache._depcache)
-    if not pm.get_archives(fetcher,list,recs):
-        logging.error(_("pm.GetArchives() failed"))
-    # run the fetcher again (otherwise local file:// 
-    # URIs are unhappy (see LP: #56832)
-    res = fetcher.run()
-    # unlock the cache
-    try:
-        apt_pkg.pkgsystem_unlock()
-    except SystemError, e:
-        pass
-    # lock for the shutdown check - its fine if the system
-    # is shutdown while downloading but not so much while installing
-    apt_pkg.get_lock("/var/run/unattended-upgrades.lock")
-    # now do the actual install
-    error = None
-    try:
-        res = pm.do_install()
-    except SystemError,e:
-        error = e
-        res = pm.RESULT_FAILED
-    finally:
-        os.dup2(old_stdout, 1)
-        os.dup2(old_stderr, 2)
 
-    if res == pm.RESULT_FAILED:
-        logging.error(_("Installing the upgrades failed!"))
-        logging.error(_("error message: '%s'") % e)
-        logging.error(_("dpkg returned a error! See '%s' for details") % logfile_dpkg)
-    else:
-        logging.info(_("All upgrades installed"))
+    try:
+        # lock for the shutdown check - its fine if the system
+        # is shutdown while downloading but not so much while installing
+        apt_pkg.get_lock("/var/run/unattended-upgrades.lock")
+
+        if (options.minimal_upgrade_steps or 
+            apt_pkg.config.find_b("Unattended-Upgrades::MinimalSteps", False)):
+            open("/var/run/unattended-upgrades.pid", "w").write("%s" % os.getpid())
+            # try upgrade all "pkgs" in minimal steps
+            pkg_install_success = upgrade_in_minimal_steps(
+                cache, [pkg.name for pkg in pkgs_to_upgrade], logfile_dpkg)
+        else:
+            pkg_install_success = upgrade_normal(
+                cache, [pkg.name for pkg in pkgs_to_upgrade], logfile_dpkg)
+    except Exception, e:
+        # print unhandled exceptions here this way, while stderr is redirected
+        os.write(old_stderr, "Exception: %s" % e)
+
+    # restore
+    os.dup2(old_stdout, 1)
+    os.dup2(old_stderr, 2)
 
     # send a mail (if needed)
-    pkg_install_success = (res != pm.RESULT_FAILED)
     if not options.dry_run:
-        send_summary_mail(pkgs, pkg_install_success, pkgs_kept_back, mem_log, logfile_dpkg)
+        send_summary_mail(
+            pkgs, pkg_install_success, pkgs_kept_back, mem_log, logfile_dpkg)
 
     # auto-reboot (if required and the config for this is set
     if (apt_pkg.config.find_b("Unattended-Upgrade::Automatic-Reboot", False) and
@@ -598,11 +680,18 @@ if __name__ == "__main__":
     parser.add_option("", "--dry-run",
                       action="store_true", default=False,
                       help=_("Simulation, download but do not install"))
+    parser.add_option("", "--minimal_upgrade_steps",
+                      action="store_true", default=False,
+                      help=_("Upgrade in minimal steps (and allow interrupting with SIGINT"))
     (options, args) = parser.parse_args()
 
     if os.getuid() != 0:
         print _("You need to be root to run this application")
         sys.exit(1)
-    
+
+    # nice & ionce
+    os.nice(19)
+    subprocess.call(["ionice","-c3", "-p",str(os.getpid())])
+
     # run the main code
     main(options)
