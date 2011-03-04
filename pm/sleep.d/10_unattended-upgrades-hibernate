@@ -13,15 +13,6 @@ if [ ! -x /usr/share/unattended-upgrades/unattended-upgrade-shutdown ]; then
 	exit 0
 fi
 
-SELF=unattended-upgrades-hibernate
-COMMAND=
-IFPLUGD_IFACE=
-
-# pm-action(8) - <action> <suspend method>
-#
-# On suspend|hibernate, disconnect any wpa-roam managed interfaces,
-# reconnect it on resume.
-
 case "${1}" in
         hibernate)
          	python /usr/share/unattended-upgrades/unattended-upgrade-shutdown       

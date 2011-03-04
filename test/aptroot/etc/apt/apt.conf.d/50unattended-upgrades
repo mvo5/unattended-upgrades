@@ -1,9 +1,6 @@
 // Automatically upgrade packages from these (origin, archive) pairs
 Unattended-Upgrade::Allowed-Origins {
-	"${distro_id} stable";
-	"${distro_id} ${distro_codename}-security";
-//	"${distro_id} ${distro_codename}-updates";
-//	"${distro_id} ${distro_codename}-proposed-updates";
+        "Ubuntu lucid-security";
 };
 
 // List of packages to not update
@@ -19,6 +16,10 @@ Unattended-Upgrade::Package-Blacklist {
 // have a working mail setup on your system. The package 'mailx'
 // must be installed or anything that provides /usr/bin/mail.
 //Unattended-Upgrade::Mail "root@localhost";
+
+// Set this value to "true" to get emails only on errors. Default
+// is to always send a mail if Unattended-Upgrade::Mail is set
+//Unattended-Upgrade::MailOnlyOnError "true";
 
 // Do automatic removal of new unused dependencies after the upgrade
 // (equivalent to apt-get autoremove)
