@@ -1,4 +1,4 @@
-unattended-upgrades (0.70) UNRELEASED; urgency=low
+unattended-upgrades (0.70) unstable; urgency=low
 
   * pm/sleep.d/10_unattended-upgrades-hibernate:
     - remove some unneeded lines from the script, thanks to
@@ -23,7 +23,7 @@ unattended-upgrades (0.70) UNRELEASED; urgency=low
   * data/50unattended-upgrades.Debian:
     - add oldstable example (closes: #515980)
   * test/test_against_real_archive.py, test/aptroot:
-    - add regression test that talks against the real lucid archive
+    - add regression test that talks against the real archive
   * unattended-upgrade:
     - remove MyCache, apt.Cache has all the features we need
     - add rootdir option to better support automatic testing
@@ -35,7 +35,7 @@ unattended-upgrades (0.70) UNRELEASED; urgency=low
   * test/test_logdir.py:
     - add test for _setup_logging
 
- -- Michael Vogt <michael.vogt@ubuntu.com>  Thu, 03 Feb 2011 20:48:31 +0100
+ -- Michael Vogt <mvo@debian.org>  Fri, 04 Mar 2011 13:17:39 +0100
 
 unattended-upgrades (0.65ubuntu2) natty; urgency=low
 
