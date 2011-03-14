@@ -6,6 +6,7 @@ check:
 	set -e; \
 	find . -name 'test_*.py' | \
 	while read file; do \
+	    echo "Running $$file"; \
 	    if [ -x $$file ]; then \
 	    	python $$file ; \
 	    fi \
