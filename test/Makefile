@@ -10,3 +10,7 @@ check:
 	    	python $$file ; \
 	    fi \
 	done
+
+clean:
+	rm -rf ./aptroot/var/cache/
+	rm -rf ./aptroot/var/lib/apt
