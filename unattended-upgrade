@@ -74,7 +74,7 @@ class Unlocked:
 
 
 def signal_handler(signal, frame):
-    logging.warn("SIGINT recieved")
+    logging.warn("SIGUSR1 recieved, will stop")
     global SIGNAL_STOP_REQUEST
     SIGNAL_STOP_REQUEST=True
 
