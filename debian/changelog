@@ -1,11 +1,15 @@
-unattended-upgrades (0.71) UNRELEASED; urgency=low
+unattended-upgrades (0.70ubuntu1) natty; urgency=low
 
   * merged lp:~mvo/unattended-upgrades/minimal-steps-upgrade
-    This allows performaing the upgrades in minimal chunks so
-    that they can be interrupted (relatively) quickly with
-    SIGUSR1
+    - This allows performaing the upgrades in minimal chunks so
+      that they can be interrupted (relatively) quickly with
+      SIGUSR1
+    - This feature is not enabled by default yet, in order
+      to use it, uncomment the line in 50unattended-upgrades:
+       Unattended-Upgrades::MinimalSteps "true";
+    LP: #729214
 
- -- Michael Vogt <michael.vogt@ubuntu.com>  Fri, 04 Mar 2011 18:13:05 +0100
+ -- Michael Vogt <michael.vogt@ubuntu.com>  Mon, 14 Mar 2011 11:49:02 +0100
 
 unattended-upgrades (0.70) unstable; urgency=low
 
