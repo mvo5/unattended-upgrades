@@ -1,3 +1,10 @@
+unattended-upgrades (0.71) UNRELEASED; urgency=low
+
+  * debian/po/da.po:
+    - added, thanks toJoe Dalton (closes: #619320)
+
+ -- Michael Vogt <michael.vogt@ubuntu.com>  Fri, 25 Mar 2011 21:55:24 +0100
+
 unattended-upgrades (0.70ubuntu1) natty; urgency=low
 
   * merged lp:~mvo/unattended-upgrades/minimal-steps-upgrade
