@@ -1,4 +1,4 @@
-unattended-upgrades (0.71) UNRELEASED; urgency=low
+unattended-upgrades (0.71ubuntu1) natty; urgency=low
 
   * debian/po/da.po:
     - added, thanks toJoe Dalton (closes: #619320)
@@ -8,7 +8,7 @@ unattended-upgrades (0.71) UNRELEASED; urgency=low
       tag section parser (LP: #724994)
     - add regression test
 
- -- Michael Vogt <michael.vogt@ubuntu.com>  Fri, 25 Mar 2011 21:55:24 +0100
+ -- Michael Vogt <michael.vogt@ubuntu.com>  Wed, 06 Apr 2011 11:44:48 +0200
 
 unattended-upgrades (0.70ubuntu1) natty; urgency=low
 
