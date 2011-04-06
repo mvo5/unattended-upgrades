@@ -25,7 +25,18 @@ class TestConffilePrompt(unittest.TestCase):
         test_pkg = "./packages/conf-test-package_1.0.deb"
         self.assertFalse(conffile_prompt(test_pkg, prefix="./root.conffile"),
                         "conffile prompt detection incorrect")
-        
+
+    def testWillNotPrompt(self):
+        # ensure we don't crash when encountering a conffile with overly
+        # many entries
+        test_pkg = "./packages/conf-test-package-257-conffiles_1.deb"
+        self.assertFalse(conffile_prompt(test_pkg, prefix="./root.conffile"),
+                        "conffile prompt detection incorrect")
+        # no conffiles anymore in the pkg
+        test_pkg = "./packages/conf-test-package-no-conffiles-anymore_2.deb"
+        self.assertFalse(conffile_prompt(test_pkg, prefix="./root.conffile"),
+                        "conffile prompt detection incorrect")
+
 
 if __name__ == "__main__":
     logging.basicConfig(level=logging.DEBUG)

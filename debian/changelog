@@ -2,6 +2,11 @@ unattended-upgrades (0.71) UNRELEASED; urgency=low
 
   * debian/po/da.po:
     - added, thanks toJoe Dalton (closes: #619320)
+  * unattended-upgrade, test/test_conffile.py:
+    - use apt_inst.DebFile.control.extractdata() instead of
+      apt_inst.debExtractControl() to not hit the limit of the
+      tag section parser (LP: #724994)
+    - add regression test
 
  -- Michael Vogt <michael.vogt@ubuntu.com>  Fri, 25 Mar 2011 21:55:24 +0100
 
