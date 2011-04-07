@@ -1,3 +1,13 @@
+unattended-upgrades (0.72ubuntu1) UNRELEASED; urgency=low
+
+  * unattended-upgrade, data/50unattended-upgrades.{Debian,Ubuntu}:
+    - automatically fix a interrupted dpkg (e.g. from a powerfailure)
+      (LP: #584817)
+    - add Unattended-Upgrade::AutoFixInterruptedDpkg to allow the admin
+      to configure this option
+
+ -- Michael Vogt <michael.vogt@ubuntu.com>  Thu, 07 Apr 2011 11:29:34 +0200
+
 unattended-upgrades (0.71ubuntu1) natty; urgency=low
 
   * debian/po/da.po:

@@ -14,6 +14,12 @@ Unattended-Upgrade::Package-Blacklist {
 //	"libc6-i686";
 };
 
+// This option allows you to control if on a unclean dpkg exit
+// unattended-upgrades will automatically run 
+//   dpkg --force-confold --configure -a
+// The default is true, to ensure updates keep getting installed
+//Unattended-Upgrade::AutoFixInterruptedDpkg "false";
+
 // Split the upgrade into the smallest possible chunks so that
 // they can be interrupted with SIGUSR1. This makes the upgrade
 // a bit slower but it has the benefit that shutdown while a upgrade

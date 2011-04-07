@@ -25,6 +25,7 @@ import apt_inst
 import apt_pkg
 
 import ConfigParser
+import copy
 import datetime
 import re
 import os
@@ -72,6 +73,17 @@ class Unlocked:
         except:
             pass
 
+def is_dpkg_journal_dirty():
+    """
+    test if the dpkg journal is dirty
+    (similar to debSystem::CheckUpdates)
+    """
+    d = os.path.dirname(
+        apt_pkg.Config.find_file("Dir::State::status"))+"/updates"
+    for f in os.listdir(d):
+        if re.match("[0-9]+", f):
+            return True
+    return False
 
 def signal_handler(signal, frame):
     logging.warn("SIGUSR1 recieved, will stop")
@@ -478,6 +490,19 @@ def main(options, rootdir=""):
 
     # display available origin
     logging.info(_("Allowed origins are: %s") % map(str,allowed_origins))
+
+    # check if the journal is dirty and if so, take emergceny action
+    # the alternative is to leave the system potentially unsecure until
+    # the user comes in and fixes
+    if (is_dpkg_journal_dirty() and
+        apt_pkg.config.find_b("Unattended-Upgrade::AutoFixInterruptedDpkg", True)):
+        logging.warning(_("Unclean dpkg state detected, trying to correct"))
+        print _("Unclean dpkg state detected, trying to correct")
+        env = copy.copy(os.environ)
+        env["DEBIAN_FRONTEND"] = "noninteractive"
+        output = subprocess.check_output(
+            ["dpkg", "--force-confold", "--configure", "-a"], env=env)
+        logging.warning(_("dpkg --configure -a output:\n%s" % output))
     
     # check and get lock
     try:
