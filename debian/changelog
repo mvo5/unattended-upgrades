@@ -1,10 +1,10 @@
-unattended-upgrades (0.72.1ubuntu1) UNRELEASEDnatty; urgency=low
+unattended-upgrades (0.72.1ubuntu1) natty; urgency=low
 
   * unattended-upgrade:
     - fix detection of unclean dpkg state if another package manager
       is working (LP: #754330)
 
- -- Michael Vogt <michael.vogt@ubuntu.com>  Tue, 12 Apr 2011 10:33:51 +0200
+ -- Michael Vogt <michael.vogt@ubuntu.com>  Tue, 12 Apr 2011 10:34:42 +0200
 
 unattended-upgrades (0.72ubuntu1) natty; urgency=low
 
