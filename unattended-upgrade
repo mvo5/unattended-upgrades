@@ -496,13 +496,23 @@ def main(options, rootdir=""):
     # the user comes in and fixes
     if (is_dpkg_journal_dirty() and
         apt_pkg.config.find_b("Unattended-Upgrade::AutoFixInterruptedDpkg", True)):
-        logging.warning(_("Unclean dpkg state detected, trying to correct"))
-        print _("Unclean dpkg state detected, trying to correct")
-        env = copy.copy(os.environ)
-        env["DEBIAN_FRONTEND"] = "noninteractive"
-        output = subprocess.check_output(
-            ["dpkg", "--force-confold", "--configure", "-a"], env=env)
-        logging.warning(_("dpkg --configure -a output:\n%s" % output))
+        # ensure the dpkg database is not already locked (LP: #754330)
+        admindir = os.path.dirname(apt_pkg.config.find("Dir::State::Status"))
+        lockfd = apt_pkg.get_lock(os.path.join(admindir, "lock"), False)
+        if lockfd > 0:
+            logging.warning(_("Unclean dpkg state detected, trying to correct"))
+            print _("Unclean dpkg state detected, trying to correct")
+            env = copy.copy(os.environ)
+            env["DEBIAN_FRONTEND"] = "noninteractive"
+            try:
+                os.close(lockfd)
+                output = subprocess.check_output(
+                    ["dpkg", "--force-confold", "--configure", "-a"], env=env)
+            except subprocess.CalledProcessError as e:
+                output = e.output
+            logging.warning(_("dpkg --configure -a output:\n%s" % output))
+        else:
+            logging.debug("Unclean dpkg state, but locked, another package manager working?")
     
     # check and get lock
     try:
