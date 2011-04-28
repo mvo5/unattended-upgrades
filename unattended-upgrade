@@ -312,7 +312,7 @@ def conffile_prompt(destFile, prefix=""):
                     logging.debug("current md5: %s" % current_md5)
                     # hashes are the same, no conffile prompt
                     if current_md5 == md5:
-                        return False
+                        continue
                     # calculate md5sum from the deb (may take a bit)
                     dpkg_cmd = ["dpkg-deb","--fsys-tarfile",destFile]
                     tar_cmd = ["tar","-x","-O", "-f","-", "."+conf_file]

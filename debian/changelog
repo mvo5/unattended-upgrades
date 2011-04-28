@@ -2,6 +2,8 @@ unattended-upgrades (0.72.2) UNRELEASED; urgency=low
 
   * po/fr.po:
     - updated, thanks to to Steve Petruzzello (closes: #622718)
+  * unattended-upgrade:
+    - fix conffile prompt detection (closes: #624148)
 
  -- Michael Vogt <michael.vogt@ubuntu.com>  Fri, 15 Apr 2011 21:49:17 +0200
 
