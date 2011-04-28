@@ -37,6 +37,11 @@ class TestConffilePrompt(unittest.TestCase):
         self.assertFalse(conffile_prompt(test_pkg, prefix="./root.conffile"),
                         "conffile prompt detection incorrect")
 
+    def testWillPromptMultiple(self):
+        test_pkg = "./packages/multiple-conffiles_2_all.deb"
+        self.assertTrue(conffile_prompt(test_pkg, prefix="./root.conffile"),
+                        "conffile prompt detection incorrect")
+
 
 if __name__ == "__main__":
     logging.basicConfig(level=logging.DEBUG)
