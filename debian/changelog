@@ -2,6 +2,8 @@ unattended-upgrades (0.72.2) UNRELEASED; urgency=low
 
   * po/fr.po:
     - updated, thanks to to Steve Petruzzello (closes: #622718)
+  * debian/po/ca.po:
+    - added, thanks to Innocent De Marchi (closes: #628368)
   * unattended-upgrade:
     - fix conffile prompt detection (closes: #624148)
 
