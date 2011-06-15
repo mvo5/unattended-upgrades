@@ -1,53 +1,15 @@
 #!/usr/bin/make -f
-# -*- makefile -*-
-# Sample debian/rules that uses debhelper.
-# GNU copyright 1997 to 1999 by Joey Hess.
 
-# Uncomment this to turn on verbose mode.
-#export DH_VERBOSE=1
-
-
-PKG=unattended-upgrades
 DIST=$(shell /usr/bin/lsb_release -i -s)
-DEBVER=$(shell dpkg-parsechangelog |sed -n -e '/^Version:/s/^Version: //p')
-DEB_BUILD_PROG:=debuild --preserve-envvar PATH --preserve-envvar CCACHE_DIR -us -uc $(DEB_BUILD_PROG_OPTS)
-PYVER=$(shell pyversions -dv)
 
+%:
+	dh $@
 
-
-ifeq (,$(findstring nostrip,$(DEB_BUILD_OPTIONS)))
-	INSTALL_PROGRAM += -s
-endif
-
-configure: configure-stamp
-configure-stamp:
-	dh_testdir
-	# Add here commands to configure the package.
-
-	touch configure-stamp
-
-
-build: build-stamp
-
-build-stamp: configure-stamp 
-	dh_testdir
-
-	# Add here commands to compile the package.
-	#$(MAKE)
-	./setup.py build
+override_dh_auto_build:
 	# copy the right template into place
 	cp data/50unattended-upgrades.$(DIST) data/50unattended-upgrades
-	touch build-stamp
 
-clean: 
-	dh_testdir
-	dh_testroot
-	rm -f build-stamp configure-stamp
-
-	# Add here commands to clean up after the build process.
-	#-$(MAKE) clean
-	./setup.py clean --all
-
+override_dh_auto_clean:
 	# Sanity-check before upload.
 	set -e; if [ -e /usr/lib/python$(PYVER)/py_compile.py ]; then \
 		for f in unattended-upgrade unattended-upgrade-shutdown; do \
@@ -57,47 +19,5 @@ clean:
 			rm -f $$f.py; \
 		done; \
 	fi
-
-	find . -name "*.so" -exec rm {} \;
-	find . -name "*.o" -exec rm {} \;
-	find . -name "*.pyc" -exec rm {} \;
-
-	debconf-updatepo
 	dh_clean 
 
-install: build
-	dh_testdir
-	dh_testroot
-	dh_clean -k 
-	dh_installdirs
-
-	# Add here commands to install the package into debian/$(PKG).
-	./setup.py install --prefix=$(CURDIR)/debian/$(PKG)/usr --install-layout=deb
-
-# Build architecture-independent files here.
-binary-indep: build install
-	dh_testdir
-	dh_testroot
-	dh_installchangelogs 
-	dh_installdocs
-	dh_installexamples
-#	dh_install
-	dh_installdebconf	
-	dh_installlogrotate
-	dh_installmime
-	dh_installinit --no-start -- start 10 0 6 .
-	dh_installman
-	dh_link
-	dh_strip
-	dh_compress
-	dh_fixperms
-	dh_python
-	dh_installdeb
-	dh_shlibdeps
-	dh_gencontrol
-	dh_md5sums
-	dh_builddeb
-
-
-binary: binary-indep binary-arch
-.PHONY: build clean binary-indep binary-arch binary install configure
