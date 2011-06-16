@@ -10,5 +10,5 @@ import time
 pid = os.fork()
 if pid == 0:
     os.setsid()
-    lock = apt_pkg.GetLock("/var/run/unattended-upgrades.lock")
+    lock = apt_pkg.get_lock("/var/run/unattended-upgrades.lock")
     time.sleep(500)

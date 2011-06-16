@@ -79,7 +79,7 @@ def is_dpkg_journal_dirty():
     (similar to debSystem::CheckUpdates)
     """
     d = os.path.dirname(
-        apt_pkg.Config.find_file("Dir::State::status"))+"/updates"
+        apt_pkg.config.find_file("Dir::State::status"))+"/updates"
     for f in os.listdir(d):
         if re.match("[0-9]+", f):
             return True
