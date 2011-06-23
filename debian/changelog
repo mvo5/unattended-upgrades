@@ -1,3 +1,9 @@
+unattended-upgrades (0.72.4) UNRELEASED; urgency=low
+
+  * updated de.po, closes: #631316 (thanks to Helge Kreutzmann)
+
+ -- Michael Vogt <michael.vogt@ubuntu.com>  Thu, 23 Jun 2011 10:05:24 +0200
+
 unattended-upgrades (0.72.3) unstable; urgency=low
 
   * debian/rules:
