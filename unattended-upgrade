@@ -252,7 +252,7 @@ def check_changes_for_sanity(cache, allowed_origins, blacklist):
                 return False
             for blacklist_regexp in blacklist:
                 if re.match(blacklist_regexp, pkg.name):
-                    logging.debug("pkg '%s' blacklisted" % pkg.name)
+                    logging.debug("skipping blacklisted package '%s'" % pkg.name)
                     return False
             if pkg._pkg.selected_state == apt_pkg.SELSTATE_HOLD:
                 logging.debug("pkg '%s' is on hold" % pkg.name)

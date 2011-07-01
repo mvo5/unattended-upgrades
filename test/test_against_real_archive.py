@@ -4,9 +4,8 @@ import apt
 import apt_pkg
 import glob
 import os
-import logging
+import re
 import unittest
-import sys
 
 import unattended_upgrade
 
@@ -31,7 +30,7 @@ class TestAgainstRealArchive(unittest.TestCase):
         cache.update()
         del cache
         # create mock options
-        options = MockOptions(debug=False)
+        options = MockOptions(debug=True)
         # ensure apt does not do any post-invoke stuff that fails
         # (because we are not root)
         apt_pkg.config.clear("DPkg::Post-Invoke")
@@ -44,7 +43,12 @@ class TestAgainstRealArchive(unittest.TestCase):
         self.assertTrue(os.path.exists(logfile))
         log = open(logfile).read()
         # check if we actually have the expected ugprade in it
-        self.assertTrue("INFO Packages that are upgraded: awstats" in log)
+        self.assertTrue(
+            re.search("INFO Packages that are upgraded:.*awstats", log))
+        self.assertFalse(
+            re.search("INFO Packages that are upgraded:.*ant-doc", log))
+        self.assertTrue(
+            re.search("DEBUG skipping blacklisted package 'ant-doc'", log))
 
 if __name__ == "__main__":
     unittest.main()
