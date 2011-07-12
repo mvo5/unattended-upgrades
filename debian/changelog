@@ -1,6 +1,9 @@
 unattended-upgrades (0.72.4) UNRELEASED; urgency=low
 
-  * updated de.po, closes: #631316 (thanks to Helge Kreutzmann)
+  * debian/po/de.po:
+    - updated, closes: #631316 (thanks to Helge Kreutzmann)
+  * merged lp:~brian-murray/unattended-upgrades/init-eol, this
+    makes the shutdown message nicer, thanks to Brian Murray
 
  -- Michael Vogt <michael.vogt@ubuntu.com>  Thu, 23 Jun 2011 10:05:24 +0200
 
