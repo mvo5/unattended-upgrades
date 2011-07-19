@@ -1,4 +1,4 @@
-unattended-upgrades (0.73) UNRELEASED; urgency=low
+unattended-upgrades (0.73ubuntu1) oneiric; urgency=low
 
   * debian/po/de.po:
     - updated, closes: #631316 (thanks to Helge Kreutzmann)
@@ -17,7 +17,7 @@ unattended-upgrades (0.73) UNRELEASED; urgency=low
       This can be override with the option:
       Unattended-Upgrade::IgnoreAppsRequireRestart=true
 
- -- Michael Vogt <michael.vogt@ubuntu.com>  Thu, 23 Jun 2011 10:05:24 +0200
+ -- Michael Vogt <michael.vogt@ubuntu.com>  Tue, 19 Jul 2011 16:44:51 +0200
 
 unattended-upgrades (0.72.3) unstable; urgency=low
 
