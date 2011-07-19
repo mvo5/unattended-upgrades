@@ -54,9 +54,24 @@ SENDMAIL_BINARY = "/usr/sbin/sendmail"
 DISTRO_CODENAME = lsb_release.get_distro_information()['CODENAME']
 DISTRO_ID = lsb_release.get_distro_information()['ID']
 
+# progress information is written here
+PROGRESS_LOG="/var/run/unattended-upgrades.progres"
+
 # set from the sigint signal handler
 SIGNAL_STOP_REQUEST=False
 
+class LogInstallProgress(apt.progress.base.InstallProgress):
+    """ Install progress that writes to self.LOG
+        (/var/run/unattended-upgrades.progress by default)
+    """
+
+    LOG = PROGRESS_LOG 
+
+    def status_change(self, pkg, percent, status):
+        f=open(self.LOG, "w")
+        f.write("%s: %s\n" % (percent, pkg))
+        f.close()
+        
 
 class Unlocked:
     """ context manager for unlocking the apt lock while cache.commit()
@@ -165,9 +180,10 @@ def match_whitelist_string(whitelist, origin):
 def upgrade_normal(cache, pkgs_to_upgrade, logfile_dpkg):
     error = None
     res = False
+    iprogress = LogInstallProgress()
     try:
         with Unlocked():
-            res = cache.commit()
+            res = cache.commit(install_progress=iprogress)
     except SystemError,e:
         error = e
     if res:
@@ -208,12 +224,20 @@ def upgrade_in_minimal_steps(cache, pkgs_to_upgrade, logfile_dpkg=""):
                 logging.debug("found  partition of size %s (%s)" % (len(changes), changes))
                 smallest_partition = changes
             cache.clear()
+
+        # write progress log information
+        f=open(PROGRESS_LOG+".overall", "w")
+        percent = len(to_upgrade)/len(pkgs_to_upgrade)*100.0
+        f.write("%s: %s" % (percent, ",".join(smallest_partition)))
+        f.close()
+
         # apply changes
         logging.debug("applying set %s" % smallest_partition)
         rewind_cache(cache, [cache[name] for name in smallest_partition])
         try:
+            iprogress = LogInstallProgress()
             with Unlocked():
-                res = cache.commit()
+                res = cache.commit(install_progress=iprogress)
                 if not res:
                     raise Exception("cache.commit() returned false")
             cache.open()

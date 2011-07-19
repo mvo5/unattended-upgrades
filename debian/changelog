@@ -4,6 +4,9 @@ unattended-upgrades (0.72.4) UNRELEASED; urgency=low
     - updated, closes: #631316 (thanks to Helge Kreutzmann)
   * merged lp:~brian-murray/unattended-upgrades/init-eol, this
     makes the shutdown message nicer, thanks to Brian Murray
+  * unattended-upgrade:
+    - write progress information /var/run/unattended-upgrades.progres
+      so that the progress can be displayed on shutdown
 
  -- Michael Vogt <michael.vogt@ubuntu.com>  Thu, 23 Jun 2011 10:05:24 +0200
 
