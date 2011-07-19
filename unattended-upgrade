@@ -284,9 +284,9 @@ def check_changes_for_sanity(cache, allowed_origins, blacklist):
                 return False
             # check if the package is unsafe to upgrade unattended
             ignore_require_restart = apt_pkg.config.find_b(
-                "Unattended-Upgrade::IgnoreAppsRequireRestart", false)
+                "Unattended-Upgrade::IgnoreAppsRequireRestart", False)
             if (pkg.marked_upgrade and
-                ignore_require_restart == false and
+                ignore_require_restart == False and
                 pkg.candidate.record.get("Upgrade-Requires") == "app-restart"):
                 logging.debug("pkg '%s' requires app-restart, not safe to upgrade unattended")
                 return False
