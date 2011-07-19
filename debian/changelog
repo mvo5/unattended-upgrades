@@ -1,4 +1,4 @@
-unattended-upgrades (0.72.4) UNRELEASED; urgency=low
+unattended-upgrades (0.73) UNRELEASED; urgency=low
 
   * debian/po/de.po:
     - updated, closes: #631316 (thanks to Helge Kreutzmann)
@@ -7,6 +7,10 @@ unattended-upgrades (0.72.4) UNRELEASED; urgency=low
   * unattended-upgrade:
     - write progress information /var/run/unattended-upgrades.progres
       so that the progress can be displayed on shutdown
+  * unattended-upgrade-shutdown:
+    - show install progress during shutdown
+  * po/unattended-upgrades.pot:
+    - refresh
 
  -- Michael Vogt <michael.vogt@ubuntu.com>  Thu, 23 Jun 2011 10:05:24 +0200
 

@@ -55,7 +55,7 @@ DISTRO_CODENAME = lsb_release.get_distro_information()['CODENAME']
 DISTRO_ID = lsb_release.get_distro_information()['ID']
 
 # progress information is written here
-PROGRESS_LOG="/var/run/unattended-upgrades.progres"
+PROGRESS_LOG="/var/run/unattended-upgrades.progress"
 
 # set from the sigint signal handler
 SIGNAL_STOP_REQUEST=False
@@ -69,7 +69,7 @@ class LogInstallProgress(apt.progress.base.InstallProgress):
 
     def status_change(self, pkg, percent, status):
         f=open(self.LOG, "w")
-        f.write("%s: %s\n" % (percent, pkg))
+        f.write(_("Progress: %s %% (%s)") % (percent, pkg))
         f.close()
         
 
@@ -226,9 +226,10 @@ def upgrade_in_minimal_steps(cache, pkgs_to_upgrade, logfile_dpkg=""):
             cache.clear()
 
         # write progress log information
-        f=open(PROGRESS_LOG+".overall", "w")
+        f=open(PROGRESS_LOG+".minimal-steps", "w")
         percent = len(to_upgrade)/len(pkgs_to_upgrade)*100.0
-        f.write("%s: %s" % (percent, ",".join(smallest_partition)))
+        f.write(_("Progress: %s %%: (%s)") % (
+                    percent, ",".join(smallest_partition)))
         f.close()
 
         # apply changes

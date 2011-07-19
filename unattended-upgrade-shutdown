@@ -94,6 +94,10 @@ if __name__ == "__main__":
 	# wait a some seconds and try again
         msg = _("Unattended-upgrade in progress during shutdown, "
                 "sleeping for 5s")
+        # progress info
+        progress = "/var/run/unattended-upgrades.progress"
+        if os.path.exists(progress):
+            msg += "\n" + open(progress).read()
         logging.warning(msg)
         do_plymouth(msg)
         do_usplash(msg)
