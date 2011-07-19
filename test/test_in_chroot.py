@@ -7,6 +7,7 @@ import os
 import shutil
 import subprocess
 import sys
+import time
 import unittest
 
 apt.apt_pkg.config.set("APT::Architecture", "i386")
@@ -64,6 +65,9 @@ class TestUnattendedUpgrade(unittest.TestCase):
             print "Skipping because uid != 0"
             return
 
+        # clear to avoid pollution in the chroot
+        apt.apt_pkg.config.clear("Acquire::http::ProxyAutoDetect")
+
         # create chroot
         target = "./test-chroot"
         # cleanup 
@@ -92,9 +96,27 @@ class TestUnattendedUpgrade(unittest.TestCase):
             unattended_upgrade.main(options)
             os._exit(0)
         else:
-            (pid, status) = os.waitpid(pid, 0)
-            ret = os.WEXITSTATUS(status)
+            has_progress=True
+            all_progress = ""
+            progress_log = os.path.join(
+                target, "var/run/unattended-upgrades.progress")
+            while True:
+                time.sleep(0.01)
+                if os.path.exists(progress_log):
+                    progress = open(progress_log).read()
+                    if progress:
+                        has_progress &= progress.startswith("Progress")
+                    all_progress += progress
+                # check exit status
+                (apid, status) = os.waitpid(pid, os.WNOHANG)
+                if pid == apid:
+                    ret = os.WEXITSTATUS(status)
+                    break
+        #print "*******************", all_progress
         self.assertEqual(ret, 0)
+        self.assertTrue(has_progress, True)
+        # this is a bit random, we just want to be sure we have data
+        self.assertTrue(len(all_progress) > 10)
         # examine log
         log = os.path.join(
             target, "var/log/unattended-upgrades/unattended-upgrades.log")
