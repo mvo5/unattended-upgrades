@@ -282,6 +282,14 @@ def check_changes_for_sanity(cache, allowed_origins, blacklist):
             if pkg._pkg.selected_state == apt_pkg.SELSTATE_HOLD:
                 logging.debug("pkg '%s' is on hold" % pkg.name)
                 return False
+            # check if the package is unsafe to upgrade unattended
+            ignore_require_restart = apt_pkg.config.find_b(
+                "Unattended-Upgrade::IgnoreAppsRequireRestart", false)
+            if (pkg.marked_upgrade and
+                ignore_require_restart == false and
+                pkg.candidate.record.get("Upgrade-Requires") == "app-restart"):
+                logging.debug("pkg '%s' requires app-restart, not safe to upgrade unattended")
+                return False
     return True
 
 def pkgname_from_deb(debfile):

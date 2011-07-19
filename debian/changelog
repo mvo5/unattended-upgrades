@@ -11,6 +11,11 @@ unattended-upgrades (0.73) UNRELEASED; urgency=low
     - show install progress during shutdown
   * po/unattended-upgrades.pot:
     - refresh
+  * unattended-upgrade:
+    - Do not upgrade apps if "XB-Upgrade-Requires: app-restart"
+      is set in the debian/control file.
+      This can be override with the option:
+      Unattended-Upgrade::IgnoreAppsRequireRestart=true
 
  -- Michael Vogt <michael.vogt@ubuntu.com>  Thu, 23 Jun 2011 10:05:24 +0200
 
