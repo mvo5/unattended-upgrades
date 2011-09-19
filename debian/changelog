@@ -4,6 +4,8 @@ unattended-upgrades (0.73.1ubuntu1) UNRELEASED; urgency=low
     - re-eval pkgs_kept_back after a successful upgrade to ensure
       that its in sync with the cache (closes: #639840), thanks to
       Iain Nicol
+    - do not write dpkg terminal log in --dry-run mode instead just
+      output to stdout (closes: #640329)
   * test/test_origin_pattern.py:
     - test fixes
 

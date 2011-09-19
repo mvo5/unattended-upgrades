@@ -707,11 +707,17 @@ def main(options, rootdir=""):
     logfile_dpkg = os.path.join(
         _get_logdir(), 'unattended-upgrades-dpkg_%s.log' % now.isoformat('_'))
     logging.info(_("Writing dpkg log to '%s'") % logfile_dpkg)
-    fd = os.open(logfile_dpkg, os.O_RDWR|os.O_CREAT, 0644)
-    old_stdout = os.dup(1)
-    old_stderr = os.dup(2)
-    os.dup2(fd,1)
-    os.dup2(fd,2)
+
+    # do not create log in dry-run mode, just output to stdout/stderr
+    if options.dry_run:
+        old_stdout = 1
+        old_stderr = 2
+    else:
+        fd = os.open(logfile_dpkg, os.O_RDWR|os.O_CREAT, 0644)
+        old_stdout = os.dup(1)
+        old_stderr = os.dup(2)
+        os.dup2(fd,1)
+        os.dup2(fd,2)
 
     try:
         # lock for the shutdown check - its fine if the system
