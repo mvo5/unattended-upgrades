@@ -75,9 +75,11 @@ class TestOriginPatern(unittest.TestCase):
         pkg._pkg.selected_state = 0
         pkg.name = "linux-image"
         pkg.marked_install = True
+        pkg.marked_upgrade = True
         pkg.marked_delete = False
         pkg.candidate = MockCandidate()
         pkg.candidate.origins = [self._get_mock_origin("Ubuntu")]
+        pkg.candidate.record = {}
         # mock cache
         cache = MockCache()
         cache._depcache = MockDepCache()

@@ -579,7 +579,15 @@ def main(options, rootdir=""):
                 pkg.mark_upgrade()
                 if check_changes_for_sanity(cache, allowed_origins,
                                             blacklisted_pkgs):
+                    # add to packages to upgrade
                     pkgs_to_upgrade.append(pkg)
+                    # re-eval pkgs_kept_back as the resolver may fail to 
+                    # directly upgrade a pkg, but that may work during
+                    # a subsequent operation, see debian bug #639840
+                    for pkgname in pkgs_kept_back:
+                        if (cache[pkgname].marked_install or
+                            cache[pkgname].marked_upgrade):
+                            pkgs_kept_back.delete(pkgname)
                 else:
                     logging.debug("sanity check failed")
                     rewind_cache(cache, pkgs_to_upgrade)

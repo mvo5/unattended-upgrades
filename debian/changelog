@@ -1,3 +1,14 @@
+unattended-upgrades (0.73.1ubuntu1) UNRELEASED; urgency=low
+
+  * unattended-upgrade:
+    - re-eval pkgs_kept_back after a successful upgrade to ensure
+      that its in sync with the cache (closes: #639840), thanks to
+      Iain Nicol
+  * test/test_origin_pattern.py:
+    - test fixes
+
+ -- Michael Vogt <michael.vogt@ubuntu.com>  Mon, 19 Sep 2011 11:22:43 +0200
+
 unattended-upgrades (0.73ubuntu1) oneiric; urgency=low
 
   * debian/po/de.po:
