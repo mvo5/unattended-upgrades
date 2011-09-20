@@ -26,9 +26,12 @@ case "$1" in
   restart|force-reload)
 	# nothing
 	;;
+  status)
+	exit 0
+	;;
   *)
     N=/etc/init.d/$NAME
-    echo "Usage: $N {start|stop|restart|force-reload}" >&2
+    echo "Usage: $N {start|stop|restart|force-reload|status}" >&2
     exit 1
     ;;
 esac
