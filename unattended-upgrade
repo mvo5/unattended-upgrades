@@ -588,6 +588,7 @@ def main(options, rootdir=""):
                         if (cache[pkgname].marked_install or
                             cache[pkgname].marked_upgrade):
                             pkgs_kept_back.remove(pkgname)
+                            pkgs_to_upgrade.append(pkgname)
                 else:
                     logging.debug("sanity check failed")
                     rewind_cache(cache, pkgs_to_upgrade)
