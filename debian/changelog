@@ -13,6 +13,10 @@ unattended-upgrades (0.73.1ubuntu1) UNRELEASED; urgency=low
   [ Peter Eisentraut ]
   * debian/unattended-upgrade.init:
     - add support for "status" action
+  
+  [ Iain Nicol ]
+  * unattended-upgrade:
+    - ensure pkgs_to_upgrade stays sorted and fix crash
 
  -- Michael Vogt <michael.vogt@ubuntu.com>  Mon, 19 Sep 2011 11:22:43 +0200
 

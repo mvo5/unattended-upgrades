@@ -588,7 +588,7 @@ def main(options, rootdir=""):
                         if (cache[pkgname].marked_install or
                             cache[pkgname].marked_upgrade):
                             pkgs_kept_back.remove(pkgname)
-                            pkgs_to_upgrade.append(pkgname)
+                            pkgs_to_upgrade.append(cache[pkgname])
                 else:
                     logging.debug("sanity check failed")
                     rewind_cache(cache, pkgs_to_upgrade)
@@ -600,6 +600,7 @@ def main(options, rootdir=""):
                 pkgs_kept_back.append(pkg.name)
                 
 
+    pkgs_to_upgrade.sort(key=lambda p: p.name)
     pkgs = "\n".join([pkg.name for pkg in pkgs_to_upgrade])
     logging.debug("pkgs that look like they should be upgraded: %s" % pkgs)
            
