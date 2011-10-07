@@ -9,7 +9,6 @@ import sys
 import time
 
 import unattended_upgrade
-from unattended_upgrade import upgrade_in_minimal_steps
 
 class TestMinimalPartitions(unittest.TestCase):
 
@@ -30,7 +29,9 @@ class TestMinimalPartitions(unittest.TestCase):
     def test_upgrade_in_minimal_steps(self):
         self.cache.upgrade(True)
         pkgs_to_upgrade = [pkg.name for pkg in self.cache.get_changes()]
-        upgrade_in_minimal_steps(self.cache, pkgs_to_upgrade)
+        unattended_upgrade.PROGRESS_LOG="./aptroot/var/run/unatteded-upgrades.progress"
+        unattended_upgrade.upgrade_in_minimal_steps(
+            self.cache, pkgs_to_upgrade)
         
 
 if __name__ == "__main__":

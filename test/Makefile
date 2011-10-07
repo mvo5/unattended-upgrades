@@ -15,3 +15,5 @@ check:
 clean:
 	rm -rf ./aptroot/var/cache/
 	rm -rf ./aptroot/var/lib/apt
+	rm -rf ./aptroot/var/run
+
