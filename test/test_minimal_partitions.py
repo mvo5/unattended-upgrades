@@ -10,6 +10,17 @@ import time
 
 import unattended_upgrade
 
+class LogInstallProgressMock(unattended_upgrade.LogInstallProgress):
+
+    # klass data so that we can veriy in the test as the actual
+    # object is destroyed
+    DATA = []
+    
+    # overwrite to log the data
+    def status_change(self, pkg, percent, status):
+        print pkg, percent
+        self.DATA.append([pkg, percent])
+
 class TestMinimalPartitions(unittest.TestCase):
 
     def setUp(self):
@@ -30,9 +41,16 @@ class TestMinimalPartitions(unittest.TestCase):
         self.cache.upgrade(True)
         pkgs_to_upgrade = [pkg.name for pkg in self.cache.get_changes()]
         unattended_upgrade.PROGRESS_LOG="./aptroot/var/run/unatteded-upgrades.progress"
+        unattended_upgrade.LogInstallProgress = LogInstallProgressMock
         unattended_upgrade.upgrade_in_minimal_steps(
             self.cache, pkgs_to_upgrade)
-        
+        # ensure we count upwarts
+        last_percent = -1
+        for (pkg, percent) in LogInstallProgressMock.DATA:
+            self.assertTrue(last_percent < percent)
+            last_percent = percent
+        # cleanup class data
+        LogInstallProgressMock.DATA = []
 
 if __name__ == "__main__":
     #logging.basicConfig(level=logging.DEBUG)
