@@ -20,15 +20,18 @@ set -e
 
 case "$1" in
   start|stop)
-        echo -n "Checking for running $DESC: "
+        echo "Checking for running $DESC: "
 	python /usr/share/unattended-upgrades/unattended-upgrade-shutdown
         ;;
   restart|force-reload)
 	# nothing
 	;;
+  status)
+	exit 0
+	;;
   *)
     N=/etc/init.d/$NAME
-    echo "Usage: $N {start|stop|restart|force-reload}" >&2
+    echo "Usage: $N {start|stop|restart|force-reload|status}" >&2
     exit 1
     ;;
 esac

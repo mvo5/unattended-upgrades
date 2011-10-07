@@ -54,9 +54,24 @@ SENDMAIL_BINARY = "/usr/sbin/sendmail"
 DISTRO_CODENAME = lsb_release.get_distro_information()['CODENAME']
 DISTRO_ID = lsb_release.get_distro_information()['ID']
 
+# progress information is written here
+PROGRESS_LOG="/var/run/unattended-upgrades.progress"
+
 # set from the sigint signal handler
 SIGNAL_STOP_REQUEST=False
 
+class LogInstallProgress(apt.progress.base.InstallProgress):
+    """ Install progress that writes to self.LOG
+        (/var/run/unattended-upgrades.progress by default)
+    """
+
+    LOG = PROGRESS_LOG 
+
+    def status_change(self, pkg, percent, status):
+        f=open(self.LOG, "w")
+        f.write(_("Progress: %s %% (%s)") % (percent, pkg))
+        f.close()
+        
 
 class Unlocked:
     """ context manager for unlocking the apt lock while cache.commit()
@@ -165,9 +180,10 @@ def match_whitelist_string(whitelist, origin):
 def upgrade_normal(cache, pkgs_to_upgrade, logfile_dpkg):
     error = None
     res = False
+    iprogress = LogInstallProgress()
     try:
         with Unlocked():
-            res = cache.commit()
+            res = cache.commit(install_progress=iprogress)
     except SystemError,e:
         error = e
     if res:
@@ -208,12 +224,21 @@ def upgrade_in_minimal_steps(cache, pkgs_to_upgrade, logfile_dpkg=""):
                 logging.debug("found  partition of size %s (%s)" % (len(changes), changes))
                 smallest_partition = changes
             cache.clear()
+
+        # write progress log information
+        f=open(PROGRESS_LOG+".minimal-steps", "w")
+        percent = len(to_upgrade)/len(pkgs_to_upgrade)*100.0
+        f.write(_("Progress: %s %%: (%s)") % (
+                    percent, ",".join(smallest_partition)))
+        f.close()
+
         # apply changes
         logging.debug("applying set %s" % smallest_partition)
         rewind_cache(cache, [cache[name] for name in smallest_partition])
         try:
+            iprogress = LogInstallProgress()
             with Unlocked():
-                res = cache.commit()
+                res = cache.commit(install_progress=iprogress)
                 if not res:
                     raise Exception("cache.commit() returned false")
             cache.open()
@@ -252,10 +277,18 @@ def check_changes_for_sanity(cache, allowed_origins, blacklist):
                 return False
             for blacklist_regexp in blacklist:
                 if re.match(blacklist_regexp, pkg.name):
-                    logging.debug("pkg '%s' blacklisted" % pkg.name)
+                    logging.debug("skipping blacklisted package '%s'" % pkg.name)
                     return False
             if pkg._pkg.selected_state == apt_pkg.SELSTATE_HOLD:
                 logging.debug("pkg '%s' is on hold" % pkg.name)
+                return False
+            # check if the package is unsafe to upgrade unattended
+            ignore_require_restart = apt_pkg.config.find_b(
+                "Unattended-Upgrade::IgnoreAppsRequireRestart", False)
+            if (pkg.marked_upgrade and
+                ignore_require_restart == False and
+                pkg.candidate.record.get("Upgrade-Requires") == "app-restart"):
+                logging.debug("pkg '%s' requires app-restart, not safe to upgrade unattended")
                 return False
     return True
 
@@ -546,7 +579,16 @@ def main(options, rootdir=""):
                 pkg.mark_upgrade()
                 if check_changes_for_sanity(cache, allowed_origins,
                                             blacklisted_pkgs):
+                    # add to packages to upgrade
                     pkgs_to_upgrade.append(pkg)
+                    # re-eval pkgs_kept_back as the resolver may fail to 
+                    # directly upgrade a pkg, but that may work during
+                    # a subsequent operation, see debian bug #639840
+                    for pkgname in pkgs_kept_back:
+                        if (cache[pkgname].marked_install or
+                            cache[pkgname].marked_upgrade):
+                            pkgs_kept_back.remove(pkgname)
+                            pkgs_to_upgrade.append(cache[pkgname])
                 else:
                     logging.debug("sanity check failed")
                     rewind_cache(cache, pkgs_to_upgrade)
@@ -558,6 +600,7 @@ def main(options, rootdir=""):
                 pkgs_kept_back.append(pkg.name)
                 
 
+    pkgs_to_upgrade.sort(key=lambda p: p.name)
     pkgs = "\n".join([pkg.name for pkg in pkgs_to_upgrade])
     logging.debug("pkgs that look like they should be upgraded: %s" % pkgs)
            
@@ -666,11 +709,17 @@ def main(options, rootdir=""):
     logfile_dpkg = os.path.join(
         _get_logdir(), 'unattended-upgrades-dpkg_%s.log' % now.isoformat('_'))
     logging.info(_("Writing dpkg log to '%s'") % logfile_dpkg)
-    fd = os.open(logfile_dpkg, os.O_RDWR|os.O_CREAT, 0644)
-    old_stdout = os.dup(1)
-    old_stderr = os.dup(2)
-    os.dup2(fd,1)
-    os.dup2(fd,2)
+
+    # do not create log in dry-run mode, just output to stdout/stderr
+    if options.dry_run:
+        old_stdout = 1
+        old_stderr = 2
+    else:
+        fd = os.open(logfile_dpkg, os.O_RDWR|os.O_CREAT, 0644)
+        old_stdout = os.dup(1)
+        old_stderr = os.dup(2)
+        os.dup2(fd,1)
+        os.dup2(fd,2)
 
     try:
         # lock for the shutdown check - its fine if the system

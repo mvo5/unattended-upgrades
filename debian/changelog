@@ -1,3 +1,46 @@
+unattended-upgrades (0.73.1ubuntu1) UNRELEASED; urgency=low
+
+  [ Michael Vogt ]
+  * unattended-upgrade:
+    - re-eval pkgs_kept_back after a successful upgrade to ensure
+      that its in sync with the cache (closes: #639840), thanks to
+      Iain Nicol
+    - do not write dpkg terminal log in --dry-run mode instead just
+      output to stdout (closes: #640329)
+  * test/test_origin_pattern.py:
+    - test fixes
+  
+  [ Peter Eisentraut ]
+  * debian/unattended-upgrade.init:
+    - add support for "status" action
+  
+  [ Iain Nicol ]
+  * unattended-upgrade:
+    - ensure pkgs_to_upgrade stays sorted and fix crash
+
+ -- Michael Vogt <michael.vogt@ubuntu.com>  Mon, 19 Sep 2011 11:22:43 +0200
+
+unattended-upgrades (0.73ubuntu1) oneiric; urgency=low
+
+  * debian/po/de.po:
+    - updated, closes: #631316 (thanks to Helge Kreutzmann)
+  * merged lp:~brian-murray/unattended-upgrades/init-eol, this
+    makes the shutdown message nicer, thanks to Brian Murray
+  * unattended-upgrade:
+    - write progress information /var/run/unattended-upgrades.progres
+      so that the progress can be displayed on shutdown
+  * unattended-upgrade-shutdown:
+    - show install progress during shutdown
+  * po/unattended-upgrades.pot:
+    - refresh
+  * unattended-upgrade:
+    - Do not upgrade apps if "XB-Upgrade-Requires: app-restart"
+      is set in the debian/control file.
+      This can be override with the option:
+      Unattended-Upgrade::IgnoreAppsRequireRestart=true
+
+ -- Michael Vogt <michael.vogt@ubuntu.com>  Tue, 19 Jul 2011 16:44:51 +0200
+
 unattended-upgrades (0.72.3) unstable; urgency=low
 
   * debian/rules:

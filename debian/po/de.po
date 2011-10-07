@@ -1,36 +1,150 @@
-# Translation of unattended-upgrades debconf templates to German
-# Copyright (C) Helge Kreutzmann <debian@helgefjell.de>, 2008.
+# Translation of unattended-upgrades templates to German
+# Copyright (C) Helge Kreutzmann <debian@helgefjell.de>, 2009.
 # This file is distributed under the same license as the unattended-upgrades package.
 #
 msgid ""
 msgstr ""
-"Project-Id-Version: unattended-upgrades 0.35debian2\n"
-"Report-Msgid-Bugs-To: unattended-upgrades@packages.debian.org\n"
-"POT-Creation-Date: 2008-12-08 18:38+0100\n"
-"PO-Revision-Date: 2008-12-09 18:19+0100\n"
+"Project-Id-Version: unattended-upgrades 0.72.3\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2009-05-06 10:52+0200\n"
+"PO-Revision-Date: 2011-06-22 08:49+0200\n"
 "Last-Translator: Helge Kreutzmann <debian@helgefjell.de>\n"
 "Language-Team: de <debian-l10n-german@lists.debian.org>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 
-#. Type: boolean
-#. Description
-#: ../templates:2001
-msgid "Automatically download and install stable updates?"
-msgstr "Aktualisierungen für Stable automatisch herunterladen und installieren?"
+#: ../unattended-upgrade:151
+msgid "print debug messages"
+msgstr "Debug-Meldungen ausgeben"
 
-#. Type: boolean
-#. Description
-#: ../templates:2001
-msgid ""
-"Applying updates on a frequent basis is an important part of keeping systems "
-"secure. By default, updates need to be applied manually using package  "
-"management tools. Alternatively, you can choose to have this system  "
-"automatically download and install security updates."
+#: ../unattended-upgrade:170
+#, c-format
+msgid "Initial blacklisted packages: %s"
+msgstr "Anfänglich ausgeschlossene Pakete: %s"
+
+#: ../unattended-upgrade:171
+msgid "Starting unattended upgrades script"
+msgstr "Unattended-Upgrades-Skript wird gestartet"
+
+#: ../unattended-upgrade:174
+#, c-format
+msgid "Allowed origins are: %s"
+msgstr "Erlaubte Quellen sind: %s"
+
+#: ../unattended-upgrade:179 ../unattended-upgrade:180
+msgid "Cache has broken packages, exiting"
+msgstr "Zwischenspeicher (Cache) enthält defekte Pakete, Programm wird beendet"
+
+#: ../unattended-upgrade:204
+#, c-format
+msgid "package '%s' upgradable but fails to be marked for upgrade (%s)"
 msgstr ""
-"Das regelmäßige Anwenden von Aktualisierungen ist ein wichtiger Beitrag zu "
-"einem sicherem System. Standardmäßig müssen Aktualisierungen mit den "
-"Paketwerkzeugen manuell eingespielt werden. Alternativ können Sie auswählen, "
-"dass dieses System automatisch die Sicherheitsaktualisierungen herunterlädt "
-"und installiert."
+"Upgrade von »%s« möglich, aber Markierung für Upgrade konnte nicht gesetzt "
+"werden (%s)"
+
+#: ../unattended-upgrade:224
+#, c-format
+msgid "GetArchives() failed: '%s'"
+msgstr "GetArchives() fehlgeschlagen: »%s«"
+
+#: ../unattended-upgrade:233 ../unattended-upgrade:234
+#, c-format
+msgid "An error ocured: '%s'"
+msgstr "Ein Fehler ist aufgetreten: »%s«"
+
+#: ../unattended-upgrade:236 ../unattended-upgrade:237
+#, c-format
+msgid "The URI '%s' failed to download, aborting"
+msgstr ""
+"Von der URI »%s« konnte nicht heruntergeladen werden, Programm wird beendet"
+
+#: ../unattended-upgrade:245
+#, c-format
+msgid "Package '%s' has conffile prompt and needs to be upgraded manually"
+msgstr ""
+"Paket »%s« enthält eine Conffile-Eingabeaufforderung und das Upgrade muss "
+"manuell durchgeführt werden"
+
+#: ../unattended-upgrade:264
+#, c-format
+msgid "package '%s' not upgraded"
+msgstr "Upgrade von Paket »%s« nicht durchgeführt"
+
+#: ../unattended-upgrade:275
+msgid "No packages found that can be upgraded unattended"
+msgstr ""
+"Keine Pakete gefunden, von denen ein unbeaufsichtigtes Upgrade durchgeführt "
+"werden kann."
+
+#: ../unattended-upgrade:280
+#, c-format
+msgid "Packages that are upgraded: %s"
+msgstr "Pakete, von denen ein Upgrade durchgeführt wird: %s"
+
+#: ../unattended-upgrade:293
+#, c-format
+msgid "Writing dpkg log to '%s'"
+msgstr "Dpkg-Protokoll wird nach »%s« geschrieben"
+
+#: ../unattended-upgrade:305
+msgid "pm.GetArchives() failed"
+msgstr "pm.GetArchives() fehlgeschlagen"
+
+#: ../unattended-upgrade:313
+msgid "Installing the upgrades failed!"
+msgstr "Installation der Upgrades fehlgeschlagen!"
+
+#: ../unattended-upgrade:314
+#, c-format
+msgid "error message: '%s'"
+msgstr "Fehlermeldung: »%s«"
+
+#: ../unattended-upgrade:318
+#, c-format
+msgid "dpkg returned a error! See '%s' for details"
+msgstr "Dpkg meldete einen Fehler! Lesen Sie »%s« für Details"
+
+#: ../unattended-upgrade:320
+msgid "All upgrades installed"
+msgstr "Alle Upgrades installiert"
+
+#: ../unattended-upgrade:326
+msgid ""
+"No '/usr/bin/mail', can not send mail. You probably want to install the "
+"'mailx' package."
+msgstr ""
+"»/usr/bin/mail« nicht vorhanden, es können keine E-Mails versendet werden. "
+"Wahrscheinlich müssen Sie das Paket »mailx« installieren."
+
+#: ../unattended-upgrade:331
+#, c-format
+msgid "unattended-upgrades result for '%s'"
+msgstr "Ergebnis von unattended-upgrades für »%s«"
+
+#: ../unattended-upgrade:335
+#, c-format
+msgid ""
+"Unattended upgrade returned: %s\n"
+"\n"
+msgstr ""
+"Unbeaufsichtiges Upgrade meldete zurück: %s\n"
+"\n"
+
+#: ../unattended-upgrade:336
+msgid "Packages that are upgraded:\n"
+msgstr "Pakete, bei denen ein Upgrade durchgeführt wurde:\n"
+
+#: ../unattended-upgrade:340
+msgid "Packages with upgradable origin but kept back:\n"
+msgstr ""
+"Pakete, bei denen die Quelle Upgrade-fähig war, die aber zurückgehalten "
+"wurden:\n"
+
+#: ../unattended-upgrade:344
+msgid "Package installation log:"
+msgstr "Paketinstallationsprotokoll:"
+
+#: ../unattended-upgrade:359
+msgid "You need to be root to run this application"
+msgstr "Sie müssen »root« sein, um dieses Programm auszuführen."
