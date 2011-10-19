@@ -60,6 +60,7 @@ PROGRESS_LOG="/var/run/unattended-upgrades.progress"
 # set from the sigint signal handler
 SIGNAL_STOP_REQUEST=False
 
+
 class LogInstallProgress(apt.progress.base.InstallProgress):
     """ Install progress that writes to self.LOG
         (/var/run/unattended-upgrades.progress by default)
@@ -71,7 +72,7 @@ class LogInstallProgress(apt.progress.base.InstallProgress):
         f=open(self.LOG, "w")
         f.write(_("Progress: %s %% (%s)") % (percent, pkg))
         f.close()
-        
+
 
 class Unlocked:
     """ context manager for unlocking the apt lock while cache.commit()
@@ -196,6 +197,10 @@ def upgrade_normal(cache, pkgs_to_upgrade, logfile_dpkg):
     return res
 
 def upgrade_in_minimal_steps(cache, pkgs_to_upgrade, logfile_dpkg=""):
+
+    install_log = LogInstallProgress()
+    install_log.LOG += ".minimal-steps"
+
     # setup signal handler
     signal.signal(signal.SIGUSR1, signal_handler)
 
@@ -226,12 +231,10 @@ def upgrade_in_minimal_steps(cache, pkgs_to_upgrade, logfile_dpkg=""):
             cache.clear()
 
         # write progress log information
-        f=open(PROGRESS_LOG+".minimal-steps", "w")
-        percent = len(to_upgrade)/len(pkgs_to_upgrade)*100.0
-        f.write(_("Progress: %s %%: (%s)") % (
-                    percent, ",".join(smallest_partition)))
-        f.close()
-
+        percent = (len(pkgs_to_upgrade)-len(to_upgrade)) / float(len(pkgs_to_upgrade))*100.0
+        install_log.status_change(pkg=",".join(smallest_partition),
+                                  percent=percent,
+                                  status="")
         # apply changes
         logging.debug("applying set %s" % smallest_partition)
         rewind_cache(cache, [cache[name] for name in smallest_partition])
