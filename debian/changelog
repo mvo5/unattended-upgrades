@@ -1,4 +1,4 @@
-unattended-upgrades (0.73.1ubuntu1) UNRELEASED; urgency=low
+unattended-upgrades (0.73.1) unstable; urgency=low
 
   [ Michael Vogt ]
   * unattended-upgrade:
@@ -18,7 +18,7 @@ unattended-upgrades (0.73.1ubuntu1) UNRELEASED; urgency=low
   * unattended-upgrade:
     - ensure pkgs_to_upgrade stays sorted and fix crash
 
- -- Michael Vogt <michael.vogt@ubuntu.com>  Mon, 19 Sep 2011 11:22:43 +0200
+ -- Michael Vogt <mvo@debian.org>  Wed, 19 Oct 2011 15:16:20 +0200
 
 unattended-upgrades (0.73ubuntu1) oneiric; urgency=low
 
