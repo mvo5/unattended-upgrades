@@ -1,3 +1,11 @@
+unattended-upgrades (0.73.2) unstable; urgency=low
+
+  * unattended-upgrade:
+    - ensure to release shutdown-lock before shutting down 
+      (closes: #645919)
+
+ -- Michael Vogt <michael.vogt@ubuntu.com>  Mon, 24 Oct 2011 09:32:31 +0200
+
 unattended-upgrades (0.73.1) unstable; urgency=low
 
   [ Michael Vogt ]

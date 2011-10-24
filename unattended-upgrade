@@ -724,10 +724,11 @@ def main(options, rootdir=""):
         os.dup2(fd,1)
         os.dup2(fd,2)
 
+    shutdown_lock = None
     try:
         # lock for the shutdown check - its fine if the system
         # is shutdown while downloading but not so much while installing
-        apt_pkg.get_lock("/var/run/unattended-upgrades.lock")
+        shutdown_lock = apt_pkg.get_lock("/var/run/unattended-upgrades.lock")
 
         if (options.minimal_upgrade_steps or 
             apt_pkg.config.find_b("Unattended-Upgrades::MinimalSteps", False)):
@@ -754,6 +755,8 @@ def main(options, rootdir=""):
     # auto-reboot (if required and the config for this is set
     if (apt_pkg.config.find_b("Unattended-Upgrade::Automatic-Reboot", False) and
         os.path.exists(REBOOT_REQUIRED_FILE)):
+        if shutdown_lock is not None:
+            os.close(shutdown_lock)
         logging.warning("Found %s, rebooting" % REBOOT_REQUIRED_FILE)
         subprocess.call(["/sbin/reboot"])
         
