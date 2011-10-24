@@ -27,9 +27,14 @@ case "$1" in
 	fi
 
         db_get unattended-upgrades/enable_auto_updates || true
+	CONFIG="/etc/apt/apt.conf.d/20auto-upgrades"
         if [ "${RET}" = "true" ]; then
 	    NEWFILE="/usr/share/unattended-upgrades/20auto-upgrades"
-	    CONFIG="/etc/apt/apt.conf.d/20auto-upgrades"
+	    ucf --three-way --debconf-ok "$NEWFILE" "$CONFIG"
+	    ucfr unattended-upgrades "$CONFIG"
+        elif [ "${RET}" = "false" ] && [ -e "$CONFIG" ]; then
+            # disable again
+	    NEWFILE="/usr/share/unattended-upgrades/20auto-upgrades-disabled"
 	    ucf --three-way --debconf-ok "$NEWFILE" "$CONFIG"
 	    ucfr unattended-upgrades "$CONFIG"
         fi
