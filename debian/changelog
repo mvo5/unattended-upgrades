@@ -1,3 +1,10 @@
+unattended-upgrades (0.73.3) UNRELEASED; urgency=low
+
+  * debian/po/de.po:
+    - updated, thanks to Helge Kreutzmann (closes: #647172)
+
+ -- Michael Vogt <michael.vogt@ubuntu.com>  Mon, 31 Oct 2011 09:47:04 -0400
+
 unattended-upgrades (0.73.2) unstable; urgency=low
 
   * unattended-upgrade:
