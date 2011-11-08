@@ -1,9 +1,21 @@
-// Automatically upgrade packages from these (origin, archive) pairs
+// Automatically upgrade packages from these origin patterns
 Unattended-Upgrade::Origins-Pattern {
-	"origin=Debian,label=Debian-Security,archive=stable";
-//	"o=Debian,a=stable";
-//	"o=Debian,a=oldstable";
-//	"o={distro_id},a=${distro_codename}-proposed-updates";
+        // Codename based matching:
+        // This will follow the migration of a release through different
+        // archives (e.g. from testing to stable and later oldstable).
+//      "o=Debian,n=squeeze";
+//      "o=Debian,n=squeeze-updates";
+//      "o=Debian,n=squeeze-proposed-updates";
+//      "o=Debian,n=squeeze,l=Debian-Security";
+
+        // Archive or Suite based matching:
+        // Note that this will silently match a different release after
+        // migration to the specified archive (e.g. testing becomes the
+        // new stable).
+//      "o=Debian,a=stable";
+//      "o=Debian,a=stable-updates";
+//      "o=Debian,a=proposed-updates";
+        "origin=Debian,archive=stable,label=Debian-Security";
 };
 
 // List of packages to not update

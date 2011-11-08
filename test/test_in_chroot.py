@@ -4,6 +4,7 @@ import apt
 import logging
 import glob
 import os
+import re
 import shutil
 import subprocess
 import sys
@@ -121,9 +122,10 @@ class TestUnattendedUpgrade(unittest.TestCase):
         log = os.path.join(
             target, "var/log/unattended-upgrades/unattended-upgrades.log")
         logfile = open(log).read()
-        self.assertTrue("Packages that are upgraded: bzip2" in logfile)
-        self.assertFalse("ERROR Installing the upgrades failed" in logfile)
         #print logfile
+        self.assertNotEqual(
+            re.search("Packages that are upgraded:.*bzip2", logfile), None)
+        self.assertFalse("ERROR Installing the upgrades failed" in logfile)
         dpkg_log = os.path.join(target, "var/log/unattended-upgrades/*-dpkg*.log")
         dpkg_logfile = open(glob.glob(dpkg_log)[0]).read()
         self.assertTrue("Preparing to replace bzip2 1.0.5-4" in dpkg_logfile)

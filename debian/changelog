@@ -1,3 +1,28 @@
+unattended-upgrades (0.74) UNRELEASEDunstable; urgency=low
+
+  * test improvements
+  * fix crash when no packages are upgraded
+  * only run dpkg if there are packages to upgrade (closes: #647476)
+  * include "stable-updates" in the configuration example
+  * debian/po/de.po:
+    - updated, thanks to Helge Kreutzmann (closes: #647172)
+  * debian/rules:
+    - install initscripts but do not run them on install/upgrade
+      (closes: #645919), thanks to Teodor MICU
+  * data/50unattended-upgrades.Debian:
+    - update default Debian config for squeeze, thanks to 
+      John Feuerstein for the example (closes: #609854)
+  * debian/prerm:
+    - ignore failures from versions where the initscript is run
+      with "stop" even when not in shutdown mode (closes: #645919)
+  * unattended-upgrade:
+    - ensure to release shutdown-lock before shutting down 
+      (closes: #645919)
+  * debian/postinst, data/20auto-upgrades-disabled:
+    - allow disabling via debconf (closes: #645971)
+
+ -- Michael Vogt <mvo@debian.org>  Tue, 08 Nov 2011 17:37:31 +0100
+
 unattended-upgrades (0.73.1) unstable; urgency=low
 
   [ Michael Vogt ]
