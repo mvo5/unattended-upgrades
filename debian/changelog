@@ -1,3 +1,11 @@
+unattended-upgrades (0.74.1) UNRELEASED; urgency=low
+
+  * debian/unattended-upgrades.init:
+    - only run unattended-upgrades-shutdown if its actually installed
+      (closes: #643607)
+
+ -- Michael Vogt <michael.vogt@ubuntu.com>  Tue, 08 Nov 2011 17:50:12 +0100
+
 unattended-upgrades (0.74) unstable; urgency=low
 
   * test improvements
