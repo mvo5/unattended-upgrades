@@ -231,7 +231,10 @@ def upgrade_in_minimal_steps(cache, pkgs_to_upgrade, logfile_dpkg=""):
             cache.clear()
 
         # write progress log information
-        percent = (len(pkgs_to_upgrade)-len(to_upgrade)) / float(len(pkgs_to_upgrade))*100.0
+        if len(pkgs_to_upgrade) > 0:
+            percent = (len(pkgs_to_upgrade)-len(to_upgrade)) / float(len(pkgs_to_upgrade))*100.0
+        else:
+            percent = 100.0
         install_log.status_change(pkg=",".join(smallest_partition),
                                   percent=percent,
                                   status="")
@@ -447,16 +450,66 @@ def send_summary_mail(pkgs, res, pkgs_kept_back, mem_log, logfile_dpkg):
         s += " " + wrap(" ".join(pkgs_kept_back), 70, " ")
         s += "\n"
     s += "\n"
-    s += _("Package installation log:")+"\n"
-    s += open(logfile_dpkg).read()
-    s += "\n\n"
+    if os.path.exists(logfile_dpkg):
+        s += _("Package installation log:")+"\n"
+        s += open(logfile_dpkg).read()
+        s += "\n\n"
     s += _("Unattended-upgrades log:\n")
     s += mem_log.getvalue()
     mail.stdin.write(s)
     mail.stdin.close()
     ret = mail.wait()
     logging.debug("mail returned: %s" % ret)
+
+
+def do_install(cache, pkgs_to_upgrade, options, logfile_dpkg):
+    # set debconf to NON_INTERACTIVE, redirect output
+    os.putenv("DEBIAN_FRONTEND","noninteractive");
+    setup_apt_listchanges()
     
+    # redirect to log
+    REDIRECT_INPUT = os.devnull
+    fd = os.open(REDIRECT_INPUT, os.O_RDWR)
+    os.dup2(fd,0)
+
+    logging.info(_("Writing dpkg log to '%s'") % logfile_dpkg)
+
+    # do not create log in dry-run mode, just output to stdout/stderr
+    if options.dry_run:
+        old_stdout = 1
+        old_stderr = 2
+    else:
+        fd = os.open(logfile_dpkg, os.O_RDWR|os.O_CREAT, 0644)
+        old_stdout = os.dup(1)
+        old_stderr = os.dup(2)
+        os.dup2(fd,1)
+        os.dup2(fd,2)
+
+    shutdown_lock = -1
+    try:
+        # lock for the shutdown check - its fine if the system
+        # is shutdown while downloading but not so much while installing
+        shutdown_lock = apt_pkg.get_lock("/var/run/unattended-upgrades.lock")
+
+        if (options.minimal_upgrade_steps or 
+            apt_pkg.config.find_b("Unattended-Upgrades::MinimalSteps", False)):
+            open("/var/run/unattended-upgrades.pid", "w").write("%s" % os.getpid())
+            # try upgrade all "pkgs" in minimal steps
+            pkg_install_success = upgrade_in_minimal_steps(
+                cache, [pkg.name for pkg in pkgs_to_upgrade], logfile_dpkg)
+        else:
+            pkg_install_success = upgrade_normal(
+                cache, [pkg.name for pkg in pkgs_to_upgrade], logfile_dpkg)
+    except Exception, e:
+        # print unhandled exceptions here this way, while stderr is redirected
+        os.write(old_stderr, "Exception: %s" % e)
+
+    # restore
+    os.dup2(old_stdout, 1)
+    os.dup2(old_stderr, 2)
+
+    return pkg_install_success
+
 
 def _setup_alternative_rootdir(rootdir):
     # clear system unattended-upgrade stuff
@@ -699,53 +752,15 @@ def main(options, rootdir=""):
     pkgs = " ".join([pkg.name for pkg in pkgs_to_upgrade])
     logging.info(_("Packages that are upgraded: %s" % pkgs))
 
-    # set debconf to NON_INTERACTIVE, redirect output
-    os.putenv("DEBIAN_FRONTEND","noninteractive");
-    setup_apt_listchanges()
-    
-    # redirect to log
-    REDIRECT_INPUT = os.devnull
-    fd = os.open(REDIRECT_INPUT, os.O_RDWR)
-    os.dup2(fd,0)
-
+    # get log
     now = datetime.datetime.now()
     logfile_dpkg = os.path.join(
         _get_logdir(), 'unattended-upgrades-dpkg_%s.log' % now.isoformat('_'))
-    logging.info(_("Writing dpkg log to '%s'") % logfile_dpkg)
 
-    # do not create log in dry-run mode, just output to stdout/stderr
-    if options.dry_run:
-        old_stdout = 1
-        old_stderr = 2
-    else:
-        fd = os.open(logfile_dpkg, os.O_RDWR|os.O_CREAT, 0644)
-        old_stdout = os.dup(1)
-        old_stderr = os.dup(2)
-        os.dup2(fd,1)
-        os.dup2(fd,2)
-
-    shutdown_lock = -1
-    try:
-        # lock for the shutdown check - its fine if the system
-        # is shutdown while downloading but not so much while installing
-        shutdown_lock = apt_pkg.get_lock("/var/run/unattended-upgrades.lock")
-
-        if (options.minimal_upgrade_steps or 
-            apt_pkg.config.find_b("Unattended-Upgrades::MinimalSteps", False)):
-            open("/var/run/unattended-upgrades.pid", "w").write("%s" % os.getpid())
-            # try upgrade all "pkgs" in minimal steps
-            pkg_install_success = upgrade_in_minimal_steps(
-                cache, [pkg.name for pkg in pkgs_to_upgrade], logfile_dpkg)
-        else:
-            pkg_install_success = upgrade_normal(
-                cache, [pkg.name for pkg in pkgs_to_upgrade], logfile_dpkg)
-    except Exception, e:
-        # print unhandled exceptions here this way, while stderr is redirected
-        os.write(old_stderr, "Exception: %s" % e)
-
-    # restore
-    os.dup2(old_stdout, 1)
-    os.dup2(old_stderr, 2)
+    # only perform install step if we actually have packages to install
+    pkg_install_success = None
+    if len(pkgs_to_upgrade) > 0:
+        pkg_install_success = do_install(cache, pkgs_to_upgrade, options, logfile_dpkg)
 
     # send a mail (if needed)
     if not options.dry_run:

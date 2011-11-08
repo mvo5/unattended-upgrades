@@ -1,12 +1,16 @@
 unattended-upgrades (0.73.3) UNRELEASED; urgency=low
 
+  * test improvements
+  * fix crash when no packages are upgraded
+  * only run dpkg if there are packages to upgrade (closes: #647476)
+  * include "stable-updates" in the configuration example
   * debian/po/de.po:
     - updated, thanks to Helge Kreutzmann (closes: #647172)
   * debian/rules:
     - install initscripts but do not run them on install/upgrade
       (closes: #645919)
 
- -- Michael Vogt <michael.vogt@ubuntu.com>  Mon, 31 Oct 2011 09:47:04 -0400
+ -- Michael Vogt <mvo@debian.org>  Tue, 08 Nov 2011 15:09:29 +0100
 
 unattended-upgrades (0.73.2) unstable; urgency=low
 
