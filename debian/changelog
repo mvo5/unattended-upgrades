@@ -12,6 +12,9 @@ unattended-upgrades (0.73.3) UNRELEASED; urgency=low
   * data/50unattended-upgrades.Debian:
     - update default Debian config for squeeze, thanks to 
       John Feuerstein for the example (closes: #609854)
+  * debian/prerm:
+    - ignore failures from versions where the initscript is run
+      with "stop" even when not in shutdown mode (closes: #645919)
 
  -- Michael Vogt <mvo@debian.org>  Tue, 08 Nov 2011 15:09:29 +0100
 
