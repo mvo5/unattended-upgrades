@@ -9,6 +9,9 @@ unattended-upgrades (0.73.3) UNRELEASED; urgency=low
   * debian/rules:
     - install initscripts but do not run them on install/upgrade
       (closes: #645919)
+  * data/50unattended-upgrades.Debian:
+    - update default Debian config for squeeze, thanks to 
+      John Feuerstein for the example (closes: #609854)
 
  -- Michael Vogt <mvo@debian.org>  Tue, 08 Nov 2011 15:09:29 +0100
 
