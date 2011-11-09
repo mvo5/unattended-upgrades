@@ -20,7 +20,10 @@ SHUTDOWN_HELPER=/usr/share/unattended-upgrades/unattended-upgrade-shutdown
 set -e
 
 case "$1" in
-  start|stop)
+  start)
+        # nothing, just to keep update-rc.d happy (see debian #630732)
+        ;;
+  stop)
         echo "Checking for running $DESC: "
         if [ -e $SHUTDOWN_HELPER ]; then
 	    python $SHUTDOWN_HELPER
