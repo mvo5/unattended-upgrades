@@ -1,8 +1,8 @@
 #! /bin/sh
 #
 ### BEGIN INIT INFO
-# Required-Start:
-# Required-Stop:
+# Required-Start:    $remote_fs
+# Required-Stop:     $remote_fs
 # Provides:          unattended-upgrade-shutdown-check
 # Default-Start:     
 # Default-Stop:      0 6
@@ -15,13 +15,19 @@
 PATH=/usr/local/sbin:/usr/local/bin:/sbin:/bin:/usr/sbin:/usr/bin
 NAME=unattended-upgrades
 DESC=unattended-upgrades
+SHUTDOWN_HELPER=/usr/share/unattended-upgrades/unattended-upgrade-shutdown
 
 set -e
 
 case "$1" in
-  start|stop)
+  start)
+        # nothing, just to keep update-rc.d happy (see debian #630732)
+        ;;
+  stop)
         echo "Checking for running $DESC: "
-	python /usr/share/unattended-upgrades/unattended-upgrade-shutdown
+        if [ -e $SHUTDOWN_HELPER ]; then
+	    python $SHUTDOWN_HELPER
+        fi
         ;;
   restart|force-reload)
 	# nothing

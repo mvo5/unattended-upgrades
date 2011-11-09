@@ -8,6 +8,7 @@
 #
 
 PATH=/sbin:/usr/sbin:/bin:/usr/bin
+SHUTDOWN_HELPER=/usr/share/unattended-upgrades/unattended-upgrade-shutdown
 
 if [ ! -x /usr/share/unattended-upgrades/unattended-upgrade-shutdown ]; then
 	exit 0
@@ -15,7 +16,9 @@ fi
 
 case "${1}" in
         hibernate)
-         	python /usr/share/unattended-upgrades/unattended-upgrade-shutdown       
+                if [ -e $SHUTDOWN_HELPER ]; then
+         	    python $SHUTDOWN_HELPER
+                fi
                 ;;
         resume|thaw)
 		# nothing
