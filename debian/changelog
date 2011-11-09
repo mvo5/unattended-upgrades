@@ -7,6 +7,7 @@ unattended-upgrades (0.74.1) UNRELEASED; urgency=low
     - only run shutdown helper when its available
   * updated README and defaults based on the work from
     Reuben Thomas, many thanks (closes: #632336)
+  * lintian fixes
 
  -- Michael Vogt <michael.vogt@ubuntu.com>  Tue, 08 Nov 2011 17:50:12 +0100
 

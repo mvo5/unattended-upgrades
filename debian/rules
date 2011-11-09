@@ -25,4 +25,4 @@ override_dh_auto_clean:
 override_dh_installinit:
 	# we do not want to run the init script, its really only useful
 	# on shutdown, see Debian bug #645919
-	dh_installinit $@ --noscripts
+	dh_installinit $@ --no-start
