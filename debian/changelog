@@ -1,4 +1,4 @@
-unattended-upgrades (0.74.1) UNRELEASED; urgency=low
+unattended-upgrades (0.74.1) unstable; urgency=low
 
   * debian/unattended-upgrades.init:
     - only run unattended-upgrades-shutdown if its actually installed
@@ -11,7 +11,7 @@ unattended-upgrades (0.74.1) UNRELEASED; urgency=low
   * debian/rules, debian/unattended-upgrades.init:
     - fix dh_initallinit arguments (closes: #630732) 
 
- -- Michael Vogt <michael.vogt@ubuntu.com>  Tue, 08 Nov 2011 17:50:12 +0100
+ -- Michael Vogt <mvo@debian.org>  Wed, 09 Nov 2011 09:26:56 +0100
 
 unattended-upgrades (0.74) unstable; urgency=low
 
