@@ -612,6 +612,9 @@ def main(options, rootdir=""):
         print _("Cache lock can not be acquired, exiting")
         sys.exit(1)
 
+    # ensure that our highest pin priority is always -security
+    apt.apt_pkg.config.set("APT::Default-Release", 
+                           "%s-security" % DISTRO_CODENAME)
     # get a cache
     cache = apt.Cache(rootdir=rootdir)
     if cache._depcache.broken_count > 0:

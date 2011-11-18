@@ -39,3 +39,47 @@ Description: Java based build tool like make - API documentation and manual
  as "Makefiles". This package contains the manual of ant as well as the
  Javadoc API documentation.
 
+Package: gs
+Status: install ok installed
+Priority: optional
+Section: text
+Installed-Size: 80
+Maintainer: Ubuntu Core Developers <ubuntu-devel-discuss@lists.ubuntu.com>
+Original-Maintainer: Masayuki Hatta (mhatta) <mhatta@debian.org>
+Architecture: all
+Version: 8.71.dfsg.1-0ubuntu5
+Depends: ghostscript, ghostscript-x
+Description: Transitional package
+ This dummy package is provided for a smooth transition from the
+ previous gs package (the package name has been changed to ghostscript).
+ It may safely be removed after installation.
+
+Package: ghostscript-x
+Status: install ok installed
+Priority: optional
+Section: text
+Installed-Size: 80
+Maintainer: Ubuntu Core Developers <ubuntu-devel-discuss@lists.ubuntu.com>
+Original-Maintainer: Masayuki Hatta (mhatta) <mhatta@debian.org>
+Architecture: all
+Version: 8.71.dfsg.1-0ubuntu5
+Depends: ghostscript, ghostscript-x
+Description: Transitional package
+ This dummy package is provided for a smooth transition from the
+ previous gs package (the package name has been changed to ghostscript).
+ It may safely be removed after installation.
+
+Package: ghostscript
+Status: install ok installed
+Priority: optional
+Section: text
+Installed-Size: 80
+Maintainer: Ubuntu Core Developers <ubuntu-devel-discuss@lists.ubuntu.com>
+Original-Maintainer: Masayuki Hatta (mhatta) <mhatta@debian.org>
+Architecture: all
+Version: 8.71.dfsg.1-0ubuntu5
+Depends: ghostscript, ghostscript-x
+Description: Transitional package
+ This dummy package is provided for a smooth transition from the
+ previous gs package (the package name has been changed to ghostscript).
+ It may safely be removed after installation.
