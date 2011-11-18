@@ -48,7 +48,7 @@ class TestAgainstRealArchive(unittest.TestCase):
             re.search("INFO Packages that are upgraded:.*awstats", log))
         # gs has a higher version in -updates than in -security
         self.assertTrue(
-            re.search("INFO Packages that are upgraded:.*gs", log))
+            re.search("INFO Packages that are upgraded:.*apt-doc", log))
         self.assertFalse(
             re.search("INFO Packages that are upgraded:.*ant-doc", log))
         self.assertTrue(

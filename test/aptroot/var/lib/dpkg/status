@@ -39,47 +39,14 @@ Description: Java based build tool like make - API documentation and manual
  as "Makefiles". This package contains the manual of ant as well as the
  Javadoc API documentation.
 
-Package: gs
+Package: apt-doc
 Status: install ok installed
 Priority: optional
-Section: text
-Installed-Size: 80
-Maintainer: Ubuntu Core Developers <ubuntu-devel-discuss@lists.ubuntu.com>
-Original-Maintainer: Masayuki Hatta (mhatta) <mhatta@debian.org>
+Section: doc
+Installed-Size: 388
+Maintainer: Ubuntu Developers <ubuntu-devel-discuss@lists.ubuntu.com>
 Architecture: all
-Version: 8.71.dfsg.1-0ubuntu5
-Depends: ghostscript, ghostscript-x
-Description: Transitional package
- This dummy package is provided for a smooth transition from the
- previous gs package (the package name has been changed to ghostscript).
- It may safely be removed after installation.
-
-Package: ghostscript-x
-Status: install ok installed
-Priority: optional
-Section: text
-Installed-Size: 80
-Maintainer: Ubuntu Core Developers <ubuntu-devel-discuss@lists.ubuntu.com>
-Original-Maintainer: Masayuki Hatta (mhatta) <mhatta@debian.org>
-Architecture: all
-Version: 8.71.dfsg.1-0ubuntu5
-Depends: ghostscript, ghostscript-x
-Description: Transitional package
- This dummy package is provided for a smooth transition from the
- previous gs package (the package name has been changed to ghostscript).
- It may safely be removed after installation.
-
-Package: ghostscript
-Status: install ok installed
-Priority: optional
-Section: text
-Installed-Size: 80
-Maintainer: Ubuntu Core Developers <ubuntu-devel-discuss@lists.ubuntu.com>
-Original-Maintainer: Masayuki Hatta (mhatta) <mhatta@debian.org>
-Architecture: all
-Version: 8.71.dfsg.1-0ubuntu5
-Depends: ghostscript, ghostscript-x
-Description: Transitional package
- This dummy package is provided for a smooth transition from the
- previous gs package (the package name has been changed to ghostscript).
- It may safely be removed after installation.
+Version: 0.7.25.3ubuntu9
+Description-en_GB: Documentation for APT
+ This package contains the user guide and offline guide, for APT, an
+ Advanced Package Tool.
