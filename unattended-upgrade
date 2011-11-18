@@ -85,13 +85,9 @@ class UnattendedUpgradesCache(apt.Cache):
             # not the candidate
             new_cand = None
             for ver in pkg.versions:
-                for origin in ver.origins:
-                    for allowed in self.allowed_origins:
-                        if match_whitelist_string(allowed, origin):
-                            new_cand = ver
-                            break
-                # leave as soon as we have the highest new candidate
-                if new_cand:
+                if is_allowed_origin(ver, self.allowed_origins):
+                    # leave as soon as we have the highest new candidate
+                    new_cand = ver
                     break
             if new_cand != pkg.candidate:
                 logging.debug("adjusting candidate version: '%s'" % new_cand)
@@ -299,10 +295,10 @@ def upgrade_in_minimal_steps(cache, pkgs_to_upgrade, logfile_dpkg=""):
             break
     return True
 
-def is_allowed_origin(pkg, allowed_origins):
-    if not pkg.candidate:
+def is_allowed_origin(ver, allowed_origins):
+    if not ver:
         return False
-    for origin in pkg.candidate.origins:
+    for origin in ver.origins:
         for allowed in allowed_origins:
             if match_whitelist_string(allowed, origin):
                 return True
@@ -316,7 +312,7 @@ def check_changes_for_sanity(cache, allowed_origins, blacklist):
             logging.debug("pkg '%s' now marked delete" % pkg.name)
             return False
         if pkg.marked_install or pkg.marked_upgrade:
-            if not is_allowed_origin(pkg, allowed_origins):
+            if not is_allowed_origin(pkg.candidate, allowed_origins):
                 logging.debug("pkg '%s' not in allowed origin" % pkg.name)
                 return False
             for blacklist_regexp in blacklist:
@@ -671,7 +667,7 @@ def main(options, rootdir=""):
         if options.debug and pkg.is_upgradable:
             logging.debug("Checking: %s (%s)" % (pkg.name, map(str, pkg.candidate.origins)))
         if (pkg.is_upgradable and 
-	    is_allowed_origin(pkg,allowed_origins)):
+	    is_allowed_origin(pkg.candidate, allowed_origins)):
             try:
                 pkg.mark_upgrade()
                 if check_changes_for_sanity(cache, allowed_origins,
