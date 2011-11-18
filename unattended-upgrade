@@ -60,6 +60,36 @@ PROGRESS_LOG="/var/run/unattended-upgrades.progress"
 # set from the sigint signal handler
 SIGNAL_STOP_REQUEST=False
 
+class UnattendedUpgradesCache(apt.Cache):
+    
+    def __init__(self, rootdir, allowed_origins):
+        apt.Cache.__init__(self, rootdir=rootdir)
+        self.allowed_origins = allowed_origins
+        # ensure we update the candidate versions 
+        self.adjust_candidate_versions()
+    def clear(self):
+        apt.Cache.clear(self)
+        # ensure we update the candidate versions 
+        self.adjust_candidate_versions()
+    def adjust_candidate_versions(self):
+        """ adjust candidate versions to match allowed origins """
+        for pkg in self:
+            if not pkg.is_upgradable:
+                continue
+            new_cand = None
+            for ver in pkg.versions:
+                for origin in ver.origins:
+                    for allowed in self.allowed_origins:
+                        if match_whitelist_string(allowed, origin):
+                            new_cand = ver
+                            break
+                # leave as soon as we have the highest new candidate
+                if new_cand:
+                    break
+            if new_cand != pkg.candidate:
+                logging.debug("adjusting candidate version: '%s'" % new_cand)
+                pkg.candidate = new_cand
+
 
 class LogInstallProgress(apt.progress.base.InstallProgress):
     """ Install progress that writes to self.LOG
@@ -178,7 +208,7 @@ def match_whitelist_string(whitelist, origin):
             res &= (value == origin.site)
     return res
 
-def upgrade_normal(cache, pkgs_to_upgrade, allowed_origins, logfile_dpkg):
+def upgrade_normal(cache, pkgs_to_upgrade, logfile_dpkg):
     error = None
     res = False
     iprogress = LogInstallProgress()
@@ -196,7 +226,7 @@ def upgrade_normal(cache, pkgs_to_upgrade, allowed_origins, logfile_dpkg):
                           logfile_dpkg)
     return res
 
-def upgrade_in_minimal_steps(cache, pkgs_to_upgrade, allowed_origins, logfile_dpkg=""):
+def upgrade_in_minimal_steps(cache, pkgs_to_upgrade, logfile_dpkg=""):
 
     install_log = LogInstallProgress()
     install_log.LOG += ".minimal-steps"
@@ -229,7 +259,6 @@ def upgrade_in_minimal_steps(cache, pkgs_to_upgrade, allowed_origins, logfile_dp
                 logging.debug("found  partition of size %s (%s)" % (len(changes), changes))
                 smallest_partition = changes
             cache.clear()
-            adjust_candidate_versions_in_cache(cache, allowed_origins)
 
         # write progress log information
         if len(pkgs_to_upgrade) > 0:
@@ -241,7 +270,7 @@ def upgrade_in_minimal_steps(cache, pkgs_to_upgrade, allowed_origins, logfile_dp
                                   status="")
         # apply changes
         logging.debug("applying set %s" % smallest_partition)
-        rewind_cache(cache, [cache[name] for name in smallest_partition], allowed_origins)
+        rewind_cache(cache, [cache[name] for name in smallest_partition])
 
         try:
             iprogress = LogInstallProgress()
@@ -385,30 +414,11 @@ def dpkg_conffile_prompt():
             return False
     return True
 
-def adjust_candidate_versions_in_cache(cache, allowed_origins):
-    # fiddle with the candidates first
-    for pkg in cache:
-        if not pkg.is_upgradable:
-            continue
-        new_cand = None
-        for ver in pkg.versions:
-            for origin in ver.origins:
-                for allowed in allowed_origins:
-                    if match_whitelist_string(allowed, origin):
-                        new_cand = ver
-                        break
-            # leave as soon as we have the highest new candidate
-            if new_cand:
-                break
-        if new_cand != pkg.candidate:
-            logging.debug("adjusting candidate version: '%s'" % new_cand)
-            cache[pkg.name].candidate = new_cand
 
 
-def rewind_cache(cache, pkgs_to_upgrade, allowed_origins):
+def rewind_cache(cache, pkgs_to_upgrade):
     " set the cache back to the state with packages_to_upgrade "
     cache.clear()
-    adjust_candidate_versions_in_cache(cache, allowed_origins)
     for pkg2 in pkgs_to_upgrade:
         pkg2.mark_upgrade()
 
@@ -485,7 +495,7 @@ def send_summary_mail(pkgs, res, pkgs_kept_back, mem_log, logfile_dpkg):
     logging.debug("mail returned: %s" % ret)
 
 
-def do_install(cache, pkgs_to_upgrade, options, allowed_origins, logfile_dpkg):
+def do_install(cache, pkgs_to_upgrade, options, logfile_dpkg):
     # set debconf to NON_INTERACTIVE, redirect output
     os.putenv("DEBIAN_FRONTEND","noninteractive");
     setup_apt_listchanges()
@@ -519,10 +529,10 @@ def do_install(cache, pkgs_to_upgrade, options, allowed_origins, logfile_dpkg):
             open("/var/run/unattended-upgrades.pid", "w").write("%s" % os.getpid())
             # try upgrade all "pkgs" in minimal steps
             pkg_install_success = upgrade_in_minimal_steps(
-                cache, [pkg.name for pkg in pkgs_to_upgrade], allowed_origins, logfile_dpkg)
+                cache, [pkg.name for pkg in pkgs_to_upgrade], logfile_dpkg)
         else:
             pkg_install_success = upgrade_normal(
-                cache, [pkg.name for pkg in pkgs_to_upgrade], allowed_origins, logfile_dpkg)
+                cache, [pkg.name for pkg in pkgs_to_upgrade], logfile_dpkg)
     except Exception, e:
         # print unhandled exceptions here this way, while stderr is redirected
         os.write(old_stderr, "Exception: %s" % e)
@@ -636,7 +646,8 @@ def main(options, rootdir=""):
         sys.exit(1)
 
     # get a cache
-    cache = apt.Cache(rootdir=rootdir)
+    cache = UnattendedUpgradesCache(rootdir=rootdir, 
+                                    allowed_origins=allowed_origins)
     if cache._depcache.broken_count > 0:
         print _("Cache has broken packages, exiting")
         logging.error(_("Cache has broken packages, exiting"))
@@ -650,9 +661,6 @@ def main(options, rootdir=""):
     pkgs_auto_removable = set([pkg.name for pkg in cache 
                                if pkg.is_auto_removable])
 
-
-    # ensure that the candidates are targeting the whitelist
-    adjust_candidate_versions_in_cache(cache, allowed_origins)
 
     # now do the actual upgrade
     for pkg in cache:
@@ -676,12 +684,12 @@ def main(options, rootdir=""):
                             pkgs_to_upgrade.append(cache[pkgname])
                 else:
                     logging.debug("sanity check failed")
-                    rewind_cache(cache, pkgs_to_upgrade, allowed_origins)
+                    rewind_cache(cache, pkgs_to_upgrade)
                     pkgs_kept_back.append(pkg.name)
             except SystemError, e:
                 # can't upgrade
                 logging.warning(_("package '%s' upgradable but fails to be marked for upgrade (%s)") % (pkg.name, e))
-                rewind_cache(cache, pkgs_to_upgrade, allowed_origins)
+                rewind_cache(cache, pkgs_to_upgrade)
                 pkgs_kept_back.append(pkg.name)
                 
 
@@ -737,7 +745,6 @@ def main(options, rootdir=""):
         # find out about the packages that are upgradable (in a allowed_origin)
         if len(blacklisted_pkgs) > 0:
             cache.clear()
-            adjust_candidate_versions_in_cache(cache, allowed_origins)
             old_pkgs_to_upgrade = pkgs_to_upgrade[:]
             pkgs_to_upgrade = []
             for pkg in old_pkgs_to_upgrade:
@@ -751,7 +758,6 @@ def main(options, rootdir=""):
                         pkgs_kept_back.append(pkg.name)
                     logging.info(_("package '%s' not upgraded") % pkg.name)
                     cache.clear()
-                    adjust_candidate_versions_in_cache(cache, allowed_origins)
                     for pkg2 in pkgs_to_upgrade:
                         pkg2.mark_upgrade()
     else:
@@ -791,7 +797,7 @@ def main(options, rootdir=""):
     # only perform install step if we actually have packages to install
     pkg_install_success = None
     if len(pkgs_to_upgrade) > 0:
-        pkg_install_success = do_install(cache, pkgs_to_upgrade, options, allowed_origins, logfile_dpkg)
+        pkg_install_success = do_install(cache, pkgs_to_upgrade, options, logfile_dpkg)
 
     # send a mail (if needed)
     if not options.dry_run:
