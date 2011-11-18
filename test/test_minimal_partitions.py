@@ -40,11 +40,10 @@ class TestMinimalPartitions(unittest.TestCase):
     def test_upgrade_in_minimal_steps(self):
         self.cache.upgrade(True)
         pkgs_to_upgrade = [pkg.name for pkg in self.cache.get_changes()]
-        allowed_origins = unattended_upgrade.get_allowed_origins()
         unattended_upgrade.PROGRESS_LOG="./aptroot/var/run/unatteded-upgrades.progress"
         unattended_upgrade.LogInstallProgress = LogInstallProgressMock
         unattended_upgrade.upgrade_in_minimal_steps(
-            self.cache, pkgs_to_upgrade, allowed_origins)
+            self.cache, pkgs_to_upgrade)
         # ensure we count upwarts
         last_percent = -1
         for (pkg, percent) in LogInstallProgressMock.DATA:

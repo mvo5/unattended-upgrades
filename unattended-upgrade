@@ -72,10 +72,17 @@ class UnattendedUpgradesCache(apt.Cache):
         # ensure we update the candidate versions 
         self.adjust_candidate_versions()
     def adjust_candidate_versions(self):
-        """ adjust candidate versions to match allowed origins """
+        """ Adjust candidate versions to match highest allowed origin
+        
+            This adjusts the origin even if the candidate has a higher
+            version
+        """
         for pkg in self:
+            # important! this avoids downgrades below
             if not pkg.is_upgradable:
                 continue
+            # check if we have a version in a allowed origin that is
+            # not the candidate
             new_cand = None
             for ver in pkg.versions:
                 for origin in ver.origins:
@@ -414,8 +421,6 @@ def dpkg_conffile_prompt():
             return False
     return True
 
-
-
 def rewind_cache(cache, pkgs_to_upgrade):
     " set the cache back to the state with packages_to_upgrade "
     cache.clear()
@@ -660,7 +665,6 @@ def main(options, rootdir=""):
     pkgs_kept_back = []
     pkgs_auto_removable = set([pkg.name for pkg in cache 
                                if pkg.is_auto_removable])
-
 
     # now do the actual upgrade
     for pkg in cache:
