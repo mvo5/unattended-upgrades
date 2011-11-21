@@ -8,7 +8,8 @@ import unittest
 import sys
 
 import unattended_upgrade
-from unattended_upgrade import match_whitelist_string, check_changes_for_sanity
+from unattended_upgrade import (
+    match_whitelist_string, check_changes_for_sanity, is_allowed_origin)
 
 class MockOrigin():
     pass
@@ -27,15 +28,6 @@ class TestOriginPatern(unittest.TestCase):
         pass
     def tearDown(self):
         pass
-    def _get_mock_origin(self, aorigin="", label="", archive="",
-                         site="", component=""):
-        origin = MockOrigin()
-        origin.origin = aorigin
-        origin.label = label
-        origin.archive = archive
-        origin.site = site
-        origin.compoent = component
-        return origin
     def test_match_whitelist_string(self):
         origin = self._get_mock_origin(
             "OriginUbuntu", "LabelUbuntu", "ArchiveUbuntu",
@@ -68,18 +60,18 @@ class TestOriginPatern(unittest.TestCase):
         self.assertTrue("s=aSite,l=aLabel" in allowed_origins)
         self.assertTrue("o=Google\, Inc.,suite=stable" in allowed_origins)
 
+    def test_compatiblity(self):
+        apt_pkg.config.clear("Unattended-Upgrade")
+        apt_pkg.read_config_file(apt_pkg.config, "./data/50unattended-upgrades.compat")
+        allowed_origins = unattended_upgrade.get_allowed_origins()
+        #print allowed_origins
+        pkg = self._get_mock_package()
+        self.assertTrue(is_allowed_origin(pkg, allowed_origins))
+        self.assertTrue("o=Google\, Inc.,a=stable" in allowed_origins)
+
     def test_blacklist(self):
         # mock pkg (yeah, complicated)
-        pkg = MockPackage()
-        pkg._pkg = MockPackage()
-        pkg._pkg.selected_state = 0
-        pkg.name = "linux-image"
-        pkg.marked_install = True
-        pkg.marked_upgrade = True
-        pkg.marked_delete = False
-        pkg.candidate = MockCandidate()
-        pkg.candidate.origins = [self._get_mock_origin("Ubuntu")]
-        pkg.candidate.record = {}
+        pkg = self._get_mock_package()
         # mock cache
         cache = MockCache()
         cache._depcache = MockDepCache()
@@ -93,6 +85,33 @@ class TestOriginPatern(unittest.TestCase):
         # with "normal" pkg
         pkg.name = "apt"
         self.assertTrue(check_changes_for_sanity(cache, allowed_origins, blacklist))   
+
+    def _get_mock_origin(self, aorigin="", label="", archive="",
+                         site="", component=""):
+        origin = MockOrigin()
+        origin.origin = aorigin
+        origin.label = label
+        origin.archive = archive
+        origin.site = site
+        origin.compoent = component
+        return origin
+
+    def _get_mock_package(self):
+        pkg = MockPackage()
+        pkg._pkg = MockPackage()
+        pkg._pkg.selected_state = 0
+        pkg.name = "linux-image"
+        pkg.marked_install = True
+        pkg.marked_upgrade = True
+        pkg.marked_delete = False
+        pkg.candidate = MockCandidate()
+        pkg.candidate.origins = [self._get_mock_origin("Ubuntu"),
+                                 self._get_mock_origin(aorigin="Google, Inc.",
+                                                       archive="stable"),
+                                ]
+        pkg.candidate.record = {}
+        return pkg
+
 
 if __name__ == "__main__":
     logging.basicConfig(level=logging.DEBUG)

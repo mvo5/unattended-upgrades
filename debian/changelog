@@ -1,3 +1,9 @@
+unattended-upgrades (0.74.4) UNRELEASED; urgency=low
+
+  * add tests for compat mode and spaces in a origin
+
+ -- Michael Vogt <michael.vogt@ubuntu.com>  Mon, 21 Nov 2011 18:00:57 +0100
+
 unattended-upgrades (0.74.3) unstable; urgency=low
 
   * add missing "." to dh_installinit (closes: #648216)
