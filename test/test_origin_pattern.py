@@ -68,6 +68,7 @@ class TestOriginPatern(unittest.TestCase):
         pkg = self._get_mock_package()
         self.assertTrue(is_allowed_origin(pkg, allowed_origins))
         self.assertTrue("o=Google\, Inc.,a=stable" in allowed_origins)
+        self.assertTrue("o=MoreCorp\, einko,a=stable" in allowed_origins)
 
     def test_blacklist(self):
         # mock pkg (yeah, complicated)

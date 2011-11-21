@@ -131,6 +131,9 @@ def get_allowed_origins_legacy():
             (distro_id, distro_codename) = s.split(':')
         else:
             (distro_id, distro_codename) = s.split()
+        # escape "," (see LP: #824856) - i wonder if there is a simpler way?
+        distro_id = re.sub(r'([^\\]),', r'\1\\,', distro_id)
+        distro_codename = re.sub(r'([^\\]),', r'\1\\,', distro_codename)
         # convert to new format
         allowed_origins.append("o=%s,a=%s" % (substitute(distro_id), 
                                               substitute(distro_codename)))

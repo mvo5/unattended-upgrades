@@ -1,6 +1,7 @@
 unattended-upgrades (0.74.4) UNRELEASED; urgency=low
 
   * add tests for compat mode and spaces in a origin
+  * escape "," in the Allowed-Origins compat mode (LP: #824856)
 
  -- Michael Vogt <michael.vogt@ubuntu.com>  Mon, 21 Nov 2011 18:00:57 +0100
 
