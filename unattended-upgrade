@@ -60,6 +60,39 @@ PROGRESS_LOG="/var/run/unattended-upgrades.progress"
 # set from the sigint signal handler
 SIGNAL_STOP_REQUEST=False
 
+class UnattendedUpgradesCache(apt.Cache):
+    
+    def __init__(self, rootdir, allowed_origins):
+        apt.Cache.__init__(self, rootdir=rootdir)
+        self.allowed_origins = allowed_origins
+        # ensure we update the candidate versions 
+        self.adjust_candidate_versions()
+    def clear(self):
+        apt.Cache.clear(self)
+        # ensure we update the candidate versions 
+        self.adjust_candidate_versions()
+    def adjust_candidate_versions(self):
+        """ Adjust candidate versions to match highest allowed origin
+        
+            This adjusts the origin even if the candidate has a higher
+            version
+        """
+        for pkg in self:
+            # important! this avoids downgrades below
+            if not pkg.is_upgradable:
+                continue
+            # check if we have a version in a allowed origin that is
+            # not the candidate
+            new_cand = None
+            for ver in pkg.versions:
+                if is_allowed_origin(ver, self.allowed_origins):
+                    # leave as soon as we have the highest new candidate
+                    new_cand = ver
+                    break
+            if new_cand and new_cand != pkg.candidate:
+                logging.debug("adjusting candidate version: '%s'" % new_cand)
+                pkg.candidate = new_cand
+
 
 class LogInstallProgress(apt.progress.base.InstallProgress):
     """ Install progress that writes to self.LOG
@@ -244,6 +277,7 @@ def upgrade_in_minimal_steps(cache, pkgs_to_upgrade, logfile_dpkg=""):
         # apply changes
         logging.debug("applying set %s" % smallest_partition)
         rewind_cache(cache, [cache[name] for name in smallest_partition])
+
         try:
             iprogress = LogInstallProgress()
             with Unlocked():
@@ -264,10 +298,10 @@ def upgrade_in_minimal_steps(cache, pkgs_to_upgrade, logfile_dpkg=""):
             break
     return True
 
-def is_allowed_origin(pkg, allowed_origins):
-    if not pkg.candidate:
+def is_allowed_origin(ver, allowed_origins):
+    if not ver:
         return False
-    for origin in pkg.candidate.origins:
+    for origin in ver.origins:
         for allowed in allowed_origins:
             if match_whitelist_string(allowed, origin):
                 return True
@@ -281,7 +315,7 @@ def check_changes_for_sanity(cache, allowed_origins, blacklist):
             logging.debug("pkg '%s' now marked delete" % pkg.name)
             return False
         if pkg.marked_install or pkg.marked_upgrade:
-            if not is_allowed_origin(pkg, allowed_origins):
+            if not is_allowed_origin(pkg.candidate, allowed_origins):
                 logging.debug("pkg '%s' not in allowed origin" % pkg.name)
                 return False
             for blacklist_regexp in blacklist:
@@ -616,7 +650,8 @@ def main(options, rootdir=""):
         sys.exit(1)
 
     # get a cache
-    cache = apt.Cache(rootdir=rootdir)
+    cache = UnattendedUpgradesCache(rootdir=rootdir, 
+                                    allowed_origins=allowed_origins)
     if cache._depcache.broken_count > 0:
         print _("Cache has broken packages, exiting")
         logging.error(_("Cache has broken packages, exiting"))
@@ -629,11 +664,13 @@ def main(options, rootdir=""):
     pkgs_kept_back = []
     pkgs_auto_removable = set([pkg.name for pkg in cache 
                                if pkg.is_auto_removable])
+
+    # now do the actual upgrade
     for pkg in cache:
         if options.debug and pkg.is_upgradable:
             logging.debug("Checking: %s (%s)" % (pkg.name, map(str, pkg.candidate.origins)))
         if (pkg.is_upgradable and 
-	    is_allowed_origin(pkg,allowed_origins)):
+	    is_allowed_origin(pkg.candidate, allowed_origins)):
             try:
                 pkg.mark_upgrade()
                 if check_changes_for_sanity(cache, allowed_origins,

@@ -38,6 +38,7 @@ class TestAgainstRealArchive(unittest.TestCase):
         logdir = os.path.abspath("./aptroot/var/log/")
         logfile = os.path.join(logdir, "unattended-upgrades.log")
         apt_pkg.config.set("APT::UnattendedUpgrades::LogDir", logdir)
+        unattended_upgrade.DISTRO_CODENAME = "lucid"
         unattended_upgrade.main(options, os.path.abspath("./aptroot"))
         # check if the log file exists
         self.assertTrue(os.path.exists(logfile))
@@ -45,6 +46,10 @@ class TestAgainstRealArchive(unittest.TestCase):
         # check if we actually have the expected ugprade in it
         self.assertTrue(
             re.search("INFO Packages that are upgraded:.*awstats", log))
+        # apt-doc has a higher version in -updates than in -security
+        # and no other dependencies so its a perfect test
+        self.assertTrue(
+            re.search("INFO Packages that are upgraded:.*apt-doc", log))
         self.assertFalse(
             re.search("INFO Packages that are upgraded:.*ant-doc", log))
         self.assertTrue(

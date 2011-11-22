@@ -2,6 +2,9 @@ unattended-upgrades (0.74.4) UNRELEASED; urgency=low
 
   * add tests for compat mode and spaces in a origin
   * escape "," in the Allowed-Origins compat mode (LP: #824856)
+  * merged lp:~mvo/unattended-upgrades/unshadow-versions, this will
+    ensure that higher versions in a non-origin branch do not "shadow"
+    the versions from a desired origin (LP: #891747)
 
  -- Michael Vogt <michael.vogt@ubuntu.com>  Mon, 21 Nov 2011 18:00:57 +0100
 

@@ -78,8 +78,12 @@ class TestUnattendedUpgrade(unittest.TestCase):
             self._create_new_debootstrap_tarball(TARBALL, target)
         # create new
         self._unpack_debootstrap_tarball(TARBALL, target)
-        open(os.path.join(target, "etc/apt/apt.conf"), "w").write(
-            'APT::Architecture "i386";')
+        open(os.path.join(target, "etc/apt/apt.conf"), "w").write("""
+APT::Architecture "i386";
+Unattended-Upgrade::Allowed-Origins {
+	"Ubuntu:lucid-security";
+};
+""")
         open(os.path.join(target, "etc/apt/sources.list"), "w").write(
             SOURCES_LIST)
         # and run the upgrade test
@@ -93,6 +97,9 @@ class TestUnattendedUpgrade(unittest.TestCase):
             # make sure we are up-to-date
             subprocess.call(["apt-get","update", "-q", "-q"])
             # run it
+            apt.apt_pkg.config.clear("Unattended-Upgrade::Allowed-Origins")
+            apt.apt_pkg.config.set("Unattended-Upgrade::Allowed-Origins::", 
+                                   "Ubuntu:lucid-security")
             unattended_upgrade.DISTRO_CODENAME = "lucid"
             unattended_upgrade.main(options)
             os._exit(0)
