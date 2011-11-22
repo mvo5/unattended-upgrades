@@ -11,6 +11,22 @@ import sys
 import time
 import unittest
 
+# debian
+#SOURCES_LIST="""
+#deb http://ftp.de.debian.org/debian squeeze main contrib non-free
+#deb http://ftp.de.debian.org/debian squeeze-updates main contrib non-free
+#deb http://ftp.de.debian.org/debian squeeze-proposed-updates main contrib non-f#ree
+#deb http://security.debian.org squeeze/updates main contrib non-free
+#"""
+#DISTRO="squeeze"
+#ARCH="i386"
+#TARBALL="%s-%s.tgz" % (DISTRO, ARCH)
+#MIRROR="http://ftp.de.debian.org/debian"
+#APT_CONF="""APT::Architecture "%s";""" % ARCH
+#ORIGINS_PATTERN="origin=Debian,archive=stable,label=Debian-Security"
+
+
+# ubuntu
 SOURCES_LIST="""
 deb http://archive.ubuntu.com/ubuntu/ lucid main restricted
 deb-src http://archive.ubuntu.com/ubuntu/ lucid main restricted
@@ -25,6 +41,8 @@ DISTRO="lucid"
 ARCH="i386"
 TARBALL="%s-%s.tgz" % (DISTRO, ARCH)
 MIRROR="http://archive.ubuntu.com/ubuntu"
+APT_CONF="""APT::Architecture "%s";""" % ARCH
+ORIGINS_PATTERN="origin=Ubuntu,archive=lucid-security"
 
 apt.apt_pkg.config.set("APT::Architecture", ARCH)
 sys.path.insert(0, "..")
@@ -45,7 +63,7 @@ class TestUnattendedUpgrade(unittest.TestCase):
                          DISTRO, 
                          target,
                          MIRROR])
-        subprocess.call(["chroot", target, "apt-get", "clear"])
+        subprocess.call(["chroot", target, "apt-get", "clean"])
         subprocess.call(["tar", "czf", tarball, target])
 
     def _unpack_debootstrap_tarball(self, tarball, target):
@@ -83,12 +101,7 @@ class TestUnattendedUpgrade(unittest.TestCase):
             self._create_new_debootstrap_tarball(TARBALL, target)
         # create new
         self._unpack_debootstrap_tarball(TARBALL, target)
-        open(os.path.join(target, "etc/apt/apt.conf"), "w").write("""
-APT::Architecture "%s";
-Unattended-Upgrade::Allowed-Origins {
-	"Ubuntu:lucid-security";
-};
-""" % ARCH)
+        open(os.path.join(target, "etc/apt/apt.conf"), "w").write(APT_CONF)
         open(os.path.join(target, "etc/apt/sources.list"), "w").write(
             SOURCES_LIST)
         # and run the upgrade test
@@ -103,8 +116,9 @@ Unattended-Upgrade::Allowed-Origins {
             subprocess.call(["apt-get","update", "-q", "-q"])
             # run it
             apt.apt_pkg.config.clear("Unattended-Upgrade::Allowed-Origins")
-            apt.apt_pkg.config.set("Unattended-Upgrade::Allowed-Origins::", 
-                                   "Ubuntu:lucid-security")
+            apt.apt_pkg.config.clear("Unattended-Upgrade::Origins-Pattern")
+            apt.apt_pkg.config.set(
+                "Unattended-Upgrade::Origins-Pattern::", ORIGINS_PATTERN)
             unattended_upgrade.DISTRO_CODENAME = "lucid"
             unattended_upgrade.main(options)
             os._exit(0)
