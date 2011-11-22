@@ -11,10 +11,6 @@ import sys
 import time
 import unittest
 
-apt.apt_pkg.config.set("APT::Architecture", "i386")
-sys.path.insert(0, "..")
-import unattended_upgrade
-
 SOURCES_LIST="""
 deb http://archive.ubuntu.com/ubuntu/ lucid main restricted
 deb-src http://archive.ubuntu.com/ubuntu/ lucid main restricted
@@ -25,7 +21,14 @@ deb-src http://archive.ubuntu.com/ubuntu/ lucid-updates main restricted
 deb http://security.ubuntu.com/ubuntu/ lucid-security main restricted
 deb-src http://security.ubuntu.com/ubuntu/ lucid-security main restricted
 """
-TARBALL="lucid-i386.tgz"
+DISTRO="lucid"
+ARCH="i386"
+TARBALL="%s-%s.tgz" % (DISTRO, ARCH)
+MIRROR="http://archive.ubuntu.com/ubuntu"
+
+apt.apt_pkg.config.set("APT::Architecture", ARCH)
+sys.path.insert(0, "..")
+import unattended_upgrade
 
 class MockOptions(object):
     debug = True
@@ -38,8 +41,10 @@ class TestUnattendedUpgrade(unittest.TestCase):
         print "creating initial test tarball, this is needed only once"
         # force i386
         subprocess.call(["debootstrap",
-                         "--arch=i386",
-                         "lucid", target])
+                         "--arch=%s" % ARCH,
+                         DISTRO, 
+                         target,
+                         MIRROR])
         subprocess.call(["chroot", target, "apt-get", "clear"])
         subprocess.call(["tar", "czf", tarball, target])
 
@@ -70,7 +75,7 @@ class TestUnattendedUpgrade(unittest.TestCase):
         apt.apt_pkg.config.clear("Acquire::http::ProxyAutoDetect")
 
         # create chroot
-        target = "./test-chroot"
+        target = "./test-chroot.%s" % DISTRO
         # cleanup 
         if os.path.exists(target):
             shutil.rmtree(target)
@@ -79,11 +84,11 @@ class TestUnattendedUpgrade(unittest.TestCase):
         # create new
         self._unpack_debootstrap_tarball(TARBALL, target)
         open(os.path.join(target, "etc/apt/apt.conf"), "w").write("""
-APT::Architecture "i386";
+APT::Architecture "%s";
 Unattended-Upgrade::Allowed-Origins {
 	"Ubuntu:lucid-security";
 };
-""")
+""" % ARCH)
         open(os.path.join(target, "etc/apt/sources.list"), "w").write(
             SOURCES_LIST)
         # and run the upgrade test
