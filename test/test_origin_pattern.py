@@ -65,10 +65,11 @@ class TestOriginPatern(unittest.TestCase):
         apt_pkg.read_config_file(apt_pkg.config, "./data/50unattended-upgrades.compat")
         allowed_origins = unattended_upgrade.get_allowed_origins()
         #print allowed_origins
-        pkg = self._get_mock_package()
-        self.assertTrue(is_allowed_origin(pkg, allowed_origins))
         self.assertTrue("o=Google\, Inc.,a=stable" in allowed_origins)
-        self.assertTrue("o=MoreCorp\, einko,a=stable" in allowed_origins)
+        self.assertTrue("o=MoreCorp\, eink,a=stable" in allowed_origins)
+        # test whitelist
+        pkg = self._get_mock_package()
+        self.assertTrue(is_allowed_origin(pkg.candidate, allowed_origins))
 
     def test_blacklist(self):
         # mock pkg (yeah, complicated)
