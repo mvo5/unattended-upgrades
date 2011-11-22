@@ -1,3 +1,13 @@
+unattended-upgrades (0.75) unstable; urgency=low
+
+  * add tests for compat mode and spaces in a origin
+  * escape "," in the Allowed-Origins compat mode (LP: #824856)
+  * merged lp:~mvo/unattended-upgrades/unshadow-versions, this will
+    ensure that higher versions in a non-origin branch do not "shadow"
+    the versions from a desired origin (LP: #891747)
+
+ -- Michael Vogt <mvo@debian.org>  Tue, 22 Nov 2011 15:27:56 +0100
+
 unattended-upgrades (0.74.4) UNRELEASED; urgency=low
 
   * add tests for compat mode and spaces in a origin
@@ -13,6 +23,12 @@ unattended-upgrades (0.74.3) unstable; urgency=low
   * add missing "." to dh_installinit (closes: #648216)
 
  -- Michael Vogt <mvo@debian.org>  Wed, 09 Nov 2011 20:16:12 +0100
+
+unattended-upgrades (0.74.2) unstable; urgency=low
+
+  * add missing "." to dh_installinit (closes: #648216)
+
+ -- Michael Vogt <mvo@debian.org>  Wed, 09 Nov 2011 19:27:43 +0100
 
 unattended-upgrades (0.74.1) unstable; urgency=low
 
