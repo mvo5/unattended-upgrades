@@ -734,10 +734,14 @@ def main(options, rootdir=""):
             if not item.is_trusted:
                 blacklisted_pkgs.append(pkgname_from_deb(item.destfile))
             if conffile_prompt(item.destfile):
-                # FIXME: skip package (means to re-run the whole marking again
+                # skip package (means to re-run the whole marking again
                 # and making sure that the package will not be pulled in by
-                # some other package again!
+                # some other package again!)
+                # 
+                # print to stdout to ensure that this message is part of
+                # the cron mail
                 print _("Package '%s' has conffile prompt and needs to be upgraded manually") % pkgname_from_deb(item.destfile)
+                # log to the logfile
                 logging.warning(_("Package '%s' has conffile prompt and needs to be upgraded manually") % pkgname_from_deb(item.destfile))
                 blacklisted_pkgs.append(pkgname_from_deb(item.destfile))
                 pkgs_kept_back.append(pkgname_from_deb(item.destfile))
