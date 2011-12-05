@@ -2,6 +2,7 @@ unattended-upgrades (0.75.1) UNRELEASED; urgency=low
 
   * print conffile hold-backs to stdout to ensure its part of
     the cron mail (LP: #773007), thanks to Jean-Baptiste Lallement
+  * typo fixes, thanks to Lei Zhang
 
  -- Michael Vogt <michael.vogt@ubuntu.com>  Wed, 30 Nov 2011 09:30:08 +0100
 

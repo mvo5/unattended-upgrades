@@ -25,12 +25,12 @@ This program can download and install security upgrades automatically
 and unattended, taking care to only install packages from the
 configured APT source, and checking for dpkg prompts about
 configuration file changes. All output is logged to
-/var/log/unattended-ugprades.log. 
+/var/log/unattended-upgrades.log.
 .sp
 This script is the backend for the APT::Periodic::Unattended-Upgrade
 option and designed to be run from cron (e.g. via /etc/cron.daily/apt).
 .SH OPTIONS
-unattended-upgrade accepts the following options
+unattended-upgrade accepts the following options:
 .TP
 \fB-h\fR, \fB\-\-help\fR
 help output
@@ -41,17 +41,17 @@ extra debug output into /var/log/unattended-upgrades.log
 \fB--dry-run\fR
 Just simulate installing updates, do not actually do it
 .SH CONFIGURATION
-The configuration is done via the apt configuration mechanism, the
-default configuration file can be found at 
+The configuration is done via the apt configuration mechanism. The
+default configuration file can be found at
 /etc/apt/apt.conf.d/50unattended-upgrades
 .SH AUTHORS
 unattended-upgrade is written by Michael Vogt <mvo@ubuntu.com>
 .PP
-This manual page was originally written by Michael Vogt <mvo@ubuntu.com> 
+This manual page was originally written by Michael Vogt <mvo@ubuntu.com>
 .SH COPYRIGHT
 Copyright  (C)  2005-2009 Canonical
 .PP
-There is NO warranty.  
+There is NO warranty.
 You may redistribute this software under the terms of  the  GNU
 General  Public License.  For more information about these matters, see
 the files named COPYING.
