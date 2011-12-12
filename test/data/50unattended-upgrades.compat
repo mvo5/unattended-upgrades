@@ -1,0 +1,6 @@
+// Automatically upgrade packages from these (origin:archive) pairs
+Unattended-Upgrade::Allowed-Origins {
+        "Google, Inc.:stable";
+        "MoreCorp\, eink:stable";
+	"${distro_id}:${distro_codename}-security";
+};

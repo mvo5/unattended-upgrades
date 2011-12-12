@@ -1,3 +1,13 @@
+unattended-upgrades (0.75.1) UNRELEASED; urgency=low
+
+  * print conffile hold-backs to stdout to ensure its part of
+    the cron mail (LP: #773007), thanks to Jean-Baptiste Lallement
+  * unattended-upgrade:
+    - fix crash on automatic-reboot, thanks to Teodor (closes: #651822)
+  * typo fixes, thanks to Lei Zhang
+
+ -- Michael Vogt <michael.vogt@ubuntu.com>  Wed, 30 Nov 2011 09:30:08 +0100
+
 unattended-upgrades (0.75) unstable; urgency=low
 
   * add tests for compat mode and spaces in a origin
@@ -7,6 +17,16 @@ unattended-upgrades (0.75) unstable; urgency=low
     the versions from a desired origin (LP: #891747)
 
  -- Michael Vogt <mvo@debian.org>  Tue, 22 Nov 2011 15:27:56 +0100
+
+unattended-upgrades (0.74.4) UNRELEASED; urgency=low
+
+  * add tests for compat mode and spaces in a origin
+  * escape "," in the Allowed-Origins compat mode (LP: #824856)
+  * merged lp:~mvo/unattended-upgrades/unshadow-versions, this will
+    ensure that higher versions in a non-origin branch do not "shadow"
+    the versions from a desired origin (LP: #891747)
+
+ -- Michael Vogt <michael.vogt@ubuntu.com>  Mon, 21 Nov 2011 18:00:57 +0100
 
 unattended-upgrades (0.74.3) unstable; urgency=low
 
