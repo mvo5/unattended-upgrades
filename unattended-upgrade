@@ -522,12 +522,7 @@ def do_install(cache, pkgs_to_upgrade, options, logfile_dpkg):
         os.dup2(fd,1)
         os.dup2(fd,2)
 
-    shutdown_lock = -1
     try:
-        # lock for the shutdown check - its fine if the system
-        # is shutdown while downloading but not so much while installing
-        shutdown_lock = apt_pkg.get_lock("/var/run/unattended-upgrades.lock")
-
         if (options.minimal_upgrade_steps or 
             apt_pkg.config.find_b("Unattended-Upgrades::MinimalSteps", False)):
             open("/var/run/unattended-upgrades.pid", "w").write("%s" % os.getpid())
@@ -537,7 +532,7 @@ def do_install(cache, pkgs_to_upgrade, options, logfile_dpkg):
         else:
             pkg_install_success = upgrade_normal(
                 cache, [pkg.name for pkg in pkgs_to_upgrade], logfile_dpkg)
-    except Exception, e:
+    except Exception as e:
         # print unhandled exceptions here this way, while stderr is redirected
         os.write(old_stderr, "Exception: %s" % e)
 
@@ -804,7 +799,12 @@ def main(options, rootdir=""):
 
     # only perform install step if we actually have packages to install
     pkg_install_success = None
+    shutdown_lock = -1
     if len(pkgs_to_upgrade) > 0:
+        # lock for the shutdown check - its fine if the system
+        # is shutdown while downloading but not so much while installing
+        shutdown_lock = apt_pkg.get_lock("/var/run/unattended-upgrades.lock")
+        # do install
         pkg_install_success = do_install(cache, pkgs_to_upgrade, options, logfile_dpkg)
 
     # send a mail (if needed)
