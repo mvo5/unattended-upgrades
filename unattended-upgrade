@@ -455,7 +455,7 @@ def setup_apt_listchanges(conf="/etc/apt/listchanges.conf"):
     os.environ["APT_LISTCHANGES_FRONTEND"] = "none"
 
 def send_summary_mail(pkgs, res, pkgs_kept_back, mem_log, logfile_dpkg):
-    " send mail (if configured in Unattended-Upgrades::Mail) "
+    " send mail (if configured in Unattended-Upgrade::Mail) "
     email = apt_pkg.config.find("Unattended-Upgrade::Mail", "")
     if not email:
         return
@@ -524,7 +524,9 @@ def do_install(cache, pkgs_to_upgrade, options, logfile_dpkg):
 
     try:
         if (options.minimal_upgrade_steps or 
-            apt_pkg.config.find_b("Unattended-Upgrades::MinimalSteps", False)):
+            # COMPAT with the mispelling
+            apt_pkg.config.find_b("Unattended-Upgrades::MinimalSteps", False) or
+            apt_pkg.config.find_b("Unattended-Upgrade::MinimalSteps", False)):
             open("/var/run/unattended-upgrades.pid", "w").write("%s" % os.getpid())
             # try upgrade all "pkgs" in minimal steps
             pkg_install_success = upgrade_in_minimal_steps(
@@ -781,6 +783,14 @@ def main(options, rootdir=""):
     # exit if there is nothing to do and nothing to report
     if (len(pkgs_to_upgrade) == 0) and (len(pkgs_kept_back) == 0):
         logging.info(_("No packages found that can be upgraded unattended"))
+        return
+
+    # check if its configured for install on shutdown, if so, the 
+    # environment UNATTENDED_UPGRADES_FORCE_INSTALL_ON_SHUTDOWN will
+    # be set by the unatteded-upgrades-shutdown script
+    if (not "UNATTENDED_UPGRADES_FORCE_INSTALL_ON_SHUTDOWN" in os.environ and
+        apt_pkg.config.find_b("Unattended-Upgrade::InstallOnShutdown", False)):
+        logger.debug("Configured to install on shutdown, so exiting now")
         return
 
     # check if we are in dry-run mode

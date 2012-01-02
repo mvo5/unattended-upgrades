@@ -1,3 +1,13 @@
+unattended-upgrades (0.75.2) UNRELEASED; urgency=low
+
+  * add basic "Unattended-Upgrades::InstallOnShutdown" option to do
+    the install step on shutdown (closes: #652982)
+  * test improvements
+  * fix mispelled "Unattended-Upgrade::MinimalSteps" (and add compat
+    mode)
+
+ -- Michael Vogt <michael.vogt@ubuntu.com>  Mon, 02 Jan 2012 14:00:03 +0100
+
 unattended-upgrades (0.75.1) unstable; urgency=low
 
   * print conffile hold-backs to stdout to ensure its part of
