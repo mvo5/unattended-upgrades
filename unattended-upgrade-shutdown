@@ -57,6 +57,18 @@ def log_msg(msg):
     do_plymouth(msg)
     do_usplash(msg)
 
+def log_progress():
+    """ helper to log the install progress (if any) """
+    # wait a some seconds and try again
+    msg = _("Unattended-upgrade in progress during shutdown, "
+            "sleeping for 5s")
+    # progress info
+    progress = "/var/run/unattended-upgrades.progress"
+    if os.path.exists(progress):
+        msg += "\n" + open(progress).read()
+    # log it
+    log_msg(msg)
+
 if __name__ == "__main__":
     # setup gettext
     localesApp="unattended-upgrades"
@@ -97,7 +109,11 @@ if __name__ == "__main__":
         logging.debug("starting unattended-upgrades in shutdown mode")
         p = subprocess.Popen(["unattended-upgrade"], env=env)
         log_msg(_("Running unattended-upgrades in shutdown mode"))
-        p.wait()
+        while True:
+            log_progress()
+            if p.poll() is not None:
+                break
+            time.sleep(5)
 
 
     # run the monitoring loop and keep the "UI" updated
@@ -113,15 +129,8 @@ if __name__ == "__main__":
         if os.path.exists(p):
             pid = int(open(p).read())
             os.kill(pid, signal.SIGUSR1)
-	# wait a some seconds and try again
-        msg = _("Unattended-upgrade in progress during shutdown, "
-                "sleeping for 5s")
-        # progress info
-        progress = "/var/run/unattended-upgrades.progress"
-        if os.path.exists(progress):
-            msg += "\n" + open(progress).read()
-        # log
-        log_msg(msg)
+        # show log
+        log_progress()
 	time.sleep(5)
 	if (time.time() - start_time) > options.delay*60:
             logging.warning(_("Giving up on lockfile after %s delay") % options.delay)
