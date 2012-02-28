@@ -5,6 +5,8 @@ unattended-upgrades (0.75.2) UNRELEASED; urgency=low
   * test improvements
   * fix mispelled "Unattended-Upgrade::MinimalSteps" (and add compat
     mode)
+  * unattended-upgrade:
+    - cleanup FDs to hopefully fix zombies (closes: #646620)
 
  -- Michael Vogt <michael.vogt@ubuntu.com>  Mon, 02 Jan 2012 14:00:03 +0100
 

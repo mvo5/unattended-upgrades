@@ -39,10 +39,12 @@ class TestAgainstRealArchive(unittest.TestCase):
         logfile = os.path.join(logdir, "unattended-upgrades.log")
         apt_pkg.config.set("APT::UnattendedUpgrades::LogDir", logdir)
         unattended_upgrade.DISTRO_CODENAME = "lucid"
-        unattended_upgrade.main(options, os.path.abspath("./aptroot"))
+        res = unattended_upgrade.main(options, os.path.abspath("./aptroot"))
         # check if the log file exists
         self.assertTrue(os.path.exists(logfile))
         log = open(logfile).read()
+        # check that stuff worked
+        self.assertFalse(" ERROR " in log)
         # check if we actually have the expected ugprade in it
         self.assertTrue(
             re.search("INFO Packages that are upgraded:.*awstats", log))

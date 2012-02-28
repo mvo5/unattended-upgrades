@@ -27,6 +27,7 @@ import apt_pkg
 import ConfigParser
 import copy
 import datetime
+import fcntl
 import re
 import os
 import string
@@ -105,6 +106,45 @@ class LogInstallProgress(apt.progress.base.InstallProgress):
         f=open(self.LOG, "w")
         f.write(_("Progress: %s %% (%s)") % (percent, pkg))
         f.close()
+
+    def _fixup_fds(self):
+        required_fds = [ 0, 1, 2, # stdin, stdout, stderr
+                         self.writefd,
+                         self.write_stream.fileno(),
+                         self.statusfd,
+                         self.status_stream.fileno()
+                       ]
+        # ensure that our required fds close on exec
+        for fd in required_fds[3:]:
+            old_flags = fcntl.fcntl(fd, fcntl.F_GETFD)
+            fcntl.fcntl(fd, fcntl.F_SETFD, old_flags | fcntl.FD_CLOEXEC)
+        # close all fds
+        proc_fd = "/proc/self/fd"
+        if os.path.exists(proc_fd):
+            error_count = 0
+            for fdname in os.listdir(proc_fd):
+                try:
+                    fd = int(fdname)
+                except Exception as e:
+                    print "ERROR: can not get fd for '%s'" % fdname
+                if fd in required_fds:
+                    continue
+                try:
+                    os.close(fd)
+                    #print "closed: ", fd
+                except OSError as e:
+                    # there will be one fd that can not be closed
+                    # as its the fd from pythons internal diropen()
+                    # so its ok to ignore one close error
+                    error_count += 1
+                    if error_count > 1:
+                        print "ERROR: os.close(%s): %s" % (fd, e)
+
+    def fork(self):
+        pid = os.fork()
+        if pid == 0:
+            self._fixup_fds()
+        return pid
 
 
 class Unlocked:
