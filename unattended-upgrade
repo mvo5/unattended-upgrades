@@ -27,6 +27,7 @@ import apt_pkg
 import ConfigParser
 import copy
 import datetime
+import fcntl
 import re
 import os
 import string
@@ -105,6 +106,45 @@ class LogInstallProgress(apt.progress.base.InstallProgress):
         f=open(self.LOG, "w")
         f.write(_("Progress: %s %% (%s)") % (percent, pkg))
         f.close()
+
+    def _fixup_fds(self):
+        required_fds = [ 0, 1, 2, # stdin, stdout, stderr
+                         self.writefd,
+                         self.write_stream.fileno(),
+                         self.statusfd,
+                         self.status_stream.fileno()
+                       ]
+        # ensure that our required fds close on exec
+        for fd in required_fds[3:]:
+            old_flags = fcntl.fcntl(fd, fcntl.F_GETFD)
+            fcntl.fcntl(fd, fcntl.F_SETFD, old_flags | fcntl.FD_CLOEXEC)
+        # close all fds
+        proc_fd = "/proc/self/fd"
+        if os.path.exists(proc_fd):
+            error_count = 0
+            for fdname in os.listdir(proc_fd):
+                try:
+                    fd = int(fdname)
+                except Exception as e:
+                    print "ERROR: can not get fd for '%s'" % fdname
+                if fd in required_fds:
+                    continue
+                try:
+                    os.close(fd)
+                    #print "closed: ", fd
+                except OSError as e:
+                    # there will be one fd that can not be closed
+                    # as its the fd from pythons internal diropen()
+                    # so its ok to ignore one close error
+                    error_count += 1
+                    if error_count > 1:
+                        print "ERROR: os.close(%s): %s" % (fd, e)
+
+    def fork(self):
+        pid = os.fork()
+        if pid == 0:
+            self._fixup_fds()
+        return pid
 
 
 class Unlocked:
@@ -455,7 +495,7 @@ def setup_apt_listchanges(conf="/etc/apt/listchanges.conf"):
     os.environ["APT_LISTCHANGES_FRONTEND"] = "none"
 
 def send_summary_mail(pkgs, res, pkgs_kept_back, mem_log, logfile_dpkg):
-    " send mail (if configured in Unattended-Upgrades::Mail) "
+    " send mail (if configured in Unattended-Upgrade::Mail) "
     email = apt_pkg.config.find("Unattended-Upgrade::Mail", "")
     if not email:
         return
@@ -524,7 +564,9 @@ def do_install(cache, pkgs_to_upgrade, options, logfile_dpkg):
 
     try:
         if (options.minimal_upgrade_steps or 
-            apt_pkg.config.find_b("Unattended-Upgrades::MinimalSteps", False)):
+            # COMPAT with the mispelling
+            apt_pkg.config.find_b("Unattended-Upgrades::MinimalSteps", False) or
+            apt_pkg.config.find_b("Unattended-Upgrade::MinimalSteps", False)):
             open("/var/run/unattended-upgrades.pid", "w").write("%s" % os.getpid())
             # try upgrade all "pkgs" in minimal steps
             pkg_install_success = upgrade_in_minimal_steps(
@@ -781,6 +823,14 @@ def main(options, rootdir=""):
     # exit if there is nothing to do and nothing to report
     if (len(pkgs_to_upgrade) == 0) and (len(pkgs_kept_back) == 0):
         logging.info(_("No packages found that can be upgraded unattended"))
+        return
+
+    # check if its configured for install on shutdown, if so, the 
+    # environment UNATTENDED_UPGRADES_FORCE_INSTALL_ON_SHUTDOWN will
+    # be set by the unatteded-upgrades-shutdown script
+    if (not "UNATTENDED_UPGRADES_FORCE_INSTALL_ON_SHUTDOWN" in os.environ and
+        apt_pkg.config.find_b("Unattended-Upgrade::InstallOnShutdown", False)):
+        logger.debug("Configured to install on shutdown, so exiting now")
         return
 
     # check if we are in dry-run mode

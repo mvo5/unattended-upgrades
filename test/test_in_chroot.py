@@ -60,6 +60,9 @@ class TestUnattendedUpgrade(unittest.TestCase):
         # force i386
         subprocess.call(["debootstrap",
                          "--arch=%s" % ARCH,
+                         # smaller version of the minimal system
+                         "--variant=minbase",
+                         "--include=python-apt,apt-utils,gpgv,ubuntu-keyring",
                          DISTRO, 
                          target,
                          MIRROR])
@@ -73,15 +76,47 @@ class TestUnattendedUpgrade(unittest.TestCase):
         print "Running normal unattended upgrade in chroot"
         options = MockOptions()
         options.minimal_upgrade_steps = False
-        self._run_upgrade_test_in_real_chroot(options)
+        # run it
+        target = self._run_upgrade_test_in_real_chroot(options)
+        # ensure we upgraded the expected packages
+        self.assertTrue(self._verify_install_log_in_real_chroot(target))
 
     def test_minimal_steps_upgrade(self):
         print "Running minimal steps unattended upgrade in chroot"
         options = MockOptions()
         options.minimal_upgrade_steps = True
-        self._run_upgrade_test_in_real_chroot(options)
+        # run it
+        target = self._run_upgrade_test_in_real_chroot(options)
+        # ensure we upgraded the expected packages
+        self.assertTrue(self._verify_install_log_in_real_chroot(target))
 
-    def _run_upgrade_test_in_real_chroot(self, options):
+    def test_upgrade_on_shutdown_upgrade(self):
+        print "Running unattended upgrade on shutdown (download and install) in chroot"
+        # ensure that it actually installs in shutdown env mode
+        options = MockOptions()
+        os.environ["UNATTENDED_UPGRADES_FORCE_INSTALL_ON_SHUTDOWN"] = "1"
+        apt.apt_pkg.config.set("Unattended-Upgrade::InstallOnShutdown", "1")
+        target = self._run_upgrade_test_in_real_chroot(options)
+        self.assertTrue(self._verify_install_log_in_real_chroot(target))
+    
+    def _get_lockfile_location(self, target):
+        return os.path.join(
+            target, "var/log/unattended-upgrades/unattended-upgrades.log")
+
+    def _setup_chroot(self, target):
+        """ helper that setups a clean chroot """
+        if os.path.exists(target):
+            shutil.rmtree(target)
+        if not os.path.exists(TARBALL):
+            self._create_new_debootstrap_tarball(TARBALL, target)
+        # create new
+        self._unpack_debootstrap_tarball(TARBALL, target)
+        open(os.path.join(target, "etc/apt/apt.conf"), "w").write(APT_CONF)
+        open(os.path.join(target, "etc/apt/sources.list"), "w").write(
+            SOURCES_LIST)
+       
+
+    def _run_upgrade_test_in_real_chroot(self, options, clean_chroot=True):
         """ helper that runs the unattended-upgrade in a chroot
             and does some basic verifications
         """
@@ -94,16 +129,11 @@ class TestUnattendedUpgrade(unittest.TestCase):
 
         # create chroot
         target = "./test-chroot.%s" % DISTRO
-        # cleanup 
-        if os.path.exists(target):
-            shutil.rmtree(target)
-        if not os.path.exists(TARBALL):
-            self._create_new_debootstrap_tarball(TARBALL, target)
-        # create new
-        self._unpack_debootstrap_tarball(TARBALL, target)
-        open(os.path.join(target, "etc/apt/apt.conf"), "w").write(APT_CONF)
-        open(os.path.join(target, "etc/apt/sources.list"), "w").write(
-            SOURCES_LIST)
+
+        # setup chroot if needed 
+        if clean_chroot:
+            self._setup_chroot(target)
+
         # and run the upgrade test
         pid = os.fork()
         if pid == 0:
@@ -123,16 +153,18 @@ class TestUnattendedUpgrade(unittest.TestCase):
             unattended_upgrade.main(options)
             os._exit(0)
         else:
-            has_progress=True
+            has_progress=False
             all_progress = ""
+            last_progress = ""
             progress_log = os.path.join(
                 target, "var/run/unattended-upgrades.progress")
             while True:
                 time.sleep(0.01)
                 if os.path.exists(progress_log):
                     progress = open(progress_log).read()
-                    if progress:
-                        has_progress &= progress.startswith("Progress")
+                    if progress and progress != last_progress:
+                        has_progress = progress.startswith("Progress")
+                        last_progress = progress
                     all_progress += progress
                 # check exit status
                 (apid, status) = os.waitpid(pid, os.WNOHANG)
@@ -141,21 +173,33 @@ class TestUnattendedUpgrade(unittest.TestCase):
                     break
         #print "*******************", all_progress
         self.assertEqual(ret, 0)
+        # this number is a bit random, we just want to be sure we have 
+        # progress data
         self.assertTrue(has_progress, True)
-        # this is a bit random, we just want to be sure we have data
-        self.assertTrue(len(all_progress) > 10)
+        self.assertTrue(len(all_progress) > 5)
+        return target
+
+    def _verify_install_log_in_real_chroot(self, target):
         # examine log
-        log = os.path.join(
-            target, "var/log/unattended-upgrades/unattended-upgrades.log")
+        log = self._get_lockfile_location(target)
         logfile = open(log).read()
         #print logfile
-        self.assertNotEqual(
-            re.search("Packages that are upgraded:.*bzip2", logfile), None)
-        self.assertFalse("ERROR Installing the upgrades failed" in logfile)
-        dpkg_log = os.path.join(target, "var/log/unattended-upgrades/*-dpkg*.log")
+        NEEDLE_PKG="ca-certificates"
+        if not re.search(
+            "Packages that are upgraded:.*%s" % NEEDLE_PKG, logfile):
+            logging.warn("Can not find expected %s upgrade in log" % NEEDLE_PKG)
+            return False
+        if "ERROR Installing the upgrades failed" in logfile:
+            logging.warn("Got a ERROR in the logfile")
+            return False
+        dpkg_log = os.path.join(
+            target, "var/log/unattended-upgrades/*-dpkg*.log")
         dpkg_logfile = open(glob.glob(dpkg_log)[0]).read()
-        self.assertTrue("Preparing to replace bzip2 1.0.5-4" in dpkg_logfile)
+        if not "Preparing to replace %s" % NEEDLE_PKG in dpkg_logfile:
+            logging.warn("Did not find %s upgrade in the dpkg.log" % NEEDLE_PKG)
+            return False
         #print dpkg_logfile
+        return True
 
 
 if __name__ == "__main__":

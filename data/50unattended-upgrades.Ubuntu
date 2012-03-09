@@ -24,7 +24,11 @@ Unattended-Upgrade::Package-Blacklist {
 // they can be interrupted with SIGUSR1. This makes the upgrade
 // a bit slower but it has the benefit that shutdown while a upgrade
 // is running is possible (with a small delay)
-//Unattended-Upgrades::MinimalSteps "true";
+//Unattended-Upgrade::MinimalSteps "true";
+
+// Install all unattended-upgrades when the machine is shuting down
+// This will (obviously) make shutdown slower
+//Unattended-Upgrade::InstallOnShutdown "true";
 
 // Send email to this address for problems or packages upgrades
 // If empty or unset then no email is sent, make sure that you
