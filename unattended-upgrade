@@ -1,5 +1,5 @@
 #!/usr/bin/python
-# Copyright (c) 2005-2010 Canonical Ltd
+# Copyright (c) 2005-2012 Canonical Ltd
 #
 # AUTHOR:
 # Michael Vogt <mvo@ubuntu.com>
@@ -81,6 +81,10 @@ class UnattendedUpgradesCache(apt.Cache):
         for pkg in self:
             # important! this avoids downgrades below
             if not pkg.is_upgradable:
+                continue
+            # check if the candidate is already pointing to a allowed
+            # origin and if so, do not mess with it
+            if is_allowed_origin(pkg.candidate, self.allowed_origins):
                 continue
             # check if we have a version in a allowed origin that is
             # not the candidate
