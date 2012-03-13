@@ -1,3 +1,10 @@
+unattended-upgrades (0.75.3) UNRELEASED; urgency=low
+
+  * unattended-upgrade:
+    - honor pin priority of < 0 when selecting new candidates
+
+ -- Michael Vogt <michael.vogt@ubuntu.com>  Tue, 13 Mar 2012 09:07:43 +0100
+
 unattended-upgrades (0.75.2) UNRELEASED; urgency=low
 
   * add basic "Unattended-Upgrades::InstallOnShutdown" option to do

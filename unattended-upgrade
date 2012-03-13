@@ -86,6 +86,10 @@ class UnattendedUpgradesCache(apt.Cache):
             # not the candidate
             new_cand = None
             for ver in pkg.versions:
+                # ignore versions that the user marked with priority < 0
+                if ver.policy_priority < 0:
+                    logging.debug("ignoring ver '%s' with priority < 0" % ver)
+                    continue
                 if is_allowed_origin(ver, self.allowed_origins):
                     # leave as soon as we have the highest new candidate
                     new_cand = ver
