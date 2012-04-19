@@ -784,8 +784,10 @@ def main(options, rootdir=""):
                 # some other package again!)
                 # 
                 # print to stdout to ensure that this message is part of
-                # the cron mail
-                print _("Package '%s' has conffile prompt and needs to be upgraded manually") % pkgname_from_deb(item.destfile)
+                # the cron mail (only if no summary mail is requested)
+                email = apt_pkg.config.find("Unattended-Upgrade::Mail", "")
+                if not email:
+                    print _("Package '%s' has conffile prompt and needs to be upgraded manually") % pkgname_from_deb(item.destfile)
                 # log to the logfile
                 logging.warning(_("Package '%s' has conffile prompt and needs to be upgraded manually") % pkgname_from_deb(item.destfile))
                 blacklisted_pkgs.append(pkgname_from_deb(item.destfile))

@@ -1,3 +1,12 @@
+unattended-upgrades (0.76.1) UNRELEASED; urgency=low
+
+  * unattended-upgrade:
+    - honor pin priority of < 0 when selecting new candidates
+    - use os.setsid() to not get killed when the terminal goes away
+    - only print to stdout if there is no summary mail configured
+
+ -- Michael Vogt <michael.vogt@ubuntu.com>  Thu, 19 Apr 2012 19:05:08 +0200
+
 unattended-upgrades (0.76) unstable; urgency=low
 
   * add basic "Unattended-Upgrades::InstallOnShutdown" option to do
@@ -10,14 +19,6 @@ unattended-upgrades (0.76) unstable; urgency=low
     - cleanup FDs to hopefully fix zombies (closes: #646620)
 
  -- Michael Vogt <mvo@debian.org>  Fri, 09 Mar 2012 09:42:33 +0100
-
-unattended-upgrades (0.75.3) UNRELEASED; urgency=low
-
-  * unattended-upgrade:
-    - honor pin priority of < 0 when selecting new candidates
-    - use os.setsid() to not get killed when the terminal goes away
-
- -- Michael Vogt <michael.vogt@ubuntu.com>  Tue, 13 Mar 2012 09:07:43 +0100
 
 unattended-upgrades (0.75.1) unstable; urgency=low
 
