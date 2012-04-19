@@ -128,6 +128,7 @@ if __name__ == "__main__":
         p = "/var/run/unattended-upgrades.pid"
         if os.path.exists(p):
             pid = int(open(p).read())
+            logging.debug("found running unattended-upgrades pid %s" % pid)
             os.kill(pid, signal.SIGUSR1)
         # show log
         log_progress()

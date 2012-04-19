@@ -1,3 +1,12 @@
+unattended-upgrades (0.76.1) unstable; urgency=low
+
+  * unattended-upgrade:
+    - honor pin priority of < 0 when selecting new candidates
+    - use os.setsid() to not get killed when the terminal goes away
+    - only print to stdout if there is no summary mail configured
+
+ -- Michael Vogt <mvo@debian.org>  Thu, 19 Apr 2012 19:06:18 +0200
+
 unattended-upgrades (0.76) unstable; urgency=low
 
   * add basic "Unattended-Upgrades::InstallOnShutdown" option to do

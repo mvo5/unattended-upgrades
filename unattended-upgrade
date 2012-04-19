@@ -1,5 +1,5 @@
 #!/usr/bin/python
-# Copyright (c) 2005-2010 Canonical Ltd
+# Copyright (c) 2005-2012 Canonical Ltd
 #
 # AUTHOR:
 # Michael Vogt <mvo@ubuntu.com>
@@ -82,10 +82,18 @@ class UnattendedUpgradesCache(apt.Cache):
             # important! this avoids downgrades below
             if not pkg.is_upgradable:
                 continue
+            # check if the candidate is already pointing to a allowed
+            # origin and if so, do not mess with it
+            if is_allowed_origin(pkg.candidate, self.allowed_origins):
+                continue
             # check if we have a version in a allowed origin that is
             # not the candidate
             new_cand = None
             for ver in pkg.versions:
+                # ignore versions that the user marked with priority < 0
+                if ver.policy_priority < 0:
+                    logging.debug("ignoring ver '%s' with priority < 0" % ver)
+                    continue
                 if is_allowed_origin(ver, self.allowed_origins):
                     # leave as soon as we have the highest new candidate
                     new_cand = ver
@@ -776,8 +784,10 @@ def main(options, rootdir=""):
                 # some other package again!)
                 # 
                 # print to stdout to ensure that this message is part of
-                # the cron mail
-                print _("Package '%s' has conffile prompt and needs to be upgraded manually") % pkgname_from_deb(item.destfile)
+                # the cron mail (only if no summary mail is requested)
+                email = apt_pkg.config.find("Unattended-Upgrade::Mail", "")
+                if not email:
+                    print _("Package '%s' has conffile prompt and needs to be upgraded manually") % pkgname_from_deb(item.destfile)
                 # log to the logfile
                 logging.warning(_("Package '%s' has conffile prompt and needs to be upgraded manually") % pkgname_from_deb(item.destfile))
                 blacklisted_pkgs.append(pkgname_from_deb(item.destfile))
@@ -897,6 +907,10 @@ if __name__ == "__main__":
     # nice & ionce
     os.nice(19)
     subprocess.call(["ionice","-c3", "-p",str(os.getpid())])
+
+    # ensure we are not killed with the terminal so that the shutdown script
+    # keeps working 
+    os.setsid()
 
     # run the main code
     main(options)
