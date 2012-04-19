@@ -1,3 +1,16 @@
+unattended-upgrades (0.76) unstable; urgency=low
+
+  * add basic "Unattended-Upgrades::InstallOnShutdown" option to do
+    the install step on shutdown (closes: #652982) instead of doing
+    it in the backgroud while the machine is running
+  * test improvements
+  * fix mispelled "Unattended-Upgrade::MinimalSteps" (and add compat
+    mode)
+  * unattended-upgrade:
+    - cleanup FDs to hopefully fix zombies (closes: #646620)
+
+ -- Michael Vogt <mvo@debian.org>  Fri, 09 Mar 2012 09:42:33 +0100
+
 unattended-upgrades (0.75.3) UNRELEASED; urgency=low
 
   * unattended-upgrade:
@@ -5,18 +18,6 @@ unattended-upgrades (0.75.3) UNRELEASED; urgency=low
     - use os.setsid() to not get killed when the terminal goes away
 
  -- Michael Vogt <michael.vogt@ubuntu.com>  Tue, 13 Mar 2012 09:07:43 +0100
-
-unattended-upgrades (0.75.2) UNRELEASED; urgency=low
-
-  * add basic "Unattended-Upgrades::InstallOnShutdown" option to do
-    the install step on shutdown (closes: #652982)
-  * test improvements
-  * fix mispelled "Unattended-Upgrade::MinimalSteps" (and add compat
-    mode)
-  * unattended-upgrade:
-    - cleanup FDs to hopefully fix zombies (closes: #646620)
-
- -- Michael Vogt <michael.vogt@ubuntu.com>  Mon, 02 Jan 2012 14:00:03 +0100
 
 unattended-upgrades (0.75.1) unstable; urgency=low
 
