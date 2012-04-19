@@ -906,5 +906,9 @@ if __name__ == "__main__":
     os.nice(19)
     subprocess.call(["ionice","-c3", "-p",str(os.getpid())])
 
+    # ensure we are not killed with the terminal so that the shutdown script
+    # keeps working 
+    os.setsid()
+
     # run the main code
     main(options)

@@ -2,6 +2,7 @@ unattended-upgrades (0.75.3) UNRELEASED; urgency=low
 
   * unattended-upgrade:
     - honor pin priority of < 0 when selecting new candidates
+    - use os.setsid() to not get killed when the terminal goes away
 
  -- Michael Vogt <michael.vogt@ubuntu.com>  Tue, 13 Mar 2012 09:07:43 +0100
 
