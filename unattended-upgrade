@@ -909,8 +909,12 @@ if __name__ == "__main__":
     subprocess.call(["ionice","-c3", "-p",str(os.getpid())])
 
     # ensure we are not killed with the terminal so that the shutdown script
-    # keeps working 
-    os.setsid()
+    # keeps working
+    try:
+        os.setsid()
+    except OSError as e:
+        logging.debug("os.setsid() failed '%s'" % e)
+        pass
 
     # run the main code
     main(options)
