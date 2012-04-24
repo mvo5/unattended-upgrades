@@ -1,4 +1,4 @@
-unattended-upgrades (0.76.3) UNRELEASEDunstable; urgency=low
+unattended-upgrades (0.76.3) unstable; urgency=low
 
   * unattended-upgrades:
     - check if "apt.package.Version" has "policy_priority" before
