@@ -91,7 +91,8 @@ class UnattendedUpgradesCache(apt.Cache):
             new_cand = None
             for ver in pkg.versions:
                 # ignore versions that the user marked with priority < 0
-                if ver.policy_priority < 0:
+                # (and ensure we have a python-apt that supports this)
+                if hasattr(ver, "policy_priority") and ver.policy_priority < 0:
                     logging.debug("ignoring ver '%s' with priority < 0" % ver)
                     continue
                 if is_allowed_origin(ver, self.allowed_origins):

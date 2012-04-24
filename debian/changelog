@@ -1,3 +1,11 @@
+unattended-upgrades (0.76.3) UNRELEASEDunstable; urgency=low
+
+  * unattended-upgrades:
+    - check if "apt.package.Version" has "policy_priority" before
+      using it (closes: #670131)
+
+ -- Michael Vogt <mvo@debian.org>  Tue, 24 Apr 2012 09:07:58 +0200
+
 unattended-upgrades (0.76.2) unstable; urgency=low
 
   * unattended-upgrades:
