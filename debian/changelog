@@ -2,6 +2,8 @@ unattended-upgrades (0.76.2) UNRELEASED; urgency=low
 
   * unattended-upgrades:
     - its ok if setsid fails (closes: #669583)
+    - check if "apt.package.Version" has "policy_priority" before
+      using it (closes: #670131)
 
  -- Michael Vogt <michael.vogt@ubuntu.com>  Fri, 20 Apr 2012 09:08:33 +0200
 
