@@ -13,6 +13,9 @@ unattended-upgrades (0.76.1) UNRELEASED; urgency=low
     - honor pin priority of < 0 when selecting new candidates
     - use os.setsid() to not get killed when the terminal goes away
     - only print to stdout if there is no summary mail configured
+  * unattended-upgrade-shutdown:
+    - be robust about import apt_pkg failures (LP: #808449), e.g.
+      during upgrades
 
  -- Michael Vogt <michael.vogt@ubuntu.com>  Thu, 19 Apr 2012 19:05:08 +0200
 

@@ -24,7 +24,6 @@
 # Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 #
 
-import apt_pkg
 import copy
 import signal
 import struct
@@ -39,6 +38,14 @@ import os.path
 
 from optparse import OptionParser
 from gettext import gettext as _
+
+try:
+    import apt_pkg
+except:
+    # if there is no python-apt no unattended-upgrades can run so not
+    # need to stop the shutdown
+    logging.exception("importing of apt_pkg failed, exiting")
+    sys.exit(0)
 
 def do_usplash(msg):
     if os.path.exists("/sbin/usplash_write"):
