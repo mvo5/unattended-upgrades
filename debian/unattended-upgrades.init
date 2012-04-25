@@ -1,8 +1,8 @@
 #! /bin/sh
 #
 ### BEGIN INIT INFO
-# Required-Start:    $remote_fs
-# Required-Stop:     $remote_fs
+# Required-Start:    $local_fs $remote_fs $syslog
+# Required-Stop:     $local_fs $remote_fs $syslog
 # Provides:          unattended-upgrade-shutdown-check
 # Default-Start:     
 # Default-Stop:      0 6

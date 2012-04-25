@@ -5,6 +5,8 @@ unattended-upgrades (0.76.2) UNRELEASED; urgency=low
     - check if "apt.package.Version" has "policy_priority" before
       using it (closes: #670131)
     - ignore md5sum "newconffile" (LP: #936870)
+  * debian/unattended-upgrades.init:
+    - add Required-{Start,Stop}: $syslog and $local_fs
 
  -- Michael Vogt <michael.vogt@ubuntu.com>  Fri, 20 Apr 2012 09:08:33 +0200
 
