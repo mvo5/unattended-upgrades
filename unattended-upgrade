@@ -420,6 +420,10 @@ def conffile_prompt(destFile, prefix=""):
                     # ignore if conffile is obsolete or does not exist
                     if obs == "obsolete" or not os.path.exists(prefix+conf_file):
                         continue
+                    # ignore state "newconffile" until its clearer if there
+                    # might be a dpkg prompt (LP: #936870)
+                    if md5 == "newconffile":
+                        continue
                     # get conffile value from pkg, its ok if the new version
                     # does not have conffiles anymore
                     deb = apt_inst.DebFile(destFile)
