@@ -98,13 +98,13 @@ if __name__ == "__main__":
     level = logging.INFO
     if options.debug:
         level = logging.DEBUG
-    logging.basicConfig(level=level, format="%(asctime)s %(levelname)s - %(message)s")
-    logger = logging.getLogger()
 
     # use a normal logfile instead of syslog too as on shutdown its too
     # easy to get syslog killed
-    logger.addHandler(logging.FileHandler(
-        "/var/log/unattended-upgrades/unattended-upgrades-shutdown.log"))
+    logfile = "/var/log/unattended-upgrades/unattended-upgrades-shutdown.log"
+    logging.basicConfig(filename=logfile,
+                        level=level,
+                        format="%(asctime)s %(levelname)s - %(message)s")
 
     # check if we need to run unattended-upgrades on shutdown and if so,
     # run it
