@@ -420,6 +420,10 @@ def conffile_prompt(destFile, prefix=""):
                     # ignore if conffile is obsolete or does not exist
                     if obs == "obsolete" or not os.path.exists(prefix+conf_file):
                         continue
+                    # ignore state "newconffile" until its clearer if there
+                    # might be a dpkg prompt (LP: #936870)
+                    if md5 == "newconffile":
+                        continue
                     # get conffile value from pkg, its ok if the new version
                     # does not have conffiles anymore
                     deb = apt_inst.DebFile(destFile)
@@ -866,7 +870,8 @@ def main(options, rootdir=""):
         # is shutdown while downloading but not so much while installing
         shutdown_lock = apt_pkg.get_lock("/var/run/unattended-upgrades.lock")
         # do install
-        pkg_install_success = do_install(cache, pkgs_to_upgrade, options, logfile_dpkg)
+        pkg_install_success = do_install(
+            cache, pkgs_to_upgrade, options, logfile_dpkg)
 
     # send a mail (if needed)
     if not options.dry_run:
@@ -909,13 +914,9 @@ if __name__ == "__main__":
     os.nice(19)
     subprocess.call(["ionice","-c3", "-p",str(os.getpid())])
 
-    # ensure we are not killed with the terminal so that the shutdown script
-    # keeps working
-    try:
-        os.setsid()
-    except OSError as e:
-        logging.debug("os.setsid() failed '%s'" % e)
-        pass
+    # ensure that we are not killed when the terminal goes away e.g. on
+    # shutdown
+    signal.signal(signal.SIGHUP, signal.SIG_IGN)
 
     # run the main code
     main(options)
