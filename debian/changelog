@@ -2,7 +2,7 @@ unattended-upgrades (0.76.4) UNRELEASED; urgency=low
 
   * unattended-upgrade:
     - ignore md5sum "newconffile" (LP: #936870)
-    - improve os.setsid() to work more reliable
+    - simply ignore SIGHUP instead of the setsid() magic
   * unattended-upgrade-shutdown:
     - be robust about import apt_pkg failures (LP: #808449), e.g.
       during upgrades

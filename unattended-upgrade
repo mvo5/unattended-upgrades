@@ -171,26 +171,6 @@ class Unlocked:
         except:
             pass
 
-def do_setsid():
-    my_pid = os.getpid()
-    if os.getsid(my_pid) != my_pid:
-        logging.debug("not session-leader, doing os.setsid()")
-        try:
-            # this is complicated, but the fork/exit is needed for
-            # this to work reliable, see setsid(2)
-            pid = os.fork()
-            if pid > 0:
-                # parent just exits
-                os._exit(0)
-            else:
-                logging.warn("Dettaching from the session background to "
-                             "become session leadd")
-                # child calls setsid
-                os.setsid()
-        except OSError as e:
-            logging.warn("os.setsid() failed '%s'" % e)
-            pass
-
 def is_dpkg_journal_dirty():
     """
     test if the dpkg journal is dirty
@@ -890,7 +870,8 @@ def main(options, rootdir=""):
         # is shutdown while downloading but not so much while installing
         shutdown_lock = apt_pkg.get_lock("/var/run/unattended-upgrades.lock")
         # do install
-        pkg_install_success = do_install(cache, pkgs_to_upgrade, options, logfile_dpkg)
+        pkg_install_success = do_install(
+            cache, pkgs_to_upgrade, options, logfile_dpkg)
 
     # send a mail (if needed)
     if not options.dry_run:
@@ -933,9 +914,9 @@ if __name__ == "__main__":
     os.nice(19)
     subprocess.call(["ionice","-c3", "-p",str(os.getpid())])
 
-    # ensure we are not killed with the terminal so that the shutdown script
-    # keeps working
-    do_setsid()
+    # ensure that we are not killed when the terminal goes away e.g. on
+    # shutdown
+    signal.signal(signal.SIGHUP, signal.SIG_IGN)
 
     # run the main code
     main(options)
