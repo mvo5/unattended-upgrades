@@ -58,9 +58,9 @@ def do_plymouth(msg):
         logging.debug("Running plymouth --text")
         subprocess.call(["/bin/plymouth","message", "--text", msg])
 
-def log_msg(msg):
+def log_msg(msg, level=logging.WARN):
     """ helper that will print msg to usplash, plymouth, console """
-    logging.warning(msg)
+    logging.log(level, msg)
     do_plymouth(msg)
     do_usplash(msg)
 
@@ -122,15 +122,17 @@ if __name__ == "__main__":
                 break
             time.sleep(5)
 
-
     # run the monitoring loop and keep the "UI" updated
     start_time = time.time()
+    lock_was_taken = False
     while True: 
         res = apt_pkg.get_lock(options.lock_file)
         logging.debug("get_lock returned %i" % res)
+        # exit here if there is no lock
         if res > 0:
             logging.debug("lock not taken")
-            sys.exit(0)
+            break
+        lock_was_taken = True
         # signal unattended-upgrades to stop
         p = "/var/run/unattended-upgrades.pid"
         if os.path.exists(p):
@@ -143,4 +145,10 @@ if __name__ == "__main__":
 	if (time.time() - start_time) > options.delay*60:
             logging.warning(_("Giving up on lockfile after %s delay") % options.delay)
             sys.exit(1)
+    
+    # add finished info to the log/terminal to help tracking down
+    # LP: #434835
+    if lock_was_taken:
+        # re-use existing string
+        log_msg(_("All upgrades installed"), logging.INFO)
     sys.exit(0)

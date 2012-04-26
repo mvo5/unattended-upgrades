@@ -5,8 +5,10 @@ unattended-upgrades (0.76.4) UNRELEASED; urgency=low
   * unattended-upgrade-shutdown:
     - be robust about import apt_pkg failures (LP: #808449), e.g.
       during upgrades
+    - log when install finished to help track down LP #434835
   * debian/unattended-upgrades.init:
-    - add Required-{Start,Stop}: $syslog and $local_fs
+    - add Required-{Start,Stop}: $syslog and $local_fs to help
+      track down LP #434835
 
  -- Michael Vogt <michael.vogt@ubuntu.com>  Thu, 26 Apr 2012 10:39:20 +0200
 
