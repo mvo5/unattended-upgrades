@@ -1,4 +1,4 @@
-unattended-upgrades (0.76.4) UNRELEASED; urgency=low
+unattended-upgrades (0.77) UNRELEASED; urgency=low
 
   * unattended-upgrade:
     - ignore md5sum "newconffile" (LP: #936870)
@@ -7,11 +7,13 @@ unattended-upgrades (0.76.4) UNRELEASED; urgency=low
     - be robust about import apt_pkg failures (LP: #808449), e.g.
       during upgrades
     - log when install finished to help track down LP #434835
+    - do not log to syslog anymore as this *might* block and 
+      could cause  LP #434835 and was not working in most cases
+      as syslog was killed before it could log
+    - log instead to /var/log/unattended-upgrades-shutdown.log 
+      to help track down LP #434835
   * debian/unattended-upgrades.init:
-    - add Required-{Start,Stop}: $syslog and $local_fs to help
-      track down LP #434835
-  * add /var/log/unattended-upgrades-shutdown.log to help track
-    down LP #434835
+    - add Required-{Start,Stop}: $local_fs to help track down LP #434835
 
  -- Michael Vogt <michael.vogt@ubuntu.com>  Thu, 26 Apr 2012 10:39:20 +0200
 
