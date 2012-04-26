@@ -5,3 +5,11 @@
   missingok
   notifempty
 }
+
+/var/log/unattended-upgrades/unattended-upgrades-shtudown.log {
+  rotate 6
+  monthly
+  compress
+  missingok
+  notifempty
+}

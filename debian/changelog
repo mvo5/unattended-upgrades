@@ -10,6 +10,8 @@ unattended-upgrades (0.76.4) UNRELEASED; urgency=low
   * debian/unattended-upgrades.init:
     - add Required-{Start,Stop}: $syslog and $local_fs to help
       track down LP #434835
+  * add /var/log/unattended-upgrades-shutdown.log to help track
+    down LP #434835
 
  -- Michael Vogt <michael.vogt@ubuntu.com>  Thu, 26 Apr 2012 10:39:20 +0200
 
