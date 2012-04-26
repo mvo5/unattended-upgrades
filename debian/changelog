@@ -1,26 +1,38 @@
-unattended-upgrades (0.76.2) UNRELEASED; urgency=low
+unattended-upgrades (0.76.4) UNRELEASED; urgency=low
 
-  * unattended-upgrades:
-    - its ok if setsid fails (closes: #669583)
-    - check if "apt.package.Version" has "policy_priority" before
-      using it (closes: #670131)
+  * unattended-upgrade:
     - ignore md5sum "newconffile" (LP: #936870)
+  * unattended-upgrade-shutdown:
+    - be robust about import apt_pkg failures (LP: #808449), e.g.
+      during upgrades
   * debian/unattended-upgrades.init:
     - add Required-{Start,Stop}: $syslog and $local_fs
 
- -- Michael Vogt <michael.vogt@ubuntu.com>  Fri, 20 Apr 2012 09:08:33 +0200
+ -- Michael Vogt <michael.vogt@ubuntu.com>  Thu, 26 Apr 2012 10:39:20 +0200
 
-unattended-upgrades (0.76.1) UNRELEASED; urgency=low
+unattended-upgrades (0.76.3) unstable; urgency=low
+
+  * unattended-upgrades:
+    - check if "apt.package.Version" has "policy_priority" before
+      using it (closes: #670131)
+
+ -- Michael Vogt <mvo@debian.org>  Tue, 24 Apr 2012 09:07:58 +0200
+
+unattended-upgrades (0.76.2) unstable; urgency=low
+
+  * unattended-upgrades:
+    - its ok if setsid fails (closes: #669583)
+
+ -- Michael Vogt <mvo@debian.org>  Fri, 20 Apr 2012 09:21:38 +0200
+
+unattended-upgrades (0.76.1) unstable; urgency=low
 
   * unattended-upgrade:
     - honor pin priority of < 0 when selecting new candidates
     - use os.setsid() to not get killed when the terminal goes away
     - only print to stdout if there is no summary mail configured
-  * unattended-upgrade-shutdown:
-    - be robust about import apt_pkg failures (LP: #808449), e.g.
-      during upgrades
 
- -- Michael Vogt <michael.vogt@ubuntu.com>  Thu, 19 Apr 2012 19:05:08 +0200
+ -- Michael Vogt <mvo@debian.org>  Thu, 19 Apr 2012 19:06:18 +0200
 
 unattended-upgrades (0.76) unstable; urgency=low
 
