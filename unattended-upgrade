@@ -914,12 +914,23 @@ if __name__ == "__main__":
     subprocess.call(["ionice","-c3", "-p",str(os.getpid())])
 
     # ensure we are not killed with the terminal so that the shutdown script
-    # keeps working
-    try:
-        os.setsid()
-    except OSError as e:
-        logging.debug("os.setsid() failed '%s'" % e)
-        pass
+    # keeps working 
+    my_pid = os.getpid()
+    if os.getsid(my_pid) != my_pid:
+        logging.debug("not session-leader, doing os.setsid()")
+        try:
+            # this is complicated, but the fork/exit is needed for
+            # this to work reliable, see setsid(2)
+            pid = os.fork()
+            if pid > 0:
+                # parent just exits
+                os._exit(0)
+            else:
+                # child calls setsid
+                os.setsid()
+        except OSError as e:
+            logging.warn("os.setsid() failed '%s'" % e)
+            pass
 
     # run the main code
     main(options)
