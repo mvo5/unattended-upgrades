@@ -3,6 +3,8 @@ unattended-upgrades (0.77) UNRELEASED; urgency=low
   * unattended-upgrade:
     - ignore md5sum "newconffile" (LP: #936870)
     - simply ignore SIGHUP instead of the setsid() magic
+    - redirect ionice stderr output to /dev/null to avoid
+      showing a error in a OpenVZ env (closes: #675021)
   * unattended-upgrade-shutdown:
     - be robust about import apt_pkg failures (LP: #808449), e.g.
       during upgrades
