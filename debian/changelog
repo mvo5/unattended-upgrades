@@ -16,6 +16,8 @@ unattended-upgrades (0.77) UNRELEASED; urgency=low
       to help track down LP #434835
   * debian/unattended-upgrades.init:
     - add Required-{Start,Stop}: $local_fs to help track down LP #434835
+  * po/fr.po:
+    - updated french translation (closes: #675916)
 
  -- Michael Vogt <michael.vogt@ubuntu.com>  Thu, 26 Apr 2012 10:39:20 +0200
 
