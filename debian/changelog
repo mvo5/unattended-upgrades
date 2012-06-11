@@ -3,6 +3,8 @@ unattended-upgrades (0.77) unstable; urgency=low
   * unattended-upgrade:
     - ignore md5sum "newconffile" (LP: #936870)
     - simply ignore SIGHUP instead of the setsid() magic
+    - redirect ionice stderr output to /dev/null to avoid
+      showing a error in a OpenVZ env (closes: #675021)
   * unattended-upgrade-shutdown:
     - be robust about import apt_pkg failures (LP: #808449), e.g.
       during upgrades
@@ -14,6 +16,8 @@ unattended-upgrades (0.77) unstable; urgency=low
       to help track down LP #434835
   * debian/unattended-upgrades.init:
     - add Required-{Start,Stop}: $local_fs to help track down LP #434835
+  * po/fr.po:
+    - updated french translation (closes: #675916)
 
  -- Michael Vogt <mvo@debian.org>  Thu, 26 Apr 2012 16:45:24 +0200
 

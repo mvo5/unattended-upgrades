@@ -912,7 +912,9 @@ if __name__ == "__main__":
 
     # nice & ionce
     os.nice(19)
-    subprocess.call(["ionice","-c3", "-p",str(os.getpid())])
+    with open(os.devnull, "w") as fstderr:
+        subprocess.call(["ionice","-c3", "-p",str(os.getpid())],
+                        stderr=fstderr)
 
     # ensure that we are not killed when the terminal goes away e.g. on
     # shutdown

@@ -7,8 +7,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: 0.35\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2009-07-03 12:21+0200\n"
-"PO-Revision-Date: 2011-03-30 12:28+0200\n"
+"POT-Creation-Date: 2011-07-19 15:24+0200\n"
+"PO-Revision-Date: 2012-05-21 14:40+0200\n"
 "Last-Translator: Steve Petruzzello <dlist@bluewin.ch>\n"
 "Language-Team: French <debian-l10n-french@lists.debian.org>\n"
 "Language: fr\n"
@@ -16,7 +16,35 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 
-#: ../unattended-upgrade:174
+#: ../unattended-upgrade:72
+#, c-format
+msgid "Progress: %s %% (%s)"
+msgstr "Progression : %s %% (%s)"
+
+#: ../unattended-upgrade:190 ../unattended-upgrade:254
+msgid "All upgrades installed"
+msgstr "Toutes les mises à niveau ont été installées"
+
+#: ../unattended-upgrade:192 ../unattended-upgrade:246
+msgid "Installing the upgrades failed!"
+msgstr "Échec de l'installation des mises à niveau"
+
+#: ../unattended-upgrade:193 ../unattended-upgrade:247
+#, c-format
+msgid "error message: '%s'"
+msgstr "Message d'erreur : %s"
+
+#: ../unattended-upgrade:194 ../unattended-upgrade:248
+#, c-format
+msgid "dpkg returned a error! See '%s' for details"
+msgstr "dpkg a renvoyé une erreur. Voir « %s » pour les détails"
+
+#: ../unattended-upgrade:231
+#, c-format
+msgid "Progress: %s %%: (%s)"
+msgstr "Progression : %s %% : (%s)"
+
+#: ../unattended-upgrade:412
 msgid ""
 "No '/usr/bin/mail', can not send mail. You probably want to install the "
 "'mailx' package."
@@ -24,153 +52,172 @@ msgstr ""
 "L'exécutable « /usr/bin/mail » est introuvable, impossible d'envoyer un "
 "courrier électronique. Veuillez installer le paquet « mailx »."
 
-#: ../unattended-upgrade:179
+#: ../unattended-upgrade:423
+msgid "[reboot required] unattended-upgrades result for '%s'"
+msgstr "[Redémarrage requis] unattended-upgrades a renvoyé : %s"
+
+#: ../unattended-upgrade:425
 #, c-format
 msgid "unattended-upgrades result for '%s'"
-msgstr "unattended-upgrades a retourné : %s"
+msgstr "unattended-upgrades a renvoyé : %s"
 
-#: ../unattended-upgrade:183
+#: ../unattended-upgrade:428
 #, c-format
 msgid ""
 "Unattended upgrade returned: %s\n"
 "\n"
 msgstr ""
-"La mise à niveau automatique a retourné : %s\n"
+"La mise à niveau automatique a renvoyé : %s\n"
 "\n"
 
-#: ../unattended-upgrade:184
+#: ../unattended-upgrade:430
+msgid ""
+"Warning: A reboot is required to complete this upgrade.\n"
+"\n"
+msgstr ""
+"Avertissement : un redémarrage est requis afin de compléter cette mise à "
+"niveau."
+
+#: ../unattended-upgrade:431
 msgid "Packages that are upgraded:\n"
 msgstr "Paquets mis à niveau :\n"
 
-#: ../unattended-upgrade:188
+#: ../unattended-upgrade:435
 msgid "Packages with upgradable origin but kept back:\n"
 msgstr ""
 "Paquets susceptibles d'une mise à niveau mais maintenus dans leur état "
 "actuel :\n"
 
-#: ../unattended-upgrade:192
+#: ../unattended-upgrade:439
 msgid "Package installation log:"
 msgstr "Journal d'installation du paquet :"
 
-#: ../unattended-upgrade:195
-#| msgid "unattended-upgrades result for '%s'"
+#: ../unattended-upgrade:442
 msgid "Unattended-upgrades log:\n"
 msgstr "Journal de unattended-upgrades :\n"
 
-#: ../unattended-upgrade:208
-msgid "print debug messages"
-msgstr "Afficher les messages de débogage"
-
-#: ../unattended-upgrade:211
-msgid "Simulation, download but do not install"
-msgstr "Simulation, télécharge mais n'installe pas"
-
-#: ../unattended-upgrade:230
+#: ../unattended-upgrade:513
 #, c-format
 msgid "Initial blacklisted packages: %s"
 msgstr "Paquets initialement sur la liste noire : %s"
 
-#: ../unattended-upgrade:231
+#: ../unattended-upgrade:514
 msgid "Starting unattended upgrades script"
 msgstr "Démarrage du script de mise à niveau automatique"
 
-#: ../unattended-upgrade:234
+#: ../unattended-upgrade:517
 #, c-format
 msgid "Allowed origins are: %s"
 msgstr "Les origines permises sont : %s"
 
-#: ../unattended-upgrade:241
+#: ../unattended-upgrade:528 ../unattended-upgrade:529
+msgid "Unclean dpkg state detected, trying to correct"
+msgstr "détection d'un état de dpkg impropre, tentative de correction"
+
+#: ../unattended-upgrade:538
+#, c-format
+msgid ""
+"dpkg --configure -a output:\n"
+"%s"
+msgstr ""
+"sortie de « dpkg --configure -a output » :\n"
+"%s"
+
+#: ../unattended-upgrade:546
 msgid "Lock could not be acquired (another package manager running?)"
 msgstr ""
 "Verrouillage impossible (y a-t-il un autre gestionnaire de paquets en cours "
 "d'exécution ?)"
 
-#: ../unattended-upgrade:243
-#| msgid "Cache has broken packages, exiting"
+#: ../unattended-upgrade:548
 msgid "Cache lock can not be acquired, exiting"
 msgstr "Le verrouillage du cache est impossible, abandon"
 
-#: ../unattended-upgrade:249 ../unattended-upgrade:250
+#: ../unattended-upgrade:554 ../unattended-upgrade:555
 msgid "Cache has broken packages, exiting"
 msgstr "Le cache contient des paquets cassés, abandon"
 
-#: ../unattended-upgrade:274
+#: ../unattended-upgrade:581
 #, c-format
 msgid "package '%s' upgradable but fails to be marked for upgrade (%s)"
 msgstr ""
 "Le paquet « %s » peut être mis à niveau mais échoue à être marqué comme tel "
 "(%s)"
 
-#: ../unattended-upgrade:294
+#: ../unattended-upgrade:601
 #, c-format
 msgid "GetArchives() failed: '%s'"
 msgstr "Échec de GetArchives() : %s"
 
-#: ../unattended-upgrade:303 ../unattended-upgrade:304
+#: ../unattended-upgrade:610 ../unattended-upgrade:611
 #, c-format
 msgid "An error ocured: '%s'"
 msgstr "Une erreur s'est produite : %s"
 
-#: ../unattended-upgrade:306 ../unattended-upgrade:307
+#: ../unattended-upgrade:613 ../unattended-upgrade:614
 #, c-format
 msgid "The URI '%s' failed to download, aborting"
 msgstr "Échec du téléchargement à l'URI « %s », abandon"
 
-#: ../unattended-upgrade:310
+#: ../unattended-upgrade:617
 #, c-format
 msgid "Download finished, but file '%s' not there?!?"
 msgstr "Téléchargement terminé mais le fichier « %s » est absent !"
 
-#: ../unattended-upgrade:319
+#: ../unattended-upgrade:626
 #, c-format
 msgid "Package '%s' has conffile prompt and needs to be upgraded manually"
 msgstr ""
 "Le paquet « %s » provoque un conflit de fichiers de configuration et "
 "nécessite une mise à niveau manuelle"
 
-#: ../unattended-upgrade:341
+#: ../unattended-upgrade:648
 #, c-format
 msgid "package '%s' not upgraded"
 msgstr "Le paquet « %s » n'a pas été mis à niveau"
 
-#: ../unattended-upgrade:352
+#: ../unattended-upgrade:662
+msgid "Packages that are auto removed: '%s'"
+msgstr "Suppression automatique des paquets : %s"
+
+#: ../unattended-upgrade:669
 msgid "No packages found that can be upgraded unattended"
 msgstr "Aucun paquet à mettre à niveau automatiquement"
 
-#: ../unattended-upgrade:362
+#: ../unattended-upgrade:679
 #, c-format
 msgid "Packages that are upgraded: %s"
 msgstr "Paquets mis à niveau : %s"
 
-#: ../unattended-upgrade:375
+#: ../unattended-upgrade:693
 #, c-format
 msgid "Writing dpkg log to '%s'"
 msgstr "Écriture du journal de dpkg dans « %s »"
 
-#: ../unattended-upgrade:386
-msgid "pm.GetArchives() failed"
-msgstr "Échec de pm.GetArchives()"
+#: ../unattended-upgrade:744
+msgid "print debug messages"
+msgstr "Afficher les messages de débogage"
 
-#: ../unattended-upgrade:407
-msgid "Installing the upgrades failed!"
-msgstr "Échec de l'installation des mises à niveau"
+#: ../unattended-upgrade:747
+msgid "Simulation, download but do not install"
+msgstr "Simulation, télécharge mais n'installe pas"
 
-#: ../unattended-upgrade:408
-#, c-format
-msgid "error message: '%s'"
-msgstr "Message d'erreur : %s"
+#: ../unattended-upgrade:750
+msgid "Upgrade in minimal steps (and allow interrupting with SIGINT"
+msgstr ""
+"Mise à niveau par étapes minimales (et autoriser l'interruption avec SIGINT)"
 
-#: ../unattended-upgrade:409
-#, c-format
-msgid "dpkg returned a error! See '%s' for details"
-msgstr "Dpkg a retourné une erreur. Voir « %s » pour les détails"
-
-#: ../unattended-upgrade:411
-msgid "All upgrades installed"
-msgstr "Toutes les mises à niveau ont été installées"
-
-#: ../unattended-upgrade:424
+#: ../unattended-upgrade:754
 msgid "You need to be root to run this application"
 msgstr ""
 "Vous devez posséder les privilèges du superutilisateur pour exécuter cette "
 "application"
+
+#: ../unattended-upgrade-shutdown:95
+msgid "Unattended-upgrade in progress during shutdown, sleeping for 5s"
+msgstr "Unattended-upgrade en cours durant l'extinction, en pause pour 5 s"
+
+#: ../unattended-upgrade-shutdown:106
+#, c-format
+msgid "Giving up on lockfile after %s delay"
+msgstr "Renonciation sur un fichier verrou après un délai de %s."
