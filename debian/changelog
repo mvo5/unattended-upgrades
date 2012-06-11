@@ -19,7 +19,7 @@ unattended-upgrades (0.77) unstable; urgency=low
   * po/fr.po:
     - updated french translation (closes: #675916)
 
- -- Michael Vogt <mvo@debian.org>  Thu, 26 Apr 2012 16:45:24 +0200
+ -- Michael Vogt <mvo@debian.org>  Mon, 11 Jun 2012 16:57:33 +0200
 
 unattended-upgrades (0.76.3) unstable; urgency=low
 

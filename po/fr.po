@@ -76,7 +76,7 @@ msgid ""
 "\n"
 msgstr ""
 "Avertissement : un redémarrage est requis afin de compléter cette mise à "
-"niveau."
+"niveau.\n"
 
 #: ../unattended-upgrade:431
 msgid "Packages that are upgraded:\n"
