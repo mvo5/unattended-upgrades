@@ -53,6 +53,7 @@ msgstr ""
 "courrier électronique. Veuillez installer le paquet « mailx »."
 
 #: ../unattended-upgrade:423
+#, c-format
 msgid "[reboot required] unattended-upgrades result for '%s'"
 msgstr "[Redémarrage requis] unattended-upgrades a renvoyé : %s"
 
@@ -177,6 +178,7 @@ msgid "package '%s' not upgraded"
 msgstr "Le paquet « %s » n'a pas été mis à niveau"
 
 #: ../unattended-upgrade:662
+#, c-format
 msgid "Packages that are auto removed: '%s'"
 msgstr "Suppression automatique des paquets : %s"
 
