@@ -1,4 +1,4 @@
-unattended-upgrades (0.77) UNRELEASEDunstable; urgency=low
+unattended-upgrades (0.77) unstable; urgency=low
 
   * unattended-upgrade:
     - ignore md5sum "newconffile" (LP: #936870)
