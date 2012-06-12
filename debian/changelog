@@ -2,6 +2,7 @@ unattended-upgrades (0.78) UNRELEASED; urgency=low
 
   * data/logrotate.d/unattended-upgrades:
     - simplify, thanks to Teodor MICU
+  * refresh po/pot automatically on clean, closes: #670473
 
  -- Michael Vogt <michael.vogt@ubuntu.com>  Tue, 12 Jun 2012 12:29:46 +0200
 
