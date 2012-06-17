@@ -1,4 +1,5 @@
 #!/usr/bin/python3
+from __future__ import print_function
 
 import apt
 import logging
@@ -56,7 +57,7 @@ class MockOptions(object):
 class TestUnattendedUpgrade(unittest.TestCase):
 
     def _create_new_debootstrap_tarball(self, tarball, target):
-        print "creating initial test tarball, this is needed only once"
+        print("creating initial test tarball, this is needed only once")
         # force i386
         subprocess.call(["debootstrap",
                          "--arch=%s" % ARCH,
@@ -73,7 +74,7 @@ class TestUnattendedUpgrade(unittest.TestCase):
         subprocess.call(["tar", "xzf", tarball])
 
     def test_normal_upgrade(self):
-        print "Running normal unattended upgrade in chroot"
+        print("Running normal unattended upgrade in chroot")
         options = MockOptions()
         options.minimal_upgrade_steps = False
         # run it
@@ -82,7 +83,7 @@ class TestUnattendedUpgrade(unittest.TestCase):
         self.assertTrue(self._verify_install_log_in_real_chroot(target))
 
     def test_minimal_steps_upgrade(self):
-        print "Running minimal steps unattended upgrade in chroot"
+        print("Running minimal steps unattended upgrade in chroot")
         options = MockOptions()
         options.minimal_upgrade_steps = True
         # run it
@@ -91,7 +92,7 @@ class TestUnattendedUpgrade(unittest.TestCase):
         self.assertTrue(self._verify_install_log_in_real_chroot(target))
 
     def test_upgrade_on_shutdown_upgrade(self):
-        print "Running unattended upgrade on shutdown (download and install) in chroot"
+        print("Running unattended upgrade on shutdown (download and install) in chroot")
         # ensure that it actually installs in shutdown env mode
         options = MockOptions()
         os.environ["UNATTENDED_UPGRADES_FORCE_INSTALL_ON_SHUTDOWN"] = "1"
@@ -121,7 +122,7 @@ class TestUnattendedUpgrade(unittest.TestCase):
             and does some basic verifications
         """
         if os.getuid() != 0:
-            print "Skipping because uid != 0"
+            print("Skipping because uid != 0")
             return
 
         # clear to avoid pollution in the chroot
@@ -171,7 +172,7 @@ class TestUnattendedUpgrade(unittest.TestCase):
                 if pid == apid:
                     ret = os.WEXITSTATUS(status)
                     break
-        #print "*******************", all_progress
+        #print("*******************", all_progress)
         self.assertEqual(ret, 0)
         # this number is a bit random, we just want to be sure we have 
         # progress data
@@ -183,7 +184,7 @@ class TestUnattendedUpgrade(unittest.TestCase):
         # examine log
         log = self._get_lockfile_location(target)
         logfile = open(log).read()
-        #print logfile
+        #print(logfile)
         NEEDLE_PKG="ca-certificates"
         if not re.search(
             "Packages that are upgraded:.*%s" % NEEDLE_PKG, logfile):
@@ -198,7 +199,7 @@ class TestUnattendedUpgrade(unittest.TestCase):
         if not "Preparing to replace %s" % NEEDLE_PKG in dpkg_logfile:
             logging.warn("Did not find %s upgrade in the dpkg.log" % NEEDLE_PKG)
             return False
-        #print dpkg_logfile
+        #print(dpkg_logfile)
         return True
 
 
