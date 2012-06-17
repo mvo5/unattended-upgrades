@@ -7,7 +7,10 @@ import logging
 import unittest
 import sys
 
-from StringIO import StringIO
+try:
+    from StringIO import StringIO    # Python 2
+except ImportError:
+    from io import StringIO          # Python 3
 
 import unattended_upgrade
 from unattended_upgrade import substitute, get_allowed_origins

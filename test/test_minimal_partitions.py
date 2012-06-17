@@ -1,4 +1,5 @@
 #!/usr/bin/python
+from __future__ import print_function
 
 import apt
 import apt_pkg
@@ -18,7 +19,7 @@ class LogInstallProgressMock(unattended_upgrade.LogInstallProgress):
     
     # overwrite to log the data
     def status_change(self, pkg, percent, status):
-        print pkg, percent
+        print(pkg, percent)
         self.DATA.append([pkg, percent])
 
 class TestMinimalPartitions(unittest.TestCase):
