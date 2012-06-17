@@ -26,7 +26,7 @@ case "$1" in
   stop)
         echo "Checking for running $DESC: "
         if [ -e $SHUTDOWN_HELPER ]; then
-	    python $SHUTDOWN_HELPER
+	    python3 $SHUTDOWN_HELPER
         fi
         ;;
   restart|force-reload)
