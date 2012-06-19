@@ -8,7 +8,7 @@ check:
 	while read file; do \
 	    echo "Running $$file"; \
 	    if [ -x $$file ]; then \
-	    	python $$file ; \
+	    	python3 $$file ; \
 	    fi \
 	done
 

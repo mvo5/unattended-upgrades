@@ -1,12 +1,9 @@
-#!/usr/bin/python
+#!/usr/bin/python3
 
 import apt
 import apt_pkg
 import os
-import logging
 import unittest
-import sys
-import time
 
 import unattended_upgrade
 
@@ -18,7 +15,7 @@ class LogInstallProgressMock(unattended_upgrade.LogInstallProgress):
     
     # overwrite to log the data
     def status_change(self, pkg, percent, status):
-        print pkg, percent
+        print(pkg, percent)
         self.DATA.append([pkg, percent])
 
 class TestMinimalPartitions(unittest.TestCase):

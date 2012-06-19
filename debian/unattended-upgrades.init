@@ -33,7 +33,7 @@ case "$1" in
     stop)
 	if [ -e $SHUTDOWN_HELPER ]; then
 	    [ "$VERBOSE" != "no" ] && log_action_msg "Checking for running $DESC" "$NAME"
-	    python $SHUTDOWN_HELPER
+	    python3 $SHUTDOWN_HELPER
 	    [ "$VERBOSE" != "no" ] && log_action_end_msg $? 
 	fi
 	;;

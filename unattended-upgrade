@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/usr/bin/python3
 # Copyright (c) 2005-2012 Canonical Ltd
 #
 # AUTHOR:
@@ -20,11 +20,13 @@
 # along with unattended-upgrades; if not, write to the Free Software
 # Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 #
-
 import apt_inst
 import apt_pkg
 
-import ConfigParser
+try:
+    import configparser         # Python 3            
+except ImportError:
+    import ConfigParser as configparser  # Python 2
 import copy
 import datetime
 import fcntl
@@ -33,7 +35,10 @@ import os
 import string
 import sys
 
-from StringIO import StringIO
+try:
+    from StringIO import StringIO    # Python 2
+except ImportError:
+    from io import StringIO          # Python 3
 from optparse import OptionParser
 from subprocess import Popen, PIPE
 
@@ -112,9 +117,8 @@ class LogInstallProgress(apt.progress.base.InstallProgress):
     LOG = PROGRESS_LOG 
 
     def status_change(self, pkg, percent, status):
-        f=open(self.LOG, "w")
-        f.write(_("Progress: %s %% (%s)") % (percent, pkg))
-        f.close()
+        with open(self.LOG, "w") as f:
+            f.write(_("Progress: %s %% (%s)") % (percent, pkg))
 
     def _fixup_fds(self):
         required_fds = [ 0, 1, 2, # stdin, stdout, stderr
@@ -135,19 +139,19 @@ class LogInstallProgress(apt.progress.base.InstallProgress):
                 try:
                     fd = int(fdname)
                 except Exception as e:
-                    print "ERROR: can not get fd for '%s'" % fdname
+                    print("ERROR: can not get fd for '%s'" % fdname)
                 if fd in required_fds:
                     continue
                 try:
                     os.close(fd)
-                    #print "closed: ", fd
+                    #print("closed: ", fd)
                 except OSError as e:
                     # there will be one fd that can not be closed
                     # as its the fd from pythons internal diropen()
                     # so its ok to ignore one close error
                     error_count += 1
                     if error_count > 1:
-                        print "ERROR: os.close(%s): %s" % (fd, e)
+                        print("ERROR: os.close(%s): %s" % (fd, e))
 
     def fork(self):
         pid = os.fork()
@@ -270,7 +274,7 @@ def upgrade_normal(cache, pkgs_to_upgrade, logfile_dpkg):
     try:
         with Unlocked():
             res = cache.commit(install_progress=iprogress)
-    except SystemError,e:
+    except SystemError as e:
         error = e
     if res:
         logging.info(_("All upgrades installed"))
@@ -334,7 +338,7 @@ def upgrade_in_minimal_steps(cache, pkgs_to_upgrade, logfile_dpkg=""):
                 if not res:
                     raise Exception("cache.commit() returned false")
             cache.open()
-        except Exception, e:
+        except Exception as e:
             logging.error(_("Installing the upgrades failed!"))
             logging.error(_("error message: '%s'") % e)
             logging.error(_("dpkg returned a error! See '%s' for details") % \
@@ -390,7 +394,7 @@ def pkgname_from_deb(debfile):
         control = apt_inst.DebFile(debfile).control.extractdata("control")
         sections = apt_pkg.TagSection(control)
         return sections["Package"]
-    except (IOError, SystemError), e:
+    except (IOError, SystemError) as e:
         logging.error("failed to read deb file '%s' (%s)" % (debfile, e))
         # dumb fallback
         return debfile.split("_")[0]
@@ -408,9 +412,9 @@ def conffile_prompt(destFile, prefix=""):
                 conffiles = section.get("Conffiles")
                 # Conffiles:
                 # /etc/bash_completion.d/m-a c7780fab6b14d75ca54e11e992a6c11c
-                for line in string.split(conffiles,"\n"):
+                for line in conffiles.splitlines():
                     logging.debug("conffile line: %s", line)
-                    l = string.split(string.strip(line))
+                    l = line.strip().split()
                     conf_file = l[0]
                     md5 = l[1]
                     if len(l) > 2:
@@ -428,7 +432,7 @@ def conffile_prompt(destFile, prefix=""):
                     # does not have conffiles anymore
                     deb = apt_inst.DebFile(destFile)
                     try:
-                        pkg_conffiles = deb.control.extractdata("conffiles")
+                        pkg_conffiles = deb.control.extractdata("conffiles").decode('utf-8')
                     except LookupError as e:
                         logging.debug("No conffiles in %s anymore? (%s)" % (destFile, e))
                         pkg_conffiles = ""
@@ -437,7 +441,8 @@ def conffile_prompt(destFile, prefix=""):
                         logging.debug("'%s' not in package conffiles '%s'" % (conf_file, pkg_conffiles))
                         continue
                     # test against the installed file
-                    current_md5 = apt_pkg.md5sum(open(prefix+conf_file).read())
+                    with open(prefix+conf_file, 'rb') as fp:
+                        current_md5 = apt_pkg.md5sum(fp.read())
                     logging.debug("current md5: %s" % current_md5)
                     # hashes are the same, no conffile prompt
                     if current_md5 == md5:
@@ -446,10 +451,13 @@ def conffile_prompt(destFile, prefix=""):
                     dpkg_cmd = ["dpkg-deb","--fsys-tarfile",destFile]
                     tar_cmd = ["tar","-x","-O", "-f","-", "."+conf_file]
                     md5_cmd = ["md5sum"]
-                    dpkg_p = Popen(dpkg_cmd, stdout=PIPE)
-                    tar_p = Popen(tar_cmd, stdin=dpkg_p.stdout, stdout=PIPE)
-                    md5_p = Popen(md5_cmd, stdin=tar_p.stdout, stdout=PIPE)
-                    pkg_md5sum = md5_p.communicate()[0].split()[0]
+                    dpkg_p = Popen(dpkg_cmd, stdout=PIPE,
+                                   universal_newlines=True)
+                    tar_p = Popen(tar_cmd, stdin=dpkg_p.stdout, stdout=PIPE,
+                                  universal_newlines=True)
+                    md5_p = Popen(md5_cmd, stdin=tar_p.stdout, stdout=PIPE,
+                                  universal_newlines=True)
+                    pkg_md5sum = md5_p.communicate()[0].split()[0].decode('ascii')
                     logging.debug("pkg_md5sum: %s" % pkg_md5sum)
                     # the md5sum in the deb is unchanged, this will not 
                     # trigger a conffile prompt
@@ -496,7 +504,7 @@ def setup_apt_listchanges(conf="/etc/apt/listchanges.conf"):
     """ deal with apt-listchanges """
     if os.path.exists(conf):
         # check if mail is used by apt-listchanges
-        cf = ConfigParser.ConfigParser()
+        cf = configparser.ConfigParser()
         cf.read(conf)
         if cf.has_section("apt") and cf.has_option("apt", "frontend"):
             frontend = cf.get("apt","frontend")
@@ -520,15 +528,16 @@ def send_summary_mail(pkgs, res, pkgs_kept_back, mem_log, logfile_dpkg):
     # mails on on errors, just exit here
     if (res and
         apt_pkg.config.find_b("Unattended-Upgrade::MailOnlyOnError", False)):
-	return
+        return
     # Check if reboot-required flag is present
     logging.debug("Sending mail with '%s' to '%s'" % (logfile_dpkg, email))
     if os.path.isfile(REBOOT_REQUIRED_FILE):
         subject = _("[reboot required] unattended-upgrades result for '%s'") % host()
     else:
         subject = _("unattended-upgrades result for '%s'") % host()
-    mail = subprocess.Popen([MAIL_BINARY, "-s", subject,
-                             email], stdin=subprocess.PIPE)
+    mail = subprocess.Popen([MAIL_BINARY, "-s", subject, email], 
+                            stdin=subprocess.PIPE,
+                            universal_newlines=True)
     s = _("Unattended upgrade returned: %s\n\n") % res
     if os.path.isfile(REBOOT_REQUIRED_FILE):
         s += _("Warning: A reboot is required to complete this upgrade.\n\n")
@@ -542,7 +551,8 @@ def send_summary_mail(pkgs, res, pkgs_kept_back, mem_log, logfile_dpkg):
     s += "\n"
     if os.path.exists(logfile_dpkg):
         s += _("Package installation log:")+"\n"
-        s += open(logfile_dpkg).read()
+        with open(logfile_dpkg) as fp:
+            s += fp.read()
         s += "\n\n"
     s += _("Unattended-upgrades log:\n")
     s += mem_log.getvalue()
@@ -569,7 +579,7 @@ def do_install(cache, pkgs_to_upgrade, options, logfile_dpkg):
         old_stdout = 1
         old_stderr = 2
     else:
-        fd = os.open(logfile_dpkg, os.O_RDWR|os.O_CREAT, 0644)
+        fd = os.open(logfile_dpkg, os.O_RDWR|os.O_CREAT, 0o644)
         old_stdout = os.dup(1)
         old_stderr = os.dup(2)
         os.dup2(fd,1)
@@ -580,7 +590,8 @@ def do_install(cache, pkgs_to_upgrade, options, logfile_dpkg):
             # COMPAT with the mispelling
             apt_pkg.config.find_b("Unattended-Upgrades::MinimalSteps", False) or
             apt_pkg.config.find_b("Unattended-Upgrade::MinimalSteps", False)):
-            open("/var/run/unattended-upgrades.pid", "w").write("%s" % os.getpid())
+            with open("/var/run/unattended-upgrades.pid", "w") as fp:
+                fp.write("%s" % os.getpid())
             # try upgrade all "pkgs" in minimal steps
             pkg_install_success = upgrade_in_minimal_steps(
                 cache, [pkg.name for pkg in pkgs_to_upgrade], logfile_dpkg)
@@ -677,7 +688,7 @@ def main(options, rootdir=""):
         lockfd = apt_pkg.get_lock(os.path.join(admindir, "lock"), False)
         if lockfd > 0:
             logging.warning(_("Unclean dpkg state detected, trying to correct"))
-            print _("Unclean dpkg state detected, trying to correct")
+            print(_("Unclean dpkg state detected, trying to correct"))
             env = copy.copy(os.environ)
             env["DEBIAN_FRONTEND"] = "noninteractive"
             try:
@@ -693,17 +704,17 @@ def main(options, rootdir=""):
     # check and get lock
     try:
         apt_pkg.pkgsystem_lock()
-    except SystemError, e:
+    except SystemError as e:
         logging.error(_("Lock could not be acquired (another package "
                         "manager running?)"))
-        print _("Cache lock can not be acquired, exiting")
+        print(_("Cache lock can not be acquired, exiting"))
         sys.exit(1)
 
     # get a cache
     cache = UnattendedUpgradesCache(rootdir=rootdir, 
                                     allowed_origins=allowed_origins)
     if cache._depcache.broken_count > 0:
-        print _("Cache has broken packages, exiting")
+        print(_("Cache has broken packages, exiting"))
         logging.error(_("Cache has broken packages, exiting"))
         sys.exit(1)
     # speed things up with latest apt
@@ -739,7 +750,7 @@ def main(options, rootdir=""):
                     logging.debug("sanity check failed")
                     rewind_cache(cache, pkgs_to_upgrade)
                     pkgs_kept_back.append(pkg.name)
-            except SystemError, e:
+            except SystemError as e:
                 # can't upgrade
                 logging.warning(_("package '%s' upgradable but fails to be marked for upgrade (%s)") % (pkg.name, e))
                 rewind_cache(cache, pkgs_to_upgrade)
@@ -761,7 +772,7 @@ def main(options, rootdir=""):
     pm = apt_pkg.PackageManager(cache._depcache)
     try:
         pm.get_archives(fetcher,list,recs)
-    except SystemError, e:
+    except SystemError as e:
         logging.error(_("GetArchives() failed: '%s'") % e)
     res = fetcher.run()
 
@@ -771,14 +782,14 @@ def main(options, rootdir=""):
         for item in fetcher.items:
             logging.debug("%s" % item)
             if item.status == item.STAT_ERROR:
-                print _("An error ocured: '%s'") % item.error_text
+                print(_("An error ocured: '%s'") % item.error_text)
                 logging.error(_("An error ocured: '%s'") % item.error_text)
             if not item.complete:
-                print _("The URI '%s' failed to download, aborting") % item.desc_uri
+                print(_("The URI '%s' failed to download, aborting") % item.desc_uri)
                 logging.error(_("The URI '%s' failed to download, aborting") % item.desc_uri)
                 sys.exit(1)
             if not os.path.exists(item.destfile):
-                print _("Download finished, but file '%s' not there?!?" % item.destfile)
+                print(_("Download finished, but file '%s' not there?!?" % item.destfile))
                 logging.error("Download finished, but file '%s' not there?!?" % item.destfile)
                 sys.exit(1)
             if not item.is_trusted:
@@ -792,7 +803,7 @@ def main(options, rootdir=""):
                 # the cron mail (only if no summary mail is requested)
                 email = apt_pkg.config.find("Unattended-Upgrade::Mail", "")
                 if not email:
-                    print _("Package '%s' has conffile prompt and needs to be upgraded manually") % pkgname_from_deb(item.destfile)
+                    print(_("Package '%s' has conffile prompt and needs to be upgraded manually") % pkgname_from_deb(item.destfile))
                 # log to the logfile
                 logging.warning(_("Package '%s' has conffile prompt and needs to be upgraded manually") % pkgname_from_deb(item.destfile))
                 blacklisted_pkgs.append(pkgname_from_deb(item.destfile))
@@ -907,7 +918,7 @@ if __name__ == "__main__":
     (options, args) = parser.parse_args()
 
     if os.getuid() != 0:
-        print _("You need to be root to run this application")
+        print(_("You need to be root to run this application"))
         sys.exit(1)
 
     # nice & ionce

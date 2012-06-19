@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/usr/bin/python3
 
 import apt
 import apt_pkg
@@ -42,9 +42,10 @@ class TestAgainstRealArchive(unittest.TestCase):
         res = unattended_upgrade.main(options, os.path.abspath("./aptroot"))
         # check if the log file exists
         self.assertTrue(os.path.exists(logfile))
-        log = open(logfile).read()
+        with open(logfile) as fp:
+            log = fp.read()
         # check that stuff worked
-        self.assertFalse(" ERROR " in log)
+        self.assertFalse(" ERROR " in log, log)
         # check if we actually have the expected ugprade in it
         self.assertTrue(
             re.search("INFO Packages that are upgraded:.*awstats", log))

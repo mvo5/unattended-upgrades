@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/usr/bin/python3
 #
 # create a lock file so that unattended-upgrades-shutdown pauses
 # on shutdown -- useful for testing
