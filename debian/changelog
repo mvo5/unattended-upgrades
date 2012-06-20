@@ -6,6 +6,8 @@ unattended-upgrades (0.78) UNRELEASED; urgency=low
   * refresh po/pot automatically on clean, closes: #670473
   * po/da.po:
     - updated, thanks to Joe Dalton, closes: #677804
+  * po/de.po:
+    - updated, thanks to Chris Leick (closes: #678204)
   
   [ Teodor MICU ]
   * debian/unattended-upgrades.init:
