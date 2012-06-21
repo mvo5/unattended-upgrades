@@ -1,3 +1,20 @@
+unattended-upgrades (0.78) UNRELEASED; urgency=low
+
+  [ Michael Vogt ]
+  * data/logrotate.d/unattended-upgrades:
+    - simplify, thanks to Teodor MICU
+  * refresh po/pot automatically on clean, closes: #670473
+  * po/da.po:
+    - updated, thanks to Joe Dalton, closes: #677804
+  * po/de.po:
+    - updated, thanks to Chris Leick (closes: #678204)
+  
+  [ Teodor MICU ]
+  * debian/unattended-upgrades.init:
+    - use new style lsb-init output, closes: #678030
+
+ -- Michael Vogt <michael.vogt@ubuntu.com>  Tue, 12 Jun 2012 12:29:46 +0200
+
 unattended-upgrades (0.77) unstable; urgency=low
 
   * unattended-upgrade:
