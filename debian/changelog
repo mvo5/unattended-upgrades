@@ -1,4 +1,4 @@
-unattended-upgrades (0.78) UNRELEASED; urgency=low
+unattended-upgrades (0.78) unstable; urgency=low
 
   [ Michael Vogt ]
   * data/logrotate.d/unattended-upgrades:
@@ -13,7 +13,7 @@ unattended-upgrades (0.78) UNRELEASED; urgency=low
   * debian/unattended-upgrades.init:
     - use new style lsb-init output, closes: #678030
 
- -- Michael Vogt <michael.vogt@ubuntu.com>  Tue, 12 Jun 2012 12:29:46 +0200
+ -- Michael Vogt <mvo@debian.org>  Thu, 21 Jun 2012 17:05:22 +0200
 
 unattended-upgrades (0.77) unstable; urgency=low
 
