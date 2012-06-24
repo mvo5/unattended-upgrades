@@ -1,4 +1,9 @@
 #!/usr/bin/python3
+"""Test unattended_upgrades against the real archive in a chroot.
+
+Note that this test is not run by the makefile in this folder, as it requires
+network access, and it fails in some situations (unclear which).
+"""
 
 import apt
 import apt_pkg
