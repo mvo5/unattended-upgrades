@@ -457,7 +457,7 @@ def conffile_prompt(destFile, prefix=""):
                                   universal_newlines=True)
                     md5_p = Popen(md5_cmd, stdin=tar_p.stdout, stdout=PIPE,
                                   universal_newlines=True)
-                    pkg_md5sum = md5_p.communicate()[0].split()[0].decode('ascii')
+                    pkg_md5sum = md5_p.communicate()[0].split()[0]
                     logging.debug("pkg_md5sum: %s" % pkg_md5sum)
                     # the md5sum in the deb is unchanged, this will not 
                     # trigger a conffile prompt
