@@ -7,6 +7,8 @@ unattended-upgrades (0.79) unstable; urgency=low
     - removed, was a debconf translation
   * po/ru.po:
     - updated, thanks to Yuri Kozlov, closes: #678427
+  * po/gl.po:
+    - added, thanks to Jorge Barreiro, closes: #678634
   
   [ Teodor MICU ]
   * debian/unattended-upgrades.init:
