@@ -1,3 +1,12 @@
+unattended-upgrades (0.79) unstable; urgency=low
+
+  * po/pt_BR.po:
+    - updated, thanks to David Prévot, closes: #678423
+  * po/cs.po:
+    - removed, was a debconf translation
+
+ -- Michael Vogt <michael.vogt@ubuntu.com>  Mon, 25 Jun 2012 08:42:23 +0200
+
 unattended-upgrades (0.78) unstable; urgency=low
 
   [ Michael Vogt ]
