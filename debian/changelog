@@ -1,4 +1,27 @@
-unattended-upgrades (0.78) UNRELEASED; urgency=low
+unattended-upgrades (0.79) unstable; urgency=low
+
+  [ Translation updates ]
+  * po/pt_BR.po:
+    - updated, thanks to David Prévot, closes: #678423
+  * po/cs.po:
+    - removed, was a debconf translation
+  * po/ru.po:
+    - updated, thanks to Yuri Kozlov, closes: #678427
+  * po/gl.po:
+    - added, thanks to Jorge Barreiro, closes: #678634
+  * po/pt.po:
+    - added, thanks to Pedro Ribeiro, closes: #678738
+  
+  [ Teodor MICU ]
+  * debian/unattended-upgrades.init:
+    - fixes new style lsb-init output, closes: #678030
+
+  [ Thomas Kluyver ]
+  * Port to Python 3
+
+ -- Michael Vogt <michael.vogt@ubuntu.com>  Mon, 25 Jun 2012 08:42:23 +0200
+
+unattended-upgrades (0.78) unstable; urgency=low
 
   [ Michael Vogt ]
   * data/logrotate.d/unattended-upgrades:
@@ -6,13 +29,14 @@ unattended-upgrades (0.78) UNRELEASED; urgency=low
   * refresh po/pot automatically on clean, closes: #670473
   * po/da.po:
     - updated, thanks to Joe Dalton, closes: #677804
-  * Port to Python 3
+  * po/de.po:
+    - updated, thanks to Chris Leick (closes: #678204)
 
   [ Teodor MICU ]
   * debian/unattended-upgrades.init:
     - use new style lsb-init output, closes: #678030
 
- -- Michael Vogt <michael.vogt@ubuntu.com>  Tue, 12 Jun 2012 12:29:46 +0200
+ -- Michael Vogt <mvo@debian.org>  Thu, 21 Jun 2012 17:05:22 +0200
 
 unattended-upgrades (0.77) unstable; urgency=low
 
