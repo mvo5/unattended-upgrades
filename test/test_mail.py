@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/usr/bin/python3
 
 import apt
 import apt_pkg
@@ -7,7 +7,7 @@ import logging
 import unittest
 import sys
 
-from StringIO import StringIO
+from io import StringIO
 
 import unattended_upgrade
 import unattended_upgrade
@@ -36,7 +36,8 @@ class TestSendSummaryMail(unittest.TestCase):
         pkgs_kept_back = []
         mem_log = StringIO("mem_log text")
         logfile_dpkg = "./apt-term.log"
-        open("./apt-term.log", "w").write("logfile_dpkg text")
+        with open("./apt-term.log", "w") as fp:
+            fp.write("logfile_dpkg text")
         return (pkgs, res, pkgs_kept_back, mem_log, logfile_dpkg)
 
     def _verify_common_mail_content(self, mail_txt):
@@ -45,16 +46,19 @@ class TestSendSummaryMail(unittest.TestCase):
         self.assertTrue("Packages that are upgraded:\n 2vcard" in mail_txt)
 
     def test_summary_mail_reboot(self):
-        open("./reboot-required","w").write("")
+        with open("./reboot-required","w") as fp:
+            fp.write("")
         send_summary_mail(*self._return_mock_data())
         os.unlink("./reboot-required")
-        mail_txt = open("mail.txt").read()
+        with open("mail.txt") as fp:
+            mail_txt = fp.read()
         self.assertTrue("[reboot required]" in mail_txt)
         self._verify_common_mail_content(mail_txt)
         
     def test_summary_mail_no_reboot(self):
         send_summary_mail(*self._return_mock_data())
-        mail_txt = open("mail.txt").read()
+        with open("mail.txt") as fp:
+            mail_txt = fp.read()
         self.assertFalse("[reboot required]" in mail_txt)
         self._verify_common_mail_content(mail_txt)
     
@@ -63,18 +67,21 @@ class TestSendSummaryMail(unittest.TestCase):
         # for both success and failure
         apt_pkg.config.set("Unattended-Upgrade::MailOnlyOnError", "false")
         send_summary_mail(*self._return_mock_data(successful=True))
-        self._verify_common_mail_content(open("mail.txt").read())
+        with open("mail.txt") as fp:
+            self._verify_common_mail_content(fp.read())
         os.remove("mail.txt")
         # now with a simulated failure
         send_summary_mail(*self._return_mock_data(successful=False))
-        self._verify_common_mail_content(open("mail.txt").read())
+        with open("mail.txt") as fp:
+            self._verify_common_mail_content(fp.read())
         os.remove("mail.txt")
         # now test with "MailOnlyOnError"
         apt_pkg.config.set("Unattended-Upgrade::MailOnlyOnError", "true")
         send_summary_mail(*self._return_mock_data(successful=True))
         self.assertFalse(os.path.exists("mail.txt"))
         send_summary_mail(*self._return_mock_data(successful=False))
-        mail_txt = open("mail.txt").read()
+        with open("mail.txt") as fp:
+            mail_txt = fp.read()
         self._verify_common_mail_content(mail_txt)
         self.assertTrue("Unattended upgrade returned: False" in mail_txt)
         self.assertTrue(os.path.exists("mail.txt"))

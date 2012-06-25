@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/usr/bin/python3
 
 import apt
 import apt_pkg
@@ -7,7 +7,7 @@ import logging
 import unittest
 import sys
 
-from StringIO import StringIO
+from io import StringIO
 
 import unattended_upgrade
 from unattended_upgrade import substitute, get_allowed_origins

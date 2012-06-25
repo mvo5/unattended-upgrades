@@ -17,7 +17,7 @@ fi
 case "${1}" in
         hibernate)
                 if [ -e $SHUTDOWN_HELPER ]; then
-         	    python $SHUTDOWN_HELPER
+         	    python3 $SHUTDOWN_HELPER
                 fi
                 ;;
         resume|thaw)
