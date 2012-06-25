@@ -27,17 +27,17 @@ SHUTDOWN_HELPER="/usr/share/unattended-upgrades/unattended-upgrade-shutdown"
 . /lib/lsb/init-functions
 
 case "$1" in
-    start|restart|force-reload|status)
+start|restart|force-reload|status)
 	# nothing, just to keep update-rc.d happy (see debian #630732)
 	;;
-    stop)
+stop)
 	if [ -e $SHUTDOWN_HELPER ]; then
-	    [ "$VERBOSE" != "no" ] && log_action_msg "Checking for running $DESC" "$NAME"
-	    python $SHUTDOWN_HELPER
-	    [ "$VERBOSE" != "no" ] && log_action_end_msg $? 
+		[ "$VERBOSE" != "no" ] && log_action_begin_msg "Checking for running $DESC"
+		python $SHUTDOWN_HELPER
+		[ "$VERBOSE" != "no" ] && log_action_end_msg $? "$NAME"
 	fi
 	;;
-    *)
+*)
 	echo "Usage: $SCRIPTNAME {start|stop|status|restart|force-reload}" >&2
 	exit 3
 	;;
