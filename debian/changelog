@@ -4,6 +4,8 @@ unattended-upgrades (0.79) unstable; urgency=low
     - updated, thanks to David Prévot, closes: #678423
   * po/cs.po:
     - removed, was a debconf translation
+  * po/ru.po:
+    - updated, thanks to Yuri Kozlov, closes: #678427
 
  -- Michael Vogt <michael.vogt@ubuntu.com>  Mon, 25 Jun 2012 08:42:23 +0200
 
