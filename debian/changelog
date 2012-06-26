@@ -1,3 +1,10 @@
+unattended-upgrades (0.80) UNRELEASED; urgency=low
+
+  [ Thomas Kluyver ]
+  * Port to Python 3
+
+ -- Michael Vogt <michael.vogt@ubuntu.com>  Tue, 26 Jun 2012 11:03:40 +0200
+
 unattended-upgrades (0.79) unstable; urgency=low
 
   [ Translation updates ]
@@ -11,13 +18,10 @@ unattended-upgrades (0.79) unstable; urgency=low
     - added, thanks to Jorge Barreiro, closes: #678634
   * po/pt.po:
     - added, thanks to Pedro Ribeiro, closes: #678738
-  
+
   [ Teodor MICU ]
   * debian/unattended-upgrades.init:
     - fixes new style lsb-init output, closes: #678030
-
-  [ Thomas Kluyver ]
-  * Port to Python 3
 
  -- Michael Vogt <michael.vogt@ubuntu.com>  Mon, 25 Jun 2012 08:42:23 +0200
 
