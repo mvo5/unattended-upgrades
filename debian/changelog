@@ -5,6 +5,7 @@ unattended-upgrades (0.79) unstable; urgency=low
     closes: #673237
   * code cleanup in conffile detection and tests
   * Set mail header to utf8 for the summary email (closes: #654851)
+  * use stdout instead of stderr in --debug mode (closes: #674140)
 
  -- Michael Vogt <michael.vogt@ubuntu.com>  Thu, 28 Jun 2012 22:03:13 +0200
 

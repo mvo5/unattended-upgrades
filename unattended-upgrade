@@ -680,8 +680,8 @@ def _setup_logging(options):
     mem_log = StringIO()
     if options.debug:
         logger.setLevel(logging.DEBUG)
-        stderr_handler = logging.StreamHandler()
-        logger.addHandler(stderr_handler)
+        stdout_handler = logging.StreamHandler(sys.stdout)
+        logger.addHandler(stdout_handler)
     if apt_pkg.config.find("Unattended-Upgrade::Mail", ""):
         mem_log_handler = logging.StreamHandler(mem_log)
         logger.addHandler(mem_log_handler)
