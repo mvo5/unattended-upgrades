@@ -558,8 +558,11 @@ def send_summary_mail(pkgs, res, pkgs_kept_back, mem_log, logfile_dpkg):
         subject = _("[reboot required] unattended-upgrades result for '%s'") % host()
     else:
         subject = _("unattended-upgrades result for '%s'") % host()
-    mail = subprocess.Popen([MAIL_BINARY, "-s", subject,
-                             email], stdin=subprocess.PIPE)
+    mail = subprocess.Popen([
+            MAIL_BINARY, 
+            "-s", subject,
+            "-a", "Content-Type: text/plain; charset=UTF-8",
+            email], stdin=subprocess.PIPE)
     s = _("Unattended upgrade returned: %s\n\n") % res
     if os.path.isfile(REBOOT_REQUIRED_FILE):
         s += _("Warning: A reboot is required to complete this upgrade.\n\n")

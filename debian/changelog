@@ -4,6 +4,7 @@ unattended-upgrades (0.79) unstable; urgency=low
     normal files previously (like /etc/profile in base-files 6.8),
     closes: #673237
   * code cleanup in conffile detection and tests
+  * Set mail header to utf8 for the summary email (closes: #654851)
 
  -- Michael Vogt <michael.vogt@ubuntu.com>  Thu, 28 Jun 2012 22:03:13 +0200
 
