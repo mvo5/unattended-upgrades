@@ -1,3 +1,12 @@
+unattended-upgrades (0.79) unstable; urgency=low
+
+  * correctly detect conffile prompt for new conffiles that were 
+    normal files previously (like /etc/profile in base-files 6.8),
+    closes: #673237
+  * code cleanup in conffile detection and tests
+
+ -- Michael Vogt <michael.vogt@ubuntu.com>  Thu, 28 Jun 2012 22:03:13 +0200
+
 unattended-upgrades (0.78) unstable; urgency=low
 
   [ Michael Vogt ]
