@@ -6,7 +6,10 @@ unattended-upgrades (0.79) unstable; urgency=low
   * code cleanup in conffile detection and tests
   * Set mail header to utf8 for the summary email (closes: #654851)
   * use stdout instead of stderr in --debug mode (closes: #674140)
-
+  * data/50unattended-upgrades.{Debian,Ubuntu}:
+    - change default mail recipient to "root" intead of "root@localhost"
+      to help systems without a real mail setup (closes: #648149)
+  
  -- Michael Vogt <michael.vogt@ubuntu.com>  Thu, 28 Jun 2012 22:03:13 +0200
 
 unattended-upgrades (0.78) unstable; urgency=low
