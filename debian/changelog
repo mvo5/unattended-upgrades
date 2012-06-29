@@ -31,7 +31,7 @@ unattended-upgrades (0.79) unstable; urgency=low
   * ignore packages in the blacklist early to avoid un-upgradable warning
     for mixed stable/testing systems (closes: #645382) 
 
- -- Michael Vogt <mvo@debian.org>  Thu, 28 Jun 2012 22:03:13 +0200
+ -- Michael Vogt <mvo@debian.org>  Fri, 29 Jun 2012 13:22:54 +0200
 
 unattended-upgrades (0.78) unstable; urgency=low
 
