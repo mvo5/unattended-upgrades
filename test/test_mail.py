@@ -80,14 +80,12 @@ class TestSendSummaryMail(unittest.TestCase):
         self.assertTrue(os.path.exists("mail.txt"))
 
     def test_apt_listchanges(self):
-        # test with mail as frontend
-        os.environ["APT_LISTCHANGES_FRONTEND"] = "canary"
+        # test with sendmail available
         unattended_upgrade.SENDMAIL_BINARY="/bin/true"
         setup_apt_listchanges("./data/listchanges.conf.mail")
-        self.assertEqual(os.environ["APT_LISTCHANGES_FRONTEND"], "canary")
-        # test with pager as frontend
-        os.environ["APT_LISTCHANGES_FRONTEND"] = "canary"
-        unattended_upgrade.SENDMAIL_BINARY="/bin/true"
+        self.assertEqual(os.environ["APT_LISTCHANGES_FRONTEND"], "mail")
+        # test without sendmail
+        unattended_upgrade.SENDMAIL_BINARY="/bin/not-here-xxxxxxxxx"
         setup_apt_listchanges("./data/listchanges.conf.pager")
         self.assertEqual(os.environ["APT_LISTCHANGES_FRONTEND"], "none")
 
