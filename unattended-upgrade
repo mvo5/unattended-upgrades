@@ -395,70 +395,101 @@ def pkgname_from_deb(debfile):
         # dumb fallback
         return debfile.split("_")[0]
 
+def get_md5sum_for_file_in_deb(deb_file, conf_file):
+    dpkg_cmd = ["dpkg-deb","--fsys-tarfile", deb_file]
+    tar_cmd = ["tar","-x","-O", "-f","-", "."+conf_file]
+    md5_cmd = ["md5sum"]
+    dpkg_p = Popen(dpkg_cmd, stdout=PIPE)
+    tar_p = Popen(tar_cmd, stdin=dpkg_p.stdout, stdout=PIPE)
+    md5_p = Popen(md5_cmd, stdin=tar_p.stdout, stdout=PIPE)
+    pkg_md5sum = md5_p.communicate()[0].split()[0]
+    return pkg_md5sum
+
 # prefix is *only* needed for the build-in tests
 def conffile_prompt(destFile, prefix=""):
     logging.debug("check_conffile_prompt('%s')" % destFile)
     pkgname = pkgname_from_deb(destFile)
+
+    # get the conffiles for the /var/lib/dpkg/status file
     status_file = apt_pkg.config.find("Dir::State::status")
     tagfile = apt_pkg.TagFile(open(status_file,"r"))
+    conffiles = ""
     for section in tagfile:
         if section.get("Package") == pkgname:
             logging.debug("found pkg: %s" % pkgname)
             if "Conffiles" in section:
                 conffiles = section.get("Conffiles")
-                # Conffiles:
-                # /etc/bash_completion.d/m-a c7780fab6b14d75ca54e11e992a6c11c
-                for line in string.split(conffiles,"\n"):
-                    logging.debug("conffile line: %s", line)
-                    l = string.split(string.strip(line))
-                    conf_file = l[0]
-                    md5 = l[1]
-                    if len(l) > 2:
-                        obs = l[2]
-                    else:
-                        obs = None
-                    # ignore if conffile is obsolete or does not exist
-                    if obs == "obsolete" or not os.path.exists(prefix+conf_file):
-                        continue
-                    # ignore state "newconffile" until its clearer if there
-                    # might be a dpkg prompt (LP: #936870)
-                    if md5 == "newconffile":
-                        continue
-                    # get conffile value from pkg, its ok if the new version
-                    # does not have conffiles anymore
-                    deb = apt_inst.DebFile(destFile)
-                    try:
-                        pkg_conffiles = deb.control.extractdata("conffiles")
-                    except LookupError as e:
-                        logging.debug("No conffiles in %s anymore? (%s)" % (destFile, e))
-                        pkg_conffiles = ""
-                    if (not pkg_conffiles or 
-                        not conf_file in pkg_conffiles.split("\n")):
-                        logging.debug("'%s' not in package conffiles '%s'" % (conf_file, pkg_conffiles))
-                        continue
-                    # test against the installed file
-                    current_md5 = apt_pkg.md5sum(open(prefix+conf_file).read())
-                    logging.debug("current md5: %s" % current_md5)
-                    # hashes are the same, no conffile prompt
-                    if current_md5 == md5:
-                        continue
-                    # calculate md5sum from the deb (may take a bit)
-                    dpkg_cmd = ["dpkg-deb","--fsys-tarfile",destFile]
-                    tar_cmd = ["tar","-x","-O", "-f","-", "."+conf_file]
-                    md5_cmd = ["md5sum"]
-                    dpkg_p = Popen(dpkg_cmd, stdout=PIPE)
-                    tar_p = Popen(tar_cmd, stdin=dpkg_p.stdout, stdout=PIPE)
-                    md5_p = Popen(md5_cmd, stdin=tar_p.stdout, stdout=PIPE)
-                    pkg_md5sum = md5_p.communicate()[0].split()[0]
-                    logging.debug("pkg_md5sum: %s" % pkg_md5sum)
-                    # the md5sum in the deb is unchanged, this will not 
-                    # trigger a conffile prompt
-                    if pkg_md5sum == md5:
-                        continue
-                    # if we made it to this point:
-                    #  current_md5 != pkg_md5sum != md5
-                    # and that will trigger a conffile prompt, we can
-                    # stop processing at this point and just return True
+                break
+
+    # get conffile value from pkg, its ok if the new version
+    # does not have conffiles anymore
+    pkg_conffiles = ""
+    deb = apt_inst.DebFile(destFile)
+    try:
+        pkg_conffiles = deb.control.extractdata("conffiles").strip()
+    except LookupError as e:
+        logging.debug("No conffiles in deb '%s' (%s)" % (destFile, e))
+
+    # Conffiles:
+    #  /etc/bash_completion.d/m-a c7780fab6b14d75ca54e11e992a6c11c
+    dpkg_status_conffiles = {}
+    for line in string.split(conffiles,"\n"):
+        # ignore empty lines
+        line = string.strip(line)
+        if not line:
+            continue
+        # show what we do
+        logging.debug("conffile line: '%s'", line)
+        l = string.split(line)
+        conf_file = l[0]
+        md5 = l[1]
+        if len(l) > 2:
+            obs = l[2]
+        else:
+            obs = None
+        # ignore if conffile is obsolete or does not exist
+        if obs == "obsolete" or not os.path.exists(prefix+conf_file):
+            continue
+        # ignore state "newconffile" until its clearer if there
+        # might be a dpkg prompt (LP: #936870)
+        if md5 == "newconffile":
+            continue
+        if (not pkg_conffiles or 
+            not conf_file in pkg_conffiles.split("\n")):
+            logging.debug("'%s' not in package conffiles '%s'" % (
+                    conf_file, pkg_conffiles))
+            continue
+        # record for later
+        dpkg_status_conffiles[conf_file] = md5
+        # test against the installed file
+        current_md5 = apt_pkg.md5sum(open(prefix+conf_file).read())
+        logging.debug("current md5: %s" % current_md5)
+        # hashes are the same, no conffile prompt
+        if current_md5 == md5:
+            continue
+        # calculate md5sum from the deb (may take a bit)
+        pkg_md5sum = get_md5sum_for_file_in_deb(destFile, conf_file)
+        logging.debug("pkg_md5sum: %s" % pkg_md5sum)
+        # the md5sum in the deb is unchanged, this will not 
+        # trigger a conffile prompt
+        if pkg_md5sum == md5:
+            continue
+        # if we made it to this point:
+        #  current_md5 != pkg_md5sum != md5
+        # and that will trigger a conffile prompt, we can
+        # stop processing at this point and just return True
+        return True
+    
+    # now check if there are conffiles in the pkg that where not there
+    # in the previous version in the dpkg status file
+    if pkg_conffiles:
+        for conf_file in pkg_conffiles.split("\n"):
+            if (not conf_file in dpkg_status_conffiles and
+                os.path.exists(prefix+conf_file)):
+                logging.debug("found conffile '%s' in new pkg but on dpkg "
+                              "status" % conf_file)
+                pkg_md5sum = get_md5sum_for_file_in_deb(destFile, conf_file)
+                if pkg_md5sum != apt_pkg.md5sum(open(prefix+conf_file).read()):
                     return True
     return False
 
@@ -527,8 +558,11 @@ def send_summary_mail(pkgs, res, pkgs_kept_back, mem_log, logfile_dpkg):
         subject = _("[reboot required] unattended-upgrades result for '%s'") % host()
     else:
         subject = _("unattended-upgrades result for '%s'") % host()
-    mail = subprocess.Popen([MAIL_BINARY, "-s", subject,
-                             email], stdin=subprocess.PIPE)
+    mail = subprocess.Popen([
+            MAIL_BINARY, 
+            "-s", subject,
+            "-a", "Content-Type: text/plain; charset=UTF-8",
+            email], stdin=subprocess.PIPE)
     s = _("Unattended upgrade returned: %s\n\n") % res
     if os.path.isfile(REBOOT_REQUIRED_FILE):
         s += _("Warning: A reboot is required to complete this upgrade.\n\n")
@@ -618,7 +652,12 @@ def _get_logdir():
                                 "/var/log/unattended-upgrades/"))
     return logdir
 
+
 def _setup_logging(options):
+    # ensure this is run only once
+    if len(logging.root.handlers) > 0:
+        return
+
     # init the logging
     logdir = _get_logdir()
     logfile = os.path.join(
@@ -635,7 +674,19 @@ def _setup_logging(options):
     logging.basicConfig(level=logging.INFO,
                         format='%(asctime)s %(levelname)s %(message)s',
                         filename=logfile)
-
+    
+    # additional logging
+    logger = logging.getLogger()
+    mem_log = StringIO()
+    if options.debug:
+        logger.setLevel(logging.DEBUG)
+        stdout_handler = logging.StreamHandler(sys.stdout)
+        logger.addHandler(stdout_handler)
+    if apt_pkg.config.find("Unattended-Upgrade::Mail", ""):
+        mem_log_handler = logging.StreamHandler(mem_log)
+        logger.addHandler(mem_log_handler)
+    return mem_log
+        
 
 def main(options, rootdir=""):
 
@@ -643,18 +694,8 @@ def main(options, rootdir=""):
     if rootdir:
         _setup_alternative_rootdir(rootdir)
 
-    _setup_logging(options)
-
     # setup logging
-    logger = logging.getLogger()
-    mem_log = StringIO()
-    if options.debug:
-        logger.setLevel(logging.DEBUG)
-        stderr_handler = logging.StreamHandler()
-        logger.addHandler(stderr_handler)
-    if apt_pkg.config.find("Unattended-Upgrade::Mail", ""):
-        mem_log_handler = logging.StreamHandler(mem_log)
-        logger.addHandler(mem_log_handler)
+    mem_log = _setup_logging(options)
 
     # format (origin, archive), e.g. ("Ubuntu","dapper-security")
     allowed_origins = get_allowed_origins()

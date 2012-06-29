@@ -13,6 +13,7 @@ from unattended_upgrade import _setup_logging
 
 class MockOptions:
     dry_run = False
+    debug = False
 
 class TestLogdir(unittest.TestCase):
 
@@ -25,6 +26,7 @@ class TestLogdir(unittest.TestCase):
         # test log
         logdir = os.path.join(self.tempdir, "mylog")
         apt_pkg.config.set("Unattended-Upgrade::LogDir", logdir)
+        logging.root.handlers = []
         _setup_logging(self.mock_options)
         self.assertTrue(os.path.exists(logdir))
 
@@ -35,6 +37,7 @@ class TestLogdir(unittest.TestCase):
         logdir2 = os.path.join(self.tempdir, "mylog-dontuse")
         apt_pkg.config.set("Unattended-Upgrade::LogDir", logdir)
         apt_pkg.config.set("APT::UnattendedUpgrades::LogDir", logdir2)
+        logging.root.handlers = []
         _setup_logging(self.mock_options)
         self.assertTrue(os.path.exists(logdir))
         self.assertFalse(os.path.exists(logdir2))
