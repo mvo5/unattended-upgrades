@@ -28,7 +28,8 @@ unattended-upgrades (0.79) unstable; urgency=low
   * data/50unattended-upgrades.{Debian,Ubuntu}:
     - change default mail recipient to "root" intead of "root@localhost"
       to help systems without a real mail setup (closes: #648149)
-  * fix fancy output, thanks to Teodor MICU (closes: #678030)
+  * ignore packages in the blacklist early to avoid un-upgradable warning
+    for mixed stable/testing systems (closes: #645382) 
 
  -- Michael Vogt <mvo@debian.org>  Thu, 28 Jun 2012 22:03:13 +0200
 

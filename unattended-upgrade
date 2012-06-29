@@ -356,6 +356,13 @@ def is_allowed_origin(ver, allowed_origins):
                 return True
     return False
 
+def is_pkgname_in_blacklist(pkgname, blacklist):
+    for blacklist_regexp in blacklist:
+        if re.match(blacklist_regexp, pkgname):
+            logging.debug("skipping blacklisted package '%s'" % pkgname)
+            return True
+    return False
+
 def check_changes_for_sanity(cache, allowed_origins, blacklist):
     if cache._depcache.broken_count != 0:
         return False
@@ -367,10 +374,8 @@ def check_changes_for_sanity(cache, allowed_origins, blacklist):
             if not is_allowed_origin(pkg.candidate, allowed_origins):
                 logging.debug("pkg '%s' not in allowed origin" % pkg.name)
                 return False
-            for blacklist_regexp in blacklist:
-                if re.match(blacklist_regexp, pkg.name):
-                    logging.debug("skipping blacklisted package '%s'" % pkg.name)
-                    return False
+            if is_pkgname_in_blacklist(pkg.name, blacklist):
+                return False
             if pkg._pkg.selected_state == apt_pkg.SELSTATE_HOLD:
                 logging.debug("pkg '%s' is on hold" % pkg.name)
                 return False
@@ -760,8 +765,9 @@ def main(options, rootdir=""):
     for pkg in cache:
         if options.debug and pkg.is_upgradable:
             logging.debug("Checking: %s (%s)" % (pkg.name, map(str, pkg.candidate.origins)))
-        if (pkg.is_upgradable and 
-	    is_allowed_origin(pkg.candidate, allowed_origins)):
+        if (pkg.is_upgradable and
+            not is_pkgname_in_blacklist(pkg.name, blacklisted_pkgs) and
+            is_allowed_origin(pkg.candidate, allowed_origins)):
             try:
                 pkg.mark_upgrade()
                 if check_changes_for_sanity(cache, allowed_origins,
