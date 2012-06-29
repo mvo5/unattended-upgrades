@@ -1,5 +1,22 @@
 unattended-upgrades (0.79) unstable; urgency=low
 
+  [ Translation updates ]
+  * po/pt_BR.po:
+    - updated, thanks to David Prévot, closes: #678423
+  * po/cs.po:
+    - removed, was a debconf translation
+  * po/ru.po:
+    - updated, thanks to Yuri Kozlov, closes: #678427
+  * po/gl.po:
+    - added, thanks to Jorge Barreiro, closes: #678634
+  * po/pt.po:
+    - added, thanks to Pedro Ribeiro, closes: #678738
+  
+  [ Teodor MICU ]
+  * debian/unattended-upgrades.init:
+    - fixes new style lsb-init output, closes: #678030
+
+  [ Michael Vogt ]
   * correctly detect conffile prompt for new conffiles that were 
     normal files previously (like /etc/profile in base-files 6.8),
     closes: #673237
@@ -10,8 +27,8 @@ unattended-upgrades (0.79) unstable; urgency=low
     - change default mail recipient to "root" intead of "root@localhost"
       to help systems without a real mail setup (closes: #648149)
   * fix fancy output, thanks to Teodor MICU (closes: #678030)
-  
- -- Michael Vogt <michael.vogt@ubuntu.com>  Thu, 28 Jun 2012 22:03:13 +0200
+
+ -- Michael Vogt <mvo@debian.org>  Thu, 28 Jun 2012 22:03:13 +0200
 
 unattended-upgrades (0.78) unstable; urgency=low
 

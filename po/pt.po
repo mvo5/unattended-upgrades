@@ -1,0 +1,217 @@
+# unattended-upgrades portuguese debconf messages
+# Copyright (C) 2012 THE PACKAGE'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the unattended-upgrades package.
+# Pedro Ribeiro <p.m42.ribeiro@gmail.com>, 2012.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: unattended-upgrades\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2011-07-19 15:24+0200\n"
+"PO-Revision-Date: 2012-06-24 09:04+0100\n"
+"Last-Translator: Pedro Ribeiro <p.m42.ribeiro@gmail.com>\n"
+"Language-Team: Portuguese <traduz@debianpt.org>\n"
+"Language: pt\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+
+#: ../unattended-upgrade:72
+#, c-format
+msgid "Progress: %s %% (%s)"
+msgstr "Progresso: %s %% (%s)"
+
+#: ../unattended-upgrade:190 ../unattended-upgrade:254
+msgid "All upgrades installed"
+msgstr "Todas as atualizações instaladas"
+
+#: ../unattended-upgrade:192 ../unattended-upgrade:246
+msgid "Installing the upgrades failed!"
+msgstr "Falhou a instalação das atualizações!"
+
+#: ../unattended-upgrade:193 ../unattended-upgrade:247
+#, c-format
+msgid "error message: '%s'"
+msgstr "mensagem de erro: '%s'"
+
+#: ../unattended-upgrade:194 ../unattended-upgrade:248
+#, c-format
+msgid "dpkg returned a error! See '%s' for details"
+msgstr "dpkg retornou um erro! Veja '%s' para mais informação"
+
+#: ../unattended-upgrade:231
+#, c-format
+msgid "Progress: %s %%: (%s)"
+msgstr "Progresso: %s %%: (%s)"
+
+#: ../unattended-upgrade:412
+msgid ""
+"No '/usr/bin/mail', can not send mail. You probably want to install the "
+"'mailx' package."
+msgstr ""
+"Não existe '/usr/bin/mail', impossível enviar mail. Provavelmente quer "
+"instalar o pacote 'mailx'."
+
+#: ../unattended-upgrade:423
+#, c-format
+msgid "[reboot required] unattended-upgrades result for '%s'"
+msgstr "[reinício necessário] resultado do unattended-upgrades para '%s'"
+
+#: ../unattended-upgrade:425
+#, c-format
+msgid "unattended-upgrades result for '%s'"
+msgstr "resultado do unattended-upgrades para '%s'"
+
+#: ../unattended-upgrade:428
+#, c-format
+msgid ""
+"Unattended upgrade returned: %s\n"
+"\n"
+msgstr ""
+"Actualização automática retornou: %s\n"
+"\n"
+
+#: ../unattended-upgrade:430
+msgid ""
+"Warning: A reboot is required to complete this upgrade.\n"
+"\n"
+msgstr ""
+"Atenção: É necessário reiniciar o computador para completar esta atualização.\n"
+"\n"
+
+#: ../unattended-upgrade:431
+msgid "Packages that are upgraded:\n"
+msgstr "Pacotes atualizados:\n"
+
+#: ../unattended-upgrade:435
+msgid "Packages with upgradable origin but kept back:\n"
+msgstr "Pacotes com possibilidade de actualização mas mantidos:\n"
+
+#: ../unattended-upgrade:439
+msgid "Package installation log:"
+msgstr "Registo de instalação de pacotes:"
+
+#: ../unattended-upgrade:442
+msgid "Unattended-upgrades log:\n"
+msgstr "Registo do Unattended-upgrades:\n"
+
+#: ../unattended-upgrade:513
+#, c-format
+msgid "Initial blacklisted packages: %s"
+msgstr "Lista negra inicial de pacotes: %s"
+
+#: ../unattended-upgrade:514
+msgid "Starting unattended upgrades script"
+msgstr "A iniciar o script de atualização automática"
+
+#: ../unattended-upgrade:517
+#, c-format
+msgid "Allowed origins are: %s"
+msgstr "Origens permitidas: %s"
+
+#: ../unattended-upgrade:528 ../unattended-upgrade:529
+msgid "Unclean dpkg state detected, trying to correct"
+msgstr "Detetado estado \"unclean\" de dpkg, a tentar correção"
+
+#: ../unattended-upgrade:538
+#, c-format
+msgid ""
+"dpkg --configure -a output:\n"
+"%s"
+msgstr ""
+"dpkg --configure -a output:\n"
+"%s"
+
+#: ../unattended-upgrade:546
+msgid "Lock could not be acquired (another package manager running?)"
+msgstr "Não foi possível bloquear (outro gestor de pacotes ativo?)"
+
+#: ../unattended-upgrade:548
+msgid "Cache lock can not be acquired, exiting"
+msgstr "Não foi possível bloquear cache, a sair"
+
+#: ../unattended-upgrade:554 ../unattended-upgrade:555
+msgid "Cache has broken packages, exiting"
+msgstr "A cache tem pacotes corrompidos, a sair"
+
+#: ../unattended-upgrade:581
+#, c-format
+msgid "package '%s' upgradable but fails to be marked for upgrade (%s)"
+msgstr "o pacote '%s' é atualizável mas não está marcado para atualização (%s)"
+
+#: ../unattended-upgrade:601
+#, c-format
+msgid "GetArchives() failed: '%s'"
+msgstr "Falhou GetArchives(): '%s'"
+
+#: ../unattended-upgrade:610 ../unattended-upgrade:611
+#, c-format
+msgid "An error ocured: '%s'"
+msgstr "Ocorreu um erro: '%s'"
+
+#: ../unattended-upgrade:613 ../unattended-upgrade:614
+#, c-format
+msgid "The URI '%s' failed to download, aborting"
+msgstr "Falhou o download do URI '%s', a terminar"
+
+#: ../unattended-upgrade:617
+#, c-format
+msgid "Download finished, but file '%s' not there?!?"
+msgstr "Acabou o download, mas o ficheiro '%s' não existe?!?"
+
+#: ../unattended-upgrade:626
+#, c-format
+msgid "Package '%s' has conffile prompt and needs to be upgraded manually"
+msgstr ""
+"O pacote '%s' tem uma questão de ficheiro de configuração e necessita de "
+"ser atualizado manualmente"
+
+#: ../unattended-upgrade:648
+#, c-format
+msgid "package '%s' not upgraded"
+msgstr "o pacote '%s' não foi atualizado"
+
+#: ../unattended-upgrade:662
+#, c-format
+msgid "Packages that are auto removed: '%s'"
+msgstr "Pacotes automaticamente removidos: '%s'"
+ 
+#: ../unattended-upgrade:669
+msgid "No packages found that can be upgraded unattended"
+msgstr ""
+"Não foram encontrados pacotes com possibilidade de atualização automatica"
+
+#: ../unattended-upgrade:679
+#, c-format
+msgid "Packages that are upgraded: %s"
+msgstr "Pacotes atualizados: %s"
+
+#: ../unattended-upgrade:693
+#, c-format
+msgid "Writing dpkg log to '%s'"
+msgstr "A escrever registo do dpkg para '%s'"
+
+#: ../unattended-upgrade:744
+msgid "print debug messages"
+msgstr "mostrar mensagens de debug"
+
+#: ../unattended-upgrade:747
+msgid "Simulation, download but do not install"
+msgstr "Simulação, fazer o download mas não instalar"
+
+#: ../unattended-upgrade:750
+msgid "Upgrade in minimal steps (and allow interrupting with SIGINT"
+msgstr "Atualizar em pequenos passos (e permitir interrupções com o SIGINT"
+
+#: ../unattended-upgrade:754
+msgid "You need to be root to run this application"
+msgstr "Necessita de acesso de root para executar esta aplicação"
+
+#: ../unattended-upgrade-shutdown:95
+msgid "Unattended-upgrade in progress during shutdown, sleeping for 5s"
+msgstr "Unattended-upgrade em progresso durante o fecho, a dormir por 5s"
+
+#: ../unattended-upgrade-shutdown:106
+#, c-format
+msgid "Giving up on lockfile after %s delay"
+msgstr "A desistir do ficheiro de lock após um atraso de %s"
