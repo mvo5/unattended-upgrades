@@ -11,6 +11,8 @@ unattended-upgrades (0.79) unstable; urgency=low
     - added, thanks to Jorge Barreiro, closes: #678634
   * po/pt.po:
     - added, thanks to Pedro Ribeiro, closes: #678738
+  * po/sk.po:
+    - added, thanks to helix84, closes: #677471
   
   [ Teodor MICU ]
   * debian/unattended-upgrades.init:
