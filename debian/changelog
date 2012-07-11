@@ -1,4 +1,4 @@
-unattended-upgrades (0.79.1) UNRELEASED; urgency=low
+unattended-upgrades (0.79.1) unstable; urgency=low
 
   * Set apt-listchanges frontend to "mail" if sendmail is available,
     the default behavior of apt-listchanges is to send a mail (if there
@@ -8,7 +8,7 @@ unattended-upgrades (0.79.1) UNRELEASED; urgency=low
     email.Message package to construct a proper utf8 message
     (closes: #654851)
 
- -- Michael Vogt <michael.vogt@ubuntu.com>  Fri, 29 Jun 2012 16:31:11 +0200
+ -- Michael Vogt <mvo@debian.org>  Wed, 11 Jul 2012 22:34:14 +0200
 
 unattended-upgrades (0.79) unstable; urgency=low
 
