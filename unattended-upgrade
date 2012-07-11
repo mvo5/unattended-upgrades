@@ -33,8 +33,9 @@ import os
 import string
 import sys
 
-from StringIO import StringIO
+from email.Message import Message
 from optparse import OptionParser
+from StringIO import StringIO
 from subprocess import Popen, PIPE
 
 import warnings
@@ -561,8 +562,6 @@ def send_summary_mail(pkgs, res, pkgs_kept_back, mem_log, logfile_dpkg):
         subject = _("unattended-upgrades result for '%s'") % host()
     mail = subprocess.Popen([
             MAIL_BINARY, 
-            "-s", subject,
-            "-a", "Content-Type: text/plain; charset=UTF-8",
             email], stdin=subprocess.PIPE)
     s = _("Unattended upgrade returned: %s\n\n") % res
     if os.path.isfile(REBOOT_REQUIRED_FILE):
@@ -581,7 +580,18 @@ def send_summary_mail(pkgs, res, pkgs_kept_back, mem_log, logfile_dpkg):
         s += "\n\n"
     s += _("Unattended-upgrades log:\n")
     s += mem_log.getvalue()
-    mail.stdin.write(s)
+
+    # ensure that the message a utf8 encoded string
+    if type(s) is unicode:
+        s = s.encode("utf-8", "replace")
+
+    # format as a proper mail
+    msg = Message()
+    msg.set_charset("utf8")
+    msg.set_payload(s)
+    msg["Subject"] = subject
+    
+    mail.stdin.write(msg.as_string())
     mail.stdin.close()
     ret = mail.wait()
     logging.debug("mail returned: %s" % ret)

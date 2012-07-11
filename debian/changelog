@@ -4,6 +4,9 @@ unattended-upgrades (0.79.1) UNRELEASED; urgency=low
     the default behavior of apt-listchanges is to send a mail (if there
     is a email_address in apt-listchanges.conf) even with pager/gtk
     frontends so this will ensure the same behavior (closes: #579733)
+  * Do not use "mail -a" as this is not POSIX, instead use the python
+    email.Message package to construct a proper utf8 message
+    (closes: #654851)
 
  -- Michael Vogt <michael.vogt@ubuntu.com>  Fri, 29 Jun 2012 16:31:11 +0200
 

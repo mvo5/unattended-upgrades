@@ -1,5 +1,5 @@
 #!/usr/bin/python
-
+# -*- coding: utf-8 -*-
 import apt
 import apt_pkg
 import os
@@ -9,7 +9,6 @@ import sys
 
 from StringIO import StringIO
 
-import unattended_upgrade
 import unattended_upgrade
 from unattended_upgrade import send_summary_mail, setup_apt_listchanges
 
@@ -34,7 +33,8 @@ class TestSendSummaryMail(unittest.TestCase):
         pkgs = "\n".join(["2vcard"])
         res = successful
         pkgs_kept_back = []
-        mem_log = StringIO("mem_log text")
+        # include some unicode chars here for good measure
+        mem_log = StringIO(u"mem_log text üöä")
         logfile_dpkg = "./apt-term.log"
         open("./apt-term.log", "w").write("logfile_dpkg text")
         return (pkgs, res, pkgs_kept_back, mem_log, logfile_dpkg)
@@ -43,6 +43,7 @@ class TestSendSummaryMail(unittest.TestCase):
         self.assertTrue("logfile_dpkg text" in mail_txt)
         self.assertTrue("mem_log text" in mail_txt)
         self.assertTrue("Packages that are upgraded:\n 2vcard" in mail_txt)
+        self.assertTrue('Content-Type: text/plain; charset="utf-8"' in mail_txt)
 
     def test_summary_mail_reboot(self):
         open("./reboot-required","w").write("")
