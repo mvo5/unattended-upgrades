@@ -1,6 +1,8 @@
 unattended-upgrades (0.79.2) UNRELEASED; urgency=low
 
   * use "mail -s" again to ensure there is a proper subject line
+  * po/es.po:
+    - updated, thanks to Omar Campagne, closes: #681334
 
  -- Michael Vogt <michael.vogt@ubuntu.com>  Thu, 12 Jul 2012 14:18:34 +0200
 
