@@ -561,7 +561,7 @@ def send_summary_mail(pkgs, res, pkgs_kept_back, mem_log, logfile_dpkg):
     else:
         subject = _("unattended-upgrades result for '%s'") % host()
     mail = subprocess.Popen([
-            MAIL_BINARY, 
+            MAIL_BINARY, "-s", subject,
             email], stdin=subprocess.PIPE)
     s = _("Unattended upgrade returned: %s\n\n") % res
     if os.path.isfile(REBOOT_REQUIRED_FILE):
@@ -589,7 +589,6 @@ def send_summary_mail(pkgs, res, pkgs_kept_back, mem_log, logfile_dpkg):
     msg = Message()
     msg.set_charset("utf8")
     msg.set_payload(s)
-    msg["Subject"] = subject
     
     mail.stdin.write(msg.as_string())
     mail.stdin.close()
