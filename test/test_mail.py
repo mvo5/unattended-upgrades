@@ -101,6 +101,12 @@ class MailxTestCase(CommonTestsForMailxAndSendmail, unittest.TestCase):
         self.common_setup()
         unattended_upgrade.MAIL_BINARY = "./mock-mail"
 
+    def _verify_common_mail_content(self, mail_txt):
+        CommonTestsForMailxAndSendmail._verify_common_mail_content(
+            self, mail_txt)
+        # setting this header with mailx is not possible so ensure
+        # we don't accidently try
+        self.assertFalse('text/plain; charset="utf-8"' in mail_txt)
 
 class SendmailTestCase(CommonTestsForMailxAndSendmail, unittest.TestCase):
 
