@@ -1,4 +1,4 @@
-unattended-upgrades (0.79.2) UNRELEASED; urgency=low
+unattended-upgrades (0.79.2) unstable; urgency=low
 
   * use "mail -s" again to ensure there is a proper subject line when
     using mailx
@@ -13,7 +13,7 @@ unattended-upgrades (0.79.2) UNRELEASED; urgency=low
   * only use ionice if available (closes: #681467)
   * make pyflakes clean and add test
 
- -- Michael Vogt <michael.vogt@ubuntu.com>  Thu, 12 Jul 2012 14:18:34 +0200
+ -- Michael Vogt <mvo@debian.org>  Fri, 13 Jul 2012 20:54:05 +0200
 
 unattended-upgrades (0.79.1) unstable; urgency=low
 
