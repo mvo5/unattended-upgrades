@@ -1,6 +1,10 @@
 unattended-upgrades (0.79.2) UNRELEASED; urgency=low
 
-  * use "mail -s" again to ensure there is a proper subject line
+  * use "mail -s" again to ensure there is a proper subject line when
+    using mailx
+  * do not attach headers when using mailx
+  * use sendmail instead of mailx when available to get a proper mime
+    mail with correct encoding etc
   * po/es.po:
     - updated, thanks to Omar Campagne, closes: #681334
 

@@ -27,6 +27,7 @@ import apt_pkg
 import ConfigParser
 import copy
 import datetime
+import email.Charset
 import fcntl
 import re
 import os
@@ -510,14 +511,17 @@ def dpkg_conffile_prompt():
             return False
     return True
 
+
 def rewind_cache(cache, pkgs_to_upgrade):
     " set the cache back to the state with packages_to_upgrade "
     cache.clear()
     for pkg2 in pkgs_to_upgrade:
         pkg2.mark_upgrade()
 
+
 def host():
     return os.uname()[1]
+
 
 # *sigh* textwrap is nice, but it breaks "linux-image" into two
 # seperate lines
@@ -528,6 +532,7 @@ def wrap(t, width=70, subsequent_indent=""):
             out += "\n" + subsequent_indent
         out += s + " "
     return out
+
 
 def setup_apt_listchanges(conf="/etc/apt/listchanges.conf"):
     """ deal with apt-listchanges """
@@ -540,12 +545,41 @@ def setup_apt_listchanges(conf="/etc/apt/listchanges.conf"):
     else:
         os.environ["APT_LISTCHANGES_FRONTEND"] = "none"
 
+
+def _send_mail_using_mailx(to_address, subject, body):
+    mail = subprocess.Popen([
+            MAIL_BINARY, "-s", subject, to_address], stdin=subprocess.PIPE)
+    mail.stdin.write(body)
+    mail.stdin.close()
+    ret = mail.wait()
+    return ret
+
+
+def _send_mail_using_sendmail(to_address, subject, body):
+    # format as a proper mail
+    msg = Message()
+    charset = email.Charset.Charset("utf-8")
+    charset.body_encoding = email.Charset.QP
+    msg.set_charset(charset)
+    msg.set_payload(body)
+    msg['Subject'] = subject
+    msg['To'] = to_address
+    sendmail = subprocess.Popen(
+        [SENDMAIL_BINARY, "-oi", "-t"], stdin=subprocess.PIPE)
+    sendmail.stdin.write(msg.as_string())
+    sendmail.stdin.close()
+    ret = sendmail.wait()
+    return ret
+
+
 def send_summary_mail(pkgs, res, pkgs_kept_back, mem_log, logfile_dpkg):
     " send mail (if configured in Unattended-Upgrade::Mail) "
-    email = apt_pkg.config.find("Unattended-Upgrade::Mail", "")
-    if not email:
+    to_email = apt_pkg.config.find("Unattended-Upgrade::Mail", "")
+    if not to_email:
         return
-    if not os.path.exists(MAIL_BINARY):
+    # FIXME: this should say that sendmail works too but doing that no
+    #        would break translations
+    if not os.path.exists(MAIL_BINARY) and not os.path.exists(SENDMAIL_BINARY):
         logging.error(_("No '/usr/bin/mail', can not send mail. "
                         "You probably want to install the 'mailx' package."))
         return
@@ -555,44 +589,39 @@ def send_summary_mail(pkgs, res, pkgs_kept_back, mem_log, logfile_dpkg):
         apt_pkg.config.find_b("Unattended-Upgrade::MailOnlyOnError", False)):
 	return
     # Check if reboot-required flag is present
-    logging.debug("Sending mail with '%s' to '%s'" % (logfile_dpkg, email))
+    logging.debug("Sending mail with '%s' to '%s'" % (logfile_dpkg, to_email))
     if os.path.isfile(REBOOT_REQUIRED_FILE):
         subject = _("[reboot required] unattended-upgrades result for '%s'") % host()
     else:
         subject = _("unattended-upgrades result for '%s'") % host()
-    mail = subprocess.Popen([
-            MAIL_BINARY, "-s", subject,
-            email], stdin=subprocess.PIPE)
-    s = _("Unattended upgrade returned: %s\n\n") % res
+    body = _("Unattended upgrade returned: %s\n\n") % res
     if os.path.isfile(REBOOT_REQUIRED_FILE):
-        s += _("Warning: A reboot is required to complete this upgrade.\n\n")
-    s += _("Packages that are upgraded:\n")
-    s += " " + wrap(pkgs, 70, " ")
-    s += "\n"
+        body += _("Warning: A reboot is required to complete this upgrade.\n\n")
+    body += _("Packages that are upgraded:\n")
+    body += " " + wrap(pkgs, 70, " ")
+    body += "\n"
     if pkgs_kept_back:
-        s += _("Packages with upgradable origin but kept back:\n")
-        s += " " + wrap(" ".join(pkgs_kept_back), 70, " ")
-        s += "\n"
-    s += "\n"
+        body += _("Packages with upgradable origin but kept back:\n")
+        body += " " + wrap(" ".join(pkgs_kept_back), 70, " ")
+        body += "\n"
+    body += "\n"
     if os.path.exists(logfile_dpkg):
-        s += _("Package installation log:")+"\n"
-        s += open(logfile_dpkg).read()
-        s += "\n\n"
-    s += _("Unattended-upgrades log:\n")
-    s += mem_log.getvalue()
+        body += _("Package installation log:")+"\n"
+        body += open(logfile_dpkg).read()
+        body += "\n\n"
+    body += _("Unattended-upgrades log:\n")
+    body += mem_log.getvalue()
 
     # ensure that the message a utf8 encoded string
-    if type(s) is unicode:
-        s = s.encode("utf-8", "replace")
+    if type(body) is unicode:
+        body= body.encode("utf-8", "replace")
 
-    # format as a proper mail
-    msg = Message()
-    msg.set_charset("utf8")
-    msg.set_payload(s)
-    
-    mail.stdin.write(msg.as_string())
-    mail.stdin.close()
-    ret = mail.wait()
+    if os.path.exists(SENDMAIL_BINARY):
+        ret = _send_mail_using_sendmail(to_email, subject, body)
+    elif os.path.exists(MAIL_BINARY):
+        ret = _send_mail_using_mailx(to_email, subject, body)
+    else:
+        raise AssertionError("at this point we must of mailx or sendmail")
     logging.debug("mail returned: %s" % ret)
 
 
