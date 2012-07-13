@@ -53,6 +53,9 @@ component "main".  The apt-cache policy short identifiers
 All operations are be logged in /var/log/unattended-upgrades/. This
 includes the dpkg output as well.
 
+If you want mail support you need to have a mail-transport-agent (e.g
+postfix) or mailx installed.
+
 == Debugging ==
 
 If something goes wrong or if you want to report a bug about the way
