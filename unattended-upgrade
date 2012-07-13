@@ -24,7 +24,6 @@
 import apt_inst
 import apt_pkg
 
-import ConfigParser
 import copy
 import datetime
 import email.Charset
@@ -788,6 +787,7 @@ def main(options, rootdir=""):
         sys.exit(1)
     # speed things up with latest apt
     actiongroup = apt_pkg.ActionGroup(cache._depcache)
+    actiongroup  # pyflakes
 
     # find out about the packages that are upgradable (in a allowed_origin)
     pkgs_to_upgrade = []
@@ -845,6 +845,7 @@ def main(options, rootdir=""):
     except SystemError, e:
         logging.error(_("GetArchives() failed: '%s'") % e)
     res = fetcher.run()
+    logging.debug("fetch.run() result: %s" % res)
 
     if dpkg_conffile_prompt():
         # now check the downloaded debs for conffile conflicts and build
@@ -926,6 +927,7 @@ def main(options, rootdir=""):
     # be set by the unatteded-upgrades-shutdown script
     if (not "UNATTENDED_UPGRADES_FORCE_INSTALL_ON_SHUTDOWN" in os.environ and
         apt_pkg.config.find_b("Unattended-Upgrade::InstallOnShutdown", False)):
+        logger = logging.getLogger()
         logger.debug("Configured to install on shutdown, so exiting now")
         return
 
@@ -993,9 +995,11 @@ if __name__ == "__main__":
 
     # nice & ionce
     os.nice(19)
-    with open(os.devnull, "w") as fstderr:
-        subprocess.call(["ionice","-c3", "-p",str(os.getpid())],
-                        stderr=fstderr)
+    IONICE="/usr/bin/ionice"
+    if os.path.exists(IONICE):
+        with open(os.devnull, "w") as fstderr:
+            subprocess.call([IONICE, "-c3", "-p",str(os.getpid())],
+                            stderr=fstderr)
 
     # ensure that we are not killed when the terminal goes away e.g. on
     # shutdown
