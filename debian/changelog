@@ -5,6 +5,7 @@ unattended-upgrades (0.79.2) UNRELEASED; urgency=low
   * do not attach headers when using mailx
   * use sendmail instead of mailx when available to get a proper mime
     mail with correct encoding etc (closes: #654851, #681442)
+    Thanks to Bjørn Mork and Teodor MICU
   * po/es.po:
     - updated, thanks to Omar Campagne, closes: #681334
   * debian/control:
