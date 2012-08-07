@@ -1,3 +1,10 @@
+unattended-upgrades (0.79.3) UNRELEASED; urgency=low
+
+  * unattended-upgrade:
+    - fix assert text, thanks to Niels Thykier
+
+ -- Michael Vogt <michael.vogt@ubuntu.com>  Tue, 07 Aug 2012 12:12:16 +0200
+
 unattended-upgrades (0.79.2) unstable; urgency=low
 
   * use "mail -s" again to ensure there is a proper subject line when

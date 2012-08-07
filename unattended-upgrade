@@ -620,7 +620,9 @@ def send_summary_mail(pkgs, res, pkgs_kept_back, mem_log, logfile_dpkg):
     elif os.path.exists(MAIL_BINARY):
         ret = _send_mail_using_mailx(to_email, subject, body)
     else:
-        raise AssertionError("at this point we must of mailx or sendmail")
+        raise AssertionError(
+            "This should never be reached, if we are here we either "
+            "have sendmail or mailx. Please report this as a bug.")
     logging.debug("mail returned: %s" % ret)
 
 
