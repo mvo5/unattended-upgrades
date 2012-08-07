@@ -1,0 +1,247 @@
+# unattended-upgrades po translation to Spanish
+# Copyright (C) 2012 Software in the Public Interest
+# This file is distributed under the same license as the unattended-upgrades package.
+#
+# Changes:
+#   - Initial translation
+#       Omar Campagne <ocampagne@gmail.com>, 2012
+#
+#   - Updates
+#       TRANSLATOR
+#
+# Traductores, si no conocen el formato PO, merece la pena leer la
+# documentación de gettext, especialmente las secciones dedicadas a este
+# formato, por ejemplo ejecutando:
+#       info -n '(gettext)PO Files'
+#       info -n '(gettext)Header Entry'
+#
+# Equipo de traducción al español, por favor lean antes de traducir
+# los siguientes documentos:
+#
+#   - El proyecto de traducción de Debian al español
+#     http://www.debian.org/intl/spanish/
+#     especialmente las notas y normas de traducción en
+#     http://www.debian.org/intl/spanish/notas
+#
+#   - La guía de traducción de po's de debconf:
+#     /usr/share/doc/po-debconf/README-trans
+#     o http://www.debian.org/intl/l10n/po-debconf/README-trans
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: unattended-upgrades 0.79\n"
+"Report-Msgid-Bugs-To: unattended-upgrades@packages.debian.org\n"
+"POT-Creation-Date: 2011-07-19 15:24+0200\n"
+"PO-Revision-Date: 2012-07-12 14:04+0200\n"
+"Last-Translator: Omar Campagne <ocampagne@gmail.com>\n"
+"Language-Team: Debian l10n Spanish <debian-l10n-spanish@lists.debian.org>\n"
+"Language: es\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+"X-Generator: Virtaal 0.7.1\n"
+
+#: ../unattended-upgrade:72
+#, c-format
+msgid "Progress: %s %% (%s)"
+msgstr "Progreso: %s %% (%s)"
+
+#: ../unattended-upgrade:190 ../unattended-upgrade:254
+msgid "All upgrades installed"
+msgstr "Se han instalado todas las actualizaciones"
+
+#: ../unattended-upgrade:192 ../unattended-upgrade:246
+msgid "Installing the upgrades failed!"
+msgstr "Fallo al instalar actualizaciones"
+
+#: ../unattended-upgrade:193 ../unattended-upgrade:247
+#, c-format
+msgid "error message: '%s'"
+msgstr "Mensaje de fallo: «%s»"
+
+#: ../unattended-upgrade:194 ../unattended-upgrade:248
+#, c-format
+msgid "dpkg returned a error! See '%s' for details"
+msgstr "Se ha detectado un fallo de dpkg. Para más detalles, consulte «%s»"
+
+#: ../unattended-upgrade:231
+#, c-format
+msgid "Progress: %s %%: (%s)"
+msgstr "Progreso: %s %%: (%s)"
+
+#: ../unattended-upgrade:412
+msgid ""
+"No '/usr/bin/mail', can not send mail. You probably want to install the "
+"'mailx' package."
+msgstr ""
+"No se ha detectado «/usr/bin/mail», no se puede enviar correo. Considere "
+"instalar el paquete «mailx»."
+
+#: ../unattended-upgrade:423
+#, c-format
+msgid "[reboot required] unattended-upgrades result for '%s'"
+msgstr "[Se requiere un reinicio] Resultado de unattended-upgrades para «%s»"
+
+#: ../unattended-upgrade:425
+#, c-format
+msgid "unattended-upgrades result for '%s'"
+msgstr "Resultado de unattended-upgrades para «%s»"
+
+#: ../unattended-upgrade:428
+#, c-format
+msgid ""
+"Unattended upgrade returned: %s\n"
+"\n"
+msgstr ""
+"Valor devuelto por unattended-upgrade: %s\n"
+"\n"
+
+#: ../unattended-upgrade:430
+msgid ""
+"Warning: A reboot is required to complete this upgrade.\n"
+"\n"
+msgstr ""
+"Advertencia: Se requiere reinciar para completar la actualización.\n"
+"\n"
+
+#: ../unattended-upgrade:431
+msgid "Packages that are upgraded:\n"
+msgstr "Paquetes que actualizar:\n"
+
+#: ../unattended-upgrade:435
+msgid "Packages with upgradable origin but kept back:\n"
+msgstr "Paquetes con una actualización disponible en la fuente pero que no se "
+"actualizarán:\n"
+
+#: ../unattended-upgrade:439
+msgid "Package installation log:"
+msgstr "Registro de instalación de paquete:"
+
+#: ../unattended-upgrade:442
+msgid "Unattended-upgrades log:\n"
+msgstr "Registro de unattended-upgrades:\n"
+
+#: ../unattended-upgrade:513
+#, c-format
+msgid "Initial blacklisted packages: %s"
+msgstr "Paquetes inicialmente bloqueados: %s"
+
+#: ../unattended-upgrade:514
+msgid "Starting unattended upgrades script"
+msgstr "Iniciando script de unattended-upgrades"
+
+#: ../unattended-upgrade:517
+#, c-format
+msgid "Allowed origins are: %s"
+msgstr "Fuentes permitidas: %s"
+
+#: ../unattended-upgrade:528 ../unattended-upgrade:529
+msgid "Unclean dpkg state detected, trying to correct"
+msgstr "Se ha detectado un estado no limpio de dpkg, intentando corregir"
+
+#: ../unattended-upgrade:538
+#, c-format
+msgid ""
+"dpkg --configure -a output:\n"
+"%s"
+msgstr ""
+"dpkg --configure -a output:\n"
+"%s"
+
+#: ../unattended-upgrade:546
+msgid "Lock could not be acquired (another package manager running?)"
+msgstr ""
+"No se puede establecer el bloqueo (¿otro gestor de paquetes ejecutándose?)"
+
+#: ../unattended-upgrade:548
+msgid "Cache lock can not be acquired, exiting"
+msgstr "No se puede establecer el bloqueo de la caché, saliendo"
+
+#: ../unattended-upgrade:554 ../unattended-upgrade:555
+msgid "Cache has broken packages, exiting"
+msgstr "La caché tiene paquetes rotos, saliendo"
+
+#: ../unattended-upgrade:581
+#, c-format
+msgid "package '%s' upgradable but fails to be marked for upgrade (%s)"
+msgstr ""
+"El paquete «%s» es actualizable, pero no se puede marcar para la "
+"actualización (%s)"
+
+#: ../unattended-upgrade:601
+#, c-format
+msgid "GetArchives() failed: '%s'"
+msgstr "Fallo de GetArchives(): «%s»"
+
+#: ../unattended-upgrade:610 ../unattended-upgrade:611
+#, c-format
+msgid "An error ocured: '%s'"
+msgstr "Se ha detectado un fallo: «%s»"
+
+#: ../unattended-upgrade:613 ../unattended-upgrade:614
+#, c-format
+msgid "The URI '%s' failed to download, aborting"
+msgstr "Fallo al descargar desde el URI «%s», interrumpiendo"
+
+#: ../unattended-upgrade:617
+#, c-format
+msgid "Download finished, but file '%s' not there?!?"
+msgstr "La descarga ha finalizado, pero no se encuentra el fichero «%s»"
+
+#: ../unattended-upgrade:626
+#, c-format
+msgid "Package '%s' has conffile prompt and needs to be upgraded manually"
+msgstr ""
+"El paquete «%s» solicita confirmación a través de un conffile, y se debe "
+"actualizar de forma manual"
+
+#: ../unattended-upgrade:648
+#, c-format
+msgid "package '%s' not upgraded"
+msgstr "No se ha actualizado el paquete «%s»"
+
+#: ../unattended-upgrade:662
+#, c-format
+msgid "Packages that are auto removed: '%s'"
+msgstr "Paquetes eliminados de forma automática: «%s»"
+
+#: ../unattended-upgrade:669
+msgid "No packages found that can be upgraded unattended"
+msgstr "No se han encontrado paquetes actualizables sin supervisión"
+
+#: ../unattended-upgrade:679
+#, c-format
+msgid "Packages that are upgraded: %s"
+msgstr "Paquetes que se han actualizado: %s"
+
+#: ../unattended-upgrade:693
+#, c-format
+msgid "Writing dpkg log to '%s'"
+msgstr "Escribiendo el registro de dpkg en «%s»"
+
+#: ../unattended-upgrade:744
+msgid "print debug messages"
+msgstr "Mostrar mensajes de depuración de fallos"
+
+#: ../unattended-upgrade:747
+msgid "Simulation, download but do not install"
+msgstr "Simulacro, descarga pero no instala"
+
+#: ../unattended-upgrade:750
+msgid "Upgrade in minimal steps (and allow interrupting with SIGINT"
+msgstr "Actualizar en pequeños pasos (y permitir la interrupción con SIGINT)"
+
+#: ../unattended-upgrade:754
+msgid "You need to be root to run this application"
+msgstr ""
+"Necesita tener privilegios de administrador para ejecutar esta aplicación"
+
+#: ../unattended-upgrade-shutdown:95
+msgid "Unattended-upgrade in progress during shutdown, sleeping for 5s"
+msgstr "Unattended-upgrade en proceso durante el apagado, esperando 5s"
+
+#: ../unattended-upgrade-shutdown:106
+#, c-format
+msgid "Giving up on lockfile after %s delay"
+msgstr "Finalizando el bloqueo del fichero después de un retraso de %s"
