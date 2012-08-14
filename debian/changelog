@@ -1,3 +1,10 @@
+unattended-upgrades (0.79.4) UNRELEASED; urgency=low
+
+  * data/50unattended-upgrades.{Debian,Ubuntu}:
+    - add missing ";" in the example config, thanks to  Tomas Pospisek
+
+ -- Michael Vogt <michael.vogt@ubuntu.com>  Tue, 14 Aug 2012 13:25:40 +0200
+
 unattended-upgrades (0.79.3) unstable; urgency=low
 
   * unattended-upgrade:
