@@ -2,6 +2,9 @@ unattended-upgrades (0.79.4) UNRELEASED; urgency=low
 
   * data/50unattended-upgrades.{Debian,Ubuntu}:
     - add missing ";" in the example config, thanks to  Tomas Pospisek
+  * unattended-upgrade, test/test_origin_pattern.py:
+    - if a unknown matcher token is found, raise a error instead of
+      silently ignoring it, thanks to Russell Stuart 
 
  -- Michael Vogt <michael.vogt@ubuntu.com>  Tue, 14 Aug 2012 13:25:40 +0200
 
