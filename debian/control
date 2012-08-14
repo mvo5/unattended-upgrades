@@ -10,7 +10,7 @@ Vcs-Bzr: http://code.launchpad.net/~ubuntu-core-dev/unattended-upgrades/ubuntu/
 Package: unattended-upgrades
 Architecture: all
 Depends: ${shlibs:Depends}, ${misc:Depends}, debconf, python, 
- python-apt (>= 0.7.90), apt-utils, apt, ucf, lsb-release, 
+ python-apt (>= 0.8.8), apt-utils, apt, ucf, lsb-release, 
  lsb-base (>= 3.2-14)
 Suggests: bsd-mailx, mail-transport-agent
 Description: automatic installation of security upgrades

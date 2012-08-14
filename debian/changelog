@@ -1,3 +1,9 @@
+unattended-upgrades (0.79.5) unstable; urgency=low
+
+  * add codename based matching 
+
+ -- Michael Vogt <michael.vogt@ubuntu.com>  Tue, 14 Aug 2012 15:06:47 +0200
+
 unattended-upgrades (0.79.4) UNRELEASED; urgency=low
 
   * data/50unattended-upgrades.{Debian,Ubuntu}:

@@ -266,6 +266,8 @@ def match_whitelist_string(whitelist, origin):
             res &= (value == origin.component)
         elif what in ("site",):
             res &= (value == origin.site)
+        elif what in ("n", "codename",):
+            res &= (value == origin.codename)
         else:
             raise UnknownMatcherError(
                 "Unknown whitelist entry for macher '%s' (token '%s')" % (
