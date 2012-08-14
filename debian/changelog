@@ -1,9 +1,11 @@
 unattended-upgrades (0.79.5) UNRELEASED; urgency=low
 
   * add codename based matching 
-  * add support fr "${distro_id}", "${distro_codename}" in the 
+  * add support for "${distro_id}", "${distro_codename}" in the 
     Unattended-Upgrade::Origins-Pattern based matching too
-    (closes: #684707)
+    (closes: #684707), thanks to Russell Stuart
+  * data/50unattended-upgrades.Debian:
+    - improve documentation, thanks to Russell Stuart
 
  -- Michael Vogt <mvo@debian.org>  Tue, 14 Aug 2012 15:06:47 +0200
 
