@@ -1,8 +1,11 @@
-unattended-upgrades (0.79.5) unstable; urgency=low
+unattended-upgrades (0.79.5) UNRELEASED; urgency=low
 
   * add codename based matching 
+  * add support fr "${distro_id}", "${distro_codename}" in the 
+    Unattended-Upgrade::Origins-Pattern based matching too
+    (closes: #684707)
 
- -- Michael Vogt <michael.vogt@ubuntu.com>  Tue, 14 Aug 2012 15:06:47 +0200
+ -- Michael Vogt <mvo@debian.org>  Tue, 14 Aug 2012 15:06:47 +0200
 
 unattended-upgrades (0.79.4) UNRELEASED; urgency=low
 

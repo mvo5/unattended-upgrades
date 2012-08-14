@@ -253,6 +253,8 @@ def match_whitelist_string(whitelist, origin):
         # strip and unquote the "," back
         (what, value) = [s.strip().replace("%2C",",")
                          for s in token.split("=")]
+        # support substitution here as well
+        value = substitute(value)
         #logging.debug("matching '%s'='%s' against '%s'" % (what, value, origin))
         # first char is apt-cache policy output, send is the name
         # in the Release file
