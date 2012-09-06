@@ -1,8 +1,6 @@
 #!/usr/bin/python3
 # -*- coding: utf-8 -*-
 
-import apt
-
 import apt_pkg
 import os
 import unittest

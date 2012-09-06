@@ -1,13 +1,8 @@
 #!/usr/bin/python3
 
-import apt
 import apt_pkg
-import os
 import logging
 import unittest
-import sys
-
-from io import StringIO
 
 import unattended_upgrade
 from unattended_upgrade import substitute, get_allowed_origins

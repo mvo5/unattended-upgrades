@@ -8,19 +8,23 @@ network access, and it fails in some situations (unclear which).
 import apt
 import apt_pkg
 import glob
+import logging
 import os
 import re
 import unittest
 
 import unattended_upgrade
 
+
 apt_pkg.config.set("APT::Architecture", "amd64")
+
 
 class MockOptions():
     def __init__(self, debug=True, dry_run=True):
         self.debug = debug
         self.dry_run = dry_run
         self.minimal_upgrade_steps = False
+
 
 class TestAgainstRealArchive(unittest.TestCase):
 
@@ -45,6 +49,7 @@ class TestAgainstRealArchive(unittest.TestCase):
         apt_pkg.config.set("APT::UnattendedUpgrades::LogDir", logdir)
         unattended_upgrade.DISTRO_CODENAME = "lucid"
         res = unattended_upgrade.main(options, os.path.abspath("./aptroot"))
+        logging.debug(res)
         # check if the log file exists
         self.assertTrue(os.path.exists(logfile))
         with open(logfile) as fp:

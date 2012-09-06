@@ -1,9 +1,10 @@
 #!/usr/bin/env python
 
 from distutils.core import setup
-from DistUtilsExtra.command import *
-import glob
-import os
+from DistUtilsExtra.command import (
+    build_extra,
+    build_i18n,
+    )
 
     
 setup(name='unattended-upgrades', version='0.1',

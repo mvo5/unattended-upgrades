@@ -3,9 +3,10 @@
 import apt_pkg
 import logging
 import unittest
-import sys
+
 
 from unattended_upgrade import conffile_prompt
+
 
 class ConffilePromptTestCase(unittest.TestCase):
 

@@ -3,7 +3,6 @@
 import apt_pkg
 import logging
 import os
-import mock
 import sys
 import tempfile
 import unittest

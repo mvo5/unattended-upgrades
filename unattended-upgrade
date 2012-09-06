@@ -34,6 +34,7 @@ import sys
 
 from io import StringIO
 from email.message import Message
+from optparse import OptionParser
 
 from subprocess import (
     Popen,
@@ -188,7 +189,7 @@ def is_dpkg_journal_dirty():
     """
     d = os.path.join(
         os.path.dirname(apt_pkg.config.find_file("Dir::State::status")),
-        "/updates")
+        "updates")
     for f in os.listdir(d):
         if re.match("[0-9]+", f):
             return True
@@ -603,7 +604,7 @@ def _send_mail_using_sendmail(to_address, subject, body):
     msg['Subject'] = subject
     msg['To'] = to_address
     sendmail = subprocess.Popen(
-        [SENDMAIL_BINARY, "-oi", "-t"], 
+        [SENDMAIL_BINARY, "-oi", "-t"],
         stdin=subprocess.PIPE, universal_newlines=True)
     sendmail.stdin.write(msg.as_string())
     sendmail.stdin.close()
@@ -630,12 +631,14 @@ def send_summary_mail(pkgs, res, pkgs_kept_back, mem_log, logfile_dpkg):
     # Check if reboot-required flag is present
     logging.debug("Sending mail with '%s' to '%s'" % (logfile_dpkg, to_email))
     if os.path.isfile(REBOOT_REQUIRED_FILE):
-        subject = _("[reboot required] unattended-upgrades result for '%s'") % host()
+        subject = _(
+            "[reboot required] unattended-upgrades result for '%s'") % host()
     else:
         subject = _("unattended-upgrades result for '%s'") % host()
     body = _("Unattended upgrade returned: %s\n\n") % res
     if os.path.isfile(REBOOT_REQUIRED_FILE):
-        body += _("Warning: A reboot is required to complete this upgrade.\n\n")
+        body += _(
+            "Warning: A reboot is required to complete this upgrade.\n\n")
     body += _("Packages that are upgraded:\n")
     body += " " + wrap(pkgs, 70, " ")
     body += "\n"
@@ -645,7 +648,7 @@ def send_summary_mail(pkgs, res, pkgs_kept_back, mem_log, logfile_dpkg):
         body += "\n"
     body += "\n"
     if os.path.exists(logfile_dpkg):
-        body += _("Package installation log:")+"\n"
+        body += _("Package installation log:") + "\n"
         with open(logfile_dpkg) as fp:
             body += fp.read()
         body += "\n\n"
@@ -665,13 +668,13 @@ def send_summary_mail(pkgs, res, pkgs_kept_back, mem_log, logfile_dpkg):
 
 def do_install(cache, pkgs_to_upgrade, options, logfile_dpkg):
     # set debconf to NON_INTERACTIVE, redirect output
-    os.putenv("DEBIAN_FRONTEND","noninteractive");
+    os.putenv("DEBIAN_FRONTEND", "noninteractive")
     setup_apt_listchanges()
-    
+
     # redirect to log
     REDIRECT_INPUT = os.devnull
     fd = os.open(REDIRECT_INPUT, os.O_RDWR)
-    os.dup2(fd,0)
+    os.dup2(fd, 0)
 
     logging.info(_("Writing dpkg log to '%s'") % logfile_dpkg)
 
@@ -680,17 +683,19 @@ def do_install(cache, pkgs_to_upgrade, options, logfile_dpkg):
         old_stdout = 1
         old_stderr = 2
     else:
-        fd = os.open(logfile_dpkg, os.O_RDWR|os.O_CREAT, 0o644)
+        fd = os.open(logfile_dpkg, os.O_RDWR | os.O_CREAT, 0o644)
         old_stdout = os.dup(1)
         old_stderr = os.dup(2)
-        os.dup2(fd,1)
-        os.dup2(fd,2)
+        os.dup2(fd, 1)
+        os.dup2(fd, 2)
 
     try:
-        if (options.minimal_upgrade_steps or 
+        if (options.minimal_upgrade_steps or
             # COMPAT with the mispelling
-            apt_pkg.config.find_b("Unattended-Upgrades::MinimalSteps", False) or
-            apt_pkg.config.find_b("Unattended-Upgrade::MinimalSteps", False)):
+            apt_pkg.config.find_b(
+                "Unattended-Upgrades::MinimalSteps", False) or
+            apt_pkg.config.find_b(
+                "Unattended-Upgrade::MinimalSteps", False)):
             with open("/var/run/unattended-upgrades.pid", "w") as fp:
                 fp.write("%s" % os.getpid())
             # try upgrade all "pkgs" in minimal steps
@@ -715,15 +720,16 @@ def _setup_alternative_rootdir(rootdir):
     apt_pkg.config.clear("Unattended-Upgrade")
     # read rootdir (taken from apt.Cache, but we need to run it
     # here before the cache gets initialized
-    if os.path.exists(rootdir+"/etc/apt/apt.conf"):
+    if os.path.exists(rootdir + "/etc/apt/apt.conf"):
         apt_pkg.read_config_file(apt_pkg.config,
                                  rootdir + "/etc/apt/apt.conf")
-    if os.path.isdir(rootdir+"/etc/apt/apt.conf.d"):
+    if os.path.isdir(rootdir + "/etc/apt/apt.conf.d"):
         apt_pkg.read_config_dir(apt_pkg.config,
                                 rootdir + "/etc/apt/apt.conf.d")
 
+
 def _get_logdir():
-    logdir= apt_pkg.config.find_dir(
+    logdir = apt_pkg.config.find_dir(
         "Unattended-Upgrade::LogDir",
         # COMPAT only
         apt_pkg.config.find_dir("APT::UnattendedUpgrades::LogDir",
@@ -752,7 +758,6 @@ def _setup_logging(options):
     logging.basicConfig(level=logging.INFO,
                         format='%(asctime)s %(levelname)s %(message)s',
                         filename=logfile)
-    
     # additional logging
     logger = logging.getLogger()
     mem_log = StringIO()
@@ -764,7 +769,7 @@ def _setup_logging(options):
         mem_log_handler = logging.StreamHandler(mem_log)
         logger.addHandler(mem_log_handler)
     return mem_log
-        
+
 
 def main(options, rootdir=""):
 
@@ -779,23 +784,27 @@ def main(options, rootdir=""):
     allowed_origins = get_allowed_origins()
 
     # pkgs that are (for some reason) not save to install
-    blacklisted_pkgs = apt_pkg.config.value_list("Unattended-Upgrade::Package-Blacklist")
-    logging.info(_("Initial blacklisted packages: %s"), " ".join(blacklisted_pkgs))
+    blacklisted_pkgs = apt_pkg.config.value_list(
+        "Unattended-Upgrade::Package-Blacklist")
+    logging.info(_("Initial blacklisted packages: %s"),
+                 " ".join(blacklisted_pkgs))
     logging.info(_("Starting unattended upgrades script"))
 
     # display available origin
-    logging.info(_("Allowed origins are: %s") % map(str,allowed_origins))
+    logging.info(_("Allowed origins are: %s") % allowed_origins)
 
     # check if the journal is dirty and if so, take emergceny action
     # the alternative is to leave the system potentially unsecure until
     # the user comes in and fixes
     if (is_dpkg_journal_dirty() and
-        apt_pkg.config.find_b("Unattended-Upgrade::AutoFixInterruptedDpkg", True)):
+        apt_pkg.config.find_b(
+            "Unattended-Upgrade::AutoFixInterruptedDpkg", True)):
         # ensure the dpkg database is not already locked (LP: #754330)
         admindir = os.path.dirname(apt_pkg.config.find("Dir::State::Status"))
         lockfd = apt_pkg.get_lock(os.path.join(admindir, "lock"), False)
         if lockfd > 0:
-            logging.warning(_("Unclean dpkg state detected, trying to correct"))
+            logging.warning(
+                _("Unclean dpkg state detected, trying to correct"))
             print(_("Unclean dpkg state detected, trying to correct"))
             env = copy.copy(os.environ)
             env["DEBIAN_FRONTEND"] = "noninteractive"
@@ -807,8 +816,9 @@ def main(options, rootdir=""):
                 output = e.output
             logging.warning(_("dpkg --configure -a output:\n%s" % output))
         else:
-            logging.debug("Unclean dpkg state, but locked, another package manager working?")
-    
+            logging.debug("Unclean dpkg state, but locked, another package "
+                          "manager working?")
+
     # check and get lock
     try:
         apt_pkg.pkgsystem_lock()
@@ -819,7 +829,7 @@ def main(options, rootdir=""):
         sys.exit(1)
 
     # get a cache
-    cache = UnattendedUpgradesCache(rootdir=rootdir, 
+    cache = UnattendedUpgradesCache(rootdir=rootdir,
                                     allowed_origins=allowed_origins)
     if cache._depcache.broken_count > 0:
         print(_("Cache has broken packages, exiting"))
@@ -832,13 +842,14 @@ def main(options, rootdir=""):
     # find out about the packages that are upgradable (in a allowed_origin)
     pkgs_to_upgrade = []
     pkgs_kept_back = []
-    pkgs_auto_removable = set([pkg.name for pkg in cache 
+    pkgs_auto_removable = set([pkg.name for pkg in cache
                                if pkg.is_auto_removable])
 
     # now do the actual upgrade
     for pkg in cache:
         if options.debug and pkg.is_upgradable:
-            logging.debug("Checking: %s (%s)" % (pkg.name, map(str, pkg.candidate.origins)))
+            logging.debug("Checking: %s (%s)" % (
+                    pkg.name, map(str, pkg.candidate.origins)))
         if (pkg.is_upgradable and
             not is_pkgname_in_blacklist(pkg.name, blacklisted_pkgs) and
             is_allowed_origin(pkg.candidate, allowed_origins)):
@@ -848,7 +859,7 @@ def main(options, rootdir=""):
                                             blacklisted_pkgs):
                     # add to packages to upgrade
                     pkgs_to_upgrade.append(pkg)
-                    # re-eval pkgs_kept_back as the resolver may fail to 
+                    # re-eval pkgs_kept_back as the resolver may fail to
                     # directly upgrade a pkg, but that may work during
                     # a subsequent operation, see debian bug #639840
                     for pkgname in pkgs_kept_back:
@@ -862,15 +873,16 @@ def main(options, rootdir=""):
                     pkgs_kept_back.append(pkg.name)
             except SystemError as e:
                 # can't upgrade
-                logging.warning(_("package '%s' upgradable but fails to be marked for upgrade (%s)") % (pkg.name, e))
+                logging.warning(
+                    _("package '%s' upgradable but fails to "
+                      "be marked for upgrade (%s)") % (pkg.name, e))
                 rewind_cache(cache, pkgs_to_upgrade)
                 pkgs_kept_back.append(pkg.name)
-                
 
     pkgs_to_upgrade.sort(key=lambda p: p.name)
     pkgs = "\n".join([pkg.name for pkg in pkgs_to_upgrade])
     logging.debug("pkgs that look like they should be upgraded: %s" % pkgs)
-           
+
     # download what looks good
     if options.debug:
         fetcher = apt_pkg.Acquire(apt.progress.text.AcquireProgress())
@@ -881,7 +893,7 @@ def main(options, rootdir=""):
     recs = cache._records
     pm = apt_pkg.PackageManager(cache._depcache)
     try:
-        pm.get_archives(fetcher,list,recs)
+        pm.get_archives(fetcher, list, recs)
     except SystemError as e:
         logging.error(_("GetArchives() failed: '%s'") % e)
     res = fetcher.run()
@@ -896,12 +908,16 @@ def main(options, rootdir=""):
                 print(_("An error ocured: '%s'") % item.error_text)
                 logging.error(_("An error ocured: '%s'") % item.error_text)
             if not item.complete:
-                print(_("The URI '%s' failed to download, aborting") % item.desc_uri)
-                logging.error(_("The URI '%s' failed to download, aborting") % item.desc_uri)
+                print(_("The URI '%s' failed to download, aborting") %
+                      item.desc_uri)
+                logging.error(_("The URI '%s' failed to download, aborting") %
+                              item.desc_uri)
                 sys.exit(1)
             if not os.path.exists(item.destfile):
-                print(_("Download finished, but file '%s' not there?!?" % item.destfile))
-                logging.error("Download finished, but file '%s' not there?!?" % item.destfile)
+                print(_("Download finished, but file '%s' not there?!?" %
+                        item.destfile))
+                logging.error("Download finished, but file '%s' not "
+                              "there?!?" % item.destfile)
                 sys.exit(1)
             if not item.is_trusted:
                 blacklisted_pkgs.append(pkgname_from_deb(item.destfile))
@@ -909,17 +925,20 @@ def main(options, rootdir=""):
                 # skip package (means to re-run the whole marking again
                 # and making sure that the package will not be pulled in by
                 # some other package again!)
-                # 
+                #
                 # print to stdout to ensure that this message is part of
                 # the cron mail (only if no summary mail is requested)
                 email = apt_pkg.config.find("Unattended-Upgrade::Mail", "")
                 if not email:
-                    print(_("Package '%s' has conffile prompt and needs to be upgraded manually") % pkgname_from_deb(item.destfile))
+                    print(_("Package '%s' has conffile prompt and needs "
+                            "to be upgraded manually") % pkgname_from_deb(
+                            item.destfile))
                 # log to the logfile
-                logging.warning(_("Package '%s' has conffile prompt and needs to be upgraded manually") % pkgname_from_deb(item.destfile))
+                logging.warning(_("Package '%s' has conffile prompt and "
+                                  "needs to be upgraded manually") %
+                                pkgname_from_deb(item.destfile))
                 blacklisted_pkgs.append(pkgname_from_deb(item.destfile))
                 pkgs_kept_back.append(pkgname_from_deb(item.destfile))
-
 
         # redo the selection about the packages to upgrade based on the new
         # blacklist
@@ -934,7 +953,7 @@ def main(options, rootdir=""):
                 pkg.mark_upgrade()
                 if check_changes_for_sanity(cache, allowed_origins,
                                             blacklisted_pkgs):
-                     pkgs_to_upgrade.append(pkg)
+                    pkgs_to_upgrade.append(pkg)
                 else:
                     if not (pkg.name in pkgs_kept_back):
                         pkgs_kept_back.append(pkg.name)
@@ -946,23 +965,26 @@ def main(options, rootdir=""):
         logging.debug("dpkg is configured not to cause conffile prompts")
 
     # do auto-remove
-    if apt_pkg.config.find_b("Unattended-Upgrade::Remove-Unused-Dependencies", False):
-        now_auto_removable = set([pkg.name for pkg in cache 
+    if apt_pkg.config.find_b(
+        "Unattended-Upgrade::Remove-Unused-Dependencies", False):
+        now_auto_removable = set([pkg.name for pkg in cache
                                if pkg.is_auto_removable])
-        for pkgname in now_auto_removable-pkgs_auto_removable:
+        for pkgname in now_auto_removable - pkgs_auto_removable:
             logging.debug("marking %s for remove" % pkgname)
             cache[pkgname].mark_delete()
         logging.info(_("Packages that are auto removed: '%s'") %
-                     " ".join(now_auto_removable-pkgs_auto_removable))
+                     " ".join(now_auto_removable - pkgs_auto_removable))
 
-    logging.debug("InstCount=%i DelCount=%i BrokenCount=%i" % (cache._depcache.inst_count, cache._depcache.del_count, cache._depcache.broken_count))
+    logging.debug("InstCount=%i DelCount=%i BrokenCount=%i" % (
+            cache._depcache.inst_count, cache._depcache.del_count,
+            cache._depcache.broken_count))
 
     # exit if there is nothing to do and nothing to report
     if (len(pkgs_to_upgrade) == 0) and (len(pkgs_kept_back) == 0):
         logging.info(_("No packages found that can be upgraded unattended"))
         return
 
-    # check if its configured for install on shutdown, if so, the 
+    # check if its configured for install on shutdown, if so, the
     # environment UNATTENDED_UPGRADES_FORCE_INSTALL_ON_SHUTDOWN will
     # be set by the unatteded-upgrades-shutdown script
     if (not "UNATTENDED_UPGRADES_FORCE_INSTALL_ON_SHUTDOWN" in os.environ and
@@ -974,7 +996,7 @@ def main(options, rootdir=""):
     # check if we are in dry-run mode
     if options.dry_run:
         logging.info("Option --dry-run given, *not* performing real actions")
-        apt_pkg.config.set("Debug::pkgDPkgPM","1")
+        apt_pkg.config.set("Debug::pkgDPkgPM", "1")
 
     # do the install based on the new list of pkgs
     pkgs = " ".join([pkg.name for pkg in pkgs_to_upgrade])
@@ -1002,17 +1024,18 @@ def main(options, rootdir=""):
             pkgs, pkg_install_success, pkgs_kept_back, mem_log, logfile_dpkg)
 
     # auto-reboot (if required and the config for this is set
-    if (apt_pkg.config.find_b("Unattended-Upgrade::Automatic-Reboot", False) and
+    if (apt_pkg.config.find_b(
+            "Unattended-Upgrade::Automatic-Reboot", False) and
         os.path.exists(REBOOT_REQUIRED_FILE)):
         if shutdown_lock > 0:
             os.close(shutdown_lock)
         logging.warning("Found %s, rebooting" % REBOOT_REQUIRED_FILE)
         subprocess.call(["/sbin/reboot"])
-        
+
 
 if __name__ == "__main__":
-    localesApp="unattended-upgrades"
-    localesDir="/usr/share/locale"
+    localesApp = "unattended-upgrades"
+    localesDir = "/usr/share/locale"
     gettext.bindtextdomain(localesApp, localesDir)
     gettext.textdomain(localesApp)
 
@@ -1026,7 +1049,8 @@ if __name__ == "__main__":
                       help=_("Simulation, download but do not install"))
     parser.add_option("", "--minimal_upgrade_steps",
                       action="store_true", default=False,
-                      help=_("Upgrade in minimal steps (and allow interrupting with SIGINT"))
+                      help=_("Upgrade in minimal steps (and allow "
+                             "interrupting with SIGINT"))
     (options, args) = parser.parse_args()
 
     if os.getuid() != 0:
@@ -1035,10 +1059,10 @@ if __name__ == "__main__":
 
     # nice & ionce
     os.nice(19)
-    IONICE="/usr/bin/ionice"
+    IONICE = "/usr/bin/ionice"
     if os.path.exists(IONICE):
         with open(os.devnull, "w") as fstderr:
-            subprocess.call([IONICE, "-c3", "-p",str(os.getpid())],
+            subprocess.call([IONICE, "-c3", "-p", str(os.getpid())],
                             stderr=fstderr)
 
     # ensure that we are not killed when the terminal goes away e.g. on
