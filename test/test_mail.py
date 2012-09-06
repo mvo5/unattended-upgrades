@@ -52,7 +52,7 @@ class CommonTestsForMailxAndSendmail(object):
             self.assertTrue(expected_string in mail_txt)
 
     def test_summary_mail_reboot(self):
-        with open("./reboot-required","w") as fp:
+        with open("./reboot-required", "w") as fp:
             fp.write("")
         send_summary_mail(*self._return_mock_data())
         os.unlink("./reboot-required")
