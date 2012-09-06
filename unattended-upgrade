@@ -838,7 +838,7 @@ def main(options, rootdir=""):
         logging.info(_("Packages that are auto removed: '%s'") %
                      " ".join(now_auto_removable-pkgs_auto_removable))
 
-    logging.debug("InstCount=%i DelCount=%i BrokenCout=%i" % (cache._depcache.inst_count, cache._depcache.del_count, cache._depcache.broken_count))
+    logging.debug("InstCount=%i DelCount=%i BrokenCount=%i" % (cache._depcache.inst_count, cache._depcache.del_count, cache._depcache.broken_count))
 
     # exit if there is nothing to do and nothing to report
     if (len(pkgs_to_upgrade) == 0) and (len(pkgs_kept_back) == 0):
