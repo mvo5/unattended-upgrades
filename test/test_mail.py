@@ -1,25 +1,33 @@
 #!/usr/bin/python3
+# -*- coding: utf-8 -*-
 
 import apt
+
 import apt_pkg
 import os
-import logging
 import unittest
-import sys
 
 from io import StringIO
+from email.parser import Parser
 
-import unattended_upgrade
 import unattended_upgrade
 from unattended_upgrade import send_summary_mail, setup_apt_listchanges
 
-class TestSendSummaryMail(unittest.TestCase):
 
-    def setUp(self):
+# note this is not a unittest.TestCase as it needs to be parameterized
+class CommonTestsForMailxAndSendmail(object):
+
+    EXPECTED_MAIL_CONTENT_STRINGS = [
+        "logfile_dpkg text",
+        "mem_log text",
+        "Packages that are upgraded:\n 2vcard",
+        ]
+
+    def common_setup(self):
         # monkey patch to make it testable
         unattended_upgrade.REBOOT_REQUIRED_FILE = "./reboot-required"
-        # mock-mail binary that creates a mail.txt file
-        unattended_upgrade.MAIL_BINARY = "./mock-mail"
+        unattended_upgrade.MAIL_BINARY = "./no-mailx-binary-here"
+        unattended_upgrade.SENDMAIL_BINARY = "./no-sendmail-binary-here"
         # setup mail
         apt_pkg.config.set("Unattended-Upgrade::Mail", "root")
         apt_pkg.config.set("Unattended-Upgrade::MailOnlyOnError", "false")
@@ -34,16 +42,16 @@ class TestSendSummaryMail(unittest.TestCase):
         pkgs = "\n".join(["2vcard"])
         res = successful
         pkgs_kept_back = []
-        mem_log = StringIO("mem_log text")
+        # include some unicode chars here for good measure
+        mem_log = StringIO("mem_log text üöä")
         logfile_dpkg = "./apt-term.log"
         with open("./apt-term.log", "w") as fp:
             fp.write("logfile_dpkg text")
         return (pkgs, res, pkgs_kept_back, mem_log, logfile_dpkg)
 
     def _verify_common_mail_content(self, mail_txt):
-        self.assertTrue("logfile_dpkg text" in mail_txt)
-        self.assertTrue("mem_log text" in mail_txt)
-        self.assertTrue("Packages that are upgraded:\n 2vcard" in mail_txt)
+        for expected_string in self.EXPECTED_MAIL_CONTENT_STRINGS:
+            self.assertTrue(expected_string in mail_txt)
 
     def test_summary_mail_reboot(self):
         with open("./reboot-required","w") as fp:
@@ -87,18 +95,51 @@ class TestSendSummaryMail(unittest.TestCase):
         self.assertTrue(os.path.exists("mail.txt"))
 
     def test_apt_listchanges(self):
-        # test with mail as frontend
-        os.environ["APT_LISTCHANGES_FRONTEND"] = "canary"
+        # test with sendmail available
         unattended_upgrade.SENDMAIL_BINARY="/bin/true"
         setup_apt_listchanges("./data/listchanges.conf.mail")
-        self.assertEqual(os.environ["APT_LISTCHANGES_FRONTEND"], "canary")
-        # test with pager as frontend
-        os.environ["APT_LISTCHANGES_FRONTEND"] = "canary"
-        unattended_upgrade.SENDMAIL_BINARY="/bin/true"
+        self.assertEqual(os.environ["APT_LISTCHANGES_FRONTEND"], "mail")
+        # test without sendmail
+        unattended_upgrade.SENDMAIL_BINARY="/bin/not-here-xxxxxxxxx"
         setup_apt_listchanges("./data/listchanges.conf.pager")
         self.assertEqual(os.environ["APT_LISTCHANGES_FRONTEND"], "none")
 
+
+class MailxTestCase(CommonTestsForMailxAndSendmail, unittest.TestCase):
+
+    def setUp(self):
+        self.common_setup()
+        unattended_upgrade.MAIL_BINARY = "./mock-mail"
+
+    def _verify_common_mail_content(self, mail_txt):
+        CommonTestsForMailxAndSendmail._verify_common_mail_content(
+            self, mail_txt)
+        # setting this header with mailx is not possible so ensure
+        # we don't accidently try
+        self.assertFalse('text/plain; charset="utf-8"' in mail_txt)
+
+class SendmailTestCase(CommonTestsForMailxAndSendmail, unittest.TestCase):
+
+    def setUp(self):
+        self.common_setup()
+        unattended_upgrade.SENDMAIL_BINARY = "./mock-sendmail"
+
+    def _verify_common_mail_content(self, mail_txt):
+        CommonTestsForMailxAndSendmail._verify_common_mail_content(
+            self, mail_txt)
+        msg = Parser().parsestr(mail_txt)
+        content_type = msg["Content-Type"]
+        self.assertEqual(content_type, 'text/plain; charset="utf-8"')
+    
+
+class SendmailAndMailxTestCase(SendmailTestCase):
+
+    def setUp(self):
+        self.common_setup()
+        unattended_upgrade.MAIL_BINARY = "./mock-mail"
+        unattended_upgrade.SENDMAIL_BINARY = "./mock-sendmail"
+
 if __name__ == "__main__":
-    logging.basicConfig(level=logging.DEBUG)
+    #logging.basicConfig(level=logging.DEBUG)
     unittest.main()
 

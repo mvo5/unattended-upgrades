@@ -8,6 +8,56 @@ unattended-upgrades (0.80) UNRELEASED; urgency=low
 
  -- Michael Vogt <michael.vogt@ubuntu.com>  Tue, 26 Jun 2012 11:03:40 +0200
 
+unattended-upgrades (0.79.4) UNRELEASED; urgency=low
+
+  * data/50unattended-upgrades.{Debian,Ubuntu}:
+    - add missing ";" in the example config, thanks to  Tomas Pospisek
+      closes: #684876
+    - remove codename based matching example as this needs a newer 
+      python-apt than available in wheezy, thanks to Russell Stuart
+  * unattended-upgrade, test/test_origin_pattern.py:
+    - if a unknown matcher token is found, raise a error instead of
+      silently ignoring it, thanks to Russell Stuart 
+
+ -- Michael Vogt <michael.vogt@ubuntu.com>  Tue, 14 Aug 2012 13:25:40 +0200
+
+unattended-upgrades (0.79.3) unstable; urgency=low
+
+  * unattended-upgrade:
+    - fix assert text, thanks to Niels Thykier
+  * really include the updated es.po, thanks to Niels Thykier
+
+ -- Michael Vogt <mvo@debian.org>  Tue, 07 Aug 2012 12:20:05 +0200
+
+unattended-upgrades (0.79.2) unstable; urgency=low
+
+  * use "mail -s" again to ensure there is a proper subject line when
+    using mailx
+  * do not attach headers when using mailx
+  * use sendmail instead of mailx when available to get a proper mime
+    mail with correct encoding etc (closes: #654851, #681442)
+    Thanks to Bjørn Mork and Teodor MICU
+  * po/es.po:
+    - updated, thanks to Omar Campagne, closes: #681334
+  * debian/control:
+    - add suggests for mail-transport-agent
+  * only use ionice if available (closes: #681467)
+  * make pyflakes clean and add test
+
+ -- Michael Vogt <mvo@debian.org>  Fri, 13 Jul 2012 20:54:05 +0200
+
+unattended-upgrades (0.79.1) unstable; urgency=low
+
+  * Set apt-listchanges frontend to "mail" if sendmail is available,
+    the default behavior of apt-listchanges is to send a mail (if there
+    is a email_address in apt-listchanges.conf) even with pager/gtk
+    frontends so this will ensure the same behavior (closes: #579733)
+  * Do not use "mail -a" as this is not POSIX, instead use the python
+    email.Message package to construct a proper utf8 message
+    (closes: #654851)
+
+ -- Michael Vogt <mvo@debian.org>  Wed, 11 Jul 2012 22:34:14 +0200
+
 unattended-upgrades (0.79) unstable; urgency=low
 
   [ Translation updates ]
@@ -21,12 +71,27 @@ unattended-upgrades (0.79) unstable; urgency=low
     - added, thanks to Jorge Barreiro, closes: #678634
   * po/pt.po:
     - added, thanks to Pedro Ribeiro, closes: #678738
+  * po/sk.po:
+    - added, thanks to helix84, closes: #677471
 
   [ Teodor MICU ]
   * debian/unattended-upgrades.init:
     - fixes new style lsb-init output, closes: #678030
 
- -- Michael Vogt <michael.vogt@ubuntu.com>  Mon, 25 Jun 2012 08:42:23 +0200
+  [ Michael Vogt ]
+  * correctly detect conffile prompt for new conffiles that were 
+    normal files previously (like /etc/profile in base-files 6.8),
+    closes: #673237
+  * code cleanup in conffile detection and tests
+  * Set mail header to utf8 for the summary email (closes: #654851)
+  * use stdout instead of stderr in --debug mode (closes: #674140)
+  * data/50unattended-upgrades.{Debian,Ubuntu}:
+    - change default mail recipient to "root" intead of "root@localhost"
+      to help systems without a real mail setup (closes: #648149)
+  * ignore packages in the blacklist early to avoid un-upgradable warning
+    for mixed stable/testing systems (closes: #645382)
+
+ -- Michael Vogt <mvo@debian.org>  Fri, 29 Jun 2012 13:22:54 +0200
 
 unattended-upgrades (0.78) unstable; urgency=low
 

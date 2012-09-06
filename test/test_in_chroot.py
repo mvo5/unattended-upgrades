@@ -62,7 +62,7 @@ class TestUnattendedUpgrade(unittest.TestCase):
                          "--arch=%s" % ARCH,
                          # smaller version of the minimal system
                          "--variant=minbase",
-                         "--include=python-apt,apt-utils,gpgv,ubuntu-keyring",
+                         "--include=python-apt,apt-utils,gpgv,ubuntu-keyring,ca-certificates",
                          DISTRO, 
                          target,
                          MIRROR])

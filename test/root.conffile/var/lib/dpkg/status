@@ -6,6 +6,7 @@ Conffiles:
  /etc/not-available-config-file  99b99d59ac8f5ecd3375107755ee8599
  /etc/configuration-file 26b99d59ac8f5ecd3375107755ee8527
  /etc/not-available-config-file2  88b99d59ac8f5ecd3375107755ee8588
+ /etc/configuration-file2 404d877bbd67dc2412ba80d7c92d6bc7
 
 Package: multiple-conffiles
 Status: install ok installed
@@ -14,3 +15,8 @@ Version: 1.0
 Conffiles:
  /etc/configuration-file1 cb9a458f0fdc96e10b4d23923f16e3a0
  /etc/configuration-file2 8bf10a884dcfe6a8c3e57039e14d2b92
+
+Package: test-package-new-conffile
+Status: install ok installed
+Architecture: all
+Version: 0.9
