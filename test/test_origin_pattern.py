@@ -121,6 +121,14 @@ class TestOriginPatern(unittest.TestCase):
         pkg.candidate.record = {}
         return pkg
 
+    def test_match_whitelist_wildcard(self):
+        origin = self._get_mock_origin(
+            "OriginUbuntu", "LabelUbuntu", "ArchiveUbuntu",
+            "archive.ubuntu.com", "main")
+        # good
+        s="o=OriginU*"
+        self.assertTrue(match_whitelist_string(s, origin))
+
 
 if __name__ == "__main__":
     logging.basicConfig(level=logging.DEBUG)
