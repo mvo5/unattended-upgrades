@@ -655,6 +655,10 @@ def send_summary_mail(pkgs, res, pkgs_kept_back, mem_log, logfile_dpkg):
     body += _("Unattended-upgrades log:\n")
     body += mem_log.getvalue()
 
+    # python2 needs this as utf8 encoded string (not unicode)
+    if sys.version < '3':
+        body = body.encode("utf-8")
+
     if os.path.exists(SENDMAIL_BINARY):
         ret = _send_mail_using_sendmail(to_email, subject, body)
     elif os.path.exists(MAIL_BINARY):

@@ -1,8 +1,10 @@
 #!/usr/bin/python3
 # -*- coding: utf-8 -*-
+from __future__ import unicode_literals
 
 import apt_pkg
 import os
+import sys
 import unittest
 
 from io import StringIO
@@ -56,15 +58,17 @@ class CommonTestsForMailxAndSendmail(object):
             fp.write("")
         send_summary_mail(*self._return_mock_data())
         os.unlink("./reboot-required")
-        with open("mail.txt") as fp:
-            mail_txt = fp.read()
+        # this is used for py2 compat for py3 only we can do
+        # remove the "rb" and the subsequent '.decode("utf-8")'
+        with open("mail.txt", "rb") as fp:
+            mail_txt = fp.read().decode("utf-8")
         self.assertTrue("[reboot required]" in mail_txt)
         self._verify_common_mail_content(mail_txt)
         
     def test_summary_mail_no_reboot(self):
         send_summary_mail(*self._return_mock_data())
-        with open("mail.txt") as fp:
-            mail_txt = fp.read()
+        with open("mail.txt", "rb") as fp:
+            mail_txt = fp.read().decode("utf-8")
         self.assertFalse("[reboot required]" in mail_txt)
         self._verify_common_mail_content(mail_txt)
     
@@ -73,21 +77,21 @@ class CommonTestsForMailxAndSendmail(object):
         # for both success and failure
         apt_pkg.config.set("Unattended-Upgrade::MailOnlyOnError", "false")
         send_summary_mail(*self._return_mock_data(successful=True))
-        with open("mail.txt") as fp:
-            self._verify_common_mail_content(fp.read())
+        with open("mail.txt", "rb") as fp:
+            self._verify_common_mail_content(fp.read().decode("utf-8"))
         os.remove("mail.txt")
         # now with a simulated failure
         send_summary_mail(*self._return_mock_data(successful=False))
-        with open("mail.txt") as fp:
-            self._verify_common_mail_content(fp.read())
+        with open("mail.txt", "rb") as fp:
+            self._verify_common_mail_content(fp.read().decode("utf-8"))
         os.remove("mail.txt")
         # now test with "MailOnlyOnError"
         apt_pkg.config.set("Unattended-Upgrade::MailOnlyOnError", "true")
         send_summary_mail(*self._return_mock_data(successful=True))
         self.assertFalse(os.path.exists("mail.txt"))
         send_summary_mail(*self._return_mock_data(successful=False))
-        with open("mail.txt") as fp:
-            mail_txt = fp.read()
+        with open("mail.txt", "rb") as fp:
+            mail_txt = fp.read().decode("utf-8")
         self._verify_common_mail_content(mail_txt)
         self.assertTrue("Unattended upgrade returned: False" in mail_txt)
         self.assertTrue(os.path.exists("mail.txt"))
@@ -125,6 +129,11 @@ class SendmailTestCase(CommonTestsForMailxAndSendmail, unittest.TestCase):
     def _verify_common_mail_content(self, mail_txt):
         CommonTestsForMailxAndSendmail._verify_common_mail_content(
             self, mail_txt)
+
+        # python2 needs this as utf8 encoded string (not unicode)
+        if sys.version < '3':
+            mail_txt = mail_txt.encode("utf-8")
+
         msg = Parser().parsestr(mail_txt)
         content_type = msg["Content-Type"]
         self.assertEqual(content_type, 'text/plain; charset="utf-8"')
