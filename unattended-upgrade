@@ -302,7 +302,7 @@ def upgrade_normal(cache, pkgs_to_upgrade, logfile_dpkg):
     else:
         logging.error(_("Installing the upgrades failed!"))
         logging.error(_("error message: '%s'") % error)
-        logging.error(_("dpkg returned a error! See '%s' for details") % \
+        logging.error(_("dpkg returned a error! See '%s' for details") %
                           logfile_dpkg)
     return res
 
@@ -365,7 +365,7 @@ def upgrade_in_minimal_steps(cache, pkgs_to_upgrade, logfile_dpkg=""):
         except Exception as e:
             logging.error(_("Installing the upgrades failed!"))
             logging.error(_("error message: '%s'") % e)
-            logging.error(_("dpkg returned a error! See '%s' for details") % \
+            logging.error(_("dpkg returned a error! See '%s' for details") %
                               logfile_dpkg)
             return False
         to_upgrade = to_upgrade - set(smallest_partition)
@@ -414,7 +414,7 @@ def check_changes_for_sanity(cache, allowed_origins, blacklist):
             ignore_require_restart = apt_pkg.config.find_b(
                 "Unattended-Upgrade::IgnoreAppsRequireRestart", False)
             if (pkg.marked_upgrade and
-                ignore_require_restart == False and
+                ignore_require_restart is False and
                 pkg.candidate.record.get("Upgrade-Requires") == "app-restart"):
                 logging.debug("pkg '%s' requires app-restart, not safe to "
                               "upgrade unattended")

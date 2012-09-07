@@ -20,7 +20,7 @@ class ConffilePromptTestCase(unittest.TestCase):
         test_pkg = "./packages/conf-test-package_1.1.deb"
         self.assertTrue(conffile_prompt(test_pkg, prefix="./root.conffile"),
                         "conffile prompt detection incorrect")
-    
+
     def test_will_not_prompt(self):
         # conf-test 0.9 is installed, 1.0 gets installed
         # they both have the same config files
@@ -58,4 +58,3 @@ class ConffilePromptTestCase(unittest.TestCase):
 if __name__ == "__main__":
     logging.basicConfig(level=logging.DEBUG)
     unittest.main()
-

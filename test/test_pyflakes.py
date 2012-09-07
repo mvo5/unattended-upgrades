@@ -7,7 +7,7 @@ class TestPyflakesClean(unittest.TestCase):
     """ ensure that the tree is pyflakes clean """
 
     def test_pyflakes_clean(self):
-        path =  os.path.join(
+        path = os.path.join(
             os.path.dirname(__file__), "unattended_upgrade.py")
         self.assertEqual(subprocess.call(["pyflakes",  path]), 0)
 

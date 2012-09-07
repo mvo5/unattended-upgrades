@@ -7,6 +7,7 @@ import unittest
 import unattended_upgrade
 from unattended_upgrade import substitute, get_allowed_origins
 
+
 class TestSubstitude(unittest.TestCase):
 
     def setUp(self):
@@ -31,4 +32,3 @@ class TestSubstitude(unittest.TestCase):
 if __name__ == "__main__":
     logging.basicConfig(level=logging.DEBUG)
     unittest.main()
-

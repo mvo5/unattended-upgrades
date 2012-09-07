@@ -10,9 +10,11 @@ import unittest
 sys.path.insert(0, "..")
 from unattended_upgrade import _setup_logging
 
+
 class MockOptions:
     dry_run = False
     debug = False
+
 
 class TestLogdir(unittest.TestCase):
 

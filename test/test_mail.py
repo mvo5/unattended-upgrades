@@ -64,14 +64,14 @@ class CommonTestsForMailxAndSendmail(object):
             mail_txt = fp.read().decode("utf-8")
         self.assertTrue("[reboot required]" in mail_txt)
         self._verify_common_mail_content(mail_txt)
-        
+
     def test_summary_mail_no_reboot(self):
         send_summary_mail(*self._return_mock_data())
         with open("mail.txt", "rb") as fp:
             mail_txt = fp.read().decode("utf-8")
         self.assertFalse("[reboot required]" in mail_txt)
         self._verify_common_mail_content(mail_txt)
-    
+
     def test_summary_mail_only_on_error(self):
         # default is to always send mail, ensure this is correct
         # for both success and failure
@@ -98,11 +98,11 @@ class CommonTestsForMailxAndSendmail(object):
 
     def test_apt_listchanges(self):
         # test with sendmail available
-        unattended_upgrade.SENDMAIL_BINARY="/bin/true"
+        unattended_upgrade.SENDMAIL_BINARY = "/bin/true"
         setup_apt_listchanges("./data/listchanges.conf.mail")
         self.assertEqual(os.environ["APT_LISTCHANGES_FRONTEND"], "mail")
         # test without sendmail
-        unattended_upgrade.SENDMAIL_BINARY="/bin/not-here-xxxxxxxxx"
+        unattended_upgrade.SENDMAIL_BINARY = "/bin/not-here-xxxxxxxxx"
         setup_apt_listchanges("./data/listchanges.conf.pager")
         self.assertEqual(os.environ["APT_LISTCHANGES_FRONTEND"], "none")
 
@@ -119,6 +119,7 @@ class MailxTestCase(CommonTestsForMailxAndSendmail, unittest.TestCase):
         # setting this header with mailx is not possible so ensure
         # we don't accidently try
         self.assertFalse('text/plain; charset="utf-8"' in mail_txt)
+
 
 class SendmailTestCase(CommonTestsForMailxAndSendmail, unittest.TestCase):
 
@@ -137,7 +138,7 @@ class SendmailTestCase(CommonTestsForMailxAndSendmail, unittest.TestCase):
         msg = Parser().parsestr(mail_txt)
         content_type = msg["Content-Type"]
         self.assertEqual(content_type, 'text/plain; charset="utf-8"')
-    
+
 
 class SendmailAndMailxTestCase(SendmailTestCase):
 
@@ -149,4 +150,3 @@ class SendmailAndMailxTestCase(SendmailTestCase):
 if __name__ == "__main__":
     #logging.basicConfig(level=logging.DEBUG)
     unittest.main()
-

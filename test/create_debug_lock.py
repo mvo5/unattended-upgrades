@@ -7,6 +7,7 @@ import apt_pkg
 import os
 import time
 
+
 pid = os.fork()
 if pid == 0:
     os.setsid()
