@@ -128,6 +128,15 @@ class TestOriginPatern(unittest.TestCase):
         # good
         s="o=OriginU*"
         self.assertTrue(match_whitelist_string(s, origin))
+        # bad
+        s="o=X*"
+        self.assertFalse(match_whitelist_string(s, origin))
+        # good
+        s="o=?riginUbunt?"
+        self.assertTrue(match_whitelist_string(s, origin))
+        # good
+        s="o=*Ubunt?"
+        self.assertTrue(match_whitelist_string(s, origin))
 
 
 if __name__ == "__main__":
