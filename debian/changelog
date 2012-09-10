@@ -1,4 +1,4 @@
-unattended-upgrades (0.80) UNRELEASED; urgency=low
+unattended-upgrades (0.79.3ubuntu1) quantal; urgency=low
 
   [ Thomas Kluyver ]
   * Port to Python 3
@@ -6,7 +6,7 @@ unattended-upgrades (0.80) UNRELEASED; urgency=low
   [ Brian Murray ]
   * unattended-upgrade: fix typo in debugging output
 
- -- Michael Vogt <michael.vogt@ubuntu.com>  Tue, 26 Jun 2012 11:03:40 +0200
+ -- Michael Vogt <michael.vogt@ubuntu.com>  Mon, 10 Sep 2012 09:55:19 +0200
 
 unattended-upgrades (0.79.4) UNRELEASED; urgency=low
 
