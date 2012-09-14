@@ -1,6 +1,11 @@
-unattended-upgrades (0.79.3ubuntu2) UNRELEASED; urgency=low
+unattended-upgrades (0.79.3ubuntu2) quantal; urgency=low
 
+  [ Marc Tardif ]
   * Fixed debug output when a package has no candidates (LP: #1046438)
+  
+  [ Michael Vogt ]
+  * debian/test/:
+    - add dep8 tests
 
  -- Marc Tardif <marc@ubuntu.com>  Thu, 13 Sep 2012 16:16:04 -0400
 
