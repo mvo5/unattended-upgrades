@@ -2,6 +2,8 @@ unattended-upgrades (0.79.3ubuntu3) UNRELEASEDquantal; urgency=low
 
   * lp:~mvo/unattended-upgrades/lp1061498:
     - fix crash in dpkg_conffile_prompt() (LP: #1061498)
+  * lp:~mvo/unattended-upgrades/create-logdir-in-shutdown-helper-lp1013363:
+    - create logdir in the shutdown helper if needed (LP: #1013363)
 
  -- Michael Vogt <michael.vogt@ubuntu.com>  Fri, 05 Oct 2012 16:59:08 +0200
 
