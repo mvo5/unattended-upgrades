@@ -1,3 +1,10 @@
+unattended-upgrades (0.79.3ubuntu3) UNRELEASEDquantal; urgency=low
+
+  * lp:~mvo/unattended-upgrades/lp1061498:
+    - fix crash in dpkg_conffile_prompt() (LP: #1061498)
+
+ -- Michael Vogt <michael.vogt@ubuntu.com>  Fri, 05 Oct 2012 16:59:08 +0200
+
 unattended-upgrades (0.79.3ubuntu2) quantal; urgency=low
 
   [ Marc Tardif ]
