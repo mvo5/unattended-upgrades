@@ -1,11 +1,11 @@
-unattended-upgrades (0.79.3ubuntu3) UNRELEASEDquantal; urgency=low
+unattended-upgrades (0.79.3ubuntu3) quantal; urgency=low
 
   * lp:~mvo/unattended-upgrades/lp1061498:
     - fix crash in dpkg_conffile_prompt() (LP: #1061498)
   * lp:~mvo/unattended-upgrades/create-logdir-in-shutdown-helper-lp1013363:
     - create logdir in the shutdown helper if needed (LP: #1013363)
 
- -- Michael Vogt <michael.vogt@ubuntu.com>  Fri, 05 Oct 2012 16:59:08 +0200
+ -- Michael Vogt <michael.vogt@ubuntu.com>  Fri, 05 Oct 2012 17:57:38 +0200
 
 unattended-upgrades (0.79.3ubuntu2) quantal; urgency=low
 
@@ -16,7 +16,7 @@ unattended-upgrades (0.79.3ubuntu2) quantal; urgency=low
   * debian/test/:
     - add dep8 tests
 
- -- Marc Tardif <marc@ubuntu.com>  Thu, 13 Sep 2012 16:16:04 -0400
+ -- Michael Vogt <michael.vogt@ubuntu.com>  Fri, 14 Sep 2012 10:41:08 +0200
 
 unattended-upgrades (0.79.3ubuntu1) quantal; urgency=low
 
