@@ -101,7 +101,11 @@ if __name__ == "__main__":
 
     # use a normal logfile instead of syslog too as on shutdown its too
     # easy to get syslog killed
-    logfile = "/var/log/unattended-upgrades/unattended-upgrades-shutdown.log"
+    logdir = apt_pkg.config.find_dir(
+        "Unattended-Upgrade::LogDir", "/var/log/unattended-upgrades/")
+    if not os.path.exists(logdir):
+        os.makedirs(logdir)
+    logfile = os.path.join(logdir, "unattended-upgrades-shutdown.log")
     logging.basicConfig(filename=logfile,
                         level=level,
                         format="%(asctime)s %(levelname)s - %(message)s")
