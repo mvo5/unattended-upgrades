@@ -307,7 +307,7 @@ def upgrade_normal(cache, pkgs_to_upgrade, logfile_dpkg):
     return res
 
 
-def upgrade_in_minimal_steps(cache, pkgs_to_upgrade, logfile_dpkg=""):
+def upgrade_in_minimal_steps(cache, pkgs_to_upgrade, logfile_dpkg, blacklist):
 
     install_log = LogInstallProgress()
     install_log.LOG += ".minimal-steps"
@@ -316,7 +316,6 @@ def upgrade_in_minimal_steps(cache, pkgs_to_upgrade, logfile_dpkg=""):
     signal.signal(signal.SIGUSR1, signal_handler)
 
     # double check any changes we do
-    blacklist = get_blacklisted_pkgs()
     allowed_origins = get_allowed_origins()
 
     # to upgrade contains the package names
@@ -681,7 +680,8 @@ def send_summary_mail(pkgs, res, pkgs_kept_back, mem_log, logfile_dpkg):
     logging.debug("mail returned: %s" % ret)
 
 
-def do_install(cache, pkgs_to_upgrade, options, logfile_dpkg):
+def do_install(cache, pkgs_to_upgrade, blacklisted_pkgs, options,
+               logfile_dpkg):
     # set debconf to NON_INTERACTIVE, redirect output
     os.putenv("DEBIAN_FRONTEND", "noninteractive")
     setup_apt_listchanges()
@@ -715,7 +715,8 @@ def do_install(cache, pkgs_to_upgrade, options, logfile_dpkg):
                 fp.write("%s" % os.getpid())
             # try upgrade all "pkgs" in minimal steps
             pkg_install_success = upgrade_in_minimal_steps(
-                cache, [pkg.name for pkg in pkgs_to_upgrade], logfile_dpkg)
+                cache, [pkg.name for pkg in pkgs_to_upgrade], logfile_dpkg,
+                blacklisted_pkgs)
         else:
             pkg_install_success = upgrade_normal(
                 cache, [pkg.name for pkg in pkgs_to_upgrade], logfile_dpkg)
@@ -1034,7 +1035,7 @@ def main(options, rootdir=""):
         shutdown_lock = apt_pkg.get_lock("/var/run/unattended-upgrades.lock")
         # do install
         pkg_install_success = do_install(
-            cache, pkgs_to_upgrade, options, logfile_dpkg)
+            cache, pkgs_to_upgrade, blacklisted_pkgs, options, logfile_dpkg)
 
     # send a mail (if needed)
     if not options.dry_run:
