@@ -1,4 +1,4 @@
-unattended-upgrades (0.79.3ubuntu4) UNRELEASEDquantal; urgency=low
+unattended-upgrades (0.79.3ubuntu4) quantal; urgency=low
 
   * lp:~mvo/unattended-upgrades/minimal-step-paranonia-lp1020680:
     - ensure the blacklist/origin constrains are never violated for
