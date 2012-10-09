@@ -1,3 +1,11 @@
+unattended-upgrades (0.79.3ubuntu4) UNRELEASEDquantal; urgency=low
+
+  * lp:~mvo/unattended-upgrades/minimal-step-paranonia-lp1020680:
+    - ensure the blacklist/origin constrains are never violated for
+      some corner cases in the minimal-upgrade mode (LP: #1020680)
+
+ -- Michael Vogt <michael.vogt@ubuntu.com>  Tue, 09 Oct 2012 10:08:01 +0200
+
 unattended-upgrades (0.79.3ubuntu3) quantal; urgency=low
 
   * lp:~mvo/unattended-upgrades/lp1061498:

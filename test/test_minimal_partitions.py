@@ -43,7 +43,7 @@ class TestMinimalPartitions(unittest.TestCase):
             "./aptroot/var/run/unatteded-upgrades.progress"
         unattended_upgrade.LogInstallProgress = LogInstallProgressMock
         unattended_upgrade.upgrade_in_minimal_steps(
-            self.cache, pkgs_to_upgrade)
+            self.cache, pkgs_to_upgrade, "", [])
         # ensure we count upwarts
         last_percent = -1
         for (pkg, percent) in LogInstallProgressMock.DATA:

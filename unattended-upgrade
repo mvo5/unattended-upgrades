@@ -307,13 +307,16 @@ def upgrade_normal(cache, pkgs_to_upgrade, logfile_dpkg):
     return res
 
 
-def upgrade_in_minimal_steps(cache, pkgs_to_upgrade, logfile_dpkg=""):
+def upgrade_in_minimal_steps(cache, pkgs_to_upgrade, logfile_dpkg, blacklist):
 
     install_log = LogInstallProgress()
     install_log.LOG += ".minimal-steps"
 
     # setup signal handler
     signal.signal(signal.SIGUSR1, signal_handler)
+
+    # double check any changes we do
+    allowed_origins = get_allowed_origins()
 
     # to upgrade contains the package names
     to_upgrade = set(pkgs_to_upgrade)
@@ -331,6 +334,13 @@ def upgrade_in_minimal_steps(cache, pkgs_to_upgrade, logfile_dpkg=""):
                 pkg.mark_install()
             else:
                 continue
+            # double check that we are not running into side effects like
+            # what could have been caused LP: #1020680
+            if not check_changes_for_sanity(cache, allowed_origins, blacklist):
+                logging.error(
+                    "Internal error while building a minimal partition."
+                    "Cache has not allowed changes")
+                return False
             changes = [pkg.name for pkg in cache.get_changes()]
             if len(changes) == 1:
                 logging.debug("found leaf package %s" % pkg.name)
@@ -670,7 +680,8 @@ def send_summary_mail(pkgs, res, pkgs_kept_back, mem_log, logfile_dpkg):
     logging.debug("mail returned: %s" % ret)
 
 
-def do_install(cache, pkgs_to_upgrade, options, logfile_dpkg):
+def do_install(cache, pkgs_to_upgrade, blacklisted_pkgs, options,
+               logfile_dpkg):
     # set debconf to NON_INTERACTIVE, redirect output
     os.putenv("DEBIAN_FRONTEND", "noninteractive")
     setup_apt_listchanges()
@@ -704,7 +715,8 @@ def do_install(cache, pkgs_to_upgrade, options, logfile_dpkg):
                 fp.write("%s" % os.getpid())
             # try upgrade all "pkgs" in minimal steps
             pkg_install_success = upgrade_in_minimal_steps(
-                cache, [pkg.name for pkg in pkgs_to_upgrade], logfile_dpkg)
+                cache, [pkg.name for pkg in pkgs_to_upgrade], logfile_dpkg,
+                blacklisted_pkgs)
         else:
             pkg_install_success = upgrade_normal(
                 cache, [pkg.name for pkg in pkgs_to_upgrade], logfile_dpkg)
@@ -775,6 +787,10 @@ def _setup_logging(options):
     return mem_log
 
 
+def get_blacklisted_pkgs():
+    return apt_pkg.config.value_list("Unattended-Upgrade::Package-Blacklist")
+
+
 def main(options, rootdir=""):
 
     # useful for testing
@@ -788,8 +804,7 @@ def main(options, rootdir=""):
     allowed_origins = get_allowed_origins()
 
     # pkgs that are (for some reason) not save to install
-    blacklisted_pkgs = apt_pkg.config.value_list(
-        "Unattended-Upgrade::Package-Blacklist")
+    blacklisted_pkgs = get_blacklisted_pkgs()
     logging.info(_("Initial blacklisted packages: %s"),
                  " ".join(blacklisted_pkgs))
     logging.info(_("Starting unattended upgrades script"))
@@ -1020,7 +1035,7 @@ def main(options, rootdir=""):
         shutdown_lock = apt_pkg.get_lock("/var/run/unattended-upgrades.lock")
         # do install
         pkg_install_success = do_install(
-            cache, pkgs_to_upgrade, options, logfile_dpkg)
+            cache, pkgs_to_upgrade, blacklisted_pkgs, options, logfile_dpkg)
 
     # send a mail (if needed)
     if not options.dry_run:
