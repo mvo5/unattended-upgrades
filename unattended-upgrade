@@ -722,7 +722,8 @@ def do_install(cache, pkgs_to_upgrade, blacklisted_pkgs, options,
                 cache, [pkg.name for pkg in pkgs_to_upgrade], logfile_dpkg)
     except Exception as e:
         # print unhandled exceptions here this way, while stderr is redirected
-        os.write(old_stderr, "Exception: %s" % e)
+        os.write(old_stderr, ("Exception: %s\n" % e).encode('utf-8'))
+        pkg_install_success = False
 
     # restore
     os.dup2(old_stdout, 1)
