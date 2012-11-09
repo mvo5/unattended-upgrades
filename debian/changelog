@@ -1,4 +1,4 @@
-unattended-upgrades (0.79.3ubuntu5) UNRELEASED; urgency=low
+unattended-upgrades (0.79.3ubuntu5) raring; urgency=low
 
   [ Colin Watson ]
   * Add pep8 as a dependency of the DEP-8 test suite.
@@ -8,7 +8,7 @@ unattended-upgrades (0.79.3ubuntu5) UNRELEASED; urgency=low
     autopkgtest.
   * debian/tests/control: Add missing pyflakes dependency.
 
- -- Colin Watson <cjwatson@ubuntu.com>  Tue, 16 Oct 2012 18:22:48 +0100
+ -- Martin Pitt <martin.pitt@ubuntu.com>  Fri, 09 Nov 2012 14:22:51 +0100
 
 unattended-upgrades (0.79.3ubuntu4) quantal; urgency=low
 
