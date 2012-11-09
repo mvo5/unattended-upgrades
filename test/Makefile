@@ -9,9 +9,9 @@ check:
 	while read file; do \
 	    if [ -x $$file ]; then \
 		echo "Running $$file with python3"; \
-	    	python3 $$file ; \
+	    	python3 $$file 2>&1; \
 		echo "Running $$file with python"; \
-		python-coverage run -a $$file; \
+		python-coverage run -a $$file 2>&1; \
 	    fi \
 	done
 
