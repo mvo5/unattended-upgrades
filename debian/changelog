@@ -6,6 +6,7 @@ unattended-upgrades (0.79.3ubuntu5) UNRELEASED; urgency=low
   [ Martin Pitt ]
   * test/Makefile: Redirect unittest stderr to stdout, to avoid failure in
     autopkgtest.
+  * debian/tests/control: Add missing pyflakes dependency.
 
  -- Colin Watson <cjwatson@ubuntu.com>  Tue, 16 Oct 2012 18:22:48 +0100
 
