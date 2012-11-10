@@ -584,10 +584,9 @@ def send_summary_mail(pkgs, res, pkgs_kept_back, mem_log, logfile_dpkg):
     to_email = apt_pkg.config.find("Unattended-Upgrade::Mail", "")
     if not to_email:
         return
-    # FIXME: this should say that sendmail works too but doing that no
-    #        would break translations
     if not os.path.exists(MAIL_BINARY) and not os.path.exists(SENDMAIL_BINARY):
-        logging.error(_("No '/usr/bin/mail', can not send mail. "
+        logging.error(_("No '/usr/bin/mail' or '/usr/sbin/sendmail',"
+                        "can not send mail. "
                         "You probably want to install the 'mailx' package."))
         return
     # if the operation was successful and the user has requested to get
@@ -604,7 +603,10 @@ def send_summary_mail(pkgs, res, pkgs_kept_back, mem_log, logfile_dpkg):
     body = _("Unattended upgrade returned: %s\n\n") % res
     if os.path.isfile(REBOOT_REQUIRED_FILE):
         body += _("Warning: A reboot is required to complete this upgrade.\n\n")
-    body += _("Packages that are upgraded:\n")
+    if res:
+        body += _("Packages that were upgraded:\n")
+    else:
+        body += _("Packages that attempted to upgrade:\n")
     body += " " + wrap(pkgs, 70, " ")
     body += "\n"
     if pkgs_kept_back:
@@ -948,7 +950,7 @@ def main(options, rootdir=""):
 
     # do the install based on the new list of pkgs
     pkgs = " ".join([pkg.name for pkg in pkgs_to_upgrade])
-    logging.info(_("Packages that are upgraded: %s" % pkgs))
+    logging.info(_("Packages that will be upgraded: %s" % pkgs))
 
     # get log
     now = datetime.datetime.now()
