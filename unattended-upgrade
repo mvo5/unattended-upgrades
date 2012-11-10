@@ -189,7 +189,7 @@ def is_dpkg_journal_dirty():
     return False
 
 def signal_handler(signal, frame):
-    logging.warn("SIGUSR1 recieved, will stop")
+    logging.warn("SIGUSR1 received, will stop")
     global SIGNAL_STOP_REQUEST
     SIGNAL_STOP_REQUEST=True
 
@@ -305,7 +305,7 @@ def upgrade_in_minimal_steps(cache, pkgs_to_upgrade, logfile_dpkg=""):
         smallest_partition = to_upgrade
         for pkgname in to_upgrade:
             if SIGNAL_STOP_REQUEST:
-                logging.warn("SIGNAL recieved, stopping")
+                logging.warn("SIGNAL received, stopping")
                 return True
             pkg = cache[pkgname]
             if pkg.is_upgradable:
@@ -320,7 +320,7 @@ def upgrade_in_minimal_steps(cache, pkgs_to_upgrade, logfile_dpkg=""):
                 smallest_partition = changes
                 break
             if len(changes) < len(smallest_partition):
-                logging.debug("found  partition of size %s (%s)" % (len(changes), changes))
+                logging.debug("found partition of size %s (%s)" % (len(changes), changes))
                 smallest_partition = changes
             cache.clear()
 
@@ -837,12 +837,12 @@ def main(options, rootdir=""):
                 logging.warning(_("package '%s' upgradable but fails to be marked for upgrade (%s)") % (pkg.name, e))
                 rewind_cache(cache, pkgs_to_upgrade)
                 pkgs_kept_back.append(pkg.name)
-                
+
 
     pkgs_to_upgrade.sort(key=lambda p: p.name)
     pkgs = "\n".join([pkg.name for pkg in pkgs_to_upgrade])
     logging.debug("pkgs that look like they should be upgraded: %s" % pkgs)
-           
+
     # download what looks good
     if options.debug:
         fetcher = apt_pkg.Acquire(apt.progress.text.AcquireProgress())
@@ -865,8 +865,8 @@ def main(options, rootdir=""):
         for item in fetcher.items:
             logging.debug("%s" % item)
             if item.status == item.STAT_ERROR:
-                print _("An error ocured: '%s'") % item.error_text
-                logging.error(_("An error ocured: '%s'") % item.error_text)
+                print _("An error occurred: '%s'") % item.error_text
+                logging.error(_("An error occurred: '%s'") % item.error_text)
             if not item.complete:
                 print _("The URI '%s' failed to download, aborting") % item.desc_uri
                 logging.error(_("The URI '%s' failed to download, aborting") % item.desc_uri)
@@ -927,7 +927,7 @@ def main(options, rootdir=""):
         logging.info(_("Packages that are auto removed: '%s'") %
                      " ".join(now_auto_removable-pkgs_auto_removable))
 
-    logging.debug("InstCount=%i DelCount=%i BrokenCout=%i" % (cache._depcache.inst_count, cache._depcache.del_count, cache._depcache.broken_count))
+    logging.debug("InstCount=%i DelCount=%i BrokenCount=%i" % (cache._depcache.inst_count, cache._depcache.del_count, cache._depcache.broken_count))
 
     # exit if there is nothing to do and nothing to report
     if (len(pkgs_to_upgrade) == 0) and (len(pkgs_kept_back) == 0):
