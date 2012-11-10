@@ -597,9 +597,9 @@ def send_summary_mail(pkgs, res, pkgs_kept_back, mem_log, logfile_dpkg):
     # Check if reboot-required flag is present
     logging.debug("Sending mail with '%s' to '%s'" % (logfile_dpkg, to_email))
     if os.path.isfile(REBOOT_REQUIRED_FILE):
-        subject = _("[reboot required] unattended-upgrades result for '%s'") % host()
+        subject = _("[reboot required] unattended-upgrades result for '%s': %s") % (host(), res)
     else:
-        subject = _("unattended-upgrades result for '%s'") % host()
+        subject = _("unattended-upgrades result for '%s': '%s'") % (host(), res)
     body = _("Unattended upgrade returned: %s\n\n") % res
     if os.path.isfile(REBOOT_REQUIRED_FILE):
         body += _("Warning: A reboot is required to complete this upgrade.\n\n")
