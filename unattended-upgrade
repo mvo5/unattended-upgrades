@@ -197,7 +197,7 @@ def is_dpkg_journal_dirty():
 
 
 def signal_handler(signal, frame):
-    logging.warn("SIGUSR1 recieved, will stop")
+    logging.warn("SIGUSR1 received, will stop")
     global SIGNAL_STOP_REQUEST
     SIGNAL_STOP_REQUEST = True
 
@@ -325,7 +325,7 @@ def upgrade_in_minimal_steps(cache, pkgs_to_upgrade, logfile_dpkg, blacklist):
         smallest_partition = to_upgrade
         for pkgname in to_upgrade:
             if SIGNAL_STOP_REQUEST:
-                logging.warn("SIGNAL recieved, stopping")
+                logging.warn("SIGNAL received, stopping")
                 return True
             pkg = cache[pkgname]
             if pkg.is_upgradable:
@@ -347,8 +347,8 @@ def upgrade_in_minimal_steps(cache, pkgs_to_upgrade, logfile_dpkg, blacklist):
                 smallest_partition = changes
                 break
             if len(changes) < len(smallest_partition):
-                logging.debug("found  partition of size %s (%s)" % (
-                        len(changes), changes))
+                logging.debug("found partition of size %s (%s)" % (
+                    len(changes), changes))
                 smallest_partition = changes
             cache.clear()
 
@@ -627,10 +627,9 @@ def send_summary_mail(pkgs, res, pkgs_kept_back, mem_log, logfile_dpkg):
     to_email = apt_pkg.config.find("Unattended-Upgrade::Mail", "")
     if not to_email:
         return
-    # FIXME: this should say that sendmail works too but doing that no
-    #        would break translations
     if not os.path.exists(MAIL_BINARY) and not os.path.exists(SENDMAIL_BINARY):
-        logging.error(_("No '/usr/bin/mail', can not send mail. "
+        logging.error(_("No '/usr/bin/mail' or '/usr/sbin/sendmail',"
+                        "can not send mail. "
                         "You probably want to install the 'mailx' package."))
         return
     # if the operation was successful and the user has requested to get
@@ -642,14 +641,18 @@ def send_summary_mail(pkgs, res, pkgs_kept_back, mem_log, logfile_dpkg):
     logging.debug("Sending mail with '%s' to '%s'" % (logfile_dpkg, to_email))
     if os.path.isfile(REBOOT_REQUIRED_FILE):
         subject = _(
-            "[reboot required] unattended-upgrades result for '%s'") % host()
+            "[reboot required] unattended-upgrades result for '%s': %s") % (
+                host(), res)
     else:
-        subject = _("unattended-upgrades result for '%s'") % host()
+        subject = _("unattended-upgrades result for '%s': '%s'") % (host(), res)
     body = _("Unattended upgrade returned: %s\n\n") % res
     if os.path.isfile(REBOOT_REQUIRED_FILE):
         body += _(
             "Warning: A reboot is required to complete this upgrade.\n\n")
-    body += _("Packages that are upgraded:\n")
+    if res:
+        body += _("Packages that were upgraded:\n")
+    else:
+        body += _("Packages that attempted to upgrade:\n")
     body += " " + wrap(pkgs, 70, " ")
     body += "\n"
     if pkgs_kept_back:
@@ -924,8 +927,8 @@ def main(options, rootdir=""):
         for item in fetcher.items:
             logging.debug("%s" % item)
             if item.status == item.STAT_ERROR:
-                print(_("An error ocured: '%s'") % item.error_text)
-                logging.error(_("An error ocured: '%s'") % item.error_text)
+                print(_("An error occurred: '%s'") % item.error_text)
+                logging.error(_("An error occurred: '%s'") % item.error_text)
             if not item.complete:
                 print(_("The URI '%s' failed to download, aborting") %
                       item.desc_uri)
@@ -995,8 +998,8 @@ def main(options, rootdir=""):
                      " ".join(now_auto_removable - pkgs_auto_removable))
 
     logging.debug("InstCount=%i DelCount=%i BrokenCount=%i" % (
-            cache._depcache.inst_count, cache._depcache.del_count,
-            cache._depcache.broken_count))
+        cache._depcache.inst_count, cache._depcache.del_count,
+        cache._depcache.broken_count))
 
     # exit if there is nothing to do and nothing to report
     if (len(pkgs_to_upgrade) == 0) and (len(pkgs_kept_back) == 0):
@@ -1019,7 +1022,7 @@ def main(options, rootdir=""):
 
     # do the install based on the new list of pkgs
     pkgs = " ".join([pkg.name for pkg in pkgs_to_upgrade])
-    logging.info(_("Packages that are upgraded: %s" % pkgs))
+    logging.info(_("Packages that will be upgraded: %s" % pkgs))
 
     # get log
     now = datetime.datetime.now()

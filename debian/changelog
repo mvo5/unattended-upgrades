@@ -1,3 +1,14 @@
+unattended-upgrades (0.79.3ubuntu6) UNRELEASEDraring; urgency=low
+
+  [ Brian Murray ]
+  * unattended-upgrade:
+    - fix a issue with the tense of packages being upgraded
+    - log that sendmail works as an alternative to mailx
+    - add the result of the upgrade to email subject, thanks to Yann 'Ze'
+      Richard for the initial patch (LP: #1069809)
+
+ -- Michael Vogt <michael.vogt@ubuntu.com>  Sun, 11 Nov 2012 16:23:13 +0100
+
 unattended-upgrades (0.79.3ubuntu5) raring; urgency=low
 
   [ Colin Watson ]
@@ -50,6 +61,7 @@ unattended-upgrades (0.79.3ubuntu1) quantal; urgency=low
 
 unattended-upgrades (0.79.4) UNRELEASED; urgency=low
 
+  [ Michael Vogt ]
   * data/50unattended-upgrades.{Debian,Ubuntu}:
     - add missing ";" in the example config, thanks to  Tomas Pospisek
       closes: #684876
@@ -58,6 +70,13 @@ unattended-upgrades (0.79.4) UNRELEASED; urgency=low
   * unattended-upgrade, test/test_origin_pattern.py:
     - if a unknown matcher token is found, raise a error instead of
       silently ignoring it, thanks to Russell Stuart 
+
+  [ Brian Murray ]
+  * unattended-upgrade:
+    - fix a issue with the tense of packages being upgraded
+    - log that sendmail works as an alternative to mailx
+    - add the result of the upgrade to email subject, thanks to Yann 'Ze'
+      Richard for the initial patch (LP: #1069809)
 
  -- Michael Vogt <michael.vogt@ubuntu.com>  Tue, 14 Aug 2012 13:25:40 +0200
 
