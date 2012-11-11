@@ -17,7 +17,6 @@ class CommonTestsForMailxAndSendmail(object):
     EXPECTED_MAIL_CONTENT_STRINGS = [
         "logfile_dpkg text",
         "mem_log text",
-        "Packages that are upgraded:\n 2vcard",
         ]
 
     def common_setup(self):
@@ -56,13 +55,15 @@ class CommonTestsForMailxAndSendmail(object):
         mail_txt = open("mail.txt").read()
         self.assertTrue("[reboot required]" in mail_txt)
         self._verify_common_mail_content(mail_txt)
-        
+        self.assertTrue("Packages that were upgraded:\n 2vcard" in mail_txt)
+
     def test_summary_mail_no_reboot(self):
         send_summary_mail(*self._return_mock_data())
         mail_txt = open("mail.txt").read()
         self.assertFalse("[reboot required]" in mail_txt)
         self._verify_common_mail_content(mail_txt)
-    
+        self.assertTrue("Packages that were upgraded:\n 2vcard" in mail_txt)
+
     def test_summary_mail_only_on_error(self):
         # default is to always send mail, ensure this is correct
         # for both success and failure
@@ -83,6 +84,8 @@ class CommonTestsForMailxAndSendmail(object):
         self._verify_common_mail_content(mail_txt)
         self.assertTrue("Unattended upgrade returned: False" in mail_txt)
         self.assertTrue(os.path.exists("mail.txt"))
+        self.assertTrue(
+            "Packages that attempted to upgrade:\n 2vcard" in mail_txt)
 
     def test_apt_listchanges(self):
         # test with sendmail available
@@ -120,7 +123,7 @@ class SendmailTestCase(CommonTestsForMailxAndSendmail, unittest.TestCase):
         msg = Parser().parsestr(mail_txt)
         content_type = msg["Content-Type"]
         self.assertEqual(content_type, 'text/plain; charset="utf-8"')
-    
+
 
 class SendmailAndMailxTestCase(SendmailTestCase):
 
@@ -132,4 +135,3 @@ class SendmailAndMailxTestCase(SendmailTestCase):
 if __name__ == "__main__":
     #logging.basicConfig(level=logging.DEBUG)
     unittest.main()
-
