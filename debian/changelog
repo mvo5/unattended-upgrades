@@ -6,6 +6,10 @@ unattended-upgrades (0.79.3ubuntu6) UNRELEASEDraring; urgency=low
     - log that sendmail works as an alternative to mailx
     - add the result of the upgrade to email subject, thanks to Yann 'Ze'
       Richard for the initial patch (LP: #1069809)
+  
+  [ Michael Vogt ]
+  * unattended-upgrade:
+    - fix debug output for origins checking in py3
 
  -- Michael Vogt <michael.vogt@ubuntu.com>  Sun, 11 Nov 2012 16:23:13 +0100
 

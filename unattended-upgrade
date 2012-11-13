@@ -872,7 +872,7 @@ def main(options, rootdir=""):
     for pkg in cache:
         if options.debug and pkg.is_upgradable:
             logging.debug("Checking: %s (%s)" % (
-                    pkg.name, map(str, getattr(pkg.candidate, "origins", []))))
+                    pkg.name, getattr(pkg.candidate, "origins", [])))
         if (pkg.is_upgradable and
             not is_pkgname_in_blacklist(pkg.name, blacklisted_pkgs) and
             is_allowed_origin(pkg.candidate, allowed_origins)):
