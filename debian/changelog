@@ -1,4 +1,4 @@
-unattended-upgrades (0.79.3ubuntu6) UNRELEASEDraring; urgency=low
+unattended-upgrades (0.79.3ubuntu6) UNRELEASED; urgency=low
 
   [ Brian Murray ]
   * unattended-upgrade:
@@ -10,6 +10,9 @@ unattended-upgrades (0.79.3ubuntu6) UNRELEASEDraring; urgency=low
   [ Michael Vogt ]
   * unattended-upgrade:
     - fix debug output for origins checking in py3
+
+  [ Martin Pitt ]
+  * Fix PEP-8 errors throughout the code to fix the autopkgtest failure.
 
  -- Michael Vogt <michael.vogt@ubuntu.com>  Sun, 11 Nov 2012 16:23:13 +0100
 

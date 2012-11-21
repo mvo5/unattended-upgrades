@@ -10,7 +10,7 @@ from unattended_upgrade import (
     check_changes_for_sanity,
     is_allowed_origin,
     UnknownMatcherError,
-    )
+)
 
 
 class MockOrigin():
@@ -133,8 +133,7 @@ class TestOriginPatern(unittest.TestCase):
         pkg.candidate = MockCandidate()
         pkg.candidate.origins = [self._get_mock_origin("Ubuntu"),
                                  self._get_mock_origin(aorigin="Google, Inc.",
-                                                       archive="stable"),
-                                ]
+                                                       archive="stable")]
         pkg.candidate.record = {}
         return pkg
 

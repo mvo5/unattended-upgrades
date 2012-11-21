@@ -67,7 +67,7 @@ class TestUnattendedUpgrade(unittest.TestCase):
              # smaller version of the minimal system
              "--variant=minbase",
              "--include=python-apt,apt-utils,gpgv,ubuntu-keyring,"
-                 "ca-certificates",
+             "ca-certificates",
              DISTRO,
              target,
              MIRROR])
@@ -191,7 +191,7 @@ class TestUnattendedUpgrade(unittest.TestCase):
         #print(logfile)
         NEEDLE_PKG = "ca-certificates"
         if not re.search(
-            "Packages that are upgraded:.*%s" % NEEDLE_PKG, logfile):
+                "Packages that are upgraded:.*%s" % NEEDLE_PKG, logfile):
             logging.warn("Can not find expected %s upgrade in log" %
                          NEEDLE_PKG)
             return False

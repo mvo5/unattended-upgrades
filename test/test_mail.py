@@ -20,7 +20,7 @@ class CommonTestsForMailxAndSendmail(object):
     EXPECTED_MAIL_CONTENT_STRINGS = [
         "logfile_dpkg text",
         "mem_log text",
-        ]
+    ]
 
     def common_setup(self):
         # monkey patch to make it testable

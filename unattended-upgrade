@@ -39,7 +39,7 @@ from optparse import OptionParser
 from subprocess import (
     Popen,
     PIPE,
-    )
+)
 
 import apt
 import logging
@@ -208,8 +208,7 @@ def substitute(line):
     Currently supported ${distro-release}
     """
     mapping = {"distro_codename": get_distro_codename(),
-               "distro_id": get_distro_id(),
-              }
+               "distro_id": get_distro_id()}
     return string.Template(line).substitute(mapping)
 
 
@@ -303,7 +302,7 @@ def upgrade_normal(cache, pkgs_to_upgrade, logfile_dpkg):
         logging.error(_("Installing the upgrades failed!"))
         logging.error(_("error message: '%s'") % error)
         logging.error(_("dpkg returned a error! See '%s' for details") %
-                          logfile_dpkg)
+                      logfile_dpkg)
     return res
 
 
@@ -376,7 +375,7 @@ def upgrade_in_minimal_steps(cache, pkgs_to_upgrade, logfile_dpkg, blacklist):
             logging.error(_("Installing the upgrades failed!"))
             logging.error(_("error message: '%s'") % e)
             logging.error(_("dpkg returned a error! See '%s' for details") %
-                              logfile_dpkg)
+                          logfile_dpkg)
             return False
         to_upgrade = to_upgrade - set(smallest_partition)
         logging.debug("left to upgrade %s" % to_upgrade)
@@ -423,9 +422,9 @@ def check_changes_for_sanity(cache, allowed_origins, blacklist):
             # check if the package is unsafe to upgrade unattended
             ignore_require_restart = apt_pkg.config.find_b(
                 "Unattended-Upgrade::IgnoreAppsRequireRestart", False)
-            if (pkg.marked_upgrade and
-                ignore_require_restart is False and
-                pkg.candidate.record.get("Upgrade-Requires") == "app-restart"):
+            upgrade_requires = pkg.candidate.record.get("Upgrade-Requires")
+            if (pkg.marked_upgrade and ignore_require_restart is False and
+                    upgrade_requires == "app-restart"):
                 logging.debug("pkg '%s' requires app-restart, not safe to "
                               "upgrade unattended")
                 return False
@@ -507,10 +506,9 @@ def conffile_prompt(destFile, prefix=""):
         # might be a dpkg prompt (LP: #936870)
         if md5 == "newconffile":
             continue
-        if (not pkg_conffiles or
-            not conf_file in pkg_conffiles.split("\n")):
+        if not pkg_conffiles or not conf_file in pkg_conffiles.split("\n"):
             logging.debug("'%s' not in package conffiles '%s'" % (
-                    conf_file, pkg_conffiles))
+                conf_file, pkg_conffiles))
             continue
         # record for later
         dpkg_status_conffiles[conf_file] = md5
@@ -539,7 +537,7 @@ def conffile_prompt(destFile, prefix=""):
     if pkg_conffiles:
         for conf_file in pkg_conffiles.split("\n"):
             if (not conf_file in dpkg_status_conffiles and
-                os.path.exists(prefix + conf_file)):
+                    os.path.exists(prefix + conf_file)):
                 logging.debug("found conffile '%s' in new pkg but on dpkg "
                               "status" % conf_file)
                 pkg_md5sum = get_md5sum_for_file_in_deb(destFile, conf_file)
@@ -634,8 +632,8 @@ def send_summary_mail(pkgs, res, pkgs_kept_back, mem_log, logfile_dpkg):
         return
     # if the operation was successful and the user has requested to get
     # mails on on errors, just exit here
-    if (res and
-        apt_pkg.config.find_b("Unattended-Upgrade::MailOnlyOnError", False)):
+    if (res and apt_pkg.config.find_b(
+            "Unattended-Upgrade::MailOnlyOnError", False)):
         return
     # Check if reboot-required flag is present
     logging.debug("Sending mail with '%s' to '%s'" % (logfile_dpkg, to_email))
@@ -872,10 +870,10 @@ def main(options, rootdir=""):
     for pkg in cache:
         if options.debug and pkg.is_upgradable:
             logging.debug("Checking: %s (%s)" % (
-                    pkg.name, getattr(pkg.candidate, "origins", [])))
+                pkg.name, getattr(pkg.candidate, "origins", [])))
         if (pkg.is_upgradable and
-            not is_pkgname_in_blacklist(pkg.name, blacklisted_pkgs) and
-            is_allowed_origin(pkg.candidate, allowed_origins)):
+                not is_pkgname_in_blacklist(pkg.name, blacklisted_pkgs) and
+                is_allowed_origin(pkg.candidate, allowed_origins)):
             try:
                 pkg.mark_upgrade()
                 if check_changes_for_sanity(cache, allowed_origins,
@@ -887,7 +885,7 @@ def main(options, rootdir=""):
                     # a subsequent operation, see debian bug #639840
                     for pkgname in pkgs_kept_back:
                         if (cache[pkgname].marked_install or
-                            cache[pkgname].marked_upgrade):
+                                cache[pkgname].marked_upgrade):
                             pkgs_kept_back.remove(pkgname)
                             pkgs_to_upgrade.append(cache[pkgname])
                 else:
@@ -955,7 +953,7 @@ def main(options, rootdir=""):
                 if not email:
                     print(_("Package '%s' has conffile prompt and needs "
                             "to be upgraded manually") % pkgname_from_deb(
-                            item.destfile))
+                                item.destfile))
                 # log to the logfile
                 logging.warning(_("Package '%s' has conffile prompt and "
                                   "needs to be upgraded manually") %
@@ -989,9 +987,9 @@ def main(options, rootdir=""):
 
     # do auto-remove
     if apt_pkg.config.find_b(
-        "Unattended-Upgrade::Remove-Unused-Dependencies", False):
+            "Unattended-Upgrade::Remove-Unused-Dependencies", False):
         now_auto_removable = set([pkg.name for pkg in cache
-                               if pkg.is_auto_removable])
+                                  if pkg.is_auto_removable])
         for pkgname in now_auto_removable - pkgs_auto_removable:
             logging.debug("marking %s for remove" % pkgname)
             cache[pkgname].mark_delete()
@@ -1011,7 +1009,8 @@ def main(options, rootdir=""):
     # environment UNATTENDED_UPGRADES_FORCE_INSTALL_ON_SHUTDOWN will
     # be set by the unatteded-upgrades-shutdown script
     if (not "UNATTENDED_UPGRADES_FORCE_INSTALL_ON_SHUTDOWN" in os.environ and
-        apt_pkg.config.find_b("Unattended-Upgrade::InstallOnShutdown", False)):
+            apt_pkg.config.find_b(
+                "Unattended-Upgrade::InstallOnShutdown", False)):
         logger = logging.getLogger()
         logger.debug("Configured to install on shutdown, so exiting now")
         return
@@ -1047,9 +1046,8 @@ def main(options, rootdir=""):
             pkgs, pkg_install_success, pkgs_kept_back, mem_log, logfile_dpkg)
 
     # auto-reboot (if required and the config for this is set
-    if (apt_pkg.config.find_b(
-            "Unattended-Upgrade::Automatic-Reboot", False) and
-        os.path.exists(REBOOT_REQUIRED_FILE)):
+    if (apt_pkg.config.find_b("Unattended-Upgrade::Automatic-Reboot", False)
+            and os.path.exists(REBOOT_REQUIRED_FILE)):
         if shutdown_lock > 0:
             os.close(shutdown_lock)
         logging.warning("Found %s, rebooting" % REBOOT_REQUIRED_FILE)

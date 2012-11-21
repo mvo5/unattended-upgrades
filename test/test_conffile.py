@@ -8,7 +8,7 @@ import unittest
 from unattended_upgrade import (
     conffile_prompt,
     dpkg_conffile_prompt,
-    )
+)
 
 
 class ConffilePromptTestCase(unittest.TestCase):
@@ -29,20 +29,20 @@ class ConffilePromptTestCase(unittest.TestCase):
         # they both have the same config files
         test_pkg = "./packages/conf-test-package_1.0.deb"
         self.assertFalse(conffile_prompt(test_pkg, prefix="./root.conffile"),
-                        "conffile prompt detection incorrect")
+                         "conffile prompt detection incorrect")
 
     def test_with_many_entries(self):
         # ensure we don't crash when encountering a conffile with overly
         # many entries
         test_pkg = "./packages/conf-test-package-257-conffiles_1.deb"
         self.assertFalse(conffile_prompt(test_pkg, prefix="./root.conffile"),
-                        "conffile prompt detection incorrect")
+                         "conffile prompt detection incorrect")
 
     def test_will_not_prompt_because_of_conffile_removal(self):
         # no conffiles anymore in the pkg
         test_pkg = "./packages/conf-test-package-no-conffiles-anymore_2.deb"
         self.assertFalse(conffile_prompt(test_pkg, prefix="./root.conffile"),
-                        "conffile prompt detection incorrect")
+                         "conffile prompt detection incorrect")
 
     def test_will_prompt_multiple(self):
         # multiple conffiles
