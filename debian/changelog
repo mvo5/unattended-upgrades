@@ -1,4 +1,4 @@
-unattended-upgrades (0.79.3ubuntu6) UNRELEASED; urgency=low
+unattended-upgrades (0.79.3ubuntu6) raring; urgency=low
 
   [ Brian Murray ]
   * unattended-upgrade:
@@ -14,7 +14,7 @@ unattended-upgrades (0.79.3ubuntu6) UNRELEASED; urgency=low
   [ Martin Pitt ]
   * Fix PEP-8 errors throughout the code to fix the autopkgtest failure.
 
- -- Michael Vogt <michael.vogt@ubuntu.com>  Sun, 11 Nov 2012 16:23:13 +0100
+ -- Martin Pitt <martin.pitt@ubuntu.com>  Wed, 21 Nov 2012 07:48:55 +0100
 
 unattended-upgrades (0.79.3ubuntu5) raring; urgency=low
 
