@@ -76,6 +76,7 @@ def log_progress():
     # log it
     log_msg(msg)
 
+
 if __name__ == "__main__":
     # setup gettext
     localesApp="unattended-upgrades"

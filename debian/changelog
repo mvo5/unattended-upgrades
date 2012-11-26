@@ -10,9 +10,15 @@ unattended-upgrades (0.79.3ubuntu6) raring; urgency=low
   [ Michael Vogt ]
   * unattended-upgrade:
     - fix debug output for origins checking in py3
+  * test/test_regression.py:
+    - regression test for crash in normal_upgrade exception handler
 
   [ Martin Pitt ]
   * Fix PEP-8 errors throughout the code to fix the autopkgtest failure.
+  
+  [ Thomas Kluyver ]
+  * lp:~takluyver/unattended-upgrades/apt-lock-crash:
+    - fix encoding bug when writing a error to stderr
 
  -- Martin Pitt <martin.pitt@ubuntu.com>  Wed, 21 Nov 2012 07:48:55 +0100
 

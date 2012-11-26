@@ -29,6 +29,7 @@ class TestSubstitude(unittest.TestCase):
         l = get_allowed_origins()
         self.assertTrue(("o=MyDistroID,a=nacked-security") in l)
 
+
 if __name__ == "__main__":
     logging.basicConfig(level=logging.DEBUG)
     unittest.main()
