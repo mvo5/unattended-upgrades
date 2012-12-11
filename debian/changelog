@@ -1,11 +1,18 @@
-unattended-upgrades (0.79.3ubuntu7) UNRELEASEDraring; urgency=low
+unattended-upgrades (0.79.3ubuntu7) raring; urgency=low
 
+  [ Michael Vogt ]
   * data/logrotate.d/unattended-upgrades:
     - only logrotate
       /var/log/unattended-upgrades/unattended-upgrades{,-shutdown}.log
       and not the dpkg logs (LP: #1081034)
   * tests/*.py:
     - updated pep8 tests, make pyflakes test "test" dir too
+  * test/test_regression.py:
+    - regression test for crash in normal_upgrade exception handler
+
+  [ Thomas Kluyver ]
+  * lp:~takluyver/unattended-upgrades/apt-lock-crash:
+    - fix encoding bug when writing a error to stderr
 
  -- Michael Vogt <michael.vogt@ubuntu.com>  Tue, 11 Dec 2012 18:52:24 +0100
 
@@ -21,15 +28,9 @@ unattended-upgrades (0.79.3ubuntu6) raring; urgency=low
   [ Michael Vogt ]
   * unattended-upgrade:
     - fix debug output for origins checking in py3
-  * test/test_regression.py:
-    - regression test for crash in normal_upgrade exception handler
 
   [ Martin Pitt ]
   * Fix PEP-8 errors throughout the code to fix the autopkgtest failure.
-  
-  [ Thomas Kluyver ]
-  * lp:~takluyver/unattended-upgrades/apt-lock-crash:
-    - fix encoding bug when writing a error to stderr
 
  -- Martin Pitt <martin.pitt@ubuntu.com>  Wed, 21 Nov 2012 07:48:55 +0100
 
