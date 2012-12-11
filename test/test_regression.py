@@ -2,7 +2,6 @@
 # -*- coding: utf-8 -*-
 
 import io
-import logging
 import os
 import tempfile
 import unittest
@@ -10,7 +9,7 @@ import unittest
 from mock import (
     Mock,
     patch,
-    )
+)
 
 from unattended_upgrade import do_install
 

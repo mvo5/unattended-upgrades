@@ -4,8 +4,10 @@ unattended-upgrades (0.79.3ubuntu7) UNRELEASEDraring; urgency=low
     - only logrotate
       /var/log/unattended-upgrades/unattended-upgrades{,-shutdown}.log
       and not the dpkg logs (LP: #1081034)
+  * tests/*.py:
+    - updated pep8 tests, make pyflakes test "test" dir too
 
- -- Michael Vogt <michael.vogt@ubuntu.com>  Tue, 11 Dec 2012 17:46:04 +0100
+ -- Michael Vogt <michael.vogt@ubuntu.com>  Tue, 11 Dec 2012 18:52:24 +0100
 
 unattended-upgrades (0.79.3ubuntu6) raring; urgency=low
 
