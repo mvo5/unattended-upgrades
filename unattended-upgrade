@@ -107,8 +107,10 @@ class LogInstallProgress(apt.progress.base.InstallProgress):
         (/var/run/unattended-upgrades.progress by default)
     """
 
-    def __init__(self, progress_log="var/run/unattended-upgrades.progress"):
+    def __init__(self, logfile_dpkg, 
+                 progress_log="var/run/unattended-upgrades.progress"):
         apt.progress.base.InstallProgress.__init__(self)
+        self.logfile_dpkg = logfile_dpkg
         self.progress_log = os.path.join(apt_pkg.config.find_dir("Dir"),
                                          progress_log)
 
@@ -149,11 +151,25 @@ class LogInstallProgress(apt.progress.base.InstallProgress):
                     error_count += 1
                     if error_count > 1:
                         print "ERROR: os.close(%s): %s" % (fd, e)
+    
+    def _redirect_stdin(self):
+        REDIRECT_INPUT = os.devnull
+        fd = os.open(REDIRECT_INPUT, os.O_RDWR)
+        os.dup2(fd,0)
+
+    def _redirect_output(self):
+        # do not create log in dry-run mode, just output to stdout/stderr
+        if not apt_pkg.config.find_b("Debug::pkgDPkgPM", False):
+            fd = os.open(self.logfile_dpkg, os.O_RDWR|os.O_CREAT, 0644)
+            os.dup2(fd,1)
+            os.dup2(fd,2)
 
     def fork(self):
         pid = os.fork()
         if pid == 0:
             self._fixup_fds()
+            self._redirect_output()
+            self._redirect_stdin()
         return pid
 
 
@@ -271,7 +287,7 @@ def match_whitelist_string(whitelist, origin):
 def upgrade_normal(cache, pkgs_to_upgrade, logfile_dpkg):
     error = None
     res = False
-    iprogress = LogInstallProgress()
+    iprogress = LogInstallProgress(logfile_dpkg)
     try:
         with Unlocked():
             res = cache.commit(install_progress=iprogress)
@@ -288,7 +304,7 @@ def upgrade_normal(cache, pkgs_to_upgrade, logfile_dpkg):
 
 def upgrade_in_minimal_steps(cache, pkgs_to_upgrade, logfile_dpkg=""):
 
-    install_log = LogInstallProgress()
+    install_log = LogInstallProgress(logfile_dpkg)
     install_log.progress_log += ".minimal-steps"
 
     # setup signal handler
@@ -333,7 +349,7 @@ def upgrade_in_minimal_steps(cache, pkgs_to_upgrade, logfile_dpkg=""):
         rewind_cache(cache, [cache[name] for name in smallest_partition])
 
         try:
-            iprogress = LogInstallProgress()
+            iprogress = LogInstallProgress(logfile_dpkg)
             with Unlocked():
                 res = cache.commit(install_progress=iprogress)
                 if not res:
@@ -636,24 +652,8 @@ def do_install(cache, pkgs_to_upgrade, options, logfile_dpkg):
     # set debconf to NON_INTERACTIVE, redirect output
     os.putenv("DEBIAN_FRONTEND","noninteractive");
     setup_apt_listchanges()
-    
-    # redirect to log
-    REDIRECT_INPUT = os.devnull
-    fd = os.open(REDIRECT_INPUT, os.O_RDWR)
-    os.dup2(fd,0)
 
     logging.info(_("Writing dpkg log to '%s'") % logfile_dpkg)
-
-    # do not create log in dry-run mode, just output to stdout/stderr
-    if options.dry_run:
-        old_stdout = 1
-        old_stderr = 2
-    else:
-        fd = os.open(logfile_dpkg, os.O_RDWR|os.O_CREAT, 0644)
-        old_stdout = os.dup(1)
-        old_stderr = os.dup(2)
-        os.dup2(fd,1)
-        os.dup2(fd,2)
 
     try:
         if (options.minimal_upgrade_steps or 
@@ -671,11 +671,7 @@ def do_install(cache, pkgs_to_upgrade, options, logfile_dpkg):
                 cache, [pkg.name for pkg in pkgs_to_upgrade], logfile_dpkg)
     except Exception as e:
         # print unhandled exceptions here this way, while stderr is redirected
-        os.write(old_stderr, "Exception: %s" % e)
-
-    # restore
-    os.dup2(old_stdout, 1)
-    os.dup2(old_stderr, 2)
+        os.write(2, "Exception: %s" % e)
 
     return pkg_install_success
 

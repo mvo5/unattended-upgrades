@@ -23,9 +23,11 @@ class MockOptions():
 class TestAgainstRealArchive(unittest.TestCase):
 
     def setUp(self):
-        for f in glob.glob("./aptroot/var/log/*"):
-            if os.path.isfile(f):
-                os.remove(f)
+        for g in ["./aptroot/var/log/apt/*",
+                  "./aptroot/var/log/*"]:
+            for f in glob.glob(g):
+                if os.path.isfile(f):
+                    os.remove(f)
         # get a lucid based cache (test good until 04/2015)
         cache = apt.Cache(rootdir="./aptroot")
         cache.update()
@@ -62,9 +64,16 @@ class TestAgainstRealArchive(unittest.TestCase):
             re.search("INFO Packages that will be upgraded:.*ant-doc", log))
         self.assertTrue(
             re.search("DEBUG skipping blacklisted package 'ant-doc'", log))
-        # test install log 
-        #print open("aptroot/var/log/apt/history.log").read()
-        print open("aptroot/var/log/apt/term.log").read()
+        # test dpkg install log 
+        term_log = open("aptroot/var/log/apt/term.log").read()
+        # FIXME: when we redirect STDIN the below test will break - however
+        #        we need to redirect it as otherwise we may hang forever
+        #        - this is actually a bug in apt that uses "tcgetattr(0, &tt)"
+        #          on FD=0 instead of FD=1
+        #print term_log
+        #self.assertTrue(
+        #    re.search(
+        #        "fake-dpkg: --status-fd .* --configure.*awstats", term_log))
 
 
 if __name__ == "__main__":
