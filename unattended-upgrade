@@ -30,6 +30,7 @@ import logging
 import lsb_release
 import re
 import os
+import select
 import signal
 import string
 import subprocess
@@ -107,12 +108,14 @@ class LogInstallProgress(apt.progress.base.InstallProgress):
         (/var/run/unattended-upgrades.progress by default)
     """
 
-    def __init__(self, logfile_dpkg, 
+    def __init__(self, logfile_dpkg, verbose=False,
                  progress_log="var/run/unattended-upgrades.progress"):
         apt.progress.base.InstallProgress.__init__(self)
         self.logfile_dpkg = logfile_dpkg
         self.progress_log = os.path.join(apt_pkg.config.find_dir("Dir"),
                                          progress_log)
+        self.verbose = verbose
+        self.output_logfd = None
 
     def status_change(self, pkg, percent, status):
         f=open(self.progress_log, "w")
@@ -160,16 +163,31 @@ class LogInstallProgress(apt.progress.base.InstallProgress):
     def _redirect_output(self):
         # do not create log in dry-run mode, just output to stdout/stderr
         if not apt_pkg.config.find_b("Debug::pkgDPkgPM", False):
-            fd = os.open(self.logfile_dpkg, os.O_RDWR|os.O_CREAT, 0644)
-            os.dup2(fd,1)
-            os.dup2(fd,2)
+            logfd = os.open(self.logfile_dpkg, os.O_RDWR|os.O_CREAT, 0644)
+            os.dup2(logfd, 1)
+            os.dup2(logfd, 2)
 
+    def update_interface(self):
+        # call super class first
+        apt.progress.base.InstallProgress.update_interface(self)
+        # and now we do too
+        if self.verbose:
+            if self.output_logfd is None:
+                self.output_logfd = os.open(self.logfile_dpkg, os.O_RDONLY)
+            try:
+                select.select([self.output_logfd], [], [], 0)
+            except select.error as (errno_, _errstr):
+                if errno_ != errno.EINTR:
+                    logging.exception("select failed")
+            # output to stdout in verbose mode only
+            os.write(1, os.read(self.output_logfd, 1024))
+        
     def fork(self):
         pid = os.fork()
         if pid == 0:
             self._fixup_fds()
-            self._redirect_output()
             self._redirect_stdin()
+            self._redirect_output()
         return pid
 
 
@@ -284,10 +302,10 @@ def match_whitelist_string(whitelist, origin):
                     what, token))
     return res
 
-def upgrade_normal(cache, pkgs_to_upgrade, logfile_dpkg):
+def upgrade_normal(cache, pkgs_to_upgrade, logfile_dpkg, verbose):
     error = None
     res = False
-    iprogress = LogInstallProgress(logfile_dpkg)
+    iprogress = LogInstallProgress(logfile_dpkg, verbose)
     try:
         with Unlocked():
             res = cache.commit(install_progress=iprogress)
@@ -302,9 +320,10 @@ def upgrade_normal(cache, pkgs_to_upgrade, logfile_dpkg):
                           logfile_dpkg)
     return res
 
-def upgrade_in_minimal_steps(cache, pkgs_to_upgrade, logfile_dpkg=""):
+def upgrade_in_minimal_steps(cache, pkgs_to_upgrade, logfile_dpkg="", 
+                             verbose=False):
 
-    install_log = LogInstallProgress(logfile_dpkg)
+    install_log = LogInstallProgress(logfile_dpkg, verbose)
     install_log.progress_log += ".minimal-steps"
 
     # setup signal handler
@@ -349,7 +368,7 @@ def upgrade_in_minimal_steps(cache, pkgs_to_upgrade, logfile_dpkg=""):
         rewind_cache(cache, [cache[name] for name in smallest_partition])
 
         try:
-            iprogress = LogInstallProgress(logfile_dpkg)
+            iprogress = LogInstallProgress(logfile_dpkg, verbose)
             with Unlocked():
                 res = cache.commit(install_progress=iprogress)
                 if not res:
@@ -665,10 +684,12 @@ def do_install(cache, pkgs_to_upgrade, options, logfile_dpkg):
             open(pidf, "w").write("%s" % os.getpid())
             # try upgrade all "pkgs" in minimal steps
             pkg_install_success = upgrade_in_minimal_steps(
-                cache, [pkg.name for pkg in pkgs_to_upgrade], logfile_dpkg)
+                cache, [pkg.name for pkg in pkgs_to_upgrade], 
+                logfile_dpkg, options.verbose or options.debug)
         else:
             pkg_install_success = upgrade_normal(
-                cache, [pkg.name for pkg in pkgs_to_upgrade], logfile_dpkg)
+                cache, [pkg.name for pkg in pkgs_to_upgrade],
+                logfile_dpkg, options.verbose or options.debug)
     except Exception as e:
         # print unhandled exceptions here this way, while stderr is redirected
         os.write(2, "Exception: %s" % e)
