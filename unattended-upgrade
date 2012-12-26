@@ -21,33 +21,29 @@
 # Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 #
 
-import apt_inst
-import apt_pkg
-
 import copy
 import datetime
 import email.Charset
 import fcntl
+import gettext
+import logging
+import lsb_release
 import re
 import os
+import signal
 import string
+import subprocess
 import sys
 
 from email.Message import Message
+from gettext import gettext as _
 from optparse import OptionParser
 from StringIO import StringIO
 from subprocess import Popen, PIPE
 
-import warnings
-warnings.filterwarnings("ignore", "apt API not stable yet", FutureWarning)
 import apt
-import logging
-import lsb_release
-import signal
-import subprocess
-
-import gettext
-from gettext import gettext as _
+import apt_inst
+import apt_pkg
 
 # the reboot required flag file used by packages
 REBOOT_REQUIRED_FILE = "/var/run/reboot-required"
@@ -55,9 +51,6 @@ MAIL_BINARY = "/usr/bin/mail"
 SENDMAIL_BINARY = "/usr/sbin/sendmail"
 DISTRO_CODENAME = lsb_release.get_distro_information()['CODENAME']
 DISTRO_ID = lsb_release.get_distro_information()['ID']
-
-# progress information is written here (relative to apt-configs "Dir")
-PROGRESS_LOG="var/run/unattended-upgrades.progress"
 
 # set from the sigint signal handler
 SIGNAL_STOP_REQUEST=False
@@ -114,10 +107,10 @@ class LogInstallProgress(apt.progress.base.InstallProgress):
         (/var/run/unattended-upgrades.progress by default)
     """
 
-    def __init__(self):
+    def __init__(self, progress_log="var/run/unattended-upgrades.progress"):
         super(LogInstallProgress, self).__init__()
         self.progress_log = os.path.join(apt_pkg.config.find_dir("Dir"),
-                                         PROGRESS_LOG)
+                                         progress_log)
 
     def status_change(self, pkg, percent, status):
         f=open(self.progress_log, "w")
