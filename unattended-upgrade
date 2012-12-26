@@ -108,7 +108,7 @@ class LogInstallProgress(apt.progress.base.InstallProgress):
     """
 
     def __init__(self, progress_log="var/run/unattended-upgrades.progress"):
-        super(LogInstallProgress, self).__init__()
+        apt.progress.base.InstallProgress.__init__(self)
         self.progress_log = os.path.join(apt_pkg.config.find_dir("Dir"),
                                          progress_log)
 
@@ -289,7 +289,7 @@ def upgrade_normal(cache, pkgs_to_upgrade, logfile_dpkg):
 def upgrade_in_minimal_steps(cache, pkgs_to_upgrade, logfile_dpkg=""):
 
     install_log = LogInstallProgress()
-    install_log.LOG += ".minimal-steps"
+    install_log.progress_log += ".minimal-steps"
 
     # setup signal handler
     signal.signal(signal.SIGUSR1, signal_handler)

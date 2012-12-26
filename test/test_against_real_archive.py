@@ -64,7 +64,7 @@ class TestAgainstRealArchive(unittest.TestCase):
             re.search("DEBUG skipping blacklisted package 'ant-doc'", log))
         # test install log 
         #print open("aptroot/var/log/apt/history.log").read()
-        #print open("aptroot/var/log/apt/term.log").read()
+        print open("aptroot/var/log/apt/term.log").read()
 
 
 if __name__ == "__main__":
