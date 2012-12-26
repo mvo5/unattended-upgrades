@@ -16,6 +16,7 @@ class MockOptions():
         self.debug = debug
         self.dry_run = dry_run
         self.minimal_upgrade_steps = False
+        self.verbose = False
 
 class TestAgainstRealArchive(unittest.TestCase):
 
@@ -43,20 +44,23 @@ class TestAgainstRealArchive(unittest.TestCase):
         # check if the log file exists
         self.assertTrue(os.path.exists(logfile))
         log = open(logfile).read()
+        print log
         # check that stuff worked
         self.assertFalse(" ERROR " in log)
         # check if we actually have the expected ugprade in it
         self.assertTrue(
-            re.search("INFO Packages that are upgraded:.*awstats", log))
+            re.search("INFO Packages that will be upgraded:.*awstats", log))
         # apt-doc has a higher version in -updates than in -security
         # and no other dependencies so its a perfect test
         self.assertTrue(
-            re.search("INFO Packages that are upgraded:.*apt-doc", log))
+            re.search("INFO Packages that will be upgraded:.*apt-doc", log))
         self.assertFalse(
-            re.search("INFO Packages that are upgraded:.*ant-doc", log))
+            re.search("INFO Packages that will be upgraded:.*ant-doc", log))
         self.assertTrue(
             re.search("DEBUG skipping blacklisted package 'ant-doc'", log))
 
 if __name__ == "__main__":
+    import locale
+    locale.setlocale(locale.LC_ALL, "C")
     unittest.main()
 
