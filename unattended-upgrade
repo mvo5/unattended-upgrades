@@ -732,6 +732,10 @@ def _setup_logging(options):
         logger.setLevel(logging.DEBUG)
         stdout_handler = logging.StreamHandler(sys.stdout)
         logger.addHandler(stdout_handler)
+    elif options.verbose:
+        logger.setLevel(logging.INFO)
+        stdout_handler = logging.StreamHandler(sys.stdout)
+        logger.addHandler(stdout_handler)
     if apt_pkg.config.find("Unattended-Upgrade::Mail", ""):
         mem_log_handler = logging.StreamHandler(mem_log)
         logger.addHandler(mem_log_handler)
@@ -991,8 +995,11 @@ if __name__ == "__main__":
     # init the options
     parser = OptionParser()
     parser.add_option("-d", "--debug",
-                      action="store_true", dest="debug", default=False,
+                      action="store_true", default=False,
                       help=_("print debug messages"))
+    parser.add_option("-v", "--verbose",
+                      action="store_true", default=False,
+                      help=_("print info messages"))
     parser.add_option("", "--dry-run",
                       action="store_true", default=False,
                       help=_("Simulation, download but do not install"))
