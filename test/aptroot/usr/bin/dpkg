@@ -1,0 +1,10 @@
+#!/bin/sh
+
+# needed for apt to figure out the multiarch state
+if [ "$1" = "--print-foreign-architectures" ]; then
+	exec dpkg $@
+
+fi
+
+# we are just pretending
+echo "fake-dpkg: $@"

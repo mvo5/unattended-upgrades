@@ -11,12 +11,14 @@ import unattended_upgrade
 
 apt_pkg.config.set("APT::Architecture", "amd64")
 
+
 class MockOptions():
-    def __init__(self, debug=True, dry_run=True):
+    def __init__(self, debug=True, dry_run=False):
         self.debug = debug
         self.dry_run = dry_run
         self.minimal_upgrade_steps = False
         self.verbose = False
+
 
 class TestAgainstRealArchive(unittest.TestCase):
 
@@ -24,27 +26,29 @@ class TestAgainstRealArchive(unittest.TestCase):
         for f in glob.glob("./aptroot/var/log/*"):
             if os.path.isfile(f):
                 os.remove(f)
-
-    def test_against_real_archive(self):
-        # get a lucid based cache (test good for 5y)
+        # get a lucid based cache (test good until 04/2015)
         cache = apt.Cache(rootdir="./aptroot")
         cache.update()
         del cache
-        # create mock options
-        options = MockOptions(debug=True)
         # ensure apt does not do any post-invoke stuff that fails
         # (because we are not root)
         apt_pkg.config.clear("DPkg::Post-Invoke")
+        unattended_upgrade.DISTRO_CODENAME = "lucid"
+
+    def test_against_real_archive(self):
+        # create mock options
+        options = MockOptions(dry_run=False, debug=True)
         # run unattended-upgrades against fake system
         logdir = os.path.abspath("./aptroot/var/log/")
         logfile = os.path.join(logdir, "unattended-upgrades.log")
         apt_pkg.config.set("APT::UnattendedUpgrades::LogDir", logdir)
-        unattended_upgrade.DISTRO_CODENAME = "lucid"
+
+        # main
         res = unattended_upgrade.main(options, os.path.abspath("./aptroot"))
+
         # check if the log file exists
         self.assertTrue(os.path.exists(logfile))
         log = open(logfile).read()
-        print log
         # check that stuff worked
         self.assertFalse(" ERROR " in log)
         # check if we actually have the expected ugprade in it
@@ -58,6 +62,10 @@ class TestAgainstRealArchive(unittest.TestCase):
             re.search("INFO Packages that will be upgraded:.*ant-doc", log))
         self.assertTrue(
             re.search("DEBUG skipping blacklisted package 'ant-doc'", log))
+        # test install log 
+        #print open("aptroot/var/log/apt/history.log").read()
+        #print open("aptroot/var/log/apt/term.log").read()
+
 
 if __name__ == "__main__":
     import locale
