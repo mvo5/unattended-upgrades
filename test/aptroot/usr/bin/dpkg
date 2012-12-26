@@ -8,3 +8,7 @@ fi
 
 # we are just pretending
 echo "fake-dpkg: $@"
+
+# this should probably split into a seperate part
+read -p "FAKE PROMPT TO ENSURE WE DO NOT BLOCK ON READS - if its handing here, the stdin close did not work" INPUT
+echo "READ: $INPUT"
