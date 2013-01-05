@@ -14,6 +14,7 @@ from unattended_upgrade import _setup_logging
 class MockOptions:
     dry_run = False
     debug = False
+    verbose = False
 
 class TestLogdir(unittest.TestCase):
 
