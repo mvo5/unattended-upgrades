@@ -106,6 +106,7 @@ class TestUnattendedUpgrade(unittest.TestCase):
     def _setup_chroot(self, target):
         """ helper that setups a clean chroot """
         if os.path.exists(target):
+            subprocess.call(["umount", os.path.join(target, "dev", "pts")])
             shutil.rmtree(target)
         if not os.path.exists(TARBALL):
             self._create_new_debootstrap_tarball(TARBALL, target)
@@ -133,6 +134,15 @@ class TestUnattendedUpgrade(unittest.TestCase):
         # setup chroot if needed 
         if clean_chroot:
             self._setup_chroot(target)
+
+        # ensure we have /dev/pts in the chroot
+        ret = subprocess.call(["mount", "-t", "devpts", "devptsfs", 
+                               os.path.join(target, "dev", "pts")])
+        if ret != 0:
+            raise Exception("Failed to mount %s/proc" % target)
+        self.addCleanup(
+            lambda: subprocess.call(
+                ["umount", os.path.join(target, "dev", "pts")]))
 
         # and run the upgrade test
         pid = os.fork()
@@ -186,7 +196,7 @@ class TestUnattendedUpgrade(unittest.TestCase):
         #print logfile
         NEEDLE_PKG="ca-certificates"
         if not re.search(
-            "Packages that are upgraded:.*%s" % NEEDLE_PKG, logfile):
+            "Packages that will be upgraded:.*%s" % NEEDLE_PKG, logfile):
             logging.warn("Can not find expected %s upgrade in log" % NEEDLE_PKG)
             return False
         if "ERROR Installing the upgrades failed" in logfile:

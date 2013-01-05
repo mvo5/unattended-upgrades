@@ -21,33 +21,30 @@
 # Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 #
 
-import apt_inst
-import apt_pkg
-
 import copy
 import datetime
 import email.Charset
 import fcntl
+import gettext
+import logging
+import lsb_release
 import re
 import os
+import select
+import signal
 import string
+import subprocess
 import sys
 
 from email.Message import Message
+from gettext import gettext as _
 from optparse import OptionParser
 from StringIO import StringIO
 from subprocess import Popen, PIPE
 
-import warnings
-warnings.filterwarnings("ignore", "apt API not stable yet", FutureWarning)
 import apt
-import logging
-import lsb_release
-import signal
-import subprocess
-
-import gettext
-from gettext import gettext as _
+import apt_inst
+import apt_pkg
 
 # the reboot required flag file used by packages
 REBOOT_REQUIRED_FILE = "/var/run/reboot-required"
@@ -55,9 +52,6 @@ MAIL_BINARY = "/usr/bin/mail"
 SENDMAIL_BINARY = "/usr/sbin/sendmail"
 DISTRO_CODENAME = lsb_release.get_distro_information()['CODENAME']
 DISTRO_ID = lsb_release.get_distro_information()['ID']
-
-# progress information is written here
-PROGRESS_LOG="/var/run/unattended-upgrades.progress"
 
 # set from the sigint signal handler
 SIGNAL_STOP_REQUEST=False
@@ -110,14 +104,21 @@ class UnattendedUpgradesCache(apt.Cache):
 
 
 class LogInstallProgress(apt.progress.base.InstallProgress):
-    """ Install progress that writes to self.LOG
+    """ Install progress that writes to self.progress_log
         (/var/run/unattended-upgrades.progress by default)
     """
 
-    LOG = PROGRESS_LOG 
+    def __init__(self, logfile_dpkg, verbose=False,
+                 progress_log="var/run/unattended-upgrades.progress"):
+        apt.progress.base.InstallProgress.__init__(self)
+        self.logfile_dpkg = logfile_dpkg
+        self.progress_log = os.path.join(apt_pkg.config.find_dir("Dir"),
+                                         progress_log)
+        self.verbose = verbose
+        self.output_logfd = None
 
     def status_change(self, pkg, percent, status):
-        f=open(self.LOG, "w")
+        f=open(self.progress_log, "w")
         f.write(_("Progress: %s %% (%s)") % (percent, pkg))
         f.close()
 
@@ -153,11 +154,40 @@ class LogInstallProgress(apt.progress.base.InstallProgress):
                     error_count += 1
                     if error_count > 1:
                         print "ERROR: os.close(%s): %s" % (fd, e)
+    
+    def _redirect_stdin(self):
+        REDIRECT_INPUT = os.devnull
+        fd = os.open(REDIRECT_INPUT, os.O_RDWR)
+        os.dup2(fd,0)
 
+    def _redirect_output(self):
+        # do not create log in dry-run mode, just output to stdout/stderr
+        if not apt_pkg.config.find_b("Debug::pkgDPkgPM", False):
+            logfd = os.open(self.logfile_dpkg, os.O_RDWR|os.O_CREAT, 0644)
+            os.dup2(logfd, 1)
+            os.dup2(logfd, 2)
+
+    def update_interface(self):
+        # call super class first
+        apt.progress.base.InstallProgress.update_interface(self)
+        # and now we do too
+        if self.verbose:
+            if self.output_logfd is None:
+                self.output_logfd = os.open(self.logfile_dpkg, os.O_RDONLY)
+            try:
+                select.select([self.output_logfd], [], [], 0)
+            except select.error as (errno_, _errstr):
+                if errno_ != errno.EINTR:
+                    logging.exception("select failed")
+            # output to stdout in verbose mode only
+            os.write(1, os.read(self.output_logfd, 1024))
+        
     def fork(self):
         pid = os.fork()
         if pid == 0:
             self._fixup_fds()
+            self._redirect_stdin()
+            self._redirect_output()
         return pid
 
 
@@ -272,10 +302,10 @@ def match_whitelist_string(whitelist, origin):
                     what, token))
     return res
 
-def upgrade_normal(cache, pkgs_to_upgrade, logfile_dpkg):
+def upgrade_normal(cache, pkgs_to_upgrade, logfile_dpkg, verbose):
     error = None
     res = False
-    iprogress = LogInstallProgress()
+    iprogress = LogInstallProgress(logfile_dpkg, verbose)
     try:
         with Unlocked():
             res = cache.commit(install_progress=iprogress)
@@ -290,10 +320,11 @@ def upgrade_normal(cache, pkgs_to_upgrade, logfile_dpkg):
                           logfile_dpkg)
     return res
 
-def upgrade_in_minimal_steps(cache, pkgs_to_upgrade, logfile_dpkg=""):
+def upgrade_in_minimal_steps(cache, pkgs_to_upgrade, logfile_dpkg="", 
+                             verbose=False):
 
-    install_log = LogInstallProgress()
-    install_log.LOG += ".minimal-steps"
+    install_log = LogInstallProgress(logfile_dpkg, verbose)
+    install_log.progress_log += ".minimal-steps"
 
     # setup signal handler
     signal.signal(signal.SIGUSR1, signal_handler)
@@ -337,7 +368,7 @@ def upgrade_in_minimal_steps(cache, pkgs_to_upgrade, logfile_dpkg=""):
         rewind_cache(cache, [cache[name] for name in smallest_partition])
 
         try:
-            iprogress = LogInstallProgress()
+            iprogress = LogInstallProgress(logfile_dpkg, verbose)
             with Unlocked():
                 res = cache.commit(install_progress=iprogress)
                 if not res:
@@ -640,44 +671,28 @@ def do_install(cache, pkgs_to_upgrade, options, logfile_dpkg):
     # set debconf to NON_INTERACTIVE, redirect output
     os.putenv("DEBIAN_FRONTEND","noninteractive");
     setup_apt_listchanges()
-    
-    # redirect to log
-    REDIRECT_INPUT = os.devnull
-    fd = os.open(REDIRECT_INPUT, os.O_RDWR)
-    os.dup2(fd,0)
 
     logging.info(_("Writing dpkg log to '%s'") % logfile_dpkg)
-
-    # do not create log in dry-run mode, just output to stdout/stderr
-    if options.dry_run:
-        old_stdout = 1
-        old_stderr = 2
-    else:
-        fd = os.open(logfile_dpkg, os.O_RDWR|os.O_CREAT, 0644)
-        old_stdout = os.dup(1)
-        old_stderr = os.dup(2)
-        os.dup2(fd,1)
-        os.dup2(fd,2)
 
     try:
         if (options.minimal_upgrade_steps or 
             # COMPAT with the mispelling
             apt_pkg.config.find_b("Unattended-Upgrades::MinimalSteps", False) or
             apt_pkg.config.find_b("Unattended-Upgrade::MinimalSteps", False)):
-            open("/var/run/unattended-upgrades.pid", "w").write("%s" % os.getpid())
+            pidf = os.path.join(apt_pkg.config.find_dir("Dir"), 
+                                  "var", "run", "unattended-upgrades.pid")
+            open(pidf, "w").write("%s" % os.getpid())
             # try upgrade all "pkgs" in minimal steps
             pkg_install_success = upgrade_in_minimal_steps(
-                cache, [pkg.name for pkg in pkgs_to_upgrade], logfile_dpkg)
+                cache, [pkg.name for pkg in pkgs_to_upgrade], 
+                logfile_dpkg, options.verbose or options.debug)
         else:
             pkg_install_success = upgrade_normal(
-                cache, [pkg.name for pkg in pkgs_to_upgrade], logfile_dpkg)
+                cache, [pkg.name for pkg in pkgs_to_upgrade],
+                logfile_dpkg, options.verbose or options.debug)
     except Exception as e:
         # print unhandled exceptions here this way, while stderr is redirected
-        os.write(old_stderr, "Exception: %s" % e)
-
-    # restore
-    os.dup2(old_stdout, 1)
-    os.dup2(old_stderr, 2)
+        os.write(2, "Exception: %s" % e)
 
     return pkg_install_success
 
@@ -730,6 +745,10 @@ def _setup_logging(options):
     mem_log = StringIO()
     if options.debug:
         logger.setLevel(logging.DEBUG)
+        stdout_handler = logging.StreamHandler(sys.stdout)
+        logger.addHandler(stdout_handler)
+    elif options.verbose:
+        logger.setLevel(logging.INFO)
         stdout_handler = logging.StreamHandler(sys.stdout)
         logger.addHandler(stdout_handler)
     if apt_pkg.config.find("Unattended-Upgrade::Mail", ""):
@@ -991,8 +1010,11 @@ if __name__ == "__main__":
     # init the options
     parser = OptionParser()
     parser.add_option("-d", "--debug",
-                      action="store_true", dest="debug", default=False,
+                      action="store_true", default=False,
                       help=_("print debug messages"))
+    parser.add_option("-v", "--verbose",
+                      action="store_true", default=False,
+                      help=_("print info messages"))
     parser.add_option("", "--dry-run",
                       action="store_true", default=False,
                       help=_("Simulation, download but do not install"))
