@@ -1,4 +1,4 @@
-unattended-upgrades (0.79.4) UNRELEASED; urgency=low
+unattended-upgrades (0.79.4) unstable; urgency=low
 
   [ Michael Vogt ]
   * data/50unattended-upgrades.{Debian,Ubuntu}:
@@ -19,7 +19,7 @@ unattended-upgrades (0.79.4) UNRELEASED; urgency=low
     - add the result of the upgrade to email subject, thanks to Yann 'Ze'
       Richard for the initial patch (LP: #1069809)
 
- -- Michael Vogt <michael.vogt@ubuntu.com>  Tue, 14 Aug 2012 13:25:40 +0200
+ -- Michael Vogt <mvo@debian.org>  Sat, 05 Jan 2013 10:22:15 +0100
 
 unattended-upgrades (0.79.3) unstable; urgency=low
 
