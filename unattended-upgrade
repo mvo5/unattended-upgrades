@@ -738,6 +738,17 @@ def _setup_logging(options):
     return mem_log
         
 
+def reboot_if_requested_and_needed(shutdown_lock):
+    # auto-reboot (if required and the config for this is set
+    if (apt_pkg.config.find_b("Unattended-Upgrade::Automatic-Reboot", False) and
+        os.path.exists(REBOOT_REQUIRED_FILE)):
+        if shutdown_lock > 0:
+            os.close(shutdown_lock)
+        logging.warning("Found %s, rebooting" % REBOOT_REQUIRED_FILE)
+        # XXX: add time option
+        subprocess.call(["/sbin/reboot"])
+        
+
 def main(options, rootdir=""):
 
     # useful for testing
@@ -972,15 +983,10 @@ def main(options, rootdir=""):
     if not options.dry_run:
         send_summary_mail(
             pkgs, pkg_install_success, pkgs_kept_back, mem_log, logfile_dpkg)
+    
+    # check if the user wants a reboot 
+    reboot_if_requested_and_needed(shutdown_lock)
 
-    # auto-reboot (if required and the config for this is set
-    if (apt_pkg.config.find_b("Unattended-Upgrade::Automatic-Reboot", False) and
-        os.path.exists(REBOOT_REQUIRED_FILE)):
-        if shutdown_lock > 0:
-            os.close(shutdown_lock)
-        logging.warning("Found %s, rebooting" % REBOOT_REQUIRED_FILE)
-        subprocess.call(["/sbin/reboot"])
-        
 
 if __name__ == "__main__":
     localesApp="unattended-upgrades"
