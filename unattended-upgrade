@@ -738,15 +738,17 @@ def _setup_logging(options):
     return mem_log
         
 
-def reboot_if_requested_and_needed(shutdown_lock):
+def reboot_if_requested_and_needed(shutdown_lock=0):
     # auto-reboot (if required and the config for this is set
     if (apt_pkg.config.find_b("Unattended-Upgrade::Automatic-Reboot", False) and
         os.path.exists(REBOOT_REQUIRED_FILE)):
+        when = apt_pkg.config.find(
+            "Unattended-Upgrade::Automatic-Reboot-Time", "now")
         if shutdown_lock > 0:
             os.close(shutdown_lock)
         logging.warning("Found %s, rebooting" % REBOOT_REQUIRED_FILE)
         # XXX: add time option
-        subprocess.call(["/sbin/reboot"])
+        subprocess.call(["/sbin/shutdown", "-r", when])
         
 
 def main(options, rootdir=""):

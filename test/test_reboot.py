@@ -14,21 +14,27 @@ import unattended_upgrade
 
 class ConffilePromptTestCase(unittest.TestCase):
 
-    @patch("subprocess.call")
-    def test_reboot_now(self, mock_call):
-        # setup
-        fake_fd = 0
+    def setUp(self):
+        # create reboot required file
         REBOOT_REQUIRED_FILE = "./reboot-required"
         with open(REBOOT_REQUIRED_FILE, "w") as f:
             pass
         self.addCleanup(lambda: os.remove(REBOOT_REQUIRED_FILE))
-        apt_pkg.config.set("Unattended-Upgrade::Automatic-Reboot", "1")
         unattended_upgrade.REBOOT_REQUIRED_FILE = REBOOT_REQUIRED_FILE
-        # run 
-        unattended_upgrade.reboot_if_requested_and_needed(0)
-        # check
-        mock_call.assert_called_with(["/sbin/reboot"])
+        # enable automatic-reboot
+        apt_pkg.config.set("Unattended-Upgrade::Automatic-Reboot", "1")        
+
+    @patch("subprocess.call")
+    def test_reboot_now(self, mock_call):
+        unattended_upgrade.reboot_if_requested_and_needed()
+        mock_call.assert_called_with(["/sbin/shutdown", "-r", "now"])
         
+    @patch("subprocess.call")
+    def test_reboot_time(self, mock_call):
+        apt_pkg.config.set("Unattended-Upgrade::Automatic-Reboot-Time", "03:00")
+        unattended_upgrade.reboot_if_requested_and_needed(0)
+        mock_call.assert_called_with(["/sbin/shutdown", "-r", "03:00"])
+    
 
 
 if __name__ == "__main__":
