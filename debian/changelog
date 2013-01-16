@@ -14,6 +14,8 @@ unattended-upgrades (0.79.4) UNRELEASED; urgency=low
   * lp:~mvo/unattended-upgrades/timed-reboot:
     - support auto rebooting at specific times instead of "now", thanks
       to Thomas Reusch for the suggestion
+   * lp:~mvo/unattended-upgrades/support-glob-in-matchers:
+     - support fnmatch style glob in the whitelist origin matching
 
   [ Brian Murray ]
   * unattended-upgrade:
