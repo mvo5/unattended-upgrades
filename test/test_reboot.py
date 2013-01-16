@@ -12,7 +12,7 @@ from mock import (
 
 import unattended_upgrade
 
-class ConffilePromptTestCase(unittest.TestCase):
+class RebootTestCase(unittest.TestCase):
 
     def setUp(self):
         # create reboot required file
