@@ -25,6 +25,7 @@ import copy
 import datetime
 import email.Charset
 import fcntl
+import fnmatch
 import gettext
 import logging
 import lsb_release
@@ -287,15 +288,15 @@ def match_whitelist_string(whitelist, origin):
         # first char is apt-cache policy output, send is the name
         # in the Release file
         if what in ("o", "origin"):
-            res &= (value == origin.origin)
+            res &= fnmatch.fnmatch(origin.origin, value)
         elif what in ("l", "label"):
-            res &= (value == origin.label)
+            res &= fnmatch.fnmatch(origin.label, value)
         elif what in ("a", "suite", "archive"):
-            res &= (value == origin.archive)
+            res &= fnmatch.fnmatch(origin.archive, value)
         elif what in ("c", "component"):
-            res &= (value == origin.component)
+            res &= fnmatch.fnmatch(origin.component, value)
         elif what in ("site",):
-            res &= (value == origin.site)
+            res &= fnmatch.fnmatch(origin.site, value)
         else:
             raise UnknownMatcherError(
                 "Unknown whitelist entry for macher '%s' (token '%s')" % (
