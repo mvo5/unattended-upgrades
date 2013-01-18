@@ -20,6 +20,8 @@ unattended-upgrades (0.79.4) UNRELEASED; urgency=low
     - only logrotate
       /var/log/unattended-upgrades/unattended-upgrades{,-shutdown}.log
       and not the dpkg logs (LP: #1081034)
+  * lp:~mvo/unattended-upgrades/lp1061498:
+    - fix crash in dpkg_conffile_prompt() (LP: #1061498)
 
   [ Brian Murray ]
   * unattended-upgrade:
