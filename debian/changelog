@@ -102,6 +102,12 @@ unattended-upgrades (0.79.4) UNRELEASED; urgency=low
       to Thomas Reusch for the suggestion
    * lp:~mvo/unattended-upgrades/support-glob-in-matchers:
      - support fnmatch style glob in the whitelist origin matching
+  * data/logrotate.d/unattended-upgrades:
+    - only logrotate
+      /var/log/unattended-upgrades/unattended-upgrades{,-shutdown}.log
+      and not the dpkg logs (LP: #1081034)
+  * lp:~mvo/unattended-upgrades/lp1061498:
+    - fix crash in dpkg_conffile_prompt() (LP: #1061498)
 
   [ Brian Murray ]
   * unattended-upgrade:

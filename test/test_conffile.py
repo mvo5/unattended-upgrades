@@ -4,7 +4,6 @@ import apt_pkg
 import logging
 import unittest
 
-
 from unattended_upgrade import (
     conffile_prompt,
     dpkg_conffile_prompt,
@@ -56,6 +55,26 @@ class ConffilePromptTestCase(unittest.TestCase):
         test_pkg = "./packages/conf-test-package-new-conffile_1.deb"
         self.assertTrue(conffile_prompt(test_pkg, prefix="./root.conffile"),
                         "conffile prompt detection incorrect")
+    
+class DpkgConffileTestCase(unittest.TestCase):
+    """ 
+    This tests that the detection if dpkg will prompt at all works,
+    i.e. if the user has decided to use a --force-conf{old,new} option
+    """
+
+    def setUp(self):
+        apt_pkg.config.clear("DPkg::Options")
+
+    def test_no_dpkg_prompt_option(self):
+        self.assertTrue(dpkg_conffile_prompt())
+
+    def test_regression_lp1061498(self):
+        apt_pkg.config.set("DPkg::Options::", "muup")
+        self.assertTrue(dpkg_conffile_prompt())
+
+    def test_dpkg_will_never_prompt(self):
+        apt_pkg.config.set("DPkg::Options::", "--force-confold")
+        self.assertFalse(dpkg_conffile_prompt())
 
 
 class DpkgConffileTestCase(unittest.TestCase):
