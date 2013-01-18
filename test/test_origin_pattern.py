@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/usr/bin/python3
 
 import apt_pkg
 import logging
@@ -10,51 +10,65 @@ from unattended_upgrade import (
     check_changes_for_sanity,
     is_allowed_origin,
     UnknownMatcherError,
-    )
+)
+
 
 class MockOrigin():
     pass
+
+
 class MockCandidate():
     pass
+
+
 class MockPackage():
     pass
+
+
 class MockCache(list):
     pass
+
+
 class MockDepCache():
     pass
+
 
 class TestOriginPatern(unittest.TestCase):
 
     def setUp(self):
         pass
+
     def tearDown(self):
         pass
+
     def test_match_whitelist_string(self):
         origin = self._get_mock_origin(
             "OriginUbuntu", "LabelUbuntu", "ArchiveUbuntu",
             "archive.ubuntu.com", "main")
         # good
-        s="o=OriginUbuntu"
+        s = "o=OriginUbuntu"
         self.assertTrue(match_whitelist_string(s, origin))
-        s="o=OriginUbuntu,l=LabelUbuntu,a=ArchiveUbuntu,site=archive.ubuntu.com"
+        s = "o=OriginUbuntu,l=LabelUbuntu,a=ArchiveUbuntu," \
+            "site=archive.ubuntu.com"
         self.assertTrue(match_whitelist_string(s, origin))
         # bad
-        s=""
+        s = ""
         self.assertFalse(match_whitelist_string(s, origin))
-        s="o=something"
+        s = "o=something"
         self.assertFalse(match_whitelist_string(s, origin))
-        s="o=LabelUbuntu,a=no-match"
+        s = "o=LabelUbuntu,a=no-match"
         self.assertFalse(match_whitelist_string(s, origin))
         # with escaping
         origin = self._get_mock_origin("Google, Inc.", archive="stable")
         # good
-        s="o=Google\, Inc.,a=stable"
+        s = "o=Google\, Inc.,a=stable"
         self.assertTrue(match_whitelist_string(s, origin))
 
     def test_match_whitelist_from_conffile(self):
         # read some
         apt_pkg.config.clear("Unattended-Upgrade")
-        apt_pkg.read_config_file(apt_pkg.config, "./data/50unattended-upgrades.Test")
+        apt_pkg.read_config_file(
+            apt_pkg.config, "./data/50unattended-upgrades.Test")
         allowed_origins = unattended_upgrade.get_allowed_origins()
         #print allowed_origins
         self.assertTrue("o=aOrigin,a=aArchive" in allowed_origins)
@@ -63,7 +77,8 @@ class TestOriginPatern(unittest.TestCase):
 
     def test_compatiblity(self):
         apt_pkg.config.clear("Unattended-Upgrade")
-        apt_pkg.read_config_file(apt_pkg.config, "./data/50unattended-upgrades.compat")
+        apt_pkg.read_config_file(
+            apt_pkg.config, "./data/50unattended-upgrades.compat")
         allowed_origins = unattended_upgrade.get_allowed_origins()
         #print allowed_origins
         self.assertTrue("o=Google\, Inc.,a=stable" in allowed_origins)
@@ -74,7 +89,7 @@ class TestOriginPatern(unittest.TestCase):
 
     def test_unkown_matcher(self):
         apt_pkg.config.clear("Unattended-Upgrade")
-        s="xxx=OriginUbuntu"
+        s = "xxx=OriginUbuntu"
         with self.assertRaises(UnknownMatcherError):
             self.assertTrue(match_whitelist_string(s, None))
 
@@ -90,10 +105,12 @@ class TestOriginPatern(unittest.TestCase):
         allowed_origins = ["o=Ubuntu"]
         blacklist = ["linux-.*"]
         # with blacklist pkg
-        self.assertFalse(check_changes_for_sanity(cache, allowed_origins, blacklist))
+        self.assertFalse(
+            check_changes_for_sanity(cache, allowed_origins, blacklist))
         # with "normal" pkg
         pkg.name = "apt"
-        self.assertTrue(check_changes_for_sanity(cache, allowed_origins, blacklist))   
+        self.assertTrue(
+            check_changes_for_sanity(cache, allowed_origins, blacklist))
 
     def _get_mock_origin(self, aorigin="", label="", archive="",
                          site="", component=""):
@@ -116,8 +133,7 @@ class TestOriginPatern(unittest.TestCase):
         pkg.candidate = MockCandidate()
         pkg.candidate.origins = [self._get_mock_origin("Ubuntu"),
                                  self._get_mock_origin(aorigin="Google, Inc.",
-                                                       archive="stable"),
-                                ]
+                                                       archive="stable")]
         pkg.candidate.record = {}
         return pkg
 
@@ -142,4 +158,3 @@ class TestOriginPatern(unittest.TestCase):
 if __name__ == "__main__":
     logging.basicConfig(level=logging.DEBUG)
     unittest.main()
-

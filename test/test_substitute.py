@@ -1,16 +1,12 @@
-#!/usr/bin/python
+#!/usr/bin/python3
 
-import apt
 import apt_pkg
-import os
 import logging
 import unittest
-import sys
-
-from StringIO import StringIO
 
 import unattended_upgrade
 from unattended_upgrade import substitute, get_allowed_origins
+
 
 class TestSubstitude(unittest.TestCase):
 
@@ -33,7 +29,7 @@ class TestSubstitude(unittest.TestCase):
         l = get_allowed_origins()
         self.assertTrue(("o=MyDistroID,a=nacked-security") in l)
 
+
 if __name__ == "__main__":
     logging.basicConfig(level=logging.DEBUG)
     unittest.main()
-

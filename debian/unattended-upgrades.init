@@ -33,7 +33,7 @@ start|restart|force-reload|status)
 stop)
 	if [ -e $SHUTDOWN_HELPER ]; then
 		[ "$VERBOSE" != "no" ] && log_action_begin_msg "Checking for running $DESC"
-		python $SHUTDOWN_HELPER
+		python3 $SHUTDOWN_HELPER
 		[ "$VERBOSE" != "no" ] && log_action_end_msg $? "$NAME"
 	fi
 	;;

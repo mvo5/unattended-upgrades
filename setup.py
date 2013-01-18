@@ -1,7 +1,10 @@
 #!/usr/bin/env python
 
 from setuptools import setup
-from DistUtilsExtra.command import *
+from DistUtilsExtra.command import (
+    build_extra,
+    build_i18n,
+)    
 import glob
 import os
 

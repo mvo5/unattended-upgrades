@@ -1,13 +1,20 @@
-#!/usr/bin/python
+#!/usr/bin/python3
+"""Test unattended_upgrades against the real archive in a chroot.
+
+Note that this test is not run by the makefile in this folder, as it requires
+network access, and it fails in some situations (unclear which).
+"""
 
 import apt
 import apt_pkg
 import glob
+import logging
 import os
 import re
 import unittest
 
 import unattended_upgrade
+
 
 apt_pkg.config.set("APT::Architecture", "amd64")
 
@@ -18,6 +25,7 @@ class MockOptions():
         self.dry_run = dry_run
         self.minimal_upgrade_steps = False
         self.verbose = False
+
 
 
 class TestAgainstRealArchive(unittest.TestCase):
@@ -47,12 +55,13 @@ class TestAgainstRealArchive(unittest.TestCase):
 
         # main
         res = unattended_upgrade.main(options, os.path.abspath("./aptroot"))
-
+        logging.debug(res)
         # check if the log file exists
         self.assertTrue(os.path.exists(logfile))
-        log = open(logfile).read()
+        with open(logfile) as fp:
+            log = fp.read()
         # check that stuff worked
-        self.assertFalse(" ERROR " in log)
+        self.assertFalse(" ERROR " in log, log)
         # check if we actually have the expected ugprade in it
         self.assertTrue(
             re.search("INFO Packages that will be upgraded:.*awstats", log))
@@ -80,4 +89,3 @@ if __name__ == "__main__":
     import locale
     locale.setlocale(locale.LC_ALL, "C")
     unittest.main()
-
