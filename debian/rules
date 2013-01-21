@@ -3,7 +3,7 @@
 DIST=$(shell /usr/bin/lsb_release -i -s)
 
 %:
-	dh $@ --with python2
+	dh $@
 
 override_dh_auto_build:
 	# copy the right template into place
