@@ -14,7 +14,7 @@ unattended-upgrades (0.79.4) UNRELEASED; urgency=low
   * lp:~mvo/unattended-upgrades/timed-reboot:
     - support auto rebooting at specific times instead of "now", thanks
       to Thomas Reusch for the suggestion
-   * lp:~mvo/unattended-upgrades/support-glob-in-matchers:
+  * lp:~mvo/unattended-upgrades/support-glob-in-matchers:
      - support fnmatch style glob in the whitelist origin matching
   * data/logrotate.d/unattended-upgrades:
     - only logrotate
@@ -33,7 +33,7 @@ unattended-upgrades (0.79.4) UNRELEASED; urgency=low
     - add the result of the upgrade to email subject, thanks to Yann 'Ze'
       Richard for the initial patch (LP: #1069809)
 
- -- Michael Vogt <mvo@debian.org>  Sat, 05 Jan 2013 10:22:15 +0100
+ -- Michael Vogt <mvo@debian.org>  Mon, 21 Jan 2013 17:11:29 +0100
 
 unattended-upgrades (0.79.3) unstable; urgency=low
 
