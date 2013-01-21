@@ -1,3 +1,11 @@
+unattended-upgrades (0.79.4) unstable; urgency=low
+
+  * lp:~mvo/unattended-upgrades/xz-support:
+     - add missing xz-utils dependency, thanks to Bastian Blank
+       (closes: #698552)
+
+ -- Michael Vogt <mvo@debian.org>  Mon, 21 Jan 2013 17:27:31 +0100
+
 unattended-upgrades (0.79.3) unstable; urgency=low
 
   * unattended-upgrade:
