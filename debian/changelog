@@ -22,6 +22,9 @@ unattended-upgrades (0.79.4) UNRELEASED; urgency=low
       and not the dpkg logs (LP: #1081034)
   * lp:~mvo/unattended-upgrades/lp1061498:
     - fix crash in dpkg_conffile_prompt() (LP: #1061498)
+   * lp:~mvo/unattended-upgrades/xz-support:
+     - add missing xz-utils dependency, thanks to Bastian Blank
+       (closes: #698552)
 
   [ Brian Murray ]
   * unattended-upgrade:
