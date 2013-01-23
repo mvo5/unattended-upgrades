@@ -1,3 +1,16 @@
+unattended-upgrades (0.79.5) unstable; urgency=low
+
+  * data/50unattended-upgrades.{Debian,Ubuntu}:
+    - add missing ";" in the example config, thanks to  Tomas Pospisek
+      closes: #684876
+    - remove codename based matching example as this needs a newer 
+      python-apt than available in wheezy, thanks to Russell Stuart
+  * unattended-upgrade, test/test_origin_pattern.py:
+    - if a unknown matcher token is found, raise a error instead of
+      silently ignoring it, thanks to Russell Stuart 
+
+ -- Michael Vogt <michael.vogt@ubuntu.com>  Wed, 23 Jan 2013 06:40:40 +0100
+
 unattended-upgrades (0.79.4) unstable; urgency=low
 
   * lp:~mvo/unattended-upgrades/xz-support:

@@ -62,6 +62,10 @@ PROGRESS_LOG="/var/run/unattended-upgrades.progress"
 # set from the sigint signal handler
 SIGNAL_STOP_REQUEST=False
 
+class UnknownMatcherError(ValueError):
+    pass
+
+
 class UnattendedUpgradesCache(apt.Cache):
     
     def __init__(self, rootdir, allowed_origins):
@@ -262,6 +266,10 @@ def match_whitelist_string(whitelist, origin):
             res &= (value == origin.component)
         elif what in ("site",):
             res &= (value == origin.site)
+        else:
+            raise UnknownMatcherError(
+                "Unknown whitelist entry for macher '%s' (token '%s')" % (
+                    what, token))
     return res
 
 def upgrade_normal(cache, pkgs_to_upgrade, logfile_dpkg):

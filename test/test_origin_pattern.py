@@ -1,15 +1,16 @@
 #!/usr/bin/python
 
-import apt
 import apt_pkg
-import os
 import logging
 import unittest
-import sys
 
 import unattended_upgrade
 from unattended_upgrade import (
-    match_whitelist_string, check_changes_for_sanity, is_allowed_origin)
+    match_whitelist_string,
+    check_changes_for_sanity,
+    is_allowed_origin,
+    UnknownMatcherError,
+    )
 
 class MockOrigin():
     pass
@@ -70,6 +71,12 @@ class TestOriginPatern(unittest.TestCase):
         # test whitelist
         pkg = self._get_mock_package()
         self.assertTrue(is_allowed_origin(pkg.candidate, allowed_origins))
+
+    def test_unkown_matcher(self):
+        apt_pkg.config.clear("Unattended-Upgrade")
+        s="xxx=OriginUbuntu"
+        with self.assertRaises(UnknownMatcherError):
+            self.assertTrue(match_whitelist_string(s, None))
 
     def test_blacklist(self):
         # mock pkg (yeah, complicated)
