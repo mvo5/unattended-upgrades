@@ -674,7 +674,8 @@ def do_install(cache, pkgs_to_upgrade, options, logfile_dpkg):
     setup_apt_listchanges()
 
     logging.info(_("Writing dpkg log to '%s'") % logfile_dpkg)
-
+    
+    pkg_install_success = False
     try:
         if (options.minimal_upgrade_steps or 
             # COMPAT with the mispelling
