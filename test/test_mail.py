@@ -39,7 +39,11 @@ class CommonTestsForMailxAndSendmail(object):
         res = successful
         pkgs_kept_back = []
         # include some unicode chars here for good measure
-        mem_log = StringIO(u"mem_log text üöä")
+        mem_log = StringIO(u"""mem_log text üöä
+Allowed origins are: ['o=Debian,n=wheezy', 'o=Debian,n=wheezy-updates',\
+ 'o=Debian,n=wheezy,l=Debian-Security', 'origin=Debian,archive=stable,label=Deb\
+ian-Security']
+""")
         logfile_dpkg = "./apt-term.log"
         open("./apt-term.log", "w").write("logfile_dpkg text")
         return (pkgs, res, pkgs_kept_back, mem_log, logfile_dpkg)
@@ -123,6 +127,13 @@ class SendmailTestCase(CommonTestsForMailxAndSendmail, unittest.TestCase):
         msg = Parser().parsestr(mail_txt)
         content_type = msg["Content-Type"]
         self.assertEqual(content_type, 'text/plain; charset="utf-8"')
+
+    def test_mail_quoted_printable(self):
+        send_summary_mail(*self._return_mock_data())
+        log_data = open("mail.txt").read()
+        self.assertTrue("""Allowed origins are: ['o=3DDebian,n=3Dwheezy', 'o=3DDebian,n=3Dwheezy-updat=
+es', 'o=3DDebian,n=3Dwheezy,l=3DDebian-Security', 'origin=3DDebian,archive=
+=3Dstable,label=3DDebian-Security']""" in log_data)
 
 
 class SendmailAndMailxTestCase(SendmailTestCase):

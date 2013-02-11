@@ -25,6 +25,9 @@ unattended-upgrades (0.79.4) UNRELEASED; urgency=low
    * lp:~mvo/unattended-upgrades/xz-support:
      - add missing xz-utils dependency, thanks to Bastian Blank
        (closes: #698552)
+  * unattended-upgrade, test/test_mail.py:
+    - ensure body encoding is correct, thanks to Sam Morris for the 
+      report (closes: #700178)
 
   [ Brian Murray ]
   * unattended-upgrade:

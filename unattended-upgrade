@@ -600,7 +600,8 @@ def _send_mail_using_sendmail(to_address, subject, body):
     charset = email.Charset.Charset("utf-8")
     charset.body_encoding = email.Charset.QP
     msg.set_charset(charset)
-    msg.set_payload(body)
+    encoded_body = charset.body_encode(body)
+    msg.set_payload(encoded_body)
     msg['Subject'] = subject
     msg['To'] = to_address
     sendmail = subprocess.Popen(
