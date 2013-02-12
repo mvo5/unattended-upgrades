@@ -129,6 +129,7 @@ class SendmailTestCase(CommonTestsForMailxAndSendmail, unittest.TestCase):
         self.assertEqual(content_type, 'text/plain; charset="utf-8"')
 
     def test_mail_quoted_printable(self):
+        """Regression test for debian bug #700178"""
         send_summary_mail(*self._return_mock_data())
         log_data = open("mail.txt").read()
         self.assertTrue("""Allowed origins are: ['o=3DDebian,n=3Dwheezy', 'o=3DDebian,n=3Dwheezy-updat=
