@@ -55,6 +55,12 @@ class ConffilePromptTestCase(unittest.TestCase):
         test_pkg = "./packages/conf-test-package-new-conffile_1.deb"
         self.assertTrue(conffile_prompt(test_pkg, prefix="./root.conffile"),
                         "conffile prompt detection incorrect")
+
+    def test_xz_compression(self):
+        test_pkg = "./packages/conf-test-xz_1.0_all.deb"
+        self.assertFalse(conffile_prompt(test_pkg, prefix="./root.conffile"),
+                        "conffile prompt detection incorrect")
+
     
 class DpkgConffileTestCase(unittest.TestCase):
     """ 
