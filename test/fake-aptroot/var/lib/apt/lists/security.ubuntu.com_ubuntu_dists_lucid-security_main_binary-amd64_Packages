@@ -1,0 +1,39 @@
+Package: awstats
+Priority: optional
+Section: web
+Installed-Size: 3103
+Maintainer: Ubuntu Developers <ubuntu-devel-discuss@lists.ubuntu.com>
+Original-Maintainer: Sergey B Kirpichev <skirpichev@gmail.com>
+Architecture: all
+Version: 7.1
+Depends: perl
+Recommends: libnet-xwhois-perl, coreutils (>= 7.4)
+Suggests: apache2 | httpd, libnet-dns-perl, libnet-ip-perl, libgeo-ipfree-perl, liburi-perl
+Filename: pool/main/a/awstats/awstats_7.1_all.deb
+Size: 624
+MD5sum: d0666d741042b42ffb0fbb592d2e56a5
+SHA1: 364b30444fb1cafbe388d3b8ce2dd2c2c532ebc0
+SHA256: d8d9dc44111d8d8034ccd938f1a9ae557968b099a7136a95ec2a3c84199b856d
+Description: powerful and featureful web server log analyzer
+Homepage: http://awstats.sourceforge.net/
+Description-md5: 13563117d747b5d1acdce35986df9f8a
+Bugs: https://bugs.launchpad.net/ubuntu/+filebug
+Origin: Ubuntu
+
+
+Package: ubuntuone-client
+Priority: optional
+Section: net
+Installed-Size: 480
+Maintainer: Ubuntu Developers <ubuntu-devel-discuss@lists.ubuntu.com>
+Original-Maintainer: Rick McBride <rick.mcbride@canonical.com>
+Architecture: all
+Version: 1.2.2-0ubuntu2.3
+Replaces: nautilus-ubuntuone, ubuntuone-oauth-login, ubuntuone-storagefs
+Conflicts: nautilus-ubuntuone, ubuntuone-oauth-login, ubuntuone-storagefs
+Filename: pool/main/u/ubuntuone-client/ubuntuone-client_1.2.2-0ubuntu2.3_all.deb
+Size: 23892
+MD5sum: e263772e3de67f49efba45d8a9f1af68
+SHA1: d38484834f293ebae9046f939168dcd65a0dca20
+SHA256: c7c5e19d0fa3e0d3f889989091e63075e198d0405b8a9c65fe74b3f219c92aaa
+Description: Ubuntu One client

@@ -404,11 +404,37 @@ def is_pkgname_in_blacklist(pkgname, blacklist):
             return True
     return False
 
+def find_conflicts_replaces_for(cache, needle_pkg):
+    print "************** find", needle_pkg
+    for pkg in cache:
+        if not pkg.marked_install and not pkg.marked_upgrade:
+            continue
+        is_conflict = False
+        is_replaces = False
+        for or_dep in pkg.candidate.get_dependencies("Conflicts"):
+            for dep in or_dep:
+                print dep.name, needle_pkg.name
+                if dep.name == needle_pkg.name:
+                    is_conflict = True
+                    break
+        for or_dep in pkg.candidate.get_dependencies("Replaces"):
+            for dep in or_dep:
+                if dep.name == needle_pkg.name:
+                    is_replaces = True
+                    break
+        if is_replaces and is_conflict:
+            return pkg
+    return None
+
 def check_changes_for_sanity(cache, allowed_origins, blacklist):
     if cache._depcache.broken_count != 0:
         return False
     for pkg in cache:
         if pkg.marked_delete:
+            if find_conflicts_replaces_for(cache, pkg):
+                logging.debug("pkg '%s' is replaced by %s" % (
+                        pkg.name, find_conflicts_replaces_for(cache, pkg)))
+                continue
             logging.debug("pkg '%s' now marked delete" % pkg.name)
             return False
         if pkg.marked_install or pkg.marked_upgrade:
@@ -532,7 +558,7 @@ def conffile_prompt(destFile, prefix=""):
         for conf_file in pkg_conffiles.split("\n"):
             if (not conf_file in dpkg_status_conffiles and
                 os.path.exists(prefix+conf_file)):
-                logging.debug("found conffile '%s' in new pkg but on dpkg "
+                logging.debug("found conffile '%s' in new pkg but not on dpkg "
                               "status" % conf_file)
                 pkg_md5sum = get_md5sum_for_file_in_deb(destFile, conf_file)
                 if pkg_md5sum != apt_pkg.md5sum(open(prefix+conf_file).read()):

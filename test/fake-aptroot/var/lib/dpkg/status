@@ -51,9 +51,16 @@ Description-en_GB: Documentation for APT
  This package contains the user guide and offline guide, for APT, an
  Advanced Package Tool.
 
-Package: mutt
+Package: ubuntuone-client
 Status: install ok installed
 Architecture: all
 Version: 1.0
-Description-en_GB: Fake package
- a package that has a conflicts/replaces
+Description-en_GB: meep
+Conffiles:
+ /etc/xdg/autostart/ubuntuone-launch.desktop 5d6e63ff57e52624cd22277e28af3f91
+
+Package: nautilus-ubuntuone
+Status: install ok installed
+Architecture: all
+Version: 1.0
+Description-en_GB: meep

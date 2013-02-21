@@ -1,0 +1,14 @@
+#!/bin/sh
+
+# needed for apt to figure out the multiarch state
+if [ "$1" = "--print-foreign-architectures" ]; then
+	exec dpkg $@
+
+fi
+
+# we are just pretending
+echo "fake-dpkg: $@"
+
+# this should probably split into a seperate part
+read -p "FAKE PROMPT TO ENSURE WE DO NOT BLOCK ON READS - if its handing here, the stdin close did not work" INPUT
+echo "READ: $INPUT"

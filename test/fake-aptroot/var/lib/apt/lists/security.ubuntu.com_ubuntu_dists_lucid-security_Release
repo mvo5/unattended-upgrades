@@ -1,0 +1,10 @@
+Origin: Ubuntu
+Label: Ubuntu
+Suite: lucid-security
+Version: 10.04
+Codename: lucid
+Date: Sun, 30 Dec 2012  3:44:49 UTC
+Architectures: amd64 armel armhf i386 powerpc
+Components: main restricted universe multiverse
+Description: Ubuntu Lucid Security
+ d0372bc5b902746081c637f23c1b0e83a4179ea798cdc55559799e0befcf6724 842 main/binary-amd64/Packages
