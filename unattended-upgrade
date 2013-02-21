@@ -404,8 +404,7 @@ def is_pkgname_in_blacklist(pkgname, blacklist):
             return True
     return False
 
-def find_conflicts_replaces_for(cache, needle_pkg):
-    print "************** find", needle_pkg
+def find_installed_or_upgraded_conflicts_replaces_for(cache, needle_pkg):
     for pkg in cache:
         if not pkg.marked_install and not pkg.marked_upgrade:
             continue
@@ -431,9 +430,11 @@ def check_changes_for_sanity(cache, allowed_origins, blacklist):
         return False
     for pkg in cache:
         if pkg.marked_delete:
-            if find_conflicts_replaces_for(cache, pkg):
+            if find_installed_or_upgraded_conflicts_replaces_for(cache, pkg):
                 logging.debug("pkg '%s' is replaced by %s" % (
-                        pkg.name, find_conflicts_replaces_for(cache, pkg)))
+                        pkg.name, 
+                        find_installed_or_upgraded_conflicts_replaces_for(
+                            cache, pkg)))
                 continue
             logging.debug("pkg '%s' now marked delete" % pkg.name)
             return False
