@@ -12,7 +12,7 @@ unattended-upgrades (0.79.5) unstable; urgency=low
     - do not nice/ionice as this wil affect daemon restarts
       (closes: #701850)
 
- -- Michael Vogt <michael.vogt@ubuntu.com>  Wed, 23 Jan 2013 06:40:40 +0100
+ -- Michael Vogt <mvo@debian.org>  Fri, 01 Mar 2013 10:07:30 +0100
 
 unattended-upgrades (0.79.4) unstable; urgency=low
 
