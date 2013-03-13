@@ -3,7 +3,6 @@
 import apt_pkg
 import logging
 import unittest
-import sys
 
 from unattended_upgrade import conffile_prompt
 
@@ -51,6 +50,11 @@ class ConffilePromptTestCase(unittest.TestCase):
         # becomes a conffile
         test_pkg = "./packages/conf-test-package-new-conffile_1.deb"
         self.assertTrue(conffile_prompt(test_pkg, prefix="./root.conffile"),
+                        "conffile prompt detection incorrect")
+
+    def test_xz_compression(self):
+        test_pkg = "./packages/conf-test-xz_1.0_all.deb"
+        self.assertFalse(conffile_prompt(test_pkg, prefix="./root.conffile"),
                         "conffile prompt detection incorrect")
 
 

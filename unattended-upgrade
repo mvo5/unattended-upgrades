@@ -1031,14 +1031,6 @@ if __name__ == "__main__":
         print _("You need to be root to run this application")
         sys.exit(1)
 
-    # nice & ionce
-    os.nice(19)
-    IONICE="/usr/bin/ionice"
-    if os.path.exists(IONICE):
-        with open(os.devnull, "w") as fstderr:
-            subprocess.call([IONICE, "-c3", "-p",str(os.getpid())],
-                            stderr=fstderr)
-
     # ensure that we are not killed when the terminal goes away e.g. on
     # shutdown
     signal.signal(signal.SIGHUP, signal.SIG_IGN)
