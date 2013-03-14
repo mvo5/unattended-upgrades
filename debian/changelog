@@ -6,7 +6,7 @@ unattended-upgrades (0.80~exp2) experimental; urgency=low
   * data/50unattended-upgrades.Debian:
     - improve documentation, thanks to Russell Stuart
 
- -- Michael Vogt <mvo@debian.org>  Thu, 14 Mar 2013 09:16:12 +0100
+ -- Michael Vogt <mvo@debian.org>  Thu, 14 Mar 2013 09:19:22 +0100
 
 unattended-upgrades (0.80~exp1) experimental; urgency=low
 
