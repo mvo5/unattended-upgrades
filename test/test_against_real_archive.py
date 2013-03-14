@@ -35,6 +35,7 @@ class TestAgainstRealArchive(unittest.TestCase):
         # ensure apt does not do any post-invoke stuff that fails
         # (because we are not root)
         apt_pkg.config.clear("DPkg::Post-Invoke")
+        apt_pkg.config.clear("DPkg::Pre-Invoke")
         unattended_upgrade.DISTRO_CODENAME = "lucid"
 
     def test_against_real_archive(self):

@@ -1,11 +1,18 @@
+unattended-upgrades (0.80~exp2) experimental; urgency=low
+
+  * add codename based matching 
+  * add support for "${distro_id}", "${distro_codename}" in the 
+    Unattended-Upgrade::Origins-Pattern based matching too
+  * data/50unattended-upgrades.Debian:
+    - improve documentation, thanks to Russell Stuart
+
+ -- Michael Vogt <mvo@debian.org>  Thu, 14 Mar 2013 09:16:12 +0100
+
 unattended-upgrades (0.80~exp1) experimental; urgency=low
 
   [ Michael Vogt ]
   * lp:~mvo/unattended-upgrades/verbose:
     - add --verbose that shows output and terminal output
-  * lp:~mvo/unattended-upgrades/xz-support:
-     - add missing xz-utils dependency, thanks to Bastian Blank
-       (closes: #698552)
   * drop --with python2 as its just a single script
   * debian/control:
     - depend on latest python-apt in experimental for the "codename"
@@ -15,9 +22,8 @@ unattended-upgrades (0.80~exp1) experimental; urgency=low
 
   [ Brian Murray ]
   * unattended-upgrade:
-    - fix a issue with the tense of packages being upgraded
     - log that sendmail works as an alternative to mailx
-    - add the result of the upgrade to email subject, thanks to Yann 'Ze'
+    - fix a issue with the tense of packages being upgraded
       Richard for the initial patch (LP: #1069809)
 
  -- Michael Vogt <mvo@debian.org>  Thu, 14 Mar 2013 06:34:27 +0100
