@@ -1,4 +1,4 @@
-unattended-upgrades (0.80~exp1) UNRELEASED; urgency=low
+unattended-upgrades (0.80~exp1) experimental; urgency=low
 
   [ Michael Vogt ]
   * lp:~mvo/unattended-upgrades/verbose:
@@ -7,6 +7,11 @@ unattended-upgrades (0.80~exp1) UNRELEASED; urgency=low
      - add missing xz-utils dependency, thanks to Bastian Blank
        (closes: #698552)
   * drop --with python2 as its just a single script
+  * debian/control:
+    - depend on latest python-apt in experimental for the "codename"
+      based origin matching
+  * data/50unattended-upgrades.Debian:
+    - re-add the codename (n=) based matching example
 
   [ Brian Murray ]
   * unattended-upgrade:
@@ -15,7 +20,7 @@ unattended-upgrades (0.80~exp1) UNRELEASED; urgency=low
     - add the result of the upgrade to email subject, thanks to Yann 'Ze'
       Richard for the initial patch (LP: #1069809)
 
- -- Michael Vogt <michael.vogt@ubuntu.com>  Wed, 13 Mar 2013 15:25:14 +0100
+ -- Michael Vogt <mvo@debian.org>  Thu, 14 Mar 2013 06:34:27 +0100
 
 unattended-upgrades (0.79.5) unstable; urgency=low
 
