@@ -3,6 +3,8 @@ unattended-upgrades (0.80~exp3) UNRELEASEDexperimental; urgency=low
   * merged lp:~mvo/unattended-upgrades/py3
    - this merges the py3 compatibilty from debian
   * enable pep8/pyflakes by default
+  * Add new Unattended-Upgrade::Automatic-Reboot-Time to control
+    when machines that need reboot are rebooting
 
  -- Michael Vogt <michael.vogt@ubuntu.com>  Thu, 11 Apr 2013 06:45:05 +0200
 

@@ -1,5 +1,7 @@
 #!/usr/bin/make -f
 
+PYTHON=python
+#PYTHON=python3
 DIST=$(shell /usr/bin/lsb_release -i -s)
 
 %:
@@ -8,10 +10,10 @@ DIST=$(shell /usr/bin/lsb_release -i -s)
 override_dh_auto_build:
 	# copy the right template into place
 	cp data/50unattended-upgrades.$(DIST) data/50unattended-upgrades
-	python3 setup.py build
+	$(PYTHON) setup.py build
 
 override_dh_auto_install:
-	python3 setup.py install \
+	$(PYTHON) setup.py install \
 		--root=$(CURDIR)/debian/unattended-upgrades \
 		--install-layout=deb
 
@@ -20,9 +22,10 @@ override_dh_auto_clean:
 	set -e; for f in unattended-upgrade unattended-upgrade-shutdown; do \
 		ln -nsf $$f $$f.py; \
 		py3compile $$f.py; \
+	        pycompile $$f.py; \
 		rm -f $$f.py; \
 	done
-	python3 setup.py clean -a
+	$(PYTHON) setup.py clean -a
 
 override_dh_installinit:
 	# we do not want to run the init script in the postinst/prerm, its

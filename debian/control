@@ -3,7 +3,7 @@ Section: admin
 Priority: optional
 Maintainer: Michael Vogt <michael.vogt@ubuntu.com>
 Build-Depends: debhelper (>= 7.0.50~), po-debconf, lsb-release
-Build-Depends-Indep: python3, python3-distutils-extra, python3-setuptools
+Build-Depends-Indep: python, python-distutils-extra, python-setuptools
 Standards-Version: 3.9.3
 Vcs-Bzr: http://code.launchpad.net/~ubuntu-core-dev/unattended-upgrades/ubuntu/
 XS-Testsuite: autopkgtest
