@@ -5,8 +5,6 @@ from DistUtilsExtra.command import (
     build_extra,
     build_i18n,
 )    
-import glob
-import os
 
     
 setup(name='unattended-upgrades',

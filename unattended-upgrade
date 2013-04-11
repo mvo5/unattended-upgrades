@@ -23,6 +23,7 @@
 
 import copy
 import datetime
+import errno
 import email.charset
 import fcntl
 import fnmatch
@@ -170,12 +171,12 @@ class LogInstallProgress(apt.progress.base.InstallProgress):
     def _redirect_stdin(self):
         REDIRECT_INPUT = os.devnull
         fd = os.open(REDIRECT_INPUT, os.O_RDWR)
-        os.dup2(fd,0)
+        os.dup2(fd, 0)
 
     def _redirect_output(self):
         # do not create log in dry-run mode, just output to stdout/stderr
         if not apt_pkg.config.find_b("Debug::pkgDPkgPM", False):
-            logfd = os.open(self.logfile_dpkg, os.O_RDWR|os.O_CREAT, o0644)
+            logfd = os.open(self.logfile_dpkg, os.O_RDWR | os.O_CREAT, 0o644)
             os.dup2(logfd, 1)
             os.dup2(logfd, 2)
 
@@ -193,7 +194,7 @@ class LogInstallProgress(apt.progress.base.InstallProgress):
                     logging.exception("select failed")
             # output to stdout in verbose mode only
             os.write(1, os.read(self.output_logfd, 1024))
-        
+
     def fork(self):
         pid = os.fork()
         if pid == 0:
@@ -307,6 +308,8 @@ def match_whitelist_string(whitelist, origin):
                          for s in token.split("=")]
         #logging.debug("matching '%s'='%s' against '%s'" % (
         #              what, value, origin))
+        # support substitution here as well
+        value = substitute(value)
         # first char is apt-cache policy output, send is the name
         # in the Release file
         if what in ("o", "origin"):
@@ -319,11 +322,16 @@ def match_whitelist_string(whitelist, origin):
             res &= fnmatch.fnmatch(origin.component, value)
         elif what in ("site",):
             res &= fnmatch.fnmatch(origin.site, value)
+        elif what in ("n", "codename",):
+            res &= fnmatch.fnmatch(origin.codename, value)
         else:
             raise UnknownMatcherError(
                 "Unknown whitelist entry for macher '%s' (token '%s')" % (
                     what, token))
+        logging.debug("matching '%s'='%s' against '%s'" % (
+                      what, value, origin))
     return res
+
 
 def upgrade_normal(cache, pkgs_to_upgrade, logfile_dpkg, verbose):
     error = None
@@ -343,7 +351,8 @@ def upgrade_normal(cache, pkgs_to_upgrade, logfile_dpkg, verbose):
                       logfile_dpkg)
     return res
 
-def upgrade_in_minimal_steps(cache, pkgs_to_upgrade, blacklist, 
+
+def upgrade_in_minimal_steps(cache, pkgs_to_upgrade, blacklist,
                              logfile_dpkg="", verbose=False):
 
     install_log = LogInstallProgress(logfile_dpkg, verbose)
@@ -646,7 +655,7 @@ def _send_mail_using_sendmail(to_address, subject, body):
     msg.set_payload(body)
     msg['Subject'] = subject
     msg['To'] = to_address
-    # order is important here, Message() first, then Charset() 
+    # order is important here, Message() first, then Charset()
     #  then msg.set_charset()
     charset = email.charset.Charset("utf-8")
     charset.body_encoding = email.charset.QP
@@ -730,7 +739,7 @@ def do_install(cache, pkgs_to_upgrade, blacklisted_pkgs, options,
     setup_apt_listchanges()
 
     logging.info(_("Writing dpkg log to '%s'") % logfile_dpkg)
-    
+
     pkg_install_success = False
     try:
         if (options.minimal_upgrade_steps or
@@ -739,14 +748,14 @@ def do_install(cache, pkgs_to_upgrade, blacklisted_pkgs, options,
                 "Unattended-Upgrades::MinimalSteps", False) or
             apt_pkg.config.find_b(
                 "Unattended-Upgrade::MinimalSteps", False)):
-            pidf = os.path.join(apt_pkg.config.find_dir("Dir"), 
+            pidf = os.path.join(apt_pkg.config.find_dir("Dir"),
                                   "var", "run", "unattended-upgrades.pid")
             with open(pidf, "w") as fp:
                 fp.write("%s" % os.getpid())
             # try upgrade all "pkgs" in minimal steps
             pkg_install_success = upgrade_in_minimal_steps(
                 cache, [pkg.name for pkg in pkgs_to_upgrade],
-                blacklisted_pkgs, logfile_dpkg, 
+                blacklisted_pkgs, logfile_dpkg,
                 options.verbose or options.debug)
         else:
             pkg_install_success = upgrade_normal(
@@ -826,7 +835,8 @@ def get_blacklisted_pkgs():
 
 def reboot_if_requested_and_needed(shutdown_lock=0):
     # auto-reboot (if required and the config for this is set
-    if (apt_pkg.config.find_b("Unattended-Upgrade::Automatic-Reboot", False) and
+    if (apt_pkg.config.find_b(
+            "Unattended-Upgrade::Automatic-Reboot", False) and
         os.path.exists(REBOOT_REQUIRED_FILE)):
         when = apt_pkg.config.find(
             "Unattended-Upgrade::Automatic-Reboot-Time", "now")
@@ -835,7 +845,7 @@ def reboot_if_requested_and_needed(shutdown_lock=0):
         logging.warning("Found %s, rebooting" % REBOOT_REQUIRED_FILE)
         # XXX: add time option
         subprocess.call(["/sbin/shutdown", "-r", when])
-        
+
 
 def main(options, rootdir=""):
 
@@ -1088,8 +1098,8 @@ def main(options, rootdir=""):
     if not options.dry_run:
         send_summary_mail(
             pkgs, pkg_install_success, pkgs_kept_back, mem_log, logfile_dpkg)
-    
-    # check if the user wants a reboot 
+
+    # check if the user wants a reboot
     reboot_if_requested_and_needed(shutdown_lock)
 
 
@@ -1119,14 +1129,6 @@ if __name__ == "__main__":
     if os.getuid() != 0:
         print(_("You need to be root to run this application"))
         sys.exit(1)
-
-    # nice & ionce
-    os.nice(19)
-    IONICE = "/usr/bin/ionice"
-    if os.path.exists(IONICE):
-        with open(os.devnull, "w") as fstderr:
-            subprocess.call([IONICE, "-c3", "-p", str(os.getpid())],
-                            stderr=fstderr)
 
     # ensure that we are not killed when the terminal goes away e.g. on
     # shutdown

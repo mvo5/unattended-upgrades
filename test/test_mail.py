@@ -44,8 +44,8 @@ class CommonTestsForMailxAndSendmail(object):
         # include some unicode chars here for good measure
         mem_log = StringIO("""mem_log text üöä
 Allowed origins are: ['o=Debian,n=wheezy', 'o=Debian,n=wheezy-updates',\
- 'o=Debian,n=wheezy,l=Debian-Security', 'origin=Debian,archive=stable,label=Deb\
-ian-Security']
+ 'o=Debian,n=wheezy,l=Debian-Security', 'origin=Debian,archive=stable,label=\
+Debian-Security']
 """)
         logfile_dpkg = "./apt-term.log"
         with open("./apt-term.log", "w") as fp:
@@ -150,9 +150,12 @@ class SendmailTestCase(CommonTestsForMailxAndSendmail, unittest.TestCase):
         """Regression test for debian bug #700178"""
         send_summary_mail(*self._return_mock_data())
         log_data = open("mail.txt").read()
-        self.assertTrue("""Allowed origins are: ['o=3DDebian,n=3Dwheezy', 'o=3DDebian,n=3Dwheezy-updat=
-es', 'o=3DDebian,n=3Dwheezy,l=3DDebian-Security', 'origin=3DDebian,archive=
-=3Dstable,label=3DDebian-Security']""" in log_data)
+        needle = "Allowed origins are: ['o=3DDebian,n=3Dwheezy', "\
+            "'o=3DDebian,n=3Dwheezy-updat=\n"\
+            "es', 'o=3DDebian,n=3Dwheezy,l=3DDebian-Security', "\
+            "'origin=3DDebian,archive=\n"\
+            "=3Dstable,label=3DDebian-Security']"
+        self.assertTrue(needle in log_data)
 
 
 class SendmailAndMailxTestCase(SendmailTestCase):

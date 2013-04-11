@@ -6,9 +6,10 @@ import unittest
 
 import unattended_upgrade
 from unattended_upgrade import (
-    match_whitelist_string,
     check_changes_for_sanity,
     is_allowed_origin,
+    get_distro_codename,
+    match_whitelist_string,
     UnknownMatcherError,
 )
 
@@ -74,6 +75,12 @@ class TestOriginPatern(unittest.TestCase):
         self.assertTrue("o=aOrigin,a=aArchive" in allowed_origins)
         self.assertTrue("s=aSite,l=aLabel" in allowed_origins)
         self.assertTrue("o=Google\, Inc.,suite=stable" in allowed_origins)
+
+    def test_macro(self):
+        codename = get_distro_codename()
+        s = "a=${distro_codename}"
+        origin = self._get_mock_origin("Foo", archive=codename)
+        self.assertTrue(match_whitelist_string(s, origin))
 
     def test_compatiblity(self):
         apt_pkg.config.clear("Unattended-Upgrade")
@@ -142,16 +149,16 @@ class TestOriginPatern(unittest.TestCase):
             "OriginUbuntu", "LabelUbuntu", "ArchiveUbuntu",
             "archive.ubuntu.com", "main")
         # good
-        s="o=OriginU*"
+        s = "o=OriginU*"
         self.assertTrue(match_whitelist_string(s, origin))
         # bad
-        s="o=X*"
+        s = "o=X*"
         self.assertFalse(match_whitelist_string(s, origin))
         # good
-        s="o=?riginUbunt?"
+        s = "o=?riginUbunt?"
         self.assertTrue(match_whitelist_string(s, origin))
         # good
-        s="o=*Ubunt?"
+        s = "o=*Ubunt?"
         self.assertTrue(match_whitelist_string(s, origin))
 
 

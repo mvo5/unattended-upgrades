@@ -61,9 +61,9 @@ class ConffilePromptTestCase(unittest.TestCase):
         self.assertFalse(conffile_prompt(test_pkg, prefix="./root.conffile"),
                         "conffile prompt detection incorrect")
 
-    
+
 class DpkgConffileTestCase(unittest.TestCase):
-    """ 
+    """
     This tests that the detection if dpkg will prompt at all works,
     i.e. if the user has decided to use a --force-conf{old,new} option
     """

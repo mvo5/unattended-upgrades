@@ -27,7 +27,6 @@ class MockOptions():
         self.verbose = False
 
 
-
 class TestAgainstRealArchive(unittest.TestCase):
 
     def setUp(self):
@@ -43,6 +42,7 @@ class TestAgainstRealArchive(unittest.TestCase):
         # ensure apt does not do any post-invoke stuff that fails
         # (because we are not root)
         apt_pkg.config.clear("DPkg::Post-Invoke")
+        apt_pkg.config.clear("DPkg::Pre-Invoke")
         unattended_upgrade.DISTRO_CODENAME = "lucid"
 
     def test_against_real_archive(self):
@@ -73,8 +73,8 @@ class TestAgainstRealArchive(unittest.TestCase):
             re.search("INFO Packages that will be upgraded:.*ant-doc", log))
         self.assertTrue(
             re.search("DEBUG skipping blacklisted package 'ant-doc'", log))
-        # test dpkg install log 
-        term_log = open("aptroot/var/log/apt/term.log").read()
+        # test dpkg install log
+        #term_log = open("aptroot/var/log/apt/term.log").read()
         # FIXME: when we redirect STDIN the below test will break - however
         #        we need to redirect it as otherwise we may hang forever
         #        - this is actually a bug in apt that uses "tcgetattr(0, &tt)"

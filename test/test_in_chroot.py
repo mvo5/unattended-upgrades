@@ -141,7 +141,7 @@ class TestUnattendedUpgrade(unittest.TestCase):
             self._setup_chroot(target)
 
         # ensure we have /dev/pts in the chroot
-        ret = subprocess.call(["mount", "-t", "devpts", "devptsfs", 
+        ret = subprocess.call(["mount", "-t", "devpts", "devptsfs",
                                os.path.join(target, "dev", "pts")])
         if ret != 0:
             raise Exception("Failed to mount %s/proc" % target)
@@ -202,7 +202,8 @@ class TestUnattendedUpgrade(unittest.TestCase):
         NEEDLE_PKG = "ca-certificates"
         if not re.search(
             "Packages that will be upgraded:.*%s" % NEEDLE_PKG, logfile):
-            logging.warn("Can not find expected %s upgrade in log" % NEEDLE_PKG)
+            logging.warn(
+                "Can not find expected %s upgrade in log" % NEEDLE_PKG)
             return False
         if "ERROR Installing the upgrades failed" in logfile:
             logging.warn("Got a ERROR in the logfile")
