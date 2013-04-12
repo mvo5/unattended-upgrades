@@ -748,6 +748,9 @@ def _setup_logging(options):
     # additional logging
     logger = logging.getLogger()
     mem_log = StringIO()
+    if options.apt_debug:
+        apt_pkg.config.set("Debug::pkgProblemResolver", "1")
+        apt_pkg.config.set("Debug::pkgDepCache::AutoInstall", "1")
     if options.debug:
         logger.setLevel(logging.DEBUG)
         stdout_handler = logging.StreamHandler(sys.stdout)
@@ -1025,6 +1028,9 @@ if __name__ == "__main__":
     parser.add_option("-d", "--debug",
                       action="store_true", default=False,
                       help=_("print debug messages"))
+    parser.add_option("", "--apt-debug",
+                      action="store_true", default=False,
+                      help=_("make apt/libapt print verbose debug messages"))
     parser.add_option("-v", "--verbose",
                       action="store_true", default=False,
                       help=_("print info messages"))

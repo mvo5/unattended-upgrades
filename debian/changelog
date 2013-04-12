@@ -28,6 +28,8 @@ unattended-upgrades (0.79.4) UNRELEASED; urgency=low
   * unattended-upgrade, test/test_mail.py:
     - ensure body encoding is correct, thanks to Sam Morris for the 
       report (closes: #700178)
+  * unattended-upgrade:
+    - add new "--apt-debug" option
 
   [ Brian Murray ]
   * unattended-upgrade:
