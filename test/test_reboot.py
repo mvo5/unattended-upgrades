@@ -6,7 +6,7 @@ import unittest
 import os
 
 from mock import (
-   patch,
+    patch,
 )
 
 import unattended_upgrade

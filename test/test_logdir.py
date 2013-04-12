@@ -15,6 +15,7 @@ class MockOptions:
     dry_run = False
     debug = False
     verbose = False
+    apt_debug = False
 
 
 class TestLogdir(unittest.TestCase):

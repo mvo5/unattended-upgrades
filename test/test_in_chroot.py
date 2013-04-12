@@ -200,8 +200,8 @@ class TestUnattendedUpgrade(unittest.TestCase):
         logfile = open(log).read()
         #print(logfile)
         NEEDLE_PKG = "ca-certificates"
-        if not re.search(
-            "Packages that will be upgraded:.*%s" % NEEDLE_PKG, logfile):
+        if not re.search("Packages that will be upgraded:.*%s" % NEEDLE_PKG,
+                         logfile):
             logging.warn(
                 "Can not find expected %s upgrade in log" % NEEDLE_PKG)
             return False

@@ -749,7 +749,7 @@ def do_install(cache, pkgs_to_upgrade, blacklisted_pkgs, options,
             apt_pkg.config.find_b(
                 "Unattended-Upgrade::MinimalSteps", False)):
             pidf = os.path.join(apt_pkg.config.find_dir("Dir"),
-                                  "var", "run", "unattended-upgrades.pid")
+                                "var", "run", "unattended-upgrades.pid")
             with open(pidf, "w") as fp:
                 fp.write("%s" % os.getpid())
             # try upgrade all "pkgs" in minimal steps
@@ -840,7 +840,7 @@ def reboot_if_requested_and_needed(shutdown_lock=0):
     # auto-reboot (if required and the config for this is set
     if (apt_pkg.config.find_b(
             "Unattended-Upgrade::Automatic-Reboot", False) and
-        os.path.exists(REBOOT_REQUIRED_FILE)):
+            os.path.exists(REBOOT_REQUIRED_FILE)):
         when = apt_pkg.config.find(
             "Unattended-Upgrade::Automatic-Reboot-Time", "now")
         if shutdown_lock > 0:
