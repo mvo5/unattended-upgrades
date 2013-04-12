@@ -1,6 +1,45 @@
-unattended-upgrades (0.79.4) UNRELEASED; urgency=low
+unattended-upgrades (0.80~exp3) UNRELEASEDexperimental; urgency=low
+
+  * merged lp:~mvo/unattended-upgrades/py3
+   - this merges the py3 compatibilty from debian
+  * enable pep8/pyflakes by default
+  * Add new Unattended-Upgrade::Automatic-Reboot-Time to control
+    when machines that need reboot are rebooting
+
+ -- Michael Vogt <michael.vogt@ubuntu.com>  Thu, 11 Apr 2013 06:45:05 +0200
+
+unattended-upgrades (0.80~exp2) experimental; urgency=low
+
+  * add codename based matching 
+  * add support for "${distro_id}", "${distro_codename}" in the 
+    Unattended-Upgrade::Origins-Pattern based matching too
+  * data/50unattended-upgrades.Debian:
+    - improve documentation, thanks to Russell Stuart
+
+ -- Michael Vogt <mvo@debian.org>  Thu, 14 Mar 2013 09:19:22 +0100
+
+unattended-upgrades (0.80~exp1) experimental; urgency=low
 
   [ Michael Vogt ]
+  * lp:~mvo/unattended-upgrades/verbose:
+    - add --verbose that shows output and terminal output
+  * drop --with python2 as its just a single script
+  * debian/control:
+    - depend on latest python-apt in experimental for the "codename"
+      based origin matching
+  * data/50unattended-upgrades.Debian:
+    - re-add the codename (n=) based matching example
+
+  [ Brian Murray ]
+  * unattended-upgrade:
+    - log that sendmail works as an alternative to mailx
+    - fix a issue with the tense of packages being upgraded
+      Richard for the initial patch (LP: #1069809)
+
+ -- Michael Vogt <mvo@debian.org>  Thu, 14 Mar 2013 06:34:27 +0100
+
+unattended-upgrades (0.79.5) unstable; urgency=low
+
   * data/50unattended-upgrades.{Debian,Ubuntu}:
     - add missing ";" in the example config, thanks to  Tomas Pospisek
       closes: #684876
@@ -9,8 +48,100 @@ unattended-upgrades (0.79.4) UNRELEASED; urgency=low
   * unattended-upgrade, test/test_origin_pattern.py:
     - if a unknown matcher token is found, raise a error instead of
       silently ignoring it, thanks to Russell Stuart 
-  * lp:~mvo/unattended-upgrades/verbose:
-    - add --verbose that shows output and terminal output
+  * unattended-upgrade:
+    - do not nice/ionice as this wil affect daemon restarts
+      (closes: #701850)
+
+ -- Michael Vogt <mvo@debian.org>  Fri, 01 Mar 2013 10:07:30 +0100
+
+unattended-upgrades (0.79.3ubuntu7) raring; urgency=low
+
+  [ Michael Vogt ]
+  * data/logrotate.d/unattended-upgrades:
+    - only logrotate
+      /var/log/unattended-upgrades/unattended-upgrades{,-shutdown}.log
+      and not the dpkg logs (LP: #1081034)
+  * tests/*.py:
+    - updated pep8 tests, make pyflakes test "test" dir too
+  * test/test_regression.py:
+    - regression test for crash in normal_upgrade exception handler
+
+  [ Thomas Kluyver ]
+  * lp:~takluyver/unattended-upgrades/apt-lock-crash:
+    - fix encoding bug when writing a error to stderr
+
+ -- Michael Vogt <michael.vogt@ubuntu.com>  Tue, 11 Dec 2012 18:52:24 +0100
+
+unattended-upgrades (0.79.3ubuntu6) raring; urgency=low
+
+  [ Brian Murray ]
+  * unattended-upgrade:
+    - fix a issue with the tense of packages being upgraded
+    - log that sendmail works as an alternative to mailx
+    - add the result of the upgrade to email subject, thanks to Yann 'Ze'
+      Richard for the initial patch (LP: #1069809)
+  
+  [ Michael Vogt ]
+  * unattended-upgrade:
+    - fix debug output for origins checking in py3
+
+  [ Martin Pitt ]
+  * Fix PEP-8 errors throughout the code to fix the autopkgtest failure.
+
+ -- Martin Pitt <martin.pitt@ubuntu.com>  Wed, 21 Nov 2012 07:48:55 +0100
+
+unattended-upgrades (0.79.3ubuntu5) raring; urgency=low
+
+  [ Colin Watson ]
+  * Add pep8 as a dependency of the DEP-8 test suite.
+
+  [ Martin Pitt ]
+  * test/Makefile: Redirect unittest stderr to stdout, to avoid failure in
+    autopkgtest.
+  * debian/tests/control: Add missing pyflakes dependency.
+
+ -- Martin Pitt <martin.pitt@ubuntu.com>  Fri, 09 Nov 2012 14:22:51 +0100
+
+unattended-upgrades (0.79.3ubuntu4) quantal; urgency=low
+
+  * lp:~mvo/unattended-upgrades/minimal-step-paranonia-lp1020680:
+    - ensure the blacklist/origin constrains are never violated for
+      some corner cases in the minimal-upgrade mode (LP: #1020680)
+
+ -- Michael Vogt <michael.vogt@ubuntu.com>  Tue, 09 Oct 2012 10:08:01 +0200
+
+unattended-upgrades (0.79.3ubuntu3) quantal; urgency=low
+
+  * lp:~mvo/unattended-upgrades/lp1061498:
+    - fix crash in dpkg_conffile_prompt() (LP: #1061498)
+  * lp:~mvo/unattended-upgrades/create-logdir-in-shutdown-helper-lp1013363:
+    - create logdir in the shutdown helper if needed (LP: #1013363)
+
+ -- Michael Vogt <michael.vogt@ubuntu.com>  Fri, 05 Oct 2012 17:57:38 +0200
+
+unattended-upgrades (0.79.3ubuntu2) quantal; urgency=low
+
+  [ Marc Tardif ]
+  * Fixed debug output when a package has no candidates (LP: #1046438)
+  
+  [ Michael Vogt ]
+  * debian/test/:
+    - add dep8 tests
+
+ -- Michael Vogt <michael.vogt@ubuntu.com>  Fri, 14 Sep 2012 10:41:08 +0200
+
+unattended-upgrades (0.79.3ubuntu1) quantal; urgency=low
+
+  [ Thomas Kluyver ]
+  * Port to Python 3
+
+  [ Brian Murray ]
+  * unattended-upgrade: fix typo in debugging output
+
+ -- Michael Vogt <michael.vogt@ubuntu.com>  Mon, 10 Sep 2012 09:55:19 +0200
+
+unattended-upgrades (0.79.4) unstable; urgency=low
+
   * lp:~mvo/unattended-upgrades/timed-reboot:
     - support auto rebooting at specific times instead of "now", thanks
       to Thomas Reusch for the suggestion
@@ -26,19 +157,8 @@ unattended-upgrades (0.79.4) UNRELEASED; urgency=low
      - add missing xz-utils dependency, thanks to Bastian Blank
        (closes: #698552)
   * unattended-upgrade, test/test_mail.py:
-    - ensure body encoding is correct, thanks to Sam Morris for the 
-      report (closes: #700178)
-  * unattended-upgrade:
-    - add new "--apt-debug" option
 
-  [ Brian Murray ]
-  * unattended-upgrade:
-    - fix a issue with the tense of packages being upgraded
-    - log that sendmail works as an alternative to mailx
-    - add the result of the upgrade to email subject, thanks to Yann 'Ze'
-      Richard for the initial patch (LP: #1069809)
-
- -- Michael Vogt <mvo@debian.org>  Mon, 21 Jan 2013 17:11:29 +0100
+ -- Michael Vogt <mvo@debian.org>  Mon, 21 Jan 2013 17:27:31 +0100
 
 unattended-upgrades (0.79.3) unstable; urgency=low
 
@@ -92,7 +212,7 @@ unattended-upgrades (0.79) unstable; urgency=low
     - added, thanks to Pedro Ribeiro, closes: #678738
   * po/sk.po:
     - added, thanks to helix84, closes: #677471
-  
+
   [ Teodor MICU ]
   * debian/unattended-upgrades.init:
     - fixes new style lsb-init output, closes: #678030
@@ -122,7 +242,7 @@ unattended-upgrades (0.78) unstable; urgency=low
     - updated, thanks to Joe Dalton, closes: #677804
   * po/de.po:
     - updated, thanks to Chris Leick (closes: #678204)
-  
+
   [ Teodor MICU ]
   * debian/unattended-upgrades.init:
     - use new style lsb-init output, closes: #678030

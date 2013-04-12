@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/usr/bin/python3
 #
 # create a lock file so that unattended-upgrades-shutdown pauses
 # on shutdown -- useful for testing
@@ -6,6 +6,7 @@
 import apt_pkg
 import os
 import time
+
 
 pid = os.fork()
 if pid == 0:
