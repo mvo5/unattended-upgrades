@@ -3,13 +3,13 @@
 import apt_pkg
 import logging
 import os
-import mock
 import sys
 import tempfile
 import unittest
 
 sys.path.insert(0, "..")
-from unattended_upgrade import LogInstallProgress
+
+from unattended_upgrades import _setup_logging
 
 
 class MockOptions:

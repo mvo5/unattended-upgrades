@@ -1,9 +1,8 @@
-#!/usr/bin/python
+#!/usr/bin/python3
 
 import apt_pkg
 import logging
 import os
-import mock
 import sys
 import tempfile
 import unittest
@@ -11,10 +10,13 @@ import unittest
 sys.path.insert(0, "..")
 from unattended_upgrade import _setup_logging
 
+
 class MockOptions:
     dry_run = False
     debug = False
     verbose = False
+    apt_debug = False
+
 
 class TestLogdir(unittest.TestCase):
 

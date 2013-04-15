@@ -30,7 +30,7 @@ class AllowRemovalTestCase(unittest.TestCase):
                     os.remove(f)
         # get a lucid based cache (test good until 04/2015)
         cache = apt.Cache(rootdir="./fake-aptroot")
-        cache # pyflakes
+        cache  # pyflakes
 
     def test_against_fake_archive(self):
         # create mock options
@@ -50,10 +50,10 @@ class AllowRemovalTestCase(unittest.TestCase):
         self.assertTrue(os.path.exists(logfile))
         log = open(logfile).read()
         # ensure upgrade works
-        res = re.search("Packages that will be upgraded:.*ubuntuone-client", log)
+        res = re.search("Packages that will be upgraded:.*ubuntuone-client",
+                        log)
         #print log[res.start():res.end()]
         self.assertNotEqual(res, None)
-            
 
 
 if __name__ == "__main__":

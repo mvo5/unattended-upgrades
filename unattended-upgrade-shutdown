@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/usr/bin/python3
 # Copyright (c) 2009 Canonical Ltd
 #
 # AUTHOR:
@@ -76,6 +76,7 @@ def log_progress():
     # log it
     log_msg(msg)
 
+
 if __name__ == "__main__":
     # setup gettext
     localesApp="unattended-upgrades"
@@ -101,7 +102,11 @@ if __name__ == "__main__":
 
     # use a normal logfile instead of syslog too as on shutdown its too
     # easy to get syslog killed
-    logfile = "/var/log/unattended-upgrades/unattended-upgrades-shutdown.log"
+    logdir = apt_pkg.config.find_dir(
+        "Unattended-Upgrade::LogDir", "/var/log/unattended-upgrades/")
+    if not os.path.exists(logdir):
+        os.makedirs(logdir)
+    logfile = os.path.join(logdir, "unattended-upgrades-shutdown.log")
     logging.basicConfig(filename=logfile,
                         level=level,
                         format="%(asctime)s %(levelname)s - %(message)s")
@@ -141,8 +146,8 @@ if __name__ == "__main__":
             os.kill(pid, signal.SIGUSR1)
         # show log
         log_progress()
-	time.sleep(5)
-	if (time.time() - start_time) > options.delay*60:
+        time.sleep(5)
+        if (time.time() - start_time) > options.delay*60:
             logging.warning(_("Giving up on lockfile after %s delay") % options.delay)
             sys.exit(1)
     
