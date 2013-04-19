@@ -183,7 +183,13 @@ class LogInstallProgress(apt.progress.base.InstallProgress):
     def update_interface(self):
         # call super class first
         apt.progress.base.InstallProgress.update_interface(self)
-        # and now we do too
+        self._do_verbose_output_if_needed()
+
+    def _do_verbose_output_if_needed(self):
+        # if we are in debug mode, nothing to be verbose about
+        if apt_pkg.config.find_b("Debug::pkgDPkgPM", False):
+            return
+        # handle verbose
         if self.verbose:
             if self.output_logfd is None:
                 self.output_logfd = os.open(self.logfile_dpkg, os.O_RDONLY)

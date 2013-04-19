@@ -5,6 +5,8 @@ unattended-upgrades (0.80~exp3) UNRELEASEDexperimental; urgency=low
   * enable pep8/pyflakes by default
   * Add new Unattended-Upgrade::Automatic-Reboot-Time to control
     when machines that need reboot are rebooting
+  * Fix crash when --dry-run and --verbose are used (thanks to 
+    Bernhard Schmidt), closes: #705615
 
  -- Michael Vogt <michael.vogt@ubuntu.com>  Thu, 11 Apr 2013 06:45:05 +0200
 
