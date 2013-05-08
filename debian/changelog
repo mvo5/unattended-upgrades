@@ -1,3 +1,9 @@
+unattended-upgrades (0.80~sid1) unstable; urgency=low
+
+  * merge fixes from the experimental uploads
+
+ -- Michael Vogt <mvo@debian.org>  Wed, 08 May 2013 19:12:36 +0200
+
 unattended-upgrades (0.80~exp2) experimental; urgency=low
 
   * add codename based matching 
