@@ -7,6 +7,8 @@ unattended-upgrades (0.80~sid2) UNRELEASEDunstable; urgency=low
     - fix Vcs location
   * data/50unattended-upgrades.Debian:
     - updated for jessie
+  * README.md:
+    - switch to markdown
 
  -- Michael Vogt <mvo@debian.org>  Thu, 16 May 2013 09:13:07 +0200
 
