@@ -10,7 +10,7 @@
 //   c,component     (eg, "main", "crontrib", "non-free")
 //   l,label         (eg, "Debian", "Debian-Security")
 //   o,origin        (eg, "Debian", "Unofficial Multimedia Packages")
-//   n,codename      (eg, "squeeze", "squeeze-updates")
+//   n,codename      (eg, "jessie", "jessie-updates")
 //     site          (eg, "http.debian.net")
 // The available values on the system are printed by the command
 // "apt-cache policy", and can be debugged by running
@@ -19,15 +19,15 @@
 // Within lines unattended-upgrades allows 2 macros whose values are
 // derived from /etc/debian_version:
 //   ${distro_id}            Installed origin.
-//   ${distro_codename}      Installed codename (eg, "squeeze")
+//   ${distro_codename}      Installed codename (eg, "jessie")
 Unattended-Upgrade::Origins-Pattern {
         // Codename based matching:
         // This will follow the migration of a release through different
         // archives (e.g. from testing to stable and later oldstable).
-//      "o=Debian,n=wheezy";
-//      "o=Debian,n=wheezy-updates";
-//      "o=Debian,n=wheezy-proposed-updates";
-//      "o=Debian,n=wheezy,l=Debian-Security";
+//      "o=Debian,n=jessie";
+//      "o=Debian,n=jessie-updates";
+//      "o=Debian,n=jessie-proposed-updates";
+//      "o=Debian,n=jessie,l=Debian-Security";
 
         // Archive or Suite based matching:
         // Note that this will silently match a different release after

@@ -1,11 +1,11 @@
 Source: unattended-upgrades
 Section: admin
 Priority: optional
-Maintainer: Michael Vogt <michael.vogt@ubuntu.com>
+Maintainer: Michael Vogt <mvo@debian.org>
 Build-Depends: debhelper (>= 7.0.50~), po-debconf, lsb-release
-Build-Depends-Indep: python, python-distutils-extra, python-setuptools
+Build-Depends-Indep: python (>= 2.6.6-3~), python-distutils-extra, python-setuptools
 Standards-Version: 3.9.3
-Vcs-Bzr: http://code.launchpad.net/~ubuntu-core-dev/unattended-upgrades/ubuntu/
+Vcs-Bzr: http://bzr.debian.org/bzr/apt/unattended-upgrades/debian-sid
 XS-Testsuite: autopkgtest
 
 Package: unattended-upgrades

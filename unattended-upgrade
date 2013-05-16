@@ -186,7 +186,7 @@ class LogInstallProgress(apt.progress.base.InstallProgress):
         self._do_verbose_output_if_needed()
 
     def _do_verbose_output_if_needed(self):
-        # if we are in debug mode, nothing to be verbose about
+        # if we are in debug mode, nothing to be more verbose about
         if apt_pkg.config.find_b("Debug::pkgDPkgPM", False):
             return
         # handle verbose

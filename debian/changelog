@@ -1,3 +1,23 @@
+unattended-upgrades (0.80~sid2) UNRELEASEDunstable; urgency=low
+
+  * fix crash when --dry-run --debug is given, thanks to
+    Sephan Helas
+  * debian/control:
+    - update maintainer address
+    - fix Vcs location
+  * data/50unattended-upgrades.Debian:
+    - updated for jessie
+  * README.md:
+    - switch to markdown
+
+ -- Michael Vogt <mvo@debian.org>  Thu, 16 May 2013 09:13:07 +0200
+
+unattended-upgrades (0.80~sid1) unstable; urgency=low
+
+  * merge fixes from the experimental uploads
+
+ -- Michael Vogt <mvo@debian.org>  Wed, 08 May 2013 19:12:36 +0200
+
 unattended-upgrades (0.80~exp3) UNRELEASEDexperimental; urgency=low
 
   * merged lp:~mvo/unattended-upgrades/py3
