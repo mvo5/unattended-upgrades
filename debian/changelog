@@ -1,3 +1,11 @@
+unattended-upgrades (0.80~sid2) UNRELEASEDunstable; urgency=low
+
+  * debian/control:
+    - update maintainer address
+    - fix Vcs location
+
+ -- Michael Vogt <mvo@debian.org>  Thu, 16 May 2013 09:13:07 +0200
+
 unattended-upgrades (0.80~sid1) unstable; urgency=low
 
   * merge fixes from the experimental uploads
