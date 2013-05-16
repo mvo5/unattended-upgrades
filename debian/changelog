@@ -1,5 +1,7 @@
 unattended-upgrades (0.80~sid2) UNRELEASEDunstable; urgency=low
 
+  * fix crash when --dry-run --debug is given, thanks to
+    Sephan Helas
   * debian/control:
     - update maintainer address
     - fix Vcs location

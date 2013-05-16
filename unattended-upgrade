@@ -170,6 +170,9 @@ class LogInstallProgress(apt.progress.base.InstallProgress):
     def update_interface(self):
         # call super class first
         apt.progress.base.InstallProgress.update_interface(self)
+        # its ok to not have the logfile (e.g. --dry-run mode)
+        if not os.path.exists(self.logfile_dpkg):
+            return
         # and now we do too
         if self.verbose:
             if self.output_logfd is None:
