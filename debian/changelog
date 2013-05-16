@@ -1,4 +1,4 @@
-unattended-upgrades (0.80~sid2) UNRELEASEDunstable; urgency=low
+unattended-upgrades (0.80~sid2) unstable; urgency=low
 
   * fix crash when --dry-run --debug is given, thanks to
     Sephan Helas
@@ -10,7 +10,7 @@ unattended-upgrades (0.80~sid2) UNRELEASEDunstable; urgency=low
   * README.md:
     - switch to markdown
 
- -- Michael Vogt <mvo@debian.org>  Thu, 16 May 2013 09:13:07 +0200
+ -- Michael Vogt <mvo@debian.org>  Thu, 16 May 2013 11:07:07 +0200
 
 unattended-upgrades (0.80~sid1) unstable; urgency=low
 
