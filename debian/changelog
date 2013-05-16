@@ -5,6 +5,8 @@ unattended-upgrades (0.80~sid2) UNRELEASEDunstable; urgency=low
   * debian/control:
     - update maintainer address
     - fix Vcs location
+  * data/50unattended-upgrades.Debian:
+    - updated for jessie
 
  -- Michael Vogt <mvo@debian.org>  Thu, 16 May 2013 09:13:07 +0200
 
