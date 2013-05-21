@@ -2,7 +2,7 @@ Source: unattended-upgrades
 Section: admin
 Priority: optional
 Maintainer: Michael Vogt <mvo@debian.org>
-Build-Depends: debhelper (>= 7.0.50~), po-debconf, lsb-release
+Build-Depends: debhelper (>= 7.0.50~), po-debconf
 Build-Depends-Indep: python (>= 2.6.6-3~), python-distutils-extra, python-setuptools
 Standards-Version: 3.9.3
 Vcs-Bzr: http://bzr.debian.org/bzr/apt/unattended-upgrades/debian-sid

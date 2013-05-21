@@ -2,7 +2,7 @@
 
 PYTHON=python
 #PYTHON=python3
-DIST=$(shell /usr/bin/lsb_release -i -s)
+DIST=$(shell dpkg-vendor --query Vendor)
 
 %:
 	dh $@

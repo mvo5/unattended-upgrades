@@ -1,3 +1,10 @@
+unattended-upgrades (0.80~sid3) unstable; urgency=low
+
+  * use dpkg-vendor --query Vendor instead of lsb_release -i -s
+    to avoid build-dependency on lsb-release
+
+ -- Michael Vogt <michael.vogt@ubuntu.com>  Tue, 21 May 2013 06:42:07 +0200
+
 unattended-upgrades (0.80~sid2) UNRELEASEDunstable; urgency=low
 
   * fix crash when --dry-run --debug is given, thanks to
