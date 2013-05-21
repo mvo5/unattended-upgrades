@@ -1,11 +1,14 @@
-unattended-upgrades (0.80~sid3) unstable; urgency=low
+unattended-upgrades (0.80~sid3) UNRELEASED; urgency=low
 
   * use dpkg-vendor --query Vendor instead of lsb_release -i -s
     to avoid build-dependency on lsb-release
+  * data/50unattended-upgrades.Debian:
+    - use ${distro_codename} instead of "stable" to avoid issues
+      on release upgrades, thanks to Evgeny Kapun (closes: #707002)
 
- -- Michael Vogt <michael.vogt@ubuntu.com>  Tue, 21 May 2013 06:42:07 +0200
+ -- Michael Vogt <michael.vogt@ubuntu.com>  Thu, 16 May 2013 17:55:37 +0200
 
-unattended-upgrades (0.80~sid2) UNRELEASEDunstable; urgency=low
+unattended-upgrades (0.80~sid2) unstable; urgency=low
 
   * fix crash when --dry-run --debug is given, thanks to
     Sephan Helas
@@ -17,7 +20,7 @@ unattended-upgrades (0.80~sid2) UNRELEASEDunstable; urgency=low
   * README.md:
     - switch to markdown
 
- -- Michael Vogt <mvo@debian.org>  Thu, 16 May 2013 09:13:07 +0200
+ -- Michael Vogt <mvo@debian.org>  Thu, 16 May 2013 11:07:07 +0200
 
 unattended-upgrades (0.80~sid1) unstable; urgency=low
 
