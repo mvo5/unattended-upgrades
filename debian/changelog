@@ -5,6 +5,8 @@ unattended-upgrades (0.80~sid3) UNRELEASED; urgency=low
   * data/50unattended-upgrades.Debian:
     - use ${distro_codename} instead of "stable" to avoid issues
       on release upgrades, thanks to Evgeny Kapun (closes: #707002)
+    - document that the pkg blacklist can contain regular expressions,
+      thanks to Thomas Reusch for the suggestion
 
  -- Michael Vogt <michael.vogt@ubuntu.com>  Thu, 16 May 2013 17:55:37 +0200
 
