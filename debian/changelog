@@ -1,8 +1,8 @@
-unattended-upgrades (0.79.3ubuntu8) UNRELEASED; urgency=low
+unattended-upgrades (0.79.3ubuntu8) saucy; urgency=low
 
   * Fix two PEP-8 errors to fix autopkgtest.
 
- -- Martin Pitt <martin.pitt@ubuntu.com>  Mon, 09 Sep 2013 11:37:59 -0400
+ -- Martin Pitt <martin.pitt@ubuntu.com>  Mon, 09 Sep 2013 11:39:12 -0400
 
 unattended-upgrades (0.79.3ubuntu7) raring; urgency=low
 
