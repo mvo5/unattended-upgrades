@@ -696,7 +696,7 @@ def send_summary_mail(pkgs, res, pkgs_kept_back, mem_log, logfile_dpkg):
     if os.path.isfile(REBOOT_REQUIRED_FILE):
         subject = _(
             "[reboot required] unattended-upgrades result for '%s': %s") % (
-                host(), res)
+            host(), res)
     else:
         subject = _("unattended-upgrades result for '%s': '%s'") % (
             host(), res)
@@ -1015,8 +1015,8 @@ def main(options, rootdir=""):
                 email = apt_pkg.config.find("Unattended-Upgrade::Mail", "")
                 if not email:
                     print(_("Package '%s' has conffile prompt and needs "
-                            "to be upgraded manually") % pkgname_from_deb(
-                                item.destfile))
+                            "to be upgraded manually") %
+                          pkgname_from_deb(item.destfile))
                 # log to the logfile
                 logging.warning(_("Package '%s' has conffile prompt and "
                                   "needs to be upgraded manually") %
