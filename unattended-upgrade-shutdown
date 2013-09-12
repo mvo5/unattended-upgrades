@@ -26,9 +26,7 @@
 
 import copy
 import signal
-import struct
 import sys
-import fcntl
 import time
 import logging
 import logging.handlers
