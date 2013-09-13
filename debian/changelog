@@ -8,6 +8,9 @@ unattended-upgrades (0.80~sid3) UNRELEASED; urgency=low
       on release upgrades, thanks to Evgeny Kapun (closes: #707002)
     - document that the pkg blacklist can contain regular expressions,
       thanks to Thomas Reusch for the suggestion
+  * unattended-upgrade:
+    - make the mail sending more robust when facing unicode encoding
+      errors
   
   [ Loïc Minier ]
   * lp:~lool/unattended-upgrades/static-cherckers-fixes:
