@@ -647,12 +647,12 @@ def setup_apt_listchanges(conf="/etc/apt/listchanges.conf"):
 
 
 def _send_mail_using_mailx(to_address, subject, body):
-    # ensure that the body is a byte stream and that we do not 
+    # ensure that the body is a byte stream and that we do not
     # break on encoding errors (the default error mode is "strict")
     encoded_body = body.encode(
         locale.getpreferredencoding(False), errors="replace")
     # we use a binary pipe to stdin to ensure we do not break on
-    # unicode encoding errors (e.g. because the user is running a 
+    # unicode encoding errors (e.g. because the user is running a
     # ascii only system like the buildds)
     mail = subprocess.Popen(
         [MAIL_BINARY, "-s", subject, to_address],
