@@ -1,5 +1,6 @@
 unattended-upgrades (0.80~sid3) UNRELEASED; urgency=low
 
+  [ Michael Vogt ]
   * use dpkg-vendor --query Vendor instead of lsb_release -i -s
     to avoid build-dependency on lsb-release
   * data/50unattended-upgrades.Debian:
@@ -7,6 +8,10 @@ unattended-upgrades (0.80~sid3) UNRELEASED; urgency=low
       on release upgrades, thanks to Evgeny Kapun (closes: #707002)
     - document that the pkg blacklist can contain regular expressions,
       thanks to Thomas Reusch for the suggestion
+  
+  [ Loïc Minier ]
+  * lp:~lool/unattended-upgrades/static-cherckers-fixes:
+    - run the tests at build time instead of via auto-pkg-test
 
  -- Michael Vogt <michael.vogt@ubuntu.com>  Thu, 16 May 2013 17:55:37 +0200
 

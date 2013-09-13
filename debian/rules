@@ -12,6 +12,9 @@ override_dh_auto_build:
 	cp data/50unattended-upgrades.$(DIST) data/50unattended-upgrades
 	$(PYTHON) setup.py build
 
+override_dh_auto_test:
+	(cd test; make )
+
 override_dh_auto_install:
 	$(PYTHON) setup.py install \
 		--root=$(CURDIR)/debian/unattended-upgrades \
