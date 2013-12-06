@@ -1,4 +1,4 @@
-unattended-upgrades (0.80~sid3) UNRELEASED; urgency=low
+unattended-upgrades (0.80) UNRELEASED; urgency=low
 
   [ Michael Vogt ]
   * use dpkg-vendor --query Vendor instead of lsb_release -i -s
@@ -11,6 +11,7 @@ unattended-upgrades (0.80~sid3) UNRELEASED; urgency=low
   * unattended-upgrade:
     - make the mail sending more robust when facing unicode encoding
       errors
+  * switch to python3 by default
   
   [ Loïc Minier ]
   * lp:~lool/unattended-upgrades/static-cherckers-fixes:
@@ -95,6 +96,12 @@ unattended-upgrades (0.79.5) unstable; urgency=low
       (closes: #701850)
 
  -- Michael Vogt <mvo@debian.org>  Fri, 01 Mar 2013 10:07:30 +0100
+
+unattended-upgrades (0.79.3ubuntu8) saucy; urgency=low
+
+  * Fix two PEP-8 errors to fix autopkgtest.
+
+ -- Martin Pitt <martin.pitt@ubuntu.com>  Mon, 09 Sep 2013 11:39:12 -0400
 
 unattended-upgrades (0.79.3ubuntu7) raring; urgency=low
 
