@@ -1,3 +1,10 @@
+unattended-upgrades (0.81) UNRELEASED; urgency=low
+
+  * add default template for SteamOS (symlink to Debian for now
+    as the customization is done in their steamos-autoupdate package)
+
+ -- Michael Vogt <michael.vogt@ubuntu.com>  Sat, 14 Dec 2013 10:31:16 +0100
+
 unattended-upgrades (0.80) unstable; urgency=low
 
   [ Michael Vogt ]
