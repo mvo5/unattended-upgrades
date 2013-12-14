@@ -1,4 +1,4 @@
-unattended-upgrades (0.80) UNRELEASED; urgency=low
+unattended-upgrades (0.80) unstable; urgency=low
 
   [ Michael Vogt ]
   * use dpkg-vendor --query Vendor instead of lsb_release -i -s
@@ -17,7 +17,7 @@ unattended-upgrades (0.80) UNRELEASED; urgency=low
   * lp:~lool/unattended-upgrades/static-cherckers-fixes:
     - run the tests at build time instead of via auto-pkg-test
 
- -- Michael Vogt <michael.vogt@ubuntu.com>  Thu, 16 May 2013 17:55:37 +0200
+ -- Michael Vogt <mvo@debian.org>  Sat, 14 Dec 2013 10:17:52 +0100
 
 unattended-upgrades (0.80~sid2) unstable; urgency=low
 
