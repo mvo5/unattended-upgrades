@@ -30,7 +30,6 @@ import fnmatch
 import gettext
 import locale
 import logging
-import lsb_release
 import re
 import os
 import select
@@ -49,17 +48,20 @@ from subprocess import (
     Popen,
     PIPE,
 )
-
 import apt
 import apt_inst
 import apt_pkg
+
 
 # the reboot required flag file used by packages
 REBOOT_REQUIRED_FILE = "/var/run/reboot-required"
 MAIL_BINARY = "/usr/bin/mail"
 SENDMAIL_BINARY = "/usr/sbin/sendmail"
-DISTRO_CODENAME = lsb_release.get_distro_information()['CODENAME']
-DISTRO_ID = lsb_release.get_distro_information()['ID']
+# no py3 lsb_release in debian :/
+DISTRO_CODENAME = subprocess.check_output(
+    ["lsb_release", "-c", "-s"], universal_newlines=True)
+DISTRO_ID = subprocess.check_output(
+    ["lsb_release", "-i", "-s"], universal_newlines=True)
 
 # progress information is written here
 PROGRESS_LOG = "/var/run/unattended-upgrades.progress"
