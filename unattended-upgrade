@@ -862,6 +862,12 @@ def reboot_if_requested_and_needed(shutdown_lock=0):
         subprocess.call(["/sbin/shutdown", "-r", when])
 
 
+def write_stamp_file():
+    statedir = os.path.join(apt_pkg.config.find_dir("Dir::State"), "periodic")
+    with open(os.path.join(statedir, "unattended-upgrades-stamp"), "w"):
+        pass
+
+
 def main(options, rootdir=""):
 
     # useful for testing
@@ -925,6 +931,11 @@ def main(options, rootdir=""):
         print(_("Cache has broken packages, exiting"))
         logging.error(_("Cache has broken packages, exiting"))
         sys.exit(1)
+
+    # FIXME: make this into a ContextManager
+    # be nice when calculating the upgrade as its pretty CPU intensive
+    os.nice(19)
+
     # speed things up with latest apt
     actiongroup = apt_pkg.ActionGroup(cache._depcache)
     actiongroup  # pyflakes
@@ -972,6 +983,10 @@ def main(options, rootdir=""):
     pkgs_to_upgrade.sort(key=lambda p: p.name)
     pkgs = "\n".join([pkg.name for pkg in pkgs_to_upgrade])
     logging.debug("pkgs that look like they should be upgraded: %s" % pkgs)
+
+    # FIXME: make this into a ContextManager
+    # stop being nice
+    os.nice(0)
 
     # download what looks good
     if options.debug:
@@ -1072,6 +1087,8 @@ def main(options, rootdir=""):
     # exit if there is nothing to do and nothing to report
     if (len(pkgs_to_upgrade) == 0) and (len(pkgs_kept_back) == 0):
         logging.info(_("No packages found that can be upgraded unattended"))
+        # FIXME: DRY violation, write_stamp_file() is used below as well
+        write_stamp_file()
         return
 
     # check if its configured for install on shutdown, if so, the
@@ -1113,6 +1130,10 @@ def main(options, rootdir=""):
     if not options.dry_run:
         send_summary_mail(
             pkgs, pkg_install_success, pkgs_kept_back, mem_log, logfile_dpkg)
+
+    # FIXME: DRY violation, write_stamp_file() is used above as well
+    # write timestamp file
+    write_stamp_file()
 
     # check if the user wants a reboot
     reboot_if_requested_and_needed(shutdown_lock)
