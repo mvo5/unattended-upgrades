@@ -7,6 +7,7 @@ unattended-upgrades (0.81) UNRELEASED; urgency=low
   * do the upgrade calculation with os.nice(19)
   * add --minimal-upgrade-steps commandline option but keep
     --minimal_upgrade_steps for compatiblity
+  * fix reading DISTRO_ID/DISTRO_CODENAME from lsb_release
 
  -- Michael Vogt <michael.vogt@ubuntu.com>  Sat, 14 Dec 2013 10:31:16 +0100
 
