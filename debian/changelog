@@ -5,6 +5,8 @@ unattended-upgrades (0.81) UNRELEASED; urgency=low
   * write /var/lib/apt/periodic/unattended-upgrades-stamp, thanks to
     John Vert for the suggestion
   * do the upgrade calculation with os.nice(19)
+  * add --minimal-upgrade-steps commandline option but keep
+    --minimal_upgrade_steps for compatiblity
 
  -- Michael Vogt <michael.vogt@ubuntu.com>  Sat, 14 Dec 2013 10:31:16 +0100
 

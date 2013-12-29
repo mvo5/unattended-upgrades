@@ -42,7 +42,10 @@ import sys
 from email.message import Message
 from gettext import gettext as _
 from io import StringIO
-from optparse import OptionParser
+from optparse import (
+     OptionParser,
+     SUPPRESS_HELP,
+)
 
 from subprocess import (
     Popen,
@@ -1159,10 +1162,14 @@ if __name__ == "__main__":
     parser.add_option("", "--dry-run",
                       action="store_true", default=False,
                       help=_("Simulation, download but do not install"))
-    parser.add_option("", "--minimal_upgrade_steps",
+    parser.add_option("", "--minimal-upgrade-steps",
                       action="store_true", default=False,
                       help=_("Upgrade in minimal steps (and allow "
                              "interrupting with SIGINT"))
+    parser.add_option("", "--minimal_upgrade_steps",
+                      action="store_true", 
+                      help=SUPPRESS_HELP,
+                      default=False)
     (options, args) = parser.parse_args()
 
     if os.getuid() != 0:
