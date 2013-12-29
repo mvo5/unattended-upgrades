@@ -1,4 +1,4 @@
-unattended-upgrades (0.81) UNRELEASED; urgency=low
+unattended-upgrades (0.81) unstable; urgency=low
 
   * add default template for SteamOS (symlink to Debian for now
     as the customization is done in their steamos-autoupdate package)
@@ -9,7 +9,7 @@ unattended-upgrades (0.81) UNRELEASED; urgency=low
     --minimal_upgrade_steps for compatiblity
   * fix reading DISTRO_ID/DISTRO_CODENAME from lsb_release
 
- -- Michael Vogt <michael.vogt@ubuntu.com>  Sat, 14 Dec 2013 10:31:16 +0100
+ -- Michael Vogt <mvo@debian.org>  Sun, 29 Dec 2013 09:16:24 +0100
 
 unattended-upgrades (0.80) unstable; urgency=low
 
