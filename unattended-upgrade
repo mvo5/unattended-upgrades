@@ -43,8 +43,8 @@ from email.message import Message
 from gettext import gettext as _
 from io import StringIO
 from optparse import (
-     OptionParser,
-     SUPPRESS_HELP,
+    OptionParser,
+    SUPPRESS_HELP,
 )
 
 from subprocess import (
@@ -1167,7 +1167,7 @@ if __name__ == "__main__":
                       help=_("Upgrade in minimal steps (and allow "
                              "interrupting with SIGINT"))
     parser.add_option("", "--minimal_upgrade_steps",
-                      action="store_true", 
+                      action="store_true",
                       help=SUPPRESS_HELP,
                       default=False)
     (options, args) = parser.parse_args()
