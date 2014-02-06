@@ -1,11 +1,12 @@
-unattended-upgrades (0.82) UNRELEASED; urgency=low
+unattended-upgrades (0.82) unstable; urgency=low
 
+  [ Brian Murray ]
   * unattended-upgrade: specify charset when setting email payload for
     python3.4 (LP: #1272381)
   * change logging.warn calls to logging.warning
   * test/test_email.py: use with to open email in test_mail_quoted_printable
 
- -- Brian Murray <brian@ubuntu.com>  Wed, 05 Feb 2014 16:00:41 -0800
+ -- Michael Vogt <mvo@debian.org>  Thu, 06 Feb 2014 08:54:25 +0100
 
 unattended-upgrades (0.81) unstable; urgency=low
 
