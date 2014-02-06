@@ -149,7 +149,8 @@ class SendmailTestCase(CommonTestsForMailxAndSendmail, unittest.TestCase):
     def test_mail_quoted_printable(self):
         """Regression test for debian bug #700178"""
         send_summary_mail(*self._return_mock_data())
-        log_data = open("mail.txt").read()
+        with open("mail.txt", "rb") as fp:
+            log_data = fp.read().decode("utf-8")
         needle = "Allowed origins are: ['o=3DDebian,n=3Dwheezy', "\
             "'o=3DDebian,n=3Dwheezy-updat=\n"\
             "es', 'o=3DDebian,n=3Dwheezy,l=3DDebian-Security', "\
