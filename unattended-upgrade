@@ -249,7 +249,7 @@ def is_dpkg_journal_dirty():
 
 
 def signal_handler(signal, frame):
-    logging.warn("SIGUSR1 received, will stop")
+    logging.warning("SIGUSR1 received, will stop")
     global SIGNAL_STOP_REQUEST
     SIGNAL_STOP_REQUEST = True
 
@@ -309,7 +309,7 @@ def match_whitelist_string(whitelist, origin):
     """
     whitelist = whitelist.strip()
     if whitelist == "":
-        logging.warn("empty match string matches nothing")
+        logging.warning("empty match string matches nothing")
         return False
     res = True
     # make "\," the html quote equivalent
@@ -383,7 +383,7 @@ def upgrade_in_minimal_steps(cache, pkgs_to_upgrade, blacklist,
         smallest_partition = to_upgrade
         for pkgname in to_upgrade:
             if SIGNAL_STOP_REQUEST:
-                logging.warn("SIGNAL received, stopping")
+                logging.warning("SIGNAL received, stopping")
                 return True
             pkg = cache[pkgname]
             if pkg.is_upgradable:
@@ -671,14 +671,13 @@ def _send_mail_using_mailx(to_address, subject, body):
 def _send_mail_using_sendmail(to_address, subject, body):
     # format as a proper mail
     msg = Message()
-    msg.set_payload(body)
     msg['Subject'] = subject
     msg['To'] = to_address
     # order is important here, Message() first, then Charset()
     #  then msg.set_charset()
     charset = email.charset.Charset("utf-8")
     charset.body_encoding = email.charset.QP
-    msg.set_charset(charset)
+    msg.set_payload(body, charset)
     # and send it away
     sendmail = subprocess.Popen(
         [SENDMAIL_BINARY, "-oi", "-t"],

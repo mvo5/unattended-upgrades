@@ -1,3 +1,12 @@
+unattended-upgrades (0.82) UNRELEASED; urgency=low
+
+  * unattended-upgrade: specify charset when setting email payload for
+    python3.4 (LP: #1272381)
+  * change logging.warn calls to logging.warning
+  * test/test_email.py: use with to open email in test_mail_quoted_printable
+
+ -- Brian Murray <brian@ubuntu.com>  Wed, 05 Feb 2014 16:00:41 -0800
+
 unattended-upgrades (0.81) unstable; urgency=low
 
   * add default template for SteamOS (symlink to Debian for now
