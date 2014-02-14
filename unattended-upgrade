@@ -400,6 +400,8 @@ def upgrade_in_minimal_steps(cache, pkgs_to_upgrade, blacklist,
                     "Cache has not allowed changes")
                 return False
             changes = [pkg.name for pkg in cache.get_changes()]
+            if not changes:
+                continue
             if len(changes) == 1:
                 logging.debug("found leaf package %s" % pkg.name)
                 smallest_partition = changes
