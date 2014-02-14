@@ -1138,7 +1138,8 @@ def main(options, rootdir=""):
     write_stamp_file()
 
     # check if the user wants a reboot
-    reboot_if_requested_and_needed(shutdown_lock)
+    if not options.dry_run:
+        reboot_if_requested_and_needed(shutdown_lock)
 
 
 if __name__ == "__main__":

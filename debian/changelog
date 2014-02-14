@@ -1,3 +1,9 @@
+unattended-upgrades (0.83) UNRELEASED; urgency=medium
+
+  * Do not reboot if run with --dry-run (LP: #1269177)
+
+ -- Brian Murray <brian@ubuntu.com>  Fri, 14 Feb 2014 11:17:12 -0800
+
 unattended-upgrades (0.82) unstable; urgency=low
 
   [ Brian Murray ]
