@@ -400,6 +400,8 @@ def upgrade_in_minimal_steps(cache, pkgs_to_upgrade, blacklist,
                     "Cache has not allowed changes")
                 return False
             changes = [pkg.name for pkg in cache.get_changes()]
+            if not changes:
+                continue
             if len(changes) == 1:
                 logging.debug("found leaf package %s" % pkg.name)
                 smallest_partition = changes
@@ -1138,7 +1140,8 @@ def main(options, rootdir=""):
     write_stamp_file()
 
     # check if the user wants a reboot
-    reboot_if_requested_and_needed(shutdown_lock)
+    if not options.dry_run:
+        reboot_if_requested_and_needed(shutdown_lock)
 
 
 if __name__ == "__main__":

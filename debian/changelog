@@ -1,3 +1,12 @@
+unattended-upgrades (0.82.1) unstable; urgency=medium
+
+  [ Brian Murray ]
+  * Do not reboot if run with --dry-run (LP: #1269177)
+  * Continue if there are no changes, thanks to Ludovico Cavedon for the
+    patch. (LP: #1265729)
+
+ -- Michael Vogt <mvo@debian.org>  Mon, 17 Feb 2014 14:23:17 +0100
+
 unattended-upgrades (0.82) unstable; urgency=low
 
   [ Brian Murray ]
