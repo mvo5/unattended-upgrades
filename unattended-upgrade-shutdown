@@ -1,13 +1,13 @@
-#!/usr/bin/python
+#!/usr/bin/python3
 # Copyright (c) 2009 Canonical Ltd
 #
 # AUTHOR:
 # Michael Vogt <mvo@ubuntu.com>
 #
-# unattended-upgrade-shutdown - helper that checks if a 
+# unattended-upgrade-shutdown - helper that checks if a
 # unattended-upgrade is in progress and waits until it exists
 #
-# This file is part of unattended-upgrades 
+# This file is part of unattended-upgrades
 #
 # unattended-upgrades is free software; you can redistribute it and/or
 # modify it under the terms of the GNU General Public License as published
@@ -26,9 +26,7 @@
 
 import copy
 import signal
-import struct
 import sys
-import fcntl
 import time
 import logging
 import logging.handlers
@@ -47,22 +45,26 @@ except:
     logging.exception("importing of apt_pkg failed, exiting")
     sys.exit(0)
 
+
 def do_usplash(msg):
     if os.path.exists("/sbin/usplash_write"):
         logging.debug("Running usplash_write")
-        subprocess.call(["/sbin/usplash_write","TEXT", msg])
-        subprocess.call(["/sbin/usplash_write","PULSATE"])
+        subprocess.call(["/sbin/usplash_write", "TEXT", msg])
+        subprocess.call(["/sbin/usplash_write", "PULSATE"])
+
 
 def do_plymouth(msg):
     if os.path.exists("/bin/plymouth"):
         logging.debug("Running plymouth --text")
-        subprocess.call(["/bin/plymouth","message", "--text", msg])
+        subprocess.call(["/bin/plymouth", "message", "--text", msg])
+
 
 def log_msg(msg, level=logging.WARN):
     """ helper that will print msg to usplash, plymouth, console """
     logging.log(level, msg)
     do_plymouth(msg)
     do_usplash(msg)
+
 
 def log_progress():
     """ helper to log the install progress (if any) """
@@ -76,10 +78,11 @@ def log_progress():
     # log it
     log_msg(msg)
 
+
 if __name__ == "__main__":
     # setup gettext
-    localesApp="unattended-upgrades"
-    localesDir="/usr/share/locale"
+    localesApp = "unattended-upgrades"
+    localesDir = "/usr/share/locale"
     gettext.bindtextdomain(localesApp, localesDir)
     gettext.textdomain(localesApp)
 
@@ -89,11 +92,11 @@ if __name__ == "__main__":
                       help="print debug messages")
     parser.add_option("", "--delay", default=10,
                       help="delay in minutes to wait for unattended-upgrades")
-    parser.add_option("", "--lock-file", 
+    parser.add_option("", "--lock-file",
                       default="/var/run/unattended-upgrades.lock",
                       help="lock file location")
     (options, args) = parser.parse_args()
-    
+
     # setup logging
     level = logging.INFO
     if options.debug:
@@ -101,7 +104,11 @@ if __name__ == "__main__":
 
     # use a normal logfile instead of syslog too as on shutdown its too
     # easy to get syslog killed
-    logfile = "/var/log/unattended-upgrades/unattended-upgrades-shutdown.log"
+    logdir = apt_pkg.config.find_dir(
+        "Unattended-Upgrade::LogDir", "/var/log/unattended-upgrades/")
+    if not os.path.exists(logdir):
+        os.makedirs(logdir)
+    logfile = os.path.join(logdir, "unattended-upgrades-shutdown.log")
     logging.basicConfig(filename=logfile,
                         level=level,
                         format="%(asctime)s %(levelname)s - %(message)s")
@@ -125,7 +132,7 @@ if __name__ == "__main__":
     # run the monitoring loop and keep the "UI" updated
     start_time = time.time()
     lock_was_taken = False
-    while True: 
+    while True:
         res = apt_pkg.get_lock(options.lock_file)
         logging.debug("get_lock returned %i" % res)
         # exit here if there is no lock
@@ -141,11 +148,12 @@ if __name__ == "__main__":
             os.kill(pid, signal.SIGUSR1)
         # show log
         log_progress()
-	time.sleep(5)
-	if (time.time() - start_time) > options.delay*60:
-            logging.warning(_("Giving up on lockfile after %s delay") % options.delay)
+        time.sleep(5)
+        if (time.time() - start_time) > options.delay*60:
+            logging.warning(_("Giving up on lockfile after %s delay") %
+                            options.delay)
             sys.exit(1)
-    
+
     # add finished info to the log/terminal to help tracking down
     # LP: #434835
     if lock_was_taken:

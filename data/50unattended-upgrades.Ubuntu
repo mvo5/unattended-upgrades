@@ -6,7 +6,7 @@ Unattended-Upgrade::Allowed-Origins {
 //	"${distro_id}:${distro_codename}-backports";
 };
 
-// List of packages to not update
+// List of packages to not update (regexp are supported)
 Unattended-Upgrade::Package-Blacklist {
 //	"vim";
 //	"libc6";
@@ -45,10 +45,14 @@ Unattended-Upgrade::Package-Blacklist {
 // (equivalent to apt-get autoremove)
 //Unattended-Upgrade::Remove-Unused-Dependencies "false";
 
-// Automatically reboot *WITHOUT CONFIRMATION* if a 
-// the file /var/run/reboot-required is found after the upgrade 
+// Automatically reboot *WITHOUT CONFIRMATION*
+//  if the file /var/run/reboot-required is found after the upgrade 
 //Unattended-Upgrade::Automatic-Reboot "false";
 
+// If automatic reboot is enabled and needed, reboot at the specific
+// time instead of immediately
+//  Default: "now"
+//Unattended-Upgrade::Automatic-Reboot-Time "02:00";
 
 // Use apt bandwidth limit feature, this example limits the download
 // speed to 70kb/sec

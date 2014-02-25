@@ -1,13 +1,20 @@
-#!/usr/bin/python
+#!/usr/bin/python3
+"""Test unattended_upgrades against the real archive in a chroot.
+
+Note that this test is not run by the makefile in this folder, as it requires
+network access, and it fails in some situations (unclear which).
+"""
 
 import apt
 import apt_pkg
 import glob
+import logging
 import os
 import re
 import unittest
 
 import unattended_upgrade
+
 
 apt_pkg.config.set("APT::Architecture", "amd64")
 
@@ -48,12 +55,13 @@ class TestAgainstRealArchive(unittest.TestCase):
 
         # main
         res = unattended_upgrade.main(options, os.path.abspath("./aptroot"))
-
+        logging.debug(res)
         # check if the log file exists
         self.assertTrue(os.path.exists(logfile))
-        log = open(logfile).read()
+        with open(logfile) as fp:
+            log = fp.read()
         # check that stuff worked
-        self.assertFalse(" ERROR " in log)
+        self.assertFalse(" ERROR " in log, log)
         # check if we actually have the expected ugprade in it
         self.assertTrue(
             re.search("INFO Packages that will be upgraded:.*awstats", log))
@@ -65,8 +73,8 @@ class TestAgainstRealArchive(unittest.TestCase):
             re.search("INFO Packages that will be upgraded:.*ant-doc", log))
         self.assertTrue(
             re.search("DEBUG skipping blacklisted package 'ant-doc'", log))
-        # test dpkg install log 
-        term_log = open("aptroot/var/log/apt/term.log").read()
+        # test dpkg install log
+        #term_log = open("aptroot/var/log/apt/term.log").read()
         # FIXME: when we redirect STDIN the below test will break - however
         #        we need to redirect it as otherwise we may hang forever
         #        - this is actually a bug in apt that uses "tcgetattr(0, &tt)"
@@ -81,4 +89,3 @@ if __name__ == "__main__":
     import locale
     locale.setlocale(locale.LC_ALL, "C")
     unittest.main()
-

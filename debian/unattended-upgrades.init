@@ -19,6 +19,12 @@ DESC="unattended package upgrades"
 SCRIPTNAME="/etc/init.d/$NAME"
 SHUTDOWN_HELPER="/usr/share/unattended-upgrades/unattended-upgrade-shutdown"
 
+if [ -x /usr/bin/python3 ]; then
+    PYTHON=python3
+else
+    PYTHON=python
+fi
+
 # Load the VERBOSE setting and other rcS variables
 . /lib/init/vars.sh
 
@@ -33,7 +39,7 @@ start|restart|force-reload|status)
 stop)
 	if [ -e $SHUTDOWN_HELPER ]; then
 		[ "$VERBOSE" != "no" ] && log_action_begin_msg "Checking for running $DESC"
-		python $SHUTDOWN_HELPER
+		$PYTHON $SHUTDOWN_HELPER
 		[ "$VERBOSE" != "no" ] && log_action_end_msg $? "$NAME"
 	fi
 	;;
