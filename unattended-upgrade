@@ -354,6 +354,8 @@ def upgrade_normal(cache, pkgs_to_upgrade, logfile_dpkg, verbose):
             res = cache.commit(install_progress=iprogress)
     except SystemError as e:
         error = e
+        if verbose:
+            logging.exception("Exception happened during upgrade.")
     if res:
         logging.info(_("All upgrades installed"))
     else:
@@ -433,6 +435,8 @@ def upgrade_in_minimal_steps(cache, pkgs_to_upgrade, blacklist,
                     raise Exception("cache.commit() returned false")
             cache.open()
         except Exception as e:
+            if verbose:
+                logging.exception("Exception happened during upgrade.")
             logging.error(_("Installing the upgrades failed!"))
             logging.error(_("error message: '%s'") % e)
             logging.error(_("dpkg returned a error! See '%s' for details") %
