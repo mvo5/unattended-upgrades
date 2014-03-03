@@ -395,10 +395,10 @@ def upgrade_in_minimal_steps(cache, pkgs_to_upgrade, blacklist,
             # double check that we are not running into side effects like
             # what could have been caused LP: #1020680
             if not check_changes_for_sanity(cache, allowed_origins, blacklist):
-                logging.error(
-                    "Internal error while building a minimal partition."
-                    "Cache has not allowed changes")
-                return False
+                logging.info("While building minimal partition: "
+                             "cache has not allowed changes")
+                cache.clear()
+                continue
             changes = [pkg.name for pkg in cache.get_changes()]
             if not changes:
                 continue
@@ -623,7 +623,7 @@ def rewind_cache(cache, pkgs_to_upgrade):
     " set the cache back to the state with packages_to_upgrade "
     cache.clear()
     for pkg2 in pkgs_to_upgrade:
-        pkg2.mark_upgrade()
+        pkg2.mark_install(auto_fix=False, auto_install=False)
 
 
 def host():
