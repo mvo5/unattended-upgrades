@@ -1,3 +1,11 @@
+unattended-upgrades (0.82.3) unstable; urgency=low
+
+  * restore python2-apt compatibility, thanks to Simon McVittie
+    closes: #740847
+  * ensure rewind_cache() does never cause a broken state
+
+ -- Michael Vogt <mvo@debian.org>  Wed, 05 Mar 2014 18:23:05 +0100
+
 unattended-upgrades (0.82.2) unstable; urgency=low
 
   * Merged lp:~paniemin/unattended-upgrades/unattended-upgrades:
