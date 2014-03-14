@@ -1,3 +1,34 @@
+unattended-upgrades (0.82.4) unstable; urgency=low
+
+  [ Simon McVittie ]
+  * do not ship generated files (*.pyc) in the source package
+    (closes: 741467)
+  
+  [ Michael Vogt ]
+  * add debian/source/format
+
+ -- Michael Vogt <mvo@debian.org>  Fri, 14 Mar 2014 10:29:22 +0100
+
+unattended-upgrades (0.82.3) unstable; urgency=low
+
+  * restore python2-apt compatibility, thanks to Simon McVittie
+    closes: #740847
+  * ensure rewind_cache() does never cause a broken state
+
+ -- Michael Vogt <mvo@debian.org>  Wed, 05 Mar 2014 18:23:05 +0100
+
+unattended-upgrades (0.82.2) unstable; urgency=low
+
+  * Merged lp:~paniemin/unattended-upgrades/unattended-upgrades:
+    - show full exception in verbose mode
+  * ignore minimal paritions that are forbidden (because they
+    contain e.g. blacklisted packages)
+  * fix Bug in rewind_cache() that can cause unwanted removals of
+    packages , thanks to the Pierre-Loup A. Griffais and
+    Simon McVittie
+
+ -- Michael Vogt <mvo@debian.org>  Mon, 03 Mar 2014 23:05:19 +0100
+
 unattended-upgrades (0.82.1) unstable; urgency=medium
 
   [ Brian Murray ]
