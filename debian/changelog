@@ -1,3 +1,11 @@
+unattended-upgrades (0.82.4) unstable; urgency=low
+
+  [ Simon McVittie ]
+  * do not ship generated files (*.pyc) in the source package
+    (closes: 741467)
+
+ -- Michael Vogt <mvo@debian.org>  Fri, 14 Mar 2014 10:29:22 +0100
+
 unattended-upgrades (0.82.3) unstable; urgency=low
 
   * restore python2-apt compatibility, thanks to Simon McVittie
