@@ -1,134 +1,239 @@
-# Translation of unattended-upgrades templates to German
-# Copyright (C) Helge Kreutzmann <debian@helgefjell.de>, 2009, 2011.
-# This file is distributed under the same license as the unattended-upgrades package.
+# Translation of unattended-upgrades to German.
+# Copyright (C) 2005-2009 Canonical Ltd.
+# This file is distributed under the same license as the
+# unattended-upgrades package.
+# Copyright (C) of this file 2012-2014 Chris Leick.
 #
 msgid ""
 msgstr ""
-"Project-Id-Version: unattended-upgrades 0.73.1\n"
+"Project-Id-Version: unattended-upgrades 0.82.3\n"
 "Report-Msgid-Bugs-To: unattended-upgrades@packages.debian.org\n"
-"POT-Creation-Date: 2009-07-06 17:32+0100\n"
-"PO-Revision-Date: 2011-10-30 19:26+0100\n"
-"Last-Translator: Helge Kreutzmann <debian@helgefjell.de>\n"
-"Language-Team: de <debian-l10n-german@lists.debian.org>\n"
-"Language: \n"
+"POT-Creation-Date: 2013-09-13 08:12+0200\n"
+"PO-Revision-Date: 2014-03-16 13:16+0100\n"
+"Last-Translator: Chris Leick <c.leick@vollbio.de>\n"
+"Language-Team: German <debian-l10n-german@lists.debian.org>\n"
+"Language: de\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
 
-#. Type: boolean
-#. Description
-#: ../templates:2001
-msgid "Automatically download and install stable updates?"
-msgstr "Aktualisierungen für Stable automatisch herunterladen und installieren?"
+#: ../unattended-upgrade:136
+#, c-format
+msgid "Progress: %s %% (%s)"
+msgstr "Fortschritt: %s %% (%s)"
 
-#. Type: boolean
-#. Description
-#: ../templates:2001
+#: ../unattended-upgrade:352 ../unattended-upgrade:436
+#: ../unattended-upgrade-shutdown:161
+msgid "All upgrades installed"
+msgstr "alle Upgrades installiert"
+
+#: ../unattended-upgrade:354 ../unattended-upgrade:428
+msgid "Installing the upgrades failed!"
+msgstr "Installation der Upgrades fehlgeschlagen!"
+
+#: ../unattended-upgrade:355 ../unattended-upgrade:429
+#, c-format
+msgid "error message: '%s'"
+msgstr "Fehlermeldung: »%s«"
+
+#: ../unattended-upgrade:356 ../unattended-upgrade:430
+#, c-format
+msgid "dpkg returned a error! See '%s' for details"
+msgstr "Dpkg gab einen Fehler zurück. Siehe »%s« für Einzelheiten"
+
+#: ../unattended-upgrade:685
 msgid ""
-"Applying updates on a frequent basis is an important part of keeping systems "
-"secure. By default, updates need to be applied manually using package  "
-"management tools. Alternatively, you can choose to have this system  "
-"automatically download and install security updates."
+"No '/usr/bin/mail' or '/usr/sbin/sendmail',can not send mail. You probably "
+"want to install the 'mailx' package."
 msgstr ""
-"Das häufige Anwenden von Aktualisierungen ist ein wichtiger Aspekt beim "
-"Erhalt der Sicherheit von Systemen. Standardmäßig müssen Aktualisierungen "
-"manuell mit den Paketverwaltungswerkzeugen eingespielt werden. Alternativ "
-"können Sie wählen, dass das System automatisch die "
-"Sicherheitsaktualisierungen herunterlädt und installiert."
+"kein »/usr/bin/mail« oder »/usr/sbin/sendmail«, Mail kann nicht gesandt "
+"werden. Möglicherweise möchten Sie das Paket »mailx« installieren."
 
-#~ msgid "print debug messages"
-#~ msgstr "Debug-Meldungen ausgeben"
+#: ../unattended-upgrade:698
+#, c-format
+msgid "[reboot required] unattended-upgrades result for '%s': %s"
+msgstr "[Neustart erforderlich] Unattended-Upgrades-Ergebnis für »%s«: %s"
 
-#~ msgid "Initial blacklisted packages: %s"
-#~ msgstr "Anfänglich ausgeschlossene Pakete: %s"
+#: ../unattended-upgrade:701
+#, c-format
+msgid "unattended-upgrades result for '%s': '%s'"
+msgstr "Unattended-Upgrades-Ergebnis für »%s«: %s"
 
-#~ msgid "Starting unattended upgrades script"
-#~ msgstr "Unattended-Upgrades-Skript wird gestartet"
+#: ../unattended-upgrade:703
+#, c-format
+msgid ""
+"Unattended upgrade returned: %s\n"
+"\n"
+msgstr ""
+"Das unbeaufsichtigte Upgrade gab %s zurück.\n"
+"\n"
 
-#~ msgid "Allowed origins are: %s"
-#~ msgstr "Erlaubte Quellen sind: %s"
+#: ../unattended-upgrade:706
+msgid ""
+"Warning: A reboot is required to complete this upgrade.\n"
+"\n"
+msgstr ""
+"Warnung: Um dieses Upgrade zu komplettieren, ist ein Neustart erforderlich.\n"
+"\n"
 
-#~ msgid "Cache has broken packages, exiting"
-#~ msgstr ""
-#~ "Zwischenspeicher (Cache) enthält defekte Pakete, Programm wird beendet"
+#: ../unattended-upgrade:708
+msgid "Packages that were upgraded:\n"
+msgstr "Pakete, von denen ein Upgrade durchgeführt wurde:\n"
 
-#~ msgid "package '%s' upgradable but fails to be marked for upgrade (%s)"
-#~ msgstr ""
-#~ "Upgrade von »%s« möglich, aber Markierung für Upgrade konnte nicht "
-#~ "gesetzt werden (%s)"
+#: ../unattended-upgrade:710
+msgid "Packages that attempted to upgrade:\n"
+msgstr "Pakete, bei denen versucht wurde, ein Upgrade durchzuführen:\n"
 
-#~ msgid "GetArchives() failed: '%s'"
-#~ msgstr "GetArchives() fehlgeschlagen: »%s«"
+#: ../unattended-upgrade:714
+msgid "Packages with upgradable origin but kept back:\n"
+msgstr ""
+"Pakete, von deren Ursprung ein Upgrade durchgeführt werden kann, die aber\n"
+"zurückgehalten werden.\n"
 
-#~ msgid "An error ocured: '%s'"
-#~ msgstr "Ein Fehler ist aufgetreten: »%s«"
+#: ../unattended-upgrade:719
+msgid "Package installation log:"
+msgstr "Paketinstallationsprotokoll:"
 
-#~ msgid "The URI '%s' failed to download, aborting"
-#~ msgstr ""
-#~ "Von der URI »%s« konnte nicht heruntergeladen werden, Programm wird "
-#~ "beendet"
+#: ../unattended-upgrade:723
+msgid "Unattended-upgrades log:\n"
+msgstr "Unattended-Upgrades-Protokoll:\n"
 
-#~ msgid "Package '%s' has conffile prompt and needs to be upgraded manually"
-#~ msgstr ""
-#~ "Paket »%s« enthält eine Conffile-Eingabeaufforderung und das Upgrade muss "
-#~ "manuell durchgeführt werden"
+#: ../unattended-upgrade:747
+#, c-format
+msgid "Writing dpkg log to '%s'"
+msgstr "Dpkg-Protokoll wird nach »%s« geschrieben"
 
-#~ msgid "package '%s' not upgraded"
-#~ msgstr "Upgrade von Paket »%s« nicht durchgeführt"
+#: ../unattended-upgrade:873
+#, c-format
+msgid "Initial blacklisted packages: %s"
+msgstr "Pakete, die anfangs auf die schwarzen Liste standen: %s"
 
-#~ msgid "No packages found that can be upgraded unattended"
-#~ msgstr ""
-#~ "Keine Pakete gefunden, von denen ein unbeaufsichtigtes Upgrade "
-#~ "durchgeführt werden kann."
+#: ../unattended-upgrade:875
+msgid "Starting unattended upgrades script"
+msgstr "Skript für unbeaufsichtigte Upgrades wird gestartet."
 
-#~ msgid "Packages that are upgraded: %s"
-#~ msgstr "Pakete, von denen ein Upgrade durchgeführt wird: %s"
+#: ../unattended-upgrade:878
+#, c-format
+msgid "Allowed origins are: %s"
+msgstr "erlaubte Ursprünge sind: %s"
 
-#~ msgid "Writing dpkg log to '%s'"
-#~ msgstr "Dpkg-Protokoll wird nach »%s« geschrieben"
+#: ../unattended-upgrade:891 ../unattended-upgrade:892
+msgid "Unclean dpkg state detected, trying to correct"
+msgstr "unsauberer Dpkg-Status entdeckt, es wird versucht dies zu korrigieren"
 
-#~ msgid "pm.GetArchives() failed"
-#~ msgstr "pm.GetArchives() fehlgeschlagen"
+#: ../unattended-upgrade:901
+#, c-format
+msgid ""
+"dpkg --configure -a output:\n"
+"%s"
+msgstr ""
+"»dpkg --configure -a«-Ausgabe:\n"
+"%s"
 
-#~ msgid "Installing the upgrades failed!"
-#~ msgstr "Installation der Upgrades fehlgeschlagen!"
+#: ../unattended-upgrade:910
+msgid "Lock could not be acquired (another package manager running?)"
+msgstr ""
+"Sperrung konnte nicht erreicht werden (läuft eine weitere Paketverwaltung?)"
 
-#~ msgid "error message: '%s'"
-#~ msgstr "Fehlermeldung: »%s«"
+#: ../unattended-upgrade:912
+msgid "Cache lock can not be acquired, exiting"
+msgstr "Zwischenspeicher konnte nicht gesperrt werden, wird beendet"
 
-#~ msgid "dpkg returned a error! See '%s' for details"
-#~ msgstr "Dpkg meldete einen Fehler! Lesen Sie »%s« für Details"
+#: ../unattended-upgrade:919 ../unattended-upgrade:920
+msgid "Cache has broken packages, exiting"
+msgstr "Zwischenspeicher enthält beschädigte Pakete, wird beendet"
 
-#~ msgid "All upgrades installed"
-#~ msgstr "Alle Upgrades installiert"
+#: ../unattended-upgrade:961
+#, c-format
+msgid "package '%s' upgradable but fails to be marked for upgrade (%s)"
+msgstr ""
+"Von Paket »%s« könnte ein Upgrade durchgeführt werden, es ist jedoch "
+"fehlgeschlagen, dies für das Upgrade zu markieren (%s)"
 
-#~ msgid ""
-#~ "No '/usr/bin/mail', can not send mail. You probably want to install the "
-#~ "'mailx' package."
-#~ msgstr ""
-#~ "»/usr/bin/mail« nicht vorhanden, es können keine E-Mails versendet "
-#~ "werden. Wahrscheinlich müssen Sie das Paket »mailx« installieren."
+#: ../unattended-upgrade:982
+#, c-format
+msgid "GetArchives() failed: '%s'"
+msgstr "GetArchives() fehlgeschlagen: »%s«"
 
-#~ msgid "unattended-upgrades result for '%s'"
-#~ msgstr "Ergebnis von unattended-upgrades für »%s«"
+#: ../unattended-upgrade:992 ../unattended-upgrade:993
+#, c-format
+msgid "An error occurred: '%s'"
+msgstr "Es ist ein Fehler aufgetreten: »%s«"
 
-#~ msgid ""
-#~ "Unattended upgrade returned: %s\n"
-#~ "\n"
-#~ msgstr ""
-#~ "Unbeaufsichtiges Upgrade meldete zurück: %s\n"
-#~ "\n"
+#: ../unattended-upgrade:995 ../unattended-upgrade:997
+#, c-format
+msgid "The URI '%s' failed to download, aborting"
+msgstr "Herunterladen von der URI »%s« fehlgeschlagen, wird abgebrochen"
 
-#~ msgid "Packages that are upgraded:\n"
-#~ msgstr "Pakete, bei denen ein Upgrade durchgeführt wurde:\n"
+#: ../unattended-upgrade:1001
+#, c-format
+msgid "Download finished, but file '%s' not there?!?"
+msgstr "Herunterladen beendet, aber Datei »%s« ist nicht dort!?"
 
-#~ msgid "Packages with upgradable origin but kept back:\n"
-#~ msgstr ""
-#~ "Pakete, bei denen die Quelle Upgrade-fähig war, die aber zurückgehalten "
-#~ "wurden:\n"
+#: ../unattended-upgrade:1017 ../unattended-upgrade:1021
+#, c-format
+msgid "Package '%s' has conffile prompt and needs to be upgraded manually"
+msgstr ""
+"Das Paket »%s« hat eine Conffile-Abfrage und muss einem manuellen Upgrade "
+"unterzogen werden."
 
-#~ msgid "Package installation log:"
-#~ msgstr "Paketinstallationsprotokoll:"
+#: ../unattended-upgrade:1044
+#, c-format
+msgid "package '%s' not upgraded"
+msgstr "Von Paket »%s« wurde kein Upgrade durchgeführt."
 
-#~ msgid "You need to be root to run this application"
-#~ msgstr "Sie müssen »root« sein, um dieses Programm auszuführen."
+#: ../unattended-upgrade:1059
+#, c-format
+msgid "Packages that are auto removed: '%s'"
+msgstr "Pakete, die automatisch entfernt wurden: »%s«"
+
+#: ../unattended-upgrade:1068
+msgid "No packages found that can be upgraded unattended"
+msgstr ""
+"Es wurden keine Pakete gefunden, von denen ein unbeaufsichtigtes Upgrade "
+"durchgeführt werden kann."
+
+#: ../unattended-upgrade:1088
+#, c-format
+msgid "Packages that will be upgraded: %s"
+msgstr "Pakete, von denen ein Upgrade durchgeführt wird: %s"
+
+#: ../unattended-upgrade:1125
+msgid "print debug messages"
+msgstr "Nachrichten zur Fehlersuche ausgeben"
+
+#: ../unattended-upgrade:1128
+msgid "make apt/libapt print verbose debug messages"
+msgstr "APT/LibAPT detaillierte Nachrichten zur Fehlersuche ausgeben lassen"
+
+#: ../unattended-upgrade:1131
+msgid "print info messages"
+msgstr "Informationsnachrichten ausgeben"
+
+#: ../unattended-upgrade:1134
+msgid "Simulation, download but do not install"
+msgstr "Simulation, herunterladen, aber nicht installieren"
+
+#: ../unattended-upgrade:1137
+msgid "Upgrade in minimal steps (and allow interrupting with SIGINT"
+msgstr "Upgrade in minimalen Schritten (Unterbrechung mit SIGINT erlaubt)"
+
+#: ../unattended-upgrade:1142
+msgid "You need to be root to run this application"
+msgstr "Sie müssen Root sein, um diese Anwendung auszuführen."
+
+#: ../unattended-upgrade-shutdown:72
+msgid "Unattended-upgrade in progress during shutdown, sleeping for 5s"
+msgstr ""
+"Unattended-Upgrade läuft während des Herunterfahrens weiter, es wird fünf "
+"Sekunden lang gewartet."
+
+#: ../unattended-upgrade-shutdown:125
+msgid "Running unattended-upgrades in shutdown mode"
+msgstr "Unattended-Upgrades im Herunterfahrmodus ausführen"
+
+#: ../unattended-upgrade-shutdown:153
+#, c-format
+msgid "Giving up on lockfile after %s delay"
+msgstr "Sperrdatei, hier wird nach %s Verzögerung aufgegeben."
