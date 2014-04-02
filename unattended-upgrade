@@ -401,7 +401,7 @@ def upgrade_in_minimal_steps(cache, pkgs_to_upgrade, blacklist,
                              "cache has not allowed changes")
                 cache.clear()
                 continue
-            changes = [pkg.name for pkg in cache.get_changes()]
+            changes = [p.name for p in cache.get_changes()]
             if not changes:
                 continue
             if len(changes) == 1:
