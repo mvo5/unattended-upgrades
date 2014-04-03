@@ -1,2 +1,2 @@
 Tests: run-tests
-Depends: @, make, python-dev, python3-dev, python-coverage, pep8, pyflakes
+Depends: @, make, python-dev, python3-dev, python-apt, python-coverage, pep8, pyflakes

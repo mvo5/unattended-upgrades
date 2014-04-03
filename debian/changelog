@@ -1,10 +1,15 @@
 unattended-upgrades (0.82.5) UNRELEASED; urgency=low
 
+  [ Michael Vogt ]
   * debian/po/de.po:
     - updated, thanks to Chris Leick closes: #741739
   * unattended-upgrades:
     - fix pyflakes error with latest pyflakes (thanks to
       Barry Warsaw)
+  
+  [ Martin Pitt ]
+  * debian/tests/control: Add missing python-apt test dependency, so that
+    tests also work with Python 2.
 
  -- Michael Vogt <mvo@debian.org>  Tue, 18 Mar 2014 16:03:09 +0100
 
