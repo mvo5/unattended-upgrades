@@ -1,11 +1,11 @@
-unattended-upgrades (0.82.6) UNRELEASED; urgency=medium
+unattended-upgrades (0.82.6) unstable; urgency=medium
 
   * unattended-upgrades, test/test_rewind.py:
     - fix regression in rewind_cache() and add test (closes: 743594)
   * unattended-upgrade:
     - ensure minimal-upgrades-modes does not truncate dpkg output log
   
- -- Michael Vogt <mvo@debian.org>  Tue, 08 Apr 2014 16:03:50 +0200
+ -- Michael Vogt <mvo@debian.org>  Tue, 08 Apr 2014 16:05:23 +0200
 
 unattended-upgrades (0.82.5) unstable; urgency=low
 
