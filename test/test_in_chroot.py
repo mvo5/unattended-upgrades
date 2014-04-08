@@ -51,7 +51,9 @@ import unattended_upgrade
 
 
 class MockOptions(object):
-    debug = True
+    debug = False
+    verbose = True
+    apt_debug = False
     dry_run = False
     minimal_upgrade_steps = False
 
