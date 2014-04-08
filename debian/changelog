@@ -1,3 +1,10 @@
+unattended-upgrades (0.82.5) UNRELEASED; urgency=low
+
+  * unattended-upgrades, test/test_rewind.py:
+    - fix regression in rewind_cache() and add test (closes: 743594)
+
+ -- Michael Vogt <michael.vogt@ubuntu.com>  Tue, 08 Apr 2014 14:44:05 +0200
+
 unattended-upgrades (0.82.4) unstable; urgency=low
 
   [ Simon McVittie ]

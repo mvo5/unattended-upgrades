@@ -1,0 +1,4 @@
+Package: forbidden-dependency
+Architecture: all
+Version: 2.0
+Description-en: forbidden dependency package
