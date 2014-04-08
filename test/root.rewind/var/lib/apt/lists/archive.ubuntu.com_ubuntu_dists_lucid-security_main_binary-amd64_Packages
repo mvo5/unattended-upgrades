@@ -1,0 +1,16 @@
+Package: test-package
+Architecture: all
+Version: 2.0
+Depends: test-package-dependency
+Description-en: test package
+
+Package: test-package-dependency
+Architecture: all
+Version: 1.0
+Description-en: test package 2
+
+Package: z-package
+Architecture: all
+Version: 1.0
+Depends: forbidden-dependency
+Description-en: test package with a forbidden dependency

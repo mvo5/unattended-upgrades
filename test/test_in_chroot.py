@@ -51,7 +51,9 @@ import unattended_upgrade
 
 
 class MockOptions(object):
-    debug = True
+    debug = False
+    verbose = True
+    apt_debug = False
     dry_run = False
     minimal_upgrade_steps = False
 
@@ -212,8 +214,8 @@ class TestUnattendedUpgrade(unittest.TestCase):
             target, "var/log/unattended-upgrades/*-dpkg*.log")
         dpkg_logfile = open(glob.glob(dpkg_log)[0]).read()
         if not "Preparing to replace %s" % NEEDLE_PKG in dpkg_logfile:
-            logging.warn("Did not find %s upgrade in the dpkg.log" %
-                         NEEDLE_PKG)
+            logging.warn("Did not find %s upgrade in %s" % (
+                         dpkg_log, NEEDLE_PKG))
             return False
         #print(dpkg_logfile)
         return True
