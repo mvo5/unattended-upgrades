@@ -182,7 +182,8 @@ class LogInstallProgress(apt.progress.base.InstallProgress):
     def _redirect_output(self):
         # do not create log in dry-run mode, just output to stdout/stderr
         if not apt_pkg.config.find_b("Debug::pkgDPkgPM", False):
-            logfd = os.open(self.logfile_dpkg, os.O_RDWR | os.O_CREAT, 0o644)
+            logfd = os.open(
+                self.logfile_dpkg, os.O_RDWR | os.O_APPEND | os.O_CREAT, 0o644)
             os.dup2(logfd, 1)
             os.dup2(logfd, 2)
 
