@@ -1,9 +1,26 @@
-unattended-upgrades (0.82.5) UNRELEASED; urgency=low
+unattended-upgrades (0.82.6) unstable; urgency=medium
 
   * unattended-upgrades, test/test_rewind.py:
     - fix regression in rewind_cache() and add test (closes: 743594)
+  * unattended-upgrade:
+    - ensure minimal-upgrades-modes does not truncate dpkg output log
+  
+ -- Michael Vogt <mvo@debian.org>  Tue, 08 Apr 2014 16:05:23 +0200
 
- -- Michael Vogt <michael.vogt@ubuntu.com>  Tue, 08 Apr 2014 14:44:05 +0200
+unattended-upgrades (0.82.5) unstable; urgency=low
+
+  [ Michael Vogt ]
+  * debian/po/de.po:
+    - updated, thanks to Chris Leick closes: #741739
+  * unattended-upgrades:
+    - fix pyflakes error with latest pyflakes (thanks to
+      Barry Warsaw)
+  
+  [ Martin Pitt ]
+  * debian/tests/control: Add missing python-apt test dependency, so that
+    tests also work with Python 2.
+
+ -- Michael Vogt <mvo@debian.org>  Thu, 03 Apr 2014 14:47:16 +0200
 
 unattended-upgrades (0.82.4) unstable; urgency=low
 
