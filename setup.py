@@ -23,7 +23,9 @@ if __name__ == "__main__":
             ('../usr/share/man/man8/',
                 ["man/unattended-upgrade.8"]),
             ('../etc/pm/sleep.d/',
-                ["pm/sleep.d/10_unattended-upgrades-hibernate"])
+                ["pm/sleep.d/10_unattended-upgrades-hibernate"]),
+            ('../usr/share/apport/package-hooks/',
+                ["debian/source_unattended-upgrades.py"])
         ],
         cmdclass={"build": build_extra.build_extra,
                   "build_i18n":  build_i18n.build_i18n},
