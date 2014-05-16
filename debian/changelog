@@ -1,4 +1,4 @@
-unattended-upgrades (0.82.7) UNRELEASED; urgency=low
+unattended-upgrades (0.82.7) unstable; urgency=low
 
   [ Michael Stapelberg ]
   * Add native systemd service file (closes: #745992)
@@ -6,7 +6,7 @@ unattended-upgrades (0.82.7) UNRELEASED; urgency=low
   [ Brian Murray ]
   * add in an apport package hook (LP: #1078386)
 
- -- Michael Vogt <mvo@debian.org>  Fri, 16 May 2014 08:32:32 +0200
+ -- Michael Vogt <mvo@debian.org>  Fri, 16 May 2014 08:33:23 +0200
 
 unattended-upgrades (0.82.6) unstable; urgency=medium
 
