@@ -1,3 +1,10 @@
+unattended-upgrades (0.82.8) UNRELEASED; urgency=low
+
+  * really add unattended-upgrades.service file, thanks
+    to Simon McVittie (closes: #745992)
+
+ -- Michael Vogt <mvo@debian.org>  Thu, 19 Jun 2014 17:35:49 +0200
+
 unattended-upgrades (0.82.7) unstable; urgency=low
 
   [ Michael Stapelberg ]
