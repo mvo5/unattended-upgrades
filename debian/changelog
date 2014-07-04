@@ -1,9 +1,10 @@
-unattended-upgrades (0.82.8) UNRELEASED; urgency=low
+unattended-upgrades (0.82.8) unstable; urgency=low
 
   * really add unattended-upgrades.service file, thanks
     to Simon McVittie (closes: #745992)
+  * pep8 fixes
 
- -- Michael Vogt <mvo@debian.org>  Thu, 19 Jun 2014 17:35:49 +0200
+ -- Michael Vogt <mvo@debian.org>  Fri, 04 Jul 2014 16:55:19 +0200
 
 unattended-upgrades (0.82.7) unstable; urgency=low
 

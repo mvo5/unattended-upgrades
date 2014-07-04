@@ -12,7 +12,7 @@ class TestPyflakesClean(unittest.TestCase):
             top_src_dir,
             os.path.join(top_src_dir, "unattended-upgrade"),
             os.path.join(top_src_dir, "unattended-upgrade-shutdown"),
-            ]
+        ]
         self.assertEqual(subprocess.call(["pyflakes", ] + targets), 0)
 
 
