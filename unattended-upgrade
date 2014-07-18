@@ -95,7 +95,9 @@ class UnattendedUpgradesCache(apt.Cache):
         """ Adjust candidate versions to match highest allowed origin
 
             This adjusts the origin even if the candidate has a higher
-            version
+            version. This is needed when e.g. a package is available in
+            the security pocket but there is also a package in the 
+            updates pocket with a higher version number
         """
         for pkg in self:
             # important! this avoids downgrades below
@@ -109,9 +111,10 @@ class UnattendedUpgradesCache(apt.Cache):
             # not the candidate
             new_cand = None
             for ver in pkg.versions:
-                # ignore versions that the user marked with priority < 0
+                # ignore versions that the user marked with priority < 100
                 # (and ensure we have a python-apt that supports this)
-                if hasattr(ver, "policy_priority") and ver.policy_priority < 0:
+                if (hasattr(ver, "policy_priority") and
+                        ver.policy_priority < 100):
                     logging.debug("ignoring ver '%s' with priority < 0" % ver)
                     continue
                 if is_allowed_origin(ver, self.allowed_origins):
