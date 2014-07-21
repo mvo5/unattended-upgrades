@@ -96,7 +96,7 @@ class UnattendedUpgradesCache(apt.Cache):
 
             This adjusts the origin even if the candidate has a higher
             version. This is needed when e.g. a package is available in
-            the security pocket but there is also a package in the 
+            the security pocket but there is also a package in the
             updates pocket with a higher version number
         """
         for pkg in self:
@@ -765,6 +765,12 @@ def do_install(cache, pkgs_to_upgrade, blacklisted_pkgs, options,
     setup_apt_listchanges()
 
     logging.info(_("Writing dpkg log to '%s'") % logfile_dpkg)
+
+    marked_delete= [pkg for pkg in cache.get_changes() if pkg.marked_delete]
+    if marked_delete:
+        raise AssertionError(
+            "Internal error. The following packages are marked for "
+            "removal:%s" % "".join([pkg.name for pkg in marked_delete]))
 
     pkg_install_success = False
     try:

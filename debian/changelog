@@ -6,6 +6,8 @@ unattended-upgrades (0.82.9) UNRELEASED; urgency=low
     - improve docstring for adjust_candidate_versions
     - ignore versions with pin priority < 100 (instead of < 0),
       thanks to Stefano Zacchiroli
+    - raise error if there are marked removals in the cache
+      (as a extra precaution)
 
  -- Michael Vogt <mvo@debian.org>  Thu, 10 Jul 2014 08:58:26 +0200
 
