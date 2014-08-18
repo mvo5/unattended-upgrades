@@ -2,6 +2,9 @@ unattended-upgrades (0.82.9) UNRELEASED; urgency=low
 
   * po/da.po:
     - updated, thanks to Joe Dalton, closes: #754130
+  * debian/po/tr.po:
+    - add Turkish translation, thanks to Mert Dirik 
+      closes: #757500
   * unattended-upgrades:
     - improve docstring for adjust_candidate_versions
     - ignore versions with pin priority < 100 (instead of < 0),
