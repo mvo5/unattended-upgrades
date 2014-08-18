@@ -42,7 +42,7 @@ Allowed-Origins is a simple list of patterns of the form
 "origin:archive".
 
 Origins-Pattern allows you to give a list of
-patterns to match against.  For example:
+(glob-style) patterns to match against.  For example:
 ```
  Unattended-Upgrade::Origins-Pattern {
         "origin=Google\, Inc.,suite=contrib";
@@ -53,6 +53,14 @@ will upgrade a package if either the origin is "Google, Inc." and
 suite is "contrib" or if it comes from www.example.com and is in
 component "main".  The apt-cache policy short identifiers
 (e.g. "o" for "origin") are also supported.
+
+If you already configure what to install via apt pinning, you can
+simply use "origin=*", e.g.:
+```
+ Unattended-Upgrade::Origins-Pattern {
+        "origin=*";
+ };
+```
 
 All operations are be logged in /var/log/unattended-upgrades/. This
 includes the dpkg output as well.

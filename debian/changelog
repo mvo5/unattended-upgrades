@@ -11,6 +11,9 @@ unattended-upgrades (0.82.9) UNRELEASED; urgency=low
       thanks to Stefano Zacchiroli
     - raise error if there are marked removals in the cache
       (as a extra precaution)
+  * README.md:
+    - add example for matching all upgradable packages
+      (thanks to Paul van der Vlis for the suggestion)
 
  -- Michael Vogt <mvo@debian.org>  Thu, 10 Jul 2014 08:58:26 +0200
 
