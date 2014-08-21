@@ -1,4 +1,4 @@
-unattended-upgrades (0.82.9) UNRELEASED; urgency=low
+unattended-upgrades (0.82.9) unstable; urgency=low
 
   * po/da.po:
     - updated, thanks to Joe Dalton, closes: #754130
@@ -15,7 +15,7 @@ unattended-upgrades (0.82.9) UNRELEASED; urgency=low
     - add example for matching all upgradable packages
       (thanks to Paul van der Vlis for the suggestion)
 
- -- Michael Vogt <mvo@debian.org>  Thu, 10 Jul 2014 08:58:26 +0200
+ -- Michael Vogt <mvo@debian.org>  Thu, 21 Aug 2014 09:42:52 +0200
 
 unattended-upgrades (0.82.8) unstable; urgency=low
 
