@@ -766,7 +766,7 @@ def do_install(cache, pkgs_to_upgrade, blacklisted_pkgs, options,
 
     logging.info(_("Writing dpkg log to '%s'") % logfile_dpkg)
 
-    marked_delete= [pkg for pkg in cache.get_changes() if pkg.marked_delete]
+    marked_delete = [pkg for pkg in cache.get_changes() if pkg.marked_delete]
     if marked_delete:
         raise AssertionError(
             "Internal error. The following packages are marked for "
