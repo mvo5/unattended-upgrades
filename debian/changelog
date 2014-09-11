@@ -8,6 +8,7 @@ unattended-upgrades (0.82.8) UNRELEASED; urgency=low
     - log to a rotated and compressed
       /var/log/unattended-upgrades/unattended-upgrades-dpkg.log
       logfile instead of to multiple small logs (closes: #759693)
+    - log u-u commandline via apt logging in /var/log/apt/history.log
   * debian/postinst:
     - set /var/log/unattended-upgrades/ permissions to 0750
       (closes: #757438). Thanks to Joey Hess

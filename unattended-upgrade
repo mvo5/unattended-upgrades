@@ -1191,6 +1191,9 @@ if __name__ == "__main__":
     gettext.bindtextdomain(localesApp, localesDir)
     gettext.textdomain(localesApp)
 
+    # this ensures the commandline is logged in /var/log/apt/history.log
+    apt_pkg.config.set("Commandline::AsString", " ".join(sys.argv))
+ 
     # init the options
     parser = OptionParser()
     parser.add_option("-d", "--debug",
