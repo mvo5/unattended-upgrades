@@ -183,15 +183,19 @@ class LogInstallProgress(apt.progress.base.InstallProgress):
     def _redirect_output(self):
         # do not create log in dry-run mode, just output to stdout/stderr
         if not apt_pkg.config.find_b("Debug::pkgDPkgPM", False):
-            logfd = os.open(
-                self.logfile_dpkg, os.O_RDWR | os.O_APPEND | os.O_CREAT, 0o640)
-            try:
-                adm_gid = grp.getgrnam("adm").gr_gid
-                os.fchown(logfd, 0, adm_gid)
-            except KeyError:
-                pass
+            logfd = self._get_logfile_dpkg_fd()
             os.dup2(logfd, 1)
             os.dup2(logfd, 2)
+
+    def _get_logfile_dpkg_fd(self):
+        logfd = os.open(
+            self.logfile_dpkg, os.O_RDWR | os.O_APPEND | os.O_CREAT, 0o640)
+        try:
+            adm_gid = grp.getgrnam("adm").gr_gid
+            os.fchown(logfd, 0, adm_gid)
+        except KeyError:
+            pass
+        return logfd
 
     def update_interface(self):
         # call super class first
@@ -206,6 +210,7 @@ class LogInstallProgress(apt.progress.base.InstallProgress):
         if self.verbose:
             if self.output_logfd is None:
                 self.output_logfd = os.open(self.logfile_dpkg, os.O_RDONLY)
+                os.lseek(self.output_logfd, 0, os.SEEK_END)
             try:
                 select.select([self.output_logfd], [], [], 0)
             except select.error as e:
@@ -214,7 +219,19 @@ class LogInstallProgress(apt.progress.base.InstallProgress):
             # output to stdout in verbose mode only
             os.write(1, os.read(self.output_logfd, 1024))
 
+    def _log_in_dpkg_log(self, msg):
+        logfd = self._get_logfile_dpkg_fd()
+        os.write(logfd, msg.encode("utf-8"))
+        os.close(logfd)
+
+    def _now(self):
+        return datetime.datetime.now().strftime("%Y-%m-%d  %H:%M:%S")
+
+    def finish_update(self):
+        self._log_in_dpkg_log("Log ended: %s\n\n" % self._now())
+
     def fork(self):
+        self._log_in_dpkg_log("Log started: %s\n" % self._now())
         pid = os.fork()
         if pid == 0:
             self._fixup_fds()
@@ -1141,8 +1158,7 @@ def main(options, rootdir=""):
 
     # get log
     now = datetime.datetime.now()
-    logfile_dpkg = os.path.join(
-        _get_logdir(), 'unattended-upgrades-dpkg_%s.log' % now.isoformat('_'))
+    logfile_dpkg = os.path.join(_get_logdir(), 'unattended-upgrades-dpkg.log')
 
     # only perform install step if we actually have packages to install
     pkg_install_success = None
