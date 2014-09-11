@@ -1,3 +1,11 @@
+unattended-upgrades (0.82.8) UNRELEASED; urgency=low
+
+  * unattended-upgrade:
+    - use mode 0640 and root:adm for the dpkg terminal log files
+      (closes: #757438)
+
+ -- Michael Vogt <mvo>  Thu, 11 Sep 2014 13:26:03 +0200
+
 unattended-upgrades (0.82.7) unstable; urgency=low
 
   [ Michael Stapelberg ]
