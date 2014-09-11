@@ -968,7 +968,9 @@ def main(options, rootdir=""):
             try:
                 os.close(lockfd)
                 output = subprocess.check_output(
-                    ["dpkg", "--force-confold", "--configure", "-a"], env=env)
+                    ["dpkg", "--force-confold", "--configure", "-a"],
+                    env=env,
+                    universal_newlines=True)
             except subprocess.CalledProcessError as e:
                 output = e.output
             logging.warning(_("dpkg --configure -a output:\n%s" % output))

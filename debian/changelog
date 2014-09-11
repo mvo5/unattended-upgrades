@@ -3,6 +3,8 @@ unattended-upgrades (0.82.8) UNRELEASED; urgency=low
   * unattended-upgrade:
     - use mode 0640 and root:adm for the dpkg terminal log files
       (closes: #757438)
+    - fix output when "dpkg --configure -a" is run to recover
+      from a unclean state
   * debian/postinst:
     - set /var/log/unattended-upgrades/ permissions to 0750
       (closes: #757438). Thanks to Joey Hess
