@@ -1,4 +1,4 @@
-unattended-upgrades (0.82.10) UNRELEASED; urgency=medium
+unattended-upgrades (0.82.10) unstable; urgency=medium
 
   [ Helge Kreutzmann ]
   * Move misplaced German program translation update from debian/po/de.po to
