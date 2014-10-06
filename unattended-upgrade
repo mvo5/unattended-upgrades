@@ -118,7 +118,6 @@ class UnattendedUpgradesCache(apt.Cache):
                 if is_allowed_origin(ver, self.allowed_origins):
                     # leave as soon as we have the highest new candidate
                     new_cand = ver
-                    print "newest candidate version applied"
                     break
             if new_cand and new_cand != pkg.candidate:
                 logging.debug("adjusting candidate version: '%s'" % new_cand)
@@ -517,10 +516,10 @@ def check_changes_for_sanity(cache, allowed_origins, blacklist, whitelist):
                 logging.debug("pkg '%s' package has been blacklisted" %
                               pkg.name)
                 return False
-            if is_pkgname_in_whitelist(pkg.name, whitelist):
+            if not is_pkgname_in_whitelist(pkg.name, whitelist):
                 logging.debug("pkg '%s' package has been whitelisted" %
                               pkg.name)
-                return True
+                return False
             if pkg._pkg.selected_state == apt_pkg.SELSTATE_HOLD:
                 logging.debug("pkg '%s' is on hold" % pkg.name)
                 return False
@@ -902,7 +901,12 @@ def get_blacklisted_pkgs():
     return apt_pkg.config.value_list("Unattended-Upgrade::Package-Blacklist")
 
 def get_whitelisted_pkgs():
-    return apt_pkg.config.value_list("Unattended-Upgrade::Package-Whitelist")
+    whitelist = apt_pkg.config.value_list(
+        "Unattended-Upgrade::Package-Whitelist")
+    if not whitelist:
+        logging.debug("empty whitelist, assuming '*'")
+        return [".*"]
+    return whitelist
 
 
 def reboot_if_requested_and_needed(shutdown_lock=0):
@@ -1218,7 +1222,6 @@ def main(options, rootdir=""):
     logging.info(_("Packages that will be upgraded: %s" % pkgs))
 
     # get log
-    now = datetime.datetime.now()
     logfile_dpkg = os.path.join(_get_logdir(), 'unattended-upgrades-dpkg.log')
 
     # only perform install step if we actually have packages to install

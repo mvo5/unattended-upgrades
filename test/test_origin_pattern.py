@@ -26,8 +26,10 @@ class MockPackage():
     pass
 
 
-class MockCache(list):
-    pass
+class MockCache(dict):
+    def __iter__(self):
+        for pkgname in self.keys():
+            yield self[pkgname]
 
 
 class MockDepCache():
@@ -101,23 +103,39 @@ class TestOriginPatern(unittest.TestCase):
             self.assertTrue(match_whitelist_string(s, None))
 
     def test_blacklist(self):
-        # mock pkg (yeah, complicated)
-        pkg = self._get_mock_package()
-        # mock cache
-        cache = MockCache()
-        cache._depcache = MockDepCache()
-        cache._depcache.broken_count = 0
-        cache.append(pkg)
+        # get the mocks
+        pkg = self._get_mock_package("linux-image")
+        cache = self._get_mock_cache()
+        cache[pkg.name] = pkg
         # origins and blacklist
         allowed_origins = ["o=Ubuntu"]
         blacklist = ["linux-.*"]
         # with blacklist pkg
         self.assertFalse(
-            check_changes_for_sanity(cache, allowed_origins, blacklist))
+            check_changes_for_sanity(cache, allowed_origins, blacklist, [".*"]))
         # with "normal" pkg
         pkg.name = "apt"
         self.assertTrue(
-            check_changes_for_sanity(cache, allowed_origins, blacklist))
+            check_changes_for_sanity(cache, allowed_origins, blacklist, [".*"]))
+
+    def test_whitelist(self):
+        cache = self._get_mock_cache()
+        for pkgname in ["not-whitelisted", "whitelisted"]:
+            pkg = self._get_mock_package(name=pkgname)
+            cache[pkg.name] = pkg
+        # origins and blacklist
+        allowed_origins = ["o=Ubuntu"]
+        whitelist = ["whitelisted"]
+        # ensure that a not-whitelisted pkg will fail
+        self.assertTrue(cache["not-whitelisted"].marked_upgrade)
+        self.assertFalse(
+            check_changes_for_sanity(cache, allowed_origins, [], whitelist))
+
+    def _get_mock_cache(self):
+        cache = MockCache()
+        cache._depcache = MockDepCache()
+        cache._depcache.broken_count = 0
+        return cache
 
     def _get_mock_origin(self, aorigin="", label="", archive="",
                          site="", component=""):
@@ -129,11 +147,11 @@ class TestOriginPatern(unittest.TestCase):
         origin.compoent = component
         return origin
 
-    def _get_mock_package(self):
+    def _get_mock_package(self, name="foo"):
         pkg = MockPackage()
         pkg._pkg = MockPackage()
         pkg._pkg.selected_state = 0
-        pkg.name = "linux-image"
+        pkg.name = name
         pkg.marked_install = True
         pkg.marked_upgrade = True
         pkg.marked_delete = False
