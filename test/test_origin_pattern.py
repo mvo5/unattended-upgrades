@@ -118,7 +118,7 @@ class TestOriginPatern(unittest.TestCase):
         self.assertTrue(
             check_changes_for_sanity(cache, allowed_origins, blacklist, [".*"]))
 
-    def test_whitelist(self):
+    def test_whitelist_with_strict_whitelisting(self):
         cache = self._get_mock_cache()
         for pkgname in ["not-whitelisted", "whitelisted"]:
             pkg = self._get_mock_package(name=pkgname)
@@ -126,6 +126,9 @@ class TestOriginPatern(unittest.TestCase):
         # origins and blacklist
         allowed_origins = ["o=Ubuntu"]
         whitelist = ["whitelisted"]
+        # test with strict whitelist
+        apt_pkg.config.set(
+            "Unattended-Upgrades::Packages-Whitelist-Strict", "true")
         # ensure that a not-whitelisted pkg will fail
         self.assertTrue(cache["not-whitelisted"].marked_upgrade)
         self.assertFalse(

@@ -367,8 +367,8 @@ def match_whitelist_string(whitelist, origin):
             raise UnknownMatcherError(
                 "Unknown whitelist entry for macher '%s' (token '%s')" % (
                     what, token))
-        logging.debug("matching '%s'='%s' against '%s'" % (
-                      what, value, origin))
+        #logging.debug("matching '%s'='%s' against '%s'" % (
+        #              what, value, origin))
     return res
 
 
@@ -496,6 +496,9 @@ def is_pkgname_in_blacklist(pkgname, blacklist):
     return False
 
 def is_pkgname_in_whitelist(pkgname, whitelist):
+    # a empty whitelist means the user does not want to use this feature
+    if not whitelist:
+        return True
     for whitelist_regexp in whitelist:
         if re.match(whitelist_regexp, pkgname):
             logging.debug("only upgrading the following package '%s'" %
@@ -519,8 +522,15 @@ def check_changes_for_sanity(cache, allowed_origins, blacklist, whitelist):
                 logging.debug("pkg '%s' package has been blacklisted" %
                               pkg.name)
                 return False
-            if not is_pkgname_in_whitelist(pkg.name, whitelist):
-                logging.debug("pkg '%s' package has been whitelisted" %
+            # a strict whitelist will not allow any changes not in the 
+            # whitelist, most people will want the relaxed whitelist
+            # that whitelists a package but pulls in the package 
+            # dependencies
+            strict_whitelist = apt_pkg.config.find_b(
+                "Unattended-Upgrade::Package-Whitelist-Strict", False)
+            if (strict_whitelist and
+                not is_pkgname_in_whitelist(pkg.name, whitelist)):
+                logging.debug("pkg '%s' package is not whitelisted" %
                               pkg.name)
                 return False
             if pkg._pkg.selected_state == apt_pkg.SELSTATE_HOLD:
@@ -879,7 +889,6 @@ def _setup_logging(options):
             # COMPAT only
             apt_pkg.config.find("APT::UnattendedUpgrades::LogFile",
                                 "unattended-upgrades.log")))
-
     if not options.dry_run and not os.path.exists(logdir):
         os.makedirs(logdir)
 
@@ -909,13 +918,9 @@ def _setup_logging(options):
 def get_blacklisted_pkgs():
     return apt_pkg.config.value_list("Unattended-Upgrade::Package-Blacklist")
 
+
 def get_whitelisted_pkgs():
-    whitelist = apt_pkg.config.value_list(
-        "Unattended-Upgrade::Package-Whitelist")
-    if not whitelist:
-        logging.debug("empty whitelist, assuming '*'")
-        return [".*"]
-    return whitelist
+    return apt_pkg.config.value_list("Unattended-Upgrade::Package-Whitelist")
 
 
 def reboot_if_requested_and_needed(shutdown_lock=0):
@@ -938,11 +943,8 @@ def write_stamp_file():
         pass
 
 
-def flag_for_upgrade(pkg, cache, allowed_origins,
+def try_to_upgrade(pkg, pkgs_to_upgrade, pkgs_kept_back, cache, allowed_origins,
                      blacklisted_pkgs, whitelisted_pkgs):
-
-    pkgs_to_upgrade = []
-    pkgs_kept_back = []
 
     try:
         pkg.mark_upgrade()
@@ -969,10 +971,13 @@ def flag_for_upgrade(pkg, cache, allowed_origins,
                 "be marked for upgrade (%s)") % (pkg.name, e))
         rewind_cache(cache, pkgs_to_upgrade)
         pkgs_kept_back.append(pkg.name)
-    return pkgs_to_upgrade, pkgs_kept_back
+
 
 def calculate_upgradable_pkgs(cache, options, allowed_origins,
                               blacklisted_pkgs, whitelisted_pkgs):
+    pkgs_to_upgrade = []
+    pkgs_kept_back = []
+
     # now do the actual upgrade
     for pkg in cache:
         if options.debug and pkg.is_upgradable:
@@ -982,33 +987,14 @@ def calculate_upgradable_pkgs(cache, options, allowed_origins,
               not is_pkgname_in_blacklist(pkg.name, blacklisted_pkgs) and
               is_pkgname_in_whitelist(pkg.name, whitelisted_pkgs) and
               is_allowed_origin(pkg.candidate, allowed_origins)):
-
-            logging.debug("Whitelisted package")
-            pkgs_to_upgrade, pkgs_kept_back = flag_for_upgrade(pkg,
-                                                               cache,
-                                                               allowed_origins,
-                                                               blacklisted_pkgs,
-                                                               whitelisted_pkgs)
-            return pkgs_to_upgrade, pkgs_kept_back
-
-        elif (pkg.is_upgradable and
-              	not is_pkgname_in_blacklist(pkg.name, blacklisted_pkgs) and
-              	is_allowed_origin(pkg.candidate, allowed_origins)):
-
-            pkgs_to_upgrade, pkgs_kept_back = flag_for_upgrade(pkg,
-                                                               cache,
-                                                               allowed_origins,
-                                                               blacklisted_pkgs,
-                                                               whitelisted_pkgs)
-            return pkgs_to_upgrade, pkgs_kept_back
-        else:
-
-            # Send back the empty lists
-
-            pkgs_to_upgrade = []
-            pkgs_kept_back = []
-
-            return pkgs_to_upgrade, pkgs_kept_back
+            try_to_upgrade(pkg,
+                           pkgs_to_upgrade,
+                           pkgs_kept_back,
+                           cache,
+                           allowed_origins,
+                           blacklisted_pkgs,
+                           whitelisted_pkgs)
+    return pkgs_to_upgrade, pkgs_kept_back
 
 
 def main(options, rootdir=""):
