@@ -1,0 +1,12 @@
+[Unit]
+Description=Unattended Upgrades
+DefaultDependencies=no
+Before=shutdown.target reboot.target halt.target
+Documentation=man:unattended-upgrade(8)
+
+[Service]
+Type=oneshot
+ExecStart=/usr/share/unattended-upgrades/unattended-upgrade-shutdown
+
+[Install]
+WantedBy=shutdown.target

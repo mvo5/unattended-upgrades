@@ -1,8 +1,35 @@
-unattended-upgrades (0.82.8) UNRELEASED; urgency=low
+unattended-upgrades (0.82.10) unstable; urgency=medium
 
-  * unattended-upgrade:
-    - use mode 0640 and root:adm for the dpkg terminal log files
-      (closes: #757438)
+  [ Helge Kreutzmann ]
+  * Move misplaced German program translation update from debian/po/de.po to
+    po/de.po and update debconf translation from Chris Leick, closes: #751162
+
+ -- Michael Vogt <mvo@debian.org>  Sun, 21 Sep 2014 21:31:20 +0200
+
+unattended-upgrades (0.82.9) unstable; urgency=low
+
+  * po/da.po:
+    - updated, thanks to Joe Dalton, closes: #754130
+  * debian/po/tr.po:
+    - add Turkish translation, thanks to Mert Dirik 
+      closes: #757500
+  * unattended-upgrades:
+    - improve docstring for adjust_candidate_versions
+    - ignore versions with pin priority < 100 (instead of < 0),
+      thanks to Stefano Zacchiroli
+    - raise error if there are marked removals in the cache
+      (as a extra precaution)
+  * README.md:
+    - add example for matching all upgradable packages
+      (thanks to Paul van der Vlis for the suggestion)
+
+ -- Michael Vogt <mvo@debian.org>  Thu, 21 Aug 2014 09:42:52 +0200
+
+unattended-upgrades (0.82.8) unstable; urgency=low
+
+  * really add unattended-upgrades.service file, thanks
+    to Simon McVittie (closes: #745992)
+  * pep8 fixes
     - fix output when "dpkg --configure -a" is run to recover
       from a unclean state
     - log to a rotated and compressed
@@ -13,7 +40,7 @@ unattended-upgrades (0.82.8) UNRELEASED; urgency=low
     - set /var/log/unattended-upgrades/ permissions to 0750
       (closes: #757438). Thanks to Joey Hess
 
- -- Michael Vogt <mvo@debian.org>  Thu, 11 Sep 2014 13:26:03 +0200
+ -- Michael Vogt <mvo@debian.org>  Fri, 04 Jul 2014 16:55:19 +0200
 
 unattended-upgrades (0.82.7) unstable; urgency=low
 

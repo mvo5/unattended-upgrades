@@ -28,6 +28,6 @@ if __name__ == "__main__":
                 ["debian/source_unattended-upgrades.py"])
         ],
         cmdclass={"build": build_extra.build_extra,
-                  "build_i18n":  build_i18n.build_i18n},
+                  "build_i18n": build_i18n.build_i18n},
         test_suite="test",
     )

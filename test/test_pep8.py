@@ -2,6 +2,8 @@ import os
 import subprocess
 import unittest
 
+IGNORE = "E265"
+
 
 class PackagePep8TestCase(unittest.TestCase):
 
@@ -11,8 +13,9 @@ class PackagePep8TestCase(unittest.TestCase):
             top_src_dir,
             os.path.join(top_src_dir, "unattended-upgrade"),
             os.path.join(top_src_dir, "unattended-upgrade-shutdown"),
-            ]
-        self.assertEqual(subprocess.call(["pep8", "--repeat", ] + targets), 0)
+        ]
+        self.assertEqual(subprocess.call(
+            ["pep8", "--repeat", "--ignore=%s" % IGNORE] + targets), 0)
 
 
 if __name__ == "__main__":

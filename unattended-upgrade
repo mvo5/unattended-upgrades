@@ -96,7 +96,9 @@ class UnattendedUpgradesCache(apt.Cache):
         """ Adjust candidate versions to match highest allowed origin
 
             This adjusts the origin even if the candidate has a higher
-            version
+            version. This is needed when e.g. a package is available in
+            the security pocket but there is also a package in the
+            updates pocket with a higher version number
         """
         for pkg in self:
             # important! this avoids downgrades below
@@ -110,9 +112,10 @@ class UnattendedUpgradesCache(apt.Cache):
             # not the candidate
             new_cand = None
             for ver in pkg.versions:
-                # ignore versions that the user marked with priority < 0
+                # ignore versions that the user marked with priority < 100
                 # (and ensure we have a python-apt that supports this)
-                if hasattr(ver, "policy_priority") and ver.policy_priority < 0:
+                if (hasattr(ver, "policy_priority") and
+                        ver.policy_priority < 100):
                     logging.debug("ignoring ver '%s' with priority < 0" % ver)
                     continue
                 if is_allowed_origin(ver, self.allowed_origins):
@@ -610,7 +613,7 @@ def conffile_prompt(destFile, prefix=""):
         # might be a dpkg prompt (LP: #936870)
         if md5 == "newconffile":
             continue
-        if not pkg_conffiles or not conf_file in pkg_conffiles.split("\n"):
+        if not pkg_conffiles or conf_file not in pkg_conffiles.split("\n"):
             logging.debug("'%s' not in package conffiles '%s'" % (
                 conf_file, pkg_conffiles))
             continue
@@ -640,7 +643,7 @@ def conffile_prompt(destFile, prefix=""):
     # in the previous version in the dpkg status file
     if pkg_conffiles:
         for conf_file in pkg_conffiles.split("\n"):
-            if (not conf_file in dpkg_status_conffiles and
+            if (conf_file not in dpkg_status_conffiles and
                     os.path.exists(prefix + conf_file)):
                 logging.debug("found conffile '%s' in new pkg but on dpkg "
                               "status" % conf_file)
@@ -652,7 +655,7 @@ def conffile_prompt(destFile, prefix=""):
 
 
 def dpkg_conffile_prompt():
-    if not "DPkg::Options" in apt_pkg.config:
+    if "DPkg::Options" not in apt_pkg.config:
         return True
     options = apt_pkg.config.value_list("DPkg::Options")
     for option in options:
@@ -708,7 +711,7 @@ def _send_mail_using_mailx(to_address, subject, body):
     # ascii only system like the buildds)
     mail = subprocess.Popen(
         [MAIL_BINARY, "-s", subject, to_address],
-        stdin=subprocess.PIPE,  universal_newlines=False)
+        stdin=subprocess.PIPE, universal_newlines=False)
     mail.stdin.write(encoded_body)
     mail.stdin.close()
     ret = mail.wait()
@@ -800,6 +803,12 @@ def do_install(cache, pkgs_to_upgrade, blacklisted_pkgs, whitelisted_pkgs,
     setup_apt_listchanges()
 
     logging.info(_("Writing dpkg log to '%s'") % logfile_dpkg)
+
+    marked_delete = [pkg for pkg in cache.get_changes() if pkg.marked_delete]
+    if marked_delete:
+        raise AssertionError(
+            "Internal error. The following packages are marked for "
+            "removal:%s" % "".join([pkg.name for pkg in marked_delete]))
 
     pkg_install_success = False
     try:
@@ -1205,7 +1214,7 @@ def main(options, rootdir=""):
     # check if its configured for install on shutdown, if so, the
     # environment UNATTENDED_UPGRADES_FORCE_INSTALL_ON_SHUTDOWN will
     # be set by the unatteded-upgrades-shutdown script
-    if (not "UNATTENDED_UPGRADES_FORCE_INSTALL_ON_SHUTDOWN" in os.environ and
+    if ("UNATTENDED_UPGRADES_FORCE_INSTALL_ON_SHUTDOWN" not in os.environ and
             apt_pkg.config.find_b(
                 "Unattended-Upgrade::InstallOnShutdown", False)):
         logger = logging.getLogger()
