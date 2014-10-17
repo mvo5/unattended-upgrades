@@ -1,4 +1,4 @@
-unattended-upgrades (0.83) UNRELEASED; urgency=medium
+unattended-upgrades (0.83) unstable; urgency=medium
 
   * add Unattended-Upgrade::Package-Whitelist to allow upgrading
     only whitelisted regexp packagenames (plus their dependencies)
