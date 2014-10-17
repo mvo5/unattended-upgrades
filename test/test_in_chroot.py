@@ -86,7 +86,8 @@ class TestUnattendedUpgrade(unittest.TestCase):
         # run it
         target = self._run_upgrade_test_in_real_chroot(options)
         # ensure we upgraded the expected packages
-        self.assertTrue(self._verify_install_log_in_real_chroot(target))
+        self.assertTrue(
+            self._verify_install_log_in_real_chroot(target, "ca-certificates"))
 
     def test_minimal_steps_upgrade(self):
         print("Running minimal steps unattended upgrade in chroot")
@@ -95,7 +96,8 @@ class TestUnattendedUpgrade(unittest.TestCase):
         # run it
         target = self._run_upgrade_test_in_real_chroot(options)
         # ensure we upgraded the expected packages
-        self.assertTrue(self._verify_install_log_in_real_chroot(target))
+        self.assertTrue(
+            self._verify_install_log_in_real_chroot(target, "ca-certificates"))
 
     def test_upgrade_on_shutdown_upgrade(self):
         print("Running unattended upgrade on shutdown (download and install) "
@@ -105,7 +107,45 @@ class TestUnattendedUpgrade(unittest.TestCase):
         os.environ["UNATTENDED_UPGRADES_FORCE_INSTALL_ON_SHUTDOWN"] = "1"
         apt.apt_pkg.config.set("Unattended-Upgrade::InstallOnShutdown", "1")
         target = self._run_upgrade_test_in_real_chroot(options)
-        self.assertTrue(self._verify_install_log_in_real_chroot(target))
+        self.assertTrue(
+            self._verify_install_log_in_real_chroot(target, "ca-certificates"))
+
+    def test_whitelist_upgrade(self):
+        print("Running unattended upgrade in chroot with whitelisted pkg")
+        options = MockOptions()
+        apt.apt_pkg.config.set(
+            "Unattended-Upgrade::Package-Whitelist::", "^libc6$")
+        # run it
+        target = self._run_upgrade_test_in_real_chroot(options)
+        # libc6 has a strict dependency on libc-bin so both packages
+        # will have to get installed. ensure that the relaxed whitelist is ok
+        self.assertTrue(
+            self._verify_install_log_in_real_chroot(target, "libc6"))
+        self.assertFalse(
+            self._verify_install_log_in_real_chroot(target, "ca-certificates"))
+        apt.apt_pkg.config.clear("Unattended-Upgrade::Package-Whitelist")
+
+    def test_whitelist_upgrade_strict(self):
+        print(
+            "Running unattended upgrade in chroot with strict whitelisted pkg")
+        options = MockOptions()
+        apt.apt_pkg.config.set(
+            "Unattended-Upgrade::Package-Whitelist::", "^apt$")
+        apt.apt_pkg.config.set(
+            "Unattended-Upgrade::Package-Whitelist::", "^libc6$")
+        apt.apt_pkg.config.set(
+            "Unattended-Upgrade::Package-Whitelist-Strict", "true")
+        # run it
+        target = self._run_upgrade_test_in_real_chroot(options)
+        # we upgraded apt, but not libc6 because libc6 needs libc-bin and
+        # its not whitelisted (in strict mode)
+        self.assertTrue(
+            self._verify_install_log_in_real_chroot(target, "apt"))
+        self.assertFalse(
+            self._verify_install_log_in_real_chroot(target, "libc6"))
+        self.assertFalse(
+            self._verify_install_log_in_real_chroot(target, "libc-bin"))
+        apt.apt_pkg.config.clear("Unattended-Upgrade::Package-Whitelist")
 
     def _get_lockfile_location(self, target):
         return os.path.join(
@@ -166,7 +206,7 @@ class TestUnattendedUpgrade(unittest.TestCase):
             apt.apt_pkg.config.clear("Unattended-Upgrade::Origins-Pattern")
             apt.apt_pkg.config.set(
                 "Unattended-Upgrade::Origins-Pattern::", ORIGINS_PATTERN)
-            unattended_upgrade.DISTRO_CODENAME = "lucid"
+            unattended_upgrade.DISTRO_CODENAME = DISTRO
             unattended_upgrade.main(options)
             os._exit(0)
         else:
@@ -196,16 +236,15 @@ class TestUnattendedUpgrade(unittest.TestCase):
         self.assertTrue(len(all_progress) > 5)
         return target
 
-    def _verify_install_log_in_real_chroot(self, target):
+    def _verify_install_log_in_real_chroot(self, target, needle_pkg):
         # examine log
         log = self._get_lockfile_location(target)
         logfile = open(log).read()
         #print(logfile)
-        NEEDLE_PKG = "ca-certificates"
-        if not re.search("Packages that will be upgraded:.*%s" % NEEDLE_PKG,
+        if not re.search("Packages that will be upgraded:.*%s" % needle_pkg,
                          logfile):
             logging.warn(
-                "Can not find expected %s upgrade in log" % NEEDLE_PKG)
+                "Can not find expected %s upgrade in log" % needle_pkg)
             return False
         if "ERROR Installing the upgrades failed" in logfile:
             logging.warn("Got a ERROR in the logfile")
@@ -213,9 +252,9 @@ class TestUnattendedUpgrade(unittest.TestCase):
         dpkg_log = os.path.join(
             target, "var/log/unattended-upgrades/*-dpkg*.log")
         dpkg_logfile = open(glob.glob(dpkg_log)[0]).read()
-        if not "Preparing to replace %s" % NEEDLE_PKG in dpkg_logfile:
+        if not "Preparing to replace %s" % needle_pkg in dpkg_logfile:
             logging.warn("Did not find %s upgrade in %s" % (
-                         dpkg_log, NEEDLE_PKG))
+                         dpkg_log, needle_pkg))
             return False
         #print(dpkg_logfile)
         return True

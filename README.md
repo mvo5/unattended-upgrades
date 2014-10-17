@@ -97,3 +97,34 @@ setup /etc/apt/apt.conf.d/10periodic. Just edit this file then to fit
 your needs. If you do not have this file, just create it or
 create/edit /etc/apt/apt.conf - you can check your configuration by
 running "apt-config dump".
+
+
+Supported Options Reference
+---------------------------
+
+* `Unattended-Upgrade::Package-Whitelist` - list of regular expressions
+ 
+ Only packages that match the regular expressions in this list will be
+ marked for upgrade. By default dependencies of whitelisted packages
+ are allowed. This can be changed to allow only ever allow whitelisted
+ packages with the `Unattended-Upgrade::Package-Whitelist-Strict`
+ boolean option.
+ 
+ Example:
+ ```
+ Unattended-Upgrade::Package-Whitelist {
+     "bash";
+ };
+ ```
+
+* `Unattended-Upgrade::Package-Whitelist-Strict` - boolean
+ 
+ When set, allow only packages in `Unattended-Upgrade::Package-Whitelist`
+ to be upgraded. This means that you also need to list all dependencies
+ of a whitelisted packages, e.g. if A depends on B and only A is
+ whitelisted, it will be held back.
+ 
+ Example:
+ ```
+ Unattended-Upgrade::Package-Whitelist-Strict "true";
+ ```

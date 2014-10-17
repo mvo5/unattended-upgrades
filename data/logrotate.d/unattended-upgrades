@@ -1,4 +1,5 @@
 /var/log/unattended-upgrades/unattended-upgrades.log 
+/var/log/unattended-upgrades/unattended-upgrades-dpkg.log
 /var/log/unattended-upgrades/unattended-upgrades-shutdown.log
 {
   rotate 6

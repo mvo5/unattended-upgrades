@@ -1,3 +1,24 @@
+unattended-upgrades (0.83) UNRELEASED; urgency=medium
+
+  * add Unattended-Upgrade::Package-Whitelist to allow upgrading
+    only whitelisted regexp packagenames (plus their dependencies)
+    (thanks to Christopher Warner)
+  * add Unattended-Upgrade::Package-Whitelist-Strict boolean option
+    to make Unattended-Upgrade::Package-Whitelist also check if all
+    dependencies are whitelisted
+  * unattended-upgrades:
+    - fix output when "dpkg --configure -a" is run to recover
+      from a unclean state
+    - log to a rotated and compressed
+      /var/log/unattended-upgrades/unattended-upgrades-dpkg.log
+      logfile instead of to multiple small logs (closes: #759693)
+    - log u-u commandline via apt logging in /var/log/apt/history.log
+  * debian/postinst:
+    - set /var/log/unattended-upgrades/ permissions to 0750
+      (closes: #757438). Thanks to Joey Hess
+ 
+ -- Michael Vogt <mvo@debian.org>  Fri, 17 Oct 2014 15:50:29 +0200
+
 unattended-upgrades (0.82.10) unstable; urgency=medium
 
   [ Helge Kreutzmann ]
