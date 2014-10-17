@@ -128,7 +128,7 @@ class TestOriginPatern(unittest.TestCase):
         whitelist = ["whitelisted"]
         # test with strict whitelist
         apt_pkg.config.set(
-            "Unattended-Upgrades::Packages-Whitelist-Strict", "true")
+            "Unattended-Upgrade::Package-Whitelist-Strict", "true")
         # ensure that a not-whitelisted pkg will fail
         self.assertTrue(cache["not-whitelisted"].marked_upgrade)
         self.assertFalse(
