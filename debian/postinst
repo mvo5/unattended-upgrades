@@ -19,6 +19,12 @@ set -e
 # the debian-policy package
 
 
+# ensure the right permissions for the logdir (#757438)
+if [ -d /var/log/unattended-upgrades ]; then
+  chown root:adm /var/log/unattended-upgrades || true
+  chmod 0750 /var/log/unattended-upgrades
+fi
+
 case "$1" in
     configure)
 	# *sigh* typo in filename in version 0.51ubuntu1
