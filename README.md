@@ -102,6 +102,35 @@ running "apt-config dump".
 Supported Options Reference
 ---------------------------
 
+* `Unattended-Upgrade::Allowed-Origins` - list of (origin:archive) pairs
+ 
+ Only packages from this origin:archive pair will be installed. You
+ can see all available origin:archive pairs by running `apt-cache policy`
+ and checking the "o=" and "a=" fields. Variable substitution is supported
+ for ${distro_id} that contains the output of `lsb_release -i` and
+ ${distro_codename} that contains the output of `lsb_release -c`.
+ 
+ Example:
+ ```
+ Unattended-Upgrade::Allowed-Origins {
+	"${distro_id}:${distro_codename}-security";
+ ```
+
+* `Unattended-Upgrade::Package-Blacklist` - list of regular expressions
+ 
+ No packages that match the regular expressions in this list will be
+ marked for upgrade. If a package A has a blacklisted package B as a
+ dependency then both packages A and B will not be upgraded. Note
+ that its a list of regular expressions so you may need to escape special
+ charackters like "+" as "\+".
+ 
+ Example:
+ ```
+ Unattended-Upgrade::Package-Blacklist {
+     "libstdc\+\+6";
+ };
+ ```
+
 * `Unattended-Upgrade::Package-Whitelist` - list of regular expressions
  
  Only packages that match the regular expressions in this list will be
@@ -128,3 +157,57 @@ Supported Options Reference
  ```
  Unattended-Upgrade::Package-Whitelist-Strict "true";
  ```
+
+* `Unattended-Upgrade::AutoFixInterruptedDpkg` - boolean (default:True)
+ 
+ Run `dpkg --force-confold --configure -a` if a unclean dpkg state is
+ detected. This defaults to true to ensure that updates get installed
+ even when the system got interrupted during a previous run.
+
+* `Unattended-Upgrade::MinimalSteps` - boolean (default:False)
+ 
+ Optimize for safety against e.g. power failure by performing the upgrade
+ in minimal self-contained chunks. This also allows sending a SIGINT to
+ unattended-upgrades and it will stop the upgrade when it finishes the
+ current upgrade step.
+
+* `Unattended-Upgrade::InstallOnShutdown` - boolean (default:False)
+ 
+ Perform the upgrade when the machine is shutting down instead of
+ doing it in he background while the machine is running.
+
+* `Unattended-Upgrade::Mail` - string (default:"")
+
+ Send an email to this address with information about the packages
+ upgraded. If empty or unset no email is send. This option requires
+ a working local mail setup.
+ 
+  Example:
+ ```
+ Unattended-Upgrade::Mail "user@example.com";
+ ```
+
+* `Unattended-Upgrade::MailOnlyOnError` - boolean (default:False)
+ 
+ Only generate a email if some problem occured during the 
+ unattended-upgrades run.
+
+* `Unattended-Upgrade::Remove-Unused-Dependencies` - boolean (default:False)
+ 
+ Remove all new unused dependencies after the upgrade finished.
+
+* `Unattended-Upgrade::Automatic-Reboot` - boolean (default:False)
+ 
+ Automatically reboot *WITHOUT CONFIRMATION* if the file
+ /var/run/reboot-required is found after the upgrade.
+
+* `Acquire::http::Dl-Limit` - integer (default:0)
+
+ Use apt bandwidth limit feature when fetching the upgrades. The
+ number is how many kb/sec apt is allowed to use
+
+ Example - limit the download to 70kb/sec:
+ ```
+ Acquire::http::Dl-Limit "70";
+ ```
+
