@@ -5,6 +5,7 @@ from __future__ import unicode_literals
 import apt_pkg
 import os
 import sys
+from textwrap import dedent
 import unittest
 
 from io import StringIO
@@ -18,8 +19,11 @@ from unattended_upgrade import send_summary_mail, setup_apt_listchanges
 class CommonTestsForMailxAndSendmail(object):
 
     EXPECTED_MAIL_CONTENT_STRINGS = [
-        "logfile_dpkg text",
+        "random logfile_dpkg text",
         "mem_log text",
+    ]
+    NOT_EXPECTED_MAIL_CONTENT_STRINGS = [
+        "old logfile text",
     ]
 
     def common_setup(self):
@@ -49,12 +53,25 @@ Debian-Security']
 """)
         logfile_dpkg = "./apt-term.log"
         with open("./apt-term.log", "w") as fp:
-            fp.write("logfile_dpkg text")
+            # note that we intentionally not have a "Log ended:" here
+            # because this may happen if something crashes power goes
+            # down etc
+            fp.write(dedent("""\
+            Log started: 2014-10-28  10:00
+            random logfile_dpkg text
+
+            Log started: 2013-01-01  12:00
+            old logfile text
+            Log ended: 2013-01-01  12:20
+            """))
         return (pkgs, res, pkgs_kept_back, mem_log, logfile_dpkg)
 
     def _verify_common_mail_content(self, mail_txt):
         for expected_string in self.EXPECTED_MAIL_CONTENT_STRINGS:
             self.assertTrue(expected_string in mail_txt)
+        for not_expected_string in self.NOT_EXPECTED_MAIL_CONTENT_STRINGS:
+            self.assertFalse(not_expected_string in mail_txt)
+        self.assertEqual(mail_txt.count("Log started: "), 1)
 
     def test_summary_mail_reboot(self):
         with open("./reboot-required", "w") as fp:

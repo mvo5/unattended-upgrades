@@ -1,3 +1,11 @@
+unattended-upgrades (0.83.1) UNRELEASED; urgency=low
+
+  * unattended-upgrade:
+    - fix regression and only send out the most recent dpkg log part
+      when sending the summary mail (closes: #759693)
+
+ -- Michael Vogt <michael.vogt@ubuntu.com>  Tue, 28 Oct 2014 11:51:56 +0100
+
 unattended-upgrades (0.83) unstable; urgency=medium
 
   * add Unattended-Upgrade::Package-Whitelist to allow upgrading

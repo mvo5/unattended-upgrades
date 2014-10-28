@@ -790,7 +790,10 @@ def send_summary_mail(pkgs, res, pkgs_kept_back, mem_log, logfile_dpkg):
     if os.path.exists(logfile_dpkg):
         body += _("Package installation log:") + "\n"
         with open(logfile_dpkg) as fp:
-            body += fp.read()
+            for i, line in enumerate(fp.readlines()):
+                if i > 0 and line.startswith("Log started: "):
+                    break
+                body += line
         body += "\n\n"
     body += _("Unattended-upgrades log:\n")
     body += mem_log.getvalue()
