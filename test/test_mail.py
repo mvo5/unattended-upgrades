@@ -57,11 +57,11 @@ Debian-Security']
             # because this may happen if something crashes power goes
             # down etc
             fp.write(dedent("""\
-            Log started: 2014-10-28  10:00
-            random logfile_dpkg text
-
             Log started: 2013-01-01  12:00
             old logfile text
+
+            Log started: 2014-10-28  10:00
+            random logfile_dpkg text
             Log ended: 2013-01-01  12:20
             """))
         return (pkgs, res, pkgs_kept_back, mem_log, logfile_dpkg)
