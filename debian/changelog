@@ -1,3 +1,11 @@
+unattended-upgrades (0.83.2) UNRELEASED; urgency=low
+
+  [ Martin-Éric Racine ]
+  * debian/changelog:
+    - updated to the DEP-5 format
+
+ -- Michael Vogt <mvo@debian.org>  Mon, 24 Nov 2014 11:24:21 +0100
+
 unattended-upgrades (0.83.1) unstable; urgency=medium
 
   * unattended-upgrade:

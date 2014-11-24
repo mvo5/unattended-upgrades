@@ -1,12 +1,9 @@
-This package was debianized by Michael Vogt <michael.vogt@ubuntu.com> on
-Mon,  28 Nov 2005 17:01:41 +0100.
+Format: http://www.debian.org/doc/packaging-manuals/copyright-format/1.0/
+Source: http://code.launchpad.net/~ubuntu-core-dev/unattended-upgrades/ubuntu
 
-It was downloaded via bzr from
-http://code.launchpad.net/~ubuntu-core-dev/unattended-upgrades/ubuntu
-
-Copyright: 2005-2009 Canonical Ltd
-
-Upstream Author: Michael Vogt <michael.vogt@ubuntu.com>
-
-GPL, see /usr/share/common-licenses/GPL-2
-
+Files: *
+Copyright: © 2005-2014 Michael Vogt <michael.vogt@ubuntu.com>,
+           © 2005-2009 Canonical Ltd
+License: GPL-2+
+  On Debian systems, the complete text of the GNU General Public License
+  can be found in </usr/share/common-licenses/GPL-2>.
