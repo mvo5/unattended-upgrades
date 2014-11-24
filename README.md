@@ -63,7 +63,10 @@ simply use "origin=*", e.g.:
 ```
 
 All operations are be logged in /var/log/unattended-upgrades/. This
-includes the dpkg output as well.
+includes the dpkg output as well. The file
+/etc/logrotate.d/unattended-upgrades controls how long logfails are
+kept and how often they are rotated. See the `logrotate` manpage for
+details.
 
 If you want mail support you need to have a mail-transport-agent (e.g
 postfix) or mailx installed.
