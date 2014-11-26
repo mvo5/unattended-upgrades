@@ -1,8 +1,11 @@
-unattended-upgrades (0.83.2) UNRELEASED; urgency=low
+unattended-upgrades (0.83.2) UNRELEASED; urgency=medium
 
   [ Martin-Éric Racine ]
   * debian/changelog:
     - updated to the DEP-5 format
+  
+  [ Alexandre Detiste ]
+  * Fix spurious newlines
 
  -- Michael Vogt <mvo@debian.org>  Mon, 24 Nov 2014 11:24:21 +0100
 

@@ -796,7 +796,7 @@ def send_summary_mail(pkgs, res, pkgs_kept_back, mem_log, logfile_dpkg):
                 if line.startswith("Log started: "):
                     content = []
                 content.append(line)
-        body += "\n".join(content)
+        body += "".join(content)
         body += "\n\n"
     body += _("Unattended-upgrades log:\n")
     body += mem_log.getvalue()
