@@ -2,17 +2,51 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 
-import apt_pkg
+from email.parser import Parser
+from io import StringIO
 import os
 import sys
 from textwrap import dedent
 import unittest
 
-from io import StringIO
-from email.parser import Parser
+
+import apt_pkg
 
 import unattended_upgrade
-from unattended_upgrade import send_summary_mail, setup_apt_listchanges
+from unattended_upgrade import (
+    get_dpkg_log_content,
+    LoggingDateTime,
+    send_summary_mail,
+    setup_apt_listchanges,
+)
+
+class ExtractDpkgLogTestCase(unittest.TestCase):
+
+    def test_get_dpkg_log_content(self):
+        logfile_dpkg = "./apt-term.log"
+        # note that we intentionally not have a "Log ended:" here
+        # because this may happen if something crashes power goes
+        # down etc
+        OLD_LOG = dedent("""\
+            Log started: 2013-01-01  12:00:00
+            old logfile text
+        """)
+        NEW_LOG = dedent("""\
+            Log started: 2014-10-28  10:00:00
+            random logfile_dpkg text
+            Log ended: 2013-01-01  12:20:00
+
+            Log started: 2014-10-28  12:21:00
+            more random logfile_dpkg text
+            Log ended: 2013-01-01  12:30:00
+            """)
+        with open("./apt-term.log", "w") as fp:
+            fp.write(OLD_LOG)
+            fp.write("\n")
+            fp.write(NEW_LOG)
+        start_time = LoggingDateTime.from_string("2014-10-28  10:00:00")
+        dpkg_log_content = get_dpkg_log_content(logfile_dpkg, start_time)
+        self.assertEqual(dpkg_log_content, NEW_LOG)
 
 
 # note this is not a unittest.TestCase as it needs to be parameterized
@@ -51,20 +85,12 @@ Allowed origins are: ['o=Debian,n=wheezy', 'o=Debian,n=wheezy-updates',\
  'o=Debian,n=wheezy,l=Debian-Security', 'origin=Debian,archive=stable,label=\
 Debian-Security']
 """)
-        logfile_dpkg = "./apt-term.log"
-        with open("./apt-term.log", "w") as fp:
-            # note that we intentionally not have a "Log ended:" here
-            # because this may happen if something crashes power goes
-            # down etc
-            fp.write(dedent("""\
-            Log started: 2013-01-01  12:00
-            old logfile text
-
-            Log started: 2014-10-28  10:00
-            random logfile_dpkg text
-            Log ended: 2013-01-01  12:20
-            """))
-        return (pkgs, res, pkgs_kept_back, mem_log, logfile_dpkg)
+        dpkg_log_content = dedent("""\
+        Log started: 2014-10-28  12:21:00
+        random logfile_dpkg text
+        Log ended: 2013-01-01  12:30:00
+        """)
+        return (pkgs, res, pkgs_kept_back, mem_log, dpkg_log_content)
 
     def _verify_common_mail_content(self, mail_txt):
         for expected_string in self.EXPECTED_MAIL_CONTENT_STRINGS:
@@ -182,6 +208,7 @@ class SendmailAndMailxTestCase(SendmailTestCase):
         self.common_setup()
         unattended_upgrade.MAIL_BINARY = "./mock-mail"
         unattended_upgrade.SENDMAIL_BINARY = "./mock-sendmail"
+
 
 if __name__ == "__main__":
     #logging.basicConfig(level=logging.DEBUG)

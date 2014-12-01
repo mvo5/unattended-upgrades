@@ -74,6 +74,20 @@ PID_FILE = "/var/run/unattended-upgrades.pid"
 # set from the sigint signal handler
 SIGNAL_STOP_REQUEST = False
 
+class LoggingDateTime:
+    """The date/time representation for the dpkg log file timestamps"""
+    LOG_DATE_TIME_FMT = "%Y-%m-%d  %H:%M:%S"
+
+    @classmethod
+    def as_string(cls):
+        """Return the current date and time as LOG_DATE_TIME_FMT string"""
+        return datetime.datetime.now().strftime(cls.LOG_DATE_TIME_FMT)
+
+    @classmethod
+    def from_string(cls, logstr):
+        """Take a LOG_DATE_TIME_FMT string and return datetime object"""
+        return datetime.datetime.strptime(logstr, cls.LOG_DATE_TIME_FMT)
+
 
 class UnknownMatcherError(ValueError):
     pass
@@ -227,14 +241,11 @@ class LogInstallProgress(apt.progress.base.InstallProgress):
         os.write(logfd, msg.encode("utf-8"))
         os.close(logfd)
 
-    def _now(self):
-        return datetime.datetime.now().strftime("%Y-%m-%d  %H:%M:%S")
-
     def finish_update(self):
-        self._log_in_dpkg_log("Log ended: %s\n\n" % self._now())
+        self._log_in_dpkg_log("Log ended: %s\n\n" % LoggingDateTime.as_string())
 
     def fork(self):
-        self._log_in_dpkg_log("Log started: %s\n" % self._now())
+        self._log_in_dpkg_log("Log started: %s\n" % LoggingDateTime.as_string())
         pid = os.fork()
         if pid == 0:
             self._fixup_fds()
@@ -748,8 +759,8 @@ def _send_mail_using_sendmail(to_address, subject, body):
     return ret
 
 
-def send_summary_mail(pkgs, res, pkgs_kept_back, mem_log, logfile_dpkg):
-    " send mail (if configured in Unattended-Upgrade::Mail) "
+def send_summary_mail(pkgs, res, pkgs_kept_back, mem_log, dpkg_log_content):
+    """ send mail (if configured in Unattended-Upgrade::Mail) """
     to_email = apt_pkg.config.find("Unattended-Upgrade::Mail", "")
     if not to_email:
         return
@@ -764,7 +775,7 @@ def send_summary_mail(pkgs, res, pkgs_kept_back, mem_log, logfile_dpkg):
             "Unattended-Upgrade::MailOnlyOnError", False)):
         return
     # Check if reboot-required flag is present
-    logging.debug("Sending mail with '%s' to '%s'" % (logfile_dpkg, to_email))
+    logging.debug("Sending mail to '%s'" % to_email)
     if os.path.isfile(REBOOT_REQUIRED_FILE):
         subject = _(
             "[reboot required] unattended-upgrades result for '%s': %s") % (
@@ -787,16 +798,9 @@ def send_summary_mail(pkgs, res, pkgs_kept_back, mem_log, logfile_dpkg):
         body += " " + wrap(" ".join(pkgs_kept_back), 70, " ")
         body += "\n"
     body += "\n"
-    if os.path.exists(logfile_dpkg):
+    if dpkg_log_content:
         body += _("Package installation log:") + "\n"
-        content = []
-        with open(logfile_dpkg) as fp:
-            # read until we find the last "Log started: "
-            for line in fp.readlines():
-                if line.startswith("Log started: "):
-                    content = []
-                content.append(line)
-        body += "".join(content)
+        body += dpkg_log_content
         body += "\n\n"
     body += _("Unattended-upgrades log:\n")
     body += mem_log.getvalue()
@@ -1001,6 +1005,26 @@ def calculate_upgradable_pkgs(cache, options, allowed_origins,
                            blacklisted_pkgs,
                            whitelisted_pkgs)
     return pkgs_to_upgrade, pkgs_kept_back
+
+
+def get_dpkg_log_content(logfile_dpkg, install_start_time):
+    logging.debug("Extracting content from '%s' since '%s'" % (
+        logfile_dpkg, install_start_time))
+    content = []
+    found_start = False
+    with open(logfile_dpkg) as fp:
+        # read until we find the last "Log started: "
+        for line in fp.readlines():
+            # scan for the first entry we need (minimal-step mode
+            # creates a new stanza for each individual install)
+            if not found_start and line.startswith("Log started: "):
+                stanza_start = LoggingDateTime.from_string(
+                    line[len("Log started: "):-1])
+                if stanza_start >= install_start_time:
+                    found_start = True
+            if found_start:
+                content.append(line)
+    return "".join(content)
 
 
 def main(options, rootdir=""):
@@ -1228,6 +1252,7 @@ def main(options, rootdir=""):
     # only perform install step if we actually have packages to install
     pkg_install_success = None
     shutdown_lock = -1
+    install_start_time = datetime.datetime.now()
     if len(pkgs_to_upgrade) > 0:
         # lock for the shutdown check - its fine if the system
         # is shutdown while downloading but not so much while installing
@@ -1238,8 +1263,9 @@ def main(options, rootdir=""):
 
     # send a mail (if needed)
     if not options.dry_run:
+        log_content = get_dpkg_log_content(logfile_dpkg, install_start_time)
         send_summary_mail(
-            pkgs, pkg_install_success, pkgs_kept_back, mem_log, logfile_dpkg)
+            pkgs, pkg_install_success, pkgs_kept_back, mem_log, log_content)
 
     # FIXME: DRY violation, write_stamp_file() is used above as well
     # write timestamp file
