@@ -938,7 +938,8 @@ def reboot_if_requested_and_needed(shutdown_lock=0):
         if not apt_pkg.config.find_b("Unattended-Upgrade::Automatic-Reboot-WithUsers", True):
             users = subprocess.check_output(USERS, universal_newlines=True).rstrip('\n')
             if users:
-                logging.warning("Found %s, but not rebooting because %s are logged in." % (REBOOT_REQUIRED_FILE, users))
+                verb = 'is' if len(users.split())==1 else 'are'
+                logging.warning("Found %s, but not rebooting because %s %s logged in." % (REBOOT_REQUIRED_FILE, users, verb))
                 return
         when = apt_pkg.config.find(
             "Unattended-Upgrade::Automatic-Reboot-Time", "now")
