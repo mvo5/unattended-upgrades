@@ -1,3 +1,14 @@
+unattended-upgrades (0.83.3) unstable; urgency=medium
+
+  [ Alexandre Detiste ]
+  * add Raspbian template
+
+  [ Michael Vogt ]
+  * Attach all dpkg log to the summary mail on minimal-upgrades-steps mode
+    (closes: #759693)
+
+ -- Michael Vogt <mvo@debian.org>  Wed, 10 Dec 2014 21:36:34 +0100
+
 unattended-upgrades (0.83.2) unstable; urgency=medium
 
   [ Martin-Éric Racine ]
