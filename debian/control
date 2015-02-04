@@ -15,6 +15,7 @@ Architecture: all
 Depends: ${shlibs:Depends}, ${misc:Depends}, debconf, python3, 
  python3-apt, apt-utils, apt, ucf, lsb-release, lsb-base (>= 3.2-14),
  xz-utils
+Recommends: cron | anacron
 Suggests: bsd-mailx, mail-transport-agent
 Description: automatic installation of security upgrades
  This package can download and install security upgrades automatically
