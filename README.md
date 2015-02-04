@@ -204,9 +204,9 @@ Supported Options Reference
  Automatically reboot *WITHOUT CONFIRMATION* if the file
  /var/run/reboot-required is found after the upgrade
 
- Please note that you need the update-notifier-common package or a
- custom hook in /etc/kernel/postinst.d to generate the reboot-required
- file.
+ Please note that you need the update-notifier-common package (only
+ available in Ubuntu) or a custom hook in /etc/kernel/postinst.d to
+ generate the reboot-required file.
 
 * `Acquire::http::Dl-Limit` - integer (default:0)
 
