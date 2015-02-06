@@ -1054,7 +1054,7 @@ def main(options, rootdir=""):
     logging.info(_("Allowed origins are: %s") % allowed_origins)
 
     # see debian #776752
-    install_start_time = datetime.datetime.now().replace(microseconds=0)
+    install_start_time = datetime.datetime.now().replace(microsecond=0)
 
     # check if the journal is dirty and if so, take emergceny action
     # the alternative is to leave the system potentially unsecure until
