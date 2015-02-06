@@ -2,3 +2,4 @@ usr/bin
 var/log/unattended-upgrades
 etc/logrotate.d
 etc/apt/apt.conf.d
+etc/kernel/postinst.d

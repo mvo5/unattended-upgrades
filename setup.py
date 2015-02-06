@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 
+import glob
 from setuptools import setup
 from DistUtilsExtra.command import (
     build_extra,
@@ -24,6 +25,8 @@ if __name__ == "__main__":
                 ["man/unattended-upgrade.8"]),
             ('../etc/pm/sleep.d/',
                 ["pm/sleep.d/10_unattended-upgrades-hibernate"]),
+            ('../etc/kernel/postinst.d/',
+                glob.glob("kernel/postinst.d/*")),
             ('../usr/share/apport/package-hooks/',
                 ["debian/source_unattended-upgrades.py"])
         ],
