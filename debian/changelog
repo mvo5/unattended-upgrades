@@ -1,3 +1,18 @@
+unattended-upgrades (0.83.4) unstable; urgency=medium
+
+  [ Alexandre Detiste ]
+  * fix sending dpkg log in mails (Closes: #776752)
+
+  [ Michael Vogt ]
+  * Document how the reboot-required file is generated (Closes: #776769)
+  * Add recommends to cron|cron-daemon|anacron (Closes: #776550),
+    thanks to Alexandre Detiste and christophe
+  * Ship /etc/kernel/postinst.d hook to ensure the
+    /var/run/reboot-required file is created (avoid the need to have
+    update-notifier-common installed) (Closes: #776769)
+
+ -- Michael Vogt <mvo@debian.org>  Tue, 10 Feb 2015 13:58:26 +0100
+
 unattended-upgrades (0.83.3) unstable; urgency=medium
 
   [ Alexandre Detiste ]
