@@ -1121,7 +1121,7 @@ def main(options, rootdir=""):
 
     # FIXME: make this into a ContextManager
     # stop being nice
-    os.nice(0)
+    os.nice(-19)
 
     # download what looks good
     if options.debug:
