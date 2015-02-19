@@ -1,3 +1,10 @@
+unattended-upgrades (0.83.5) unstable; urgency=medium
+
+  [ Brian Murray ]
+  * properly restore niceness (LP: #1422345)
+
+ -- Michael Vogt <mvo@debian.org>  Thu, 19 Feb 2015 15:06:58 +0100
+
 unattended-upgrades (0.83.4) unstable; urgency=medium
 
   [ Alexandre Detiste ]
