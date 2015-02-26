@@ -1131,7 +1131,7 @@ def main(options, rootdir=""):
 
     # FIXME: make this into a ContextManager
     # stop being nice
-    os.nice(old_priority - os.nice(19))
+    os.nice(old_priority - os.nice(0))
 
     # download what looks good
     if options.debug:
