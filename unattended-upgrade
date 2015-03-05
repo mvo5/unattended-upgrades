@@ -41,7 +41,7 @@ import sys
 
 
 from email.message import Message
-from errno import EACCESS, EPERM
+from errno import EACCES, EPERM
 from gettext import gettext as _
 from io import StringIO
 from optparse import (
@@ -1110,7 +1110,7 @@ def main(options, rootdir=""):
         os.nice(-1)
         os.nice(20)
     except OSError as e:
-        if e.errno in (EPERM, EACCESS):
+        if e.errno in (EPERM, EACCES):
             pass
         else:
             raise
