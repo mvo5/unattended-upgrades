@@ -1,3 +1,11 @@
+unattended-upgrades (0.83.6) unstable; urgency=medium
+
+  [ Brian Murray ]
+  * Handle the situation where you may not be able to decrease process
+    niceness e.g. on an lxc container.
+
+ -- Michael Vogt <mvo@debian.org>  Thu, 05 Mar 2015 11:32:50 -0500
+
 unattended-upgrades (0.83.5) unstable; urgency=medium
 
   [ Brian Murray ]
