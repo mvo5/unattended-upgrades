@@ -1,3 +1,13 @@
+unattended-upgrades (0.83.7) unstable; urgency=medium
+
+  [ Michael Vogt ]
+  * fix errno import
+
+  [ Brian Murray ]
+  * In the apport package hook gather the right log file name.
+
+ -- Michael Vogt <mvo@debian.org>  Tue, 31 Mar 2015 11:01:04 -0400
+
 unattended-upgrades (0.83.6) unstable; urgency=medium
 
   [ Brian Murray ]
