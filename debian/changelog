@@ -1,3 +1,10 @@
+unattended-upgrades (0.83.3.1) stable; urgency=low
+
+  * fix default configuration to match the jessie security
+    server configuration (closes: #783690)
+
+ -- Michael Vogt <mvo@debian.org>  Thu, 30 Apr 2015 16:05:26 +0200
+
 unattended-upgrades (0.83.3) unstable; urgency=medium
 
   [ Alexandre Detiste ]
