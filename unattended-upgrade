@@ -1141,9 +1141,6 @@ def main(options, rootdir=""):
     actiongroup = apt_pkg.ActionGroup(cache._depcache)
     actiongroup  # pyflakes
 
-    # stuff in auto-remove state
-    pkgs_auto_removable = set([pkg.name for pkg in cache
-                               if pkg.is_auto_removable])
     # find out about the packages that are upgradable (in a allowed_origin)
     pkgs_to_upgrade, pkgs_kept_back = calculate_upgradable_pkgs(
         cache, options, allowed_origins, blacklisted_pkgs, whitelisted_pkgs)
