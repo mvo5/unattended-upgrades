@@ -1026,6 +1026,40 @@ def get_dpkg_log_content(logfile_dpkg, install_start_time):
                 content.append(line)
     return "".join(content)
 
+def do_auto_remove(cache, options, logfile_dpkg, verbose=False):
+    # set debconf to NON_INTERACTIVE, redirect output
+    os.putenv("DEBIAN_FRONTEND", "noninteractive")
+
+    error = None
+    res = False
+    iprogress = LogInstallProgress(logfile_dpkg, verbose)
+
+    auto_removable = set([pkg.name for pkg in cache
+                              if pkg.is_auto_removable])
+
+    for pkgname in auto_removable:
+        logging.debug("marking %s for remove" % pkgname)
+        cache[pkgname].mark_delete()
+    logging.info(_("Packages that are auto removed: '%s'") %
+                     " ".join(auto_removable))
+
+    if not options.dry_run:
+        try:
+            with Unlocked():
+                res = cache.commit(install_progress=iprogress)
+        except SystemError as e:
+            error = e
+        if res:
+            logging.info(_("Packages auto-removed"))
+        else:
+            logging.error(_("Auto-removing the packages failed!"))
+            logging.error(_("Error message: '%s'") % error)
+            logging.error(_("dpkg returned an error! See '%s' for details")
+                          % logfile_dpkg)
+    else:
+        logging.info(_("Packages auto-removed"))
+    return res
+
 
 def main(options, rootdir=""):
 
@@ -1205,21 +1239,6 @@ def main(options, rootdir=""):
     else:
         logging.debug("dpkg is configured not to cause conffile prompts")
 
-    # do auto-remove
-    if apt_pkg.config.find_b(
-            "Unattended-Upgrade::Remove-Unused-Dependencies", False):
-        now_auto_removable = set([pkg.name for pkg in cache
-                                  if pkg.is_auto_removable])
-        for pkgname in now_auto_removable - pkgs_auto_removable:
-            logging.debug("marking %s for remove" % pkgname)
-            cache[pkgname].mark_delete()
-        logging.info(_("Packages that are auto removed: '%s'") %
-                     " ".join(now_auto_removable - pkgs_auto_removable))
-
-    logging.debug("InstCount=%i DelCount=%i BrokenCount=%i" % (
-        cache._depcache.inst_count, cache._depcache.del_count,
-        cache._depcache.broken_count))
-
     # exit if there is nothing to do and nothing to report
     if (len(pkgs_to_upgrade) == 0) and (len(pkgs_kept_back) == 0):
         logging.info(_("No packages found that can be upgraded unattended"))
@@ -1260,6 +1279,27 @@ def main(options, rootdir=""):
         # do install
         pkg_install_success = do_install(
             cache, pkgs_to_upgrade, blacklisted_pkgs, whitelisted_pkgs, options, logfile_dpkg)
+
+
+    # remove unneeded packages if there are any
+    if apt_pkg.config.find_b(
+            "Unattended-Upgrade::Remove-Unused-Dependencies", False):
+        cache = UnattendedUpgradesCache(rootdir=rootdir,
+                                    allowed_origins=allowed_origins)
+        if cache._depcache.broken_count > 0:
+            print(_("Cache has broken packages, exiting"))
+            logging.error(_("Cache has broken packages, exiting"))
+            sys.exit(1)
+
+        remove_success = do_auto_remove(
+            cache, options, logfile_dpkg,
+            options.verbose or options.debug)
+        if pkg_install_success is not False:
+            pkg_install_success = remove_success
+
+    logging.debug("InstCount=%i DelCount=%i BrokenCount=%i" % (
+    cache._depcache.inst_count, cache._depcache.del_count,
+    cache._depcache.broken_count))
 
     # send a mail (if needed)
     if not options.dry_run:
