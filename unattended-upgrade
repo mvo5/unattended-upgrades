@@ -524,7 +524,10 @@ def check_changes_for_sanity(cache, allowed_origins, blacklist, whitelist):
     for pkg in cache:
         if pkg.marked_delete:
             logging.debug("pkg '%s' now marked delete" % pkg.name)
-            return False
+            if not apt_pkg.config.find_b(
+                    "Unattended-Upgrade::AllowRemoveOnUpgrade",
+                    False):
+                return False
         if pkg.marked_install or pkg.marked_upgrade:
             if not is_allowed_origin(pkg.candidate, allowed_origins):
                 logging.debug("pkg '%s' not in allowed origin" % pkg.name)
@@ -825,7 +828,9 @@ def do_install(cache, pkgs_to_upgrade, blacklisted_pkgs, whitelisted_pkgs,
     logging.info(_("Writing dpkg log to '%s'") % logfile_dpkg)
 
     marked_delete = [pkg for pkg in cache.get_changes() if pkg.marked_delete]
-    if marked_delete:
+    if marked_delete and not apt_pkg.config.find_b(
+                    "Unattended-Upgrade::AllowRemoveOnUpgrade",
+                    False):
         raise AssertionError(
             "Internal error. The following packages are marked for "
             "removal:%s" % "".join([pkg.name for pkg in marked_delete]))
