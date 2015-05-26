@@ -149,7 +149,7 @@ Supported Options Reference
  };
  ```
 
-* `Unattended-Upgrade::Package-Whitelist-Strict` - boolean
+* `Unattended-Upgrade::Package-Whitelist-Strict` - boolean (default:False)
  
  When set, allow only packages in `Unattended-Upgrade::Package-Whitelist`
  to be upgraded. This means that you also need to list all dependencies
