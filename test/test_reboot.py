@@ -80,11 +80,10 @@ class RebootTestCase(unittest.TestCase):
     @patch("subprocess.call")
     def test_logged_in_users(self, mock_call):
         # some pgm that allways output a word
-        unattended_upgrade.USERS = ["/bin/date", "+%Y %m"]
+        unattended_upgrade.USERS = ["/bin/date", "+%Y %Y %Y"]
         users = unattended_upgrade.logged_in_users()
         today = datetime.date.today()
-        self.assertEqual(users, [
-            today.strftime("%Y"), today.strftime("%m")])
+        self.assertEqual(users, set([today.strftime("%Y")]))
 
 
 if __name__ == "__main__":
