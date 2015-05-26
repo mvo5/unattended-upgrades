@@ -61,6 +61,7 @@ import apt_pkg
 REBOOT_REQUIRED_FILE = "/var/run/reboot-required"
 MAIL_BINARY = "/usr/bin/mail"
 SENDMAIL_BINARY = "/usr/sbin/sendmail"
+USERS = "/usr/bin/users"
 # no py3 lsb_release in debian :/
 DISTRO_CODENAME = subprocess.check_output(
     ["lsb_release", "-c", "-s"], universal_newlines=True).strip()
@@ -938,6 +939,12 @@ def reboot_if_requested_and_needed(shutdown_lock=0):
     if (apt_pkg.config.find_b(
             "Unattended-Upgrade::Automatic-Reboot", False) and
             os.path.exists(REBOOT_REQUIRED_FILE)):
+        if not apt_pkg.config.find_b("Unattended-Upgrade::Automatic-Reboot-WithUsers", True):
+            users = subprocess.check_output(USERS, universal_newlines=True).rstrip('\n')
+            if users:
+                verb = 'is' if len(users.split())==1 else 'are'
+                logging.warning("Found %s, but not rebooting because %s %s logged in." % (REBOOT_REQUIRED_FILE, users, verb))
+                return
         when = apt_pkg.config.find(
             "Unattended-Upgrade::Automatic-Reboot-Time", "now")
         if shutdown_lock > 0:
@@ -1236,6 +1243,9 @@ def main(options, rootdir=""):
         logging.info(_("No packages found that can be upgraded unattended"))
         # FIXME: DRY violation, write_stamp_file() is used below as well
         write_stamp_file()
+        # check if we couldn't reboot on previous run because
+        # a user was logged-in at this time
+        reboot_if_requested_and_needed()
         return
 
     # check if its configured for install on shutdown, if so, the

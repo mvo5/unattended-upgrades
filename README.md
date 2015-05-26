@@ -204,6 +204,10 @@ Supported Options Reference
  Automatically reboot *WITHOUT CONFIRMATION* if the file
  /var/run/reboot-required is found after the upgrade
 
+* `Unattended-Upgrade::Automatic-Reboot-WithUsers` - boolean (default:True)
+
+ Automatically reboot even if users are logged in.
+
 * `Acquire::http::Dl-Limit` - integer (default:0)
 
  Use apt bandwidth limit feature when fetching the upgrades. The
