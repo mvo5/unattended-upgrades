@@ -18,6 +18,7 @@ from unattended_upgrade import do_install
 class MockCache:
     def __iter__(self):
         raise StopIteration
+
     def get_changes(self):
         return []
 
