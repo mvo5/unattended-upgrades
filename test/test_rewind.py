@@ -33,13 +33,15 @@ class TestRewindCache(unittest.TestCase):
         """ Test that rewinding the cache works correctly, debian #743594 """
         options = MockOptions()
         blacklisted_pkgs = []
+        whitelisted_pkgs = []
         to_upgrade, kept_back = unattended_upgrade.calculate_upgradable_pkgs(
-            self.cache, options, self.allowed_origins, blacklisted_pkgs)
+            self.cache, options, self.allowed_origins, blacklisted_pkgs,
+            whitelisted_pkgs)
         self.assertEqual(to_upgrade, [self.cache["test-package"]])
         self.assertEqual(kept_back, ["z-package"])
 
 
 if __name__ == "__main__":
-    #import logging
-    #logging.basicConfig(level=logging.DEBUG)
+    import logging
+    logging.basicConfig(level=logging.DEBUG)
     unittest.main()
