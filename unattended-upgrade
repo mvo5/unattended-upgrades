@@ -1277,10 +1277,10 @@ def main(options, rootdir=""):
         logging.debug("dpkg is configured not to cause conffile prompts")
 
     # exit if there is nothing to do and nothing to report
-    if (len(pkgs_to_upgrade) == 0 and
-            len(pkgs_kept_back) == 0 and
-            not apt_pkg.config.find_b(
-                "Unattended-Upgrade::Remove-Unused-Dependencies", False)):
+    #
+    # XXX: note that this means we only do cleanup of unused-dependencies
+    # if we also upgrade some packages.
+    if len(pkgs_to_upgrade) == 0 and len(pkgs_kept_back) == 0:
         logging.info(_("No packages found that can be upgraded unattended"))
         # FIXME: DRY violation, write_stamp_file() is used below as well
         write_stamp_file()
@@ -1288,9 +1288,6 @@ def main(options, rootdir=""):
         # a user was logged-in at this time
         reboot_if_requested_and_needed()
         return
-    elif (apt_pkg.config.find_b(
-          "Unattended-Upgrade::Remove-Unused-Dependencies", False)):
-        logging.info(_("Checking for unattended removal of packages"))
 
     # check if its configured for install on shutdown, if so, the
     # environment UNATTENDED_UPGRADES_FORCE_INSTALL_ON_SHUTDOWN will
