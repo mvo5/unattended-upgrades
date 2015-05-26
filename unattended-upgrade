@@ -1246,9 +1246,11 @@ def main(options, rootdir=""):
         logging.debug("dpkg is configured not to cause conffile prompts")
 
     # exit if there is nothing to do and nothing to report
-    if (len(pkgs_to_upgrade) == 0) and (len(pkgs_kept_back) == 0
-        and not apt_pkg.config.find_b(
-            "Unattended-Upgrade::Remove-Unused-Dependencies", False)):
+    if ((len(pkgs_to_upgrade) == 0)
+            and (len(pkgs_kept_back) == 0)
+            and not apt_pkg.config.find_b(
+                "Unattended-Upgrade::Remove-Unused-Dependencies", False)):
+
         logging.info(_("No packages found that can be upgraded unattended"))
         # FIXME: DRY violation, write_stamp_file() is used below as well
         write_stamp_file()
