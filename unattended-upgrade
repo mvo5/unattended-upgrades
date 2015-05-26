@@ -391,6 +391,11 @@ def cache_commit(cache, logfile_dpkg, verbose, iprogress=None):
     # set debconf to NON_INTERACTIVE, redirect output
     os.putenv("DEBIAN_FRONTEND", "noninteractive")
 
+    # only act if there is anything to do (important to avoid writing
+    # empty log stanzas)
+    if len(cache.get_changes()) == 0:
+        return True, None
+
     error = None
     res = False
     if iprogress is None:
@@ -1071,6 +1076,7 @@ def do_auto_remove(cache, options, logfile_dpkg, verbose=False):
     logging.info(_("Packages that are auto removed: '%s'")
                  % " ".join(auto_removable))
 
+    # do it
     res, error = cache_commit(cache, logfile_dpkg, verbose)
     if res:
         logging.info(_("Packages auto-removed"))
