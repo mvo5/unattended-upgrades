@@ -953,7 +953,7 @@ def logged_in_users():
     # "user1, user1, user2"
     users = subprocess.check_output(
         USERS, universal_newlines=True).rstrip('\n')
-    return users.split()
+    return set(users.split())
 
 
 def reboot_if_requested_and_needed(shutdown_lock=0):
