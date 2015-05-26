@@ -197,7 +197,7 @@ Supported Options Reference
 
 * `Unattended-Upgrade::Remove-Unused-Dependencies` - boolean (default:False)
  
- Remove all new unused dependencies after the upgrade finished.
+ Remove all unused dependencies after the upgrade finished.
 
 * `Unattended-Upgrade::Automatic-Reboot` - boolean (default:False)
  
