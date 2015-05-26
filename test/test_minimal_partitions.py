@@ -3,6 +3,8 @@
 import apt
 import apt_pkg
 import os
+import shutil
+import tempfile
 import unittest
 
 import unattended_upgrade
@@ -10,7 +12,7 @@ import unattended_upgrade
 
 class LogInstallProgressMock(unattended_upgrade.LogInstallProgress):
 
-    # klass data so that we can veriy in the test as the actual
+    # klass data so that we can verify in the test as the actual
     # object is destroyed
     DATA = []
 
@@ -31,6 +33,10 @@ class TestMinimalPartitions(unittest.TestCase):
         apt_pkg.config.clear("Dpkg::Post-Invoke")
         apt_pkg.config.clear("Dpkg::Pre-Install-Pkgs")
         self.cache = apt.Cache()
+        # for the log
+        self.tempdir = tempfile.mkdtemp()
+        self.addCleanup(lambda: shutil.rmtree(self.tempdir))
+        apt_pkg.config.set("Unattended-Upgrade::LogDir", self.tempdir)
 
     def tearDown(self):
         if os.path.exists("./extended_states"):
@@ -43,7 +49,8 @@ class TestMinimalPartitions(unittest.TestCase):
             "./aptroot/var/run/unatteded-upgrades.progress"
         unattended_upgrade.LogInstallProgress = LogInstallProgressMock
         unattended_upgrade.upgrade_in_minimal_steps(
-            self.cache, pkgs_to_upgrade, "", [])
+            self.cache, pkgs_to_upgrade, "", [],
+            os.path.join(self.tempdir, "mylog"))
         # ensure we count upwarts
         last_percent = -1
         for (pkg, percent) in LogInstallProgressMock.DATA:
@@ -52,6 +59,8 @@ class TestMinimalPartitions(unittest.TestCase):
         # cleanup class data
         LogInstallProgressMock.DATA = []
 
+
 if __name__ == "__main__":
-    #logging.basicConfig(level=logging.DEBUG)
+    import logging
+    logging.basicConfig(level=logging.DEBUG)
     unittest.main()

@@ -211,7 +211,7 @@ class LogInstallProgress(apt.progress.base.InstallProgress):
         try:
             adm_gid = grp.getgrnam("adm").gr_gid
             os.fchown(logfd, 0, adm_gid)
-        except KeyError:
+        except (KeyError, OSError):
             pass
         return logfd
 
@@ -384,10 +384,15 @@ def match_whitelist_string(whitelist, origin):
     return res
 
 
-def upgrade_normal(cache, pkgs_to_upgrade, logfile_dpkg, verbose):
+def cache_commit(cache, logfile_dpkg, verbose, iprogress=None):
+    # set debconf to NON_INTERACTIVE, redirect output
+    os.putenv("DEBIAN_FRONTEND", "noninteractive")
+
     error = None
     res = False
-    iprogress = LogInstallProgress(logfile_dpkg, verbose)
+    if iprogress is None:
+        iprogress = LogInstallProgress(logfile_dpkg, verbose)
+
     try:
         with Unlocked():
             res = cache.commit(install_progress=iprogress)
@@ -395,6 +400,11 @@ def upgrade_normal(cache, pkgs_to_upgrade, logfile_dpkg, verbose):
         error = e
         if verbose:
             logging.exception("Exception happened during upgrade.")
+    return res, error
+
+
+def upgrade_normal(cache, logfile_dpkg, verbose):
+    res, error = cache_commit(cache, logfile_dpkg, verbose)
     if res:
         logging.info(_("All upgrades installed"))
     else:
@@ -467,18 +477,12 @@ def upgrade_in_minimal_steps(cache, pkgs_to_upgrade, blacklist,
         logging.debug("applying set %s" % smallest_partition)
         rewind_cache(cache, [cache[name] for name in smallest_partition])
 
-        try:
-            iprogress = LogInstallProgress(logfile_dpkg, verbose)
-            with Unlocked():
-                res = cache.commit(install_progress=iprogress)
-                if not res:
-                    raise Exception("cache.commit() returned false")
-            cache.open()
-        except Exception as e:
+        res, error = cache_commit(cache, logfile_dpkg, verbose, install_log)
+        if error:
             if verbose:
                 logging.exception("Exception happened during upgrade.")
             logging.error(_("Installing the upgrades failed!"))
-            logging.error(_("error message: '%s'") % e)
+            logging.error(_("error message: '%s'") % error)
             logging.error(_("dpkg returned a error! See '%s' for details") %
                           logfile_dpkg)
             return False
@@ -850,8 +854,7 @@ def do_install(cache, pkgs_to_upgrade, blacklisted_pkgs, whitelisted_pkgs,
                 options.verbose or options.debug)
         else:
             pkg_install_success = upgrade_normal(
-                cache, [pkg.name for pkg in pkgs_to_upgrade],
-                logfile_dpkg, options.verbose or options.debug)
+                cache, logfile_dpkg, options.verbose or options.debug)
     except Exception as e:
         # print unhandled exceptions here this way, while stderr is redirected
         os.write(2, ("Exception: %s\n" % e).encode('utf-8'))
@@ -1049,14 +1052,8 @@ def get_dpkg_log_content(logfile_dpkg, install_start_time):
                 content.append(line)
     return "".join(content)
 
+
 def do_auto_remove(cache, options, logfile_dpkg, verbose=False):
-    # set debconf to NON_INTERACTIVE, redirect output
-    os.putenv("DEBIAN_FRONTEND", "noninteractive")
-
-    error = None
-    res = False
-    iprogress = LogInstallProgress(logfile_dpkg, verbose)
-
     auto_removable = set([pkg.name for pkg in cache
                               if pkg.is_auto_removable])
 
@@ -1066,21 +1063,14 @@ def do_auto_remove(cache, options, logfile_dpkg, verbose=False):
     logging.info(_("Packages that are auto removed: '%s'") %
                      " ".join(auto_removable))
 
-    if not options.dry_run:
-        try:
-            with Unlocked():
-                res = cache.commit(install_progress=iprogress)
-        except SystemError as e:
-            error = e
-        if res:
-            logging.info(_("Packages auto-removed"))
-        else:
-            logging.error(_("Auto-removing the packages failed!"))
-            logging.error(_("Error message: '%s'") % error)
-            logging.error(_("dpkg returned an error! See '%s' for details")
-                          % logfile_dpkg)
-    else:
+    res, error = cache_commit(cache, logfile_dpkg, verbose)
+    if res:
         logging.info(_("Packages auto-removed"))
+    else:
+        logging.error(_("Auto-removing the packages failed!"))
+        logging.error(_("Error message: '%s'") % error)
+        logging.error(_("dpkg returned an error! See '%s' for details")
+                      % logfile_dpkg)
     return res
 
 
