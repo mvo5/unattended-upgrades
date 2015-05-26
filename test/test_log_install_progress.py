@@ -9,13 +9,14 @@ import unittest
 
 sys.path.insert(0, "..")
 
-from unattended_upgrades import _setup_logging
+from unattended_upgrade import _setup_logging
 
 
 class MockOptions:
     dry_run = False
     debug = False
     verbose = False
+    apt_debug = False
 
 
 class TestLogInstallProgress(unittest.TestCase):

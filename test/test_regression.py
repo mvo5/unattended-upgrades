@@ -40,6 +40,7 @@ class TestRegression(unittest.TestCase):
         tmp.seek(0)
         self.assertEqual(tmp.read().decode("utf-8"), "Exception: meepä\n")
 
+
 if __name__ == "__main__":
     #logging.basicConfig(level=logging.DEBUG)
     unittest.main()
