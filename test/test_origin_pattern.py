@@ -112,11 +112,13 @@ class TestOriginPatern(unittest.TestCase):
         blacklist = ["linux-.*"]
         # with blacklist pkg
         self.assertFalse(
-            check_changes_for_sanity(cache, allowed_origins, blacklist, [".*"]))
+            check_changes_for_sanity(
+                cache, allowed_origins, blacklist, [".*"]))
         # with "normal" pkg
         pkg.name = "apt"
         self.assertTrue(
-            check_changes_for_sanity(cache, allowed_origins, blacklist, [".*"]))
+            check_changes_for_sanity(
+                cache, allowed_origins, blacklist, [".*"]))
 
     def test_whitelist_with_strict_whitelisting(self):
         cache = self._get_mock_cache()

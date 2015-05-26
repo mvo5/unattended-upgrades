@@ -25,7 +25,8 @@ class RebootTestCase(unittest.TestCase):
         unattended_upgrade.REBOOT_REQUIRED_FILE = REBOOT_REQUIRED_FILE
         # enable automatic-reboot
         apt_pkg.config.set("Unattended-Upgrade::Automatic-Reboot", "1")
-        apt_pkg.config.set("Unattended-Upgrade::Automatic-Reboot-WithUsers", "1")
+        apt_pkg.config.set(
+            "Unattended-Upgrade::Automatic-Reboot-WithUsers", "1")
 
     @patch("subprocess.call")
     def test_no_reboot_done_because_no_stamp(self, mock_call):
@@ -38,7 +39,7 @@ class RebootTestCase(unittest.TestCase):
         apt_pkg.config.set("Unattended-Upgrade::Automatic-Reboot", "0")
         unattended_upgrade.reboot_if_requested_and_needed()
         self.assertEqual(mock_call.called, False)
-        
+
     @patch("subprocess.call")
     def test_reboot_now(self, mock_call):
         unattended_upgrade.reboot_if_requested_and_needed()

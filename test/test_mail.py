@@ -20,6 +20,7 @@ from unattended_upgrade import (
     setup_apt_listchanges,
 )
 
+
 class ExtractDpkgLogTestCase(unittest.TestCase):
 
     def test_get_dpkg_log_content(self):

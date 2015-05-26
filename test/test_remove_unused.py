@@ -41,7 +41,8 @@ class TestRemoveUnused(unittest.TestCase):
             self.rootdir, "var", "log", "unattended-upgrades",
             "unattended-upgrades.log")
         with open(log) as f:
-            needle = "Packages that are auto removed: 'test-package-dependency'"
+            needle = "Packages that are auto removed: "\
+                     "'test-package-dependency'"
             haystack = f.read()
             self.assertTrue(needle in haystack,
                             "Can not find '%s' in '%s'" % (needle, haystack))

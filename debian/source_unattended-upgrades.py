@@ -17,5 +17,5 @@ def add_info(report, ui):
     # always attach these files
     attach_conffiles(report, 'unattended-upgrades', ui=ui)
     attach_conffiles(report, 'update-notifier-common', ui=ui)
-    attach_file_if_exists(report,
-                          '/var/log/unattended-upgrades/unattended-upgrades.log')
+    attach_file_if_exists(
+        report, '/var/log/unattended-upgrades/unattended-upgrades.log')

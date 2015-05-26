@@ -964,8 +964,10 @@ def reboot_if_requested_and_needed(shutdown_lock=0):
         users = logged_in_users()
         if users:
             msg = gettext.ngettext(
-                "Found %s, but not rebooting because %s is logged in." % (REBOOT_REQUIRED_FILE, users),
-                "Found %s, but not rebooting because %s are logged in." % (REBOOT_REQUIRED_FILE, users),
+                "Found %s, but not rebooting because %s is logged in." % (
+                    REBOOT_REQUIRED_FILE, users),
+                "Found %s, but not rebooting because %s are logged in." % (
+                    REBOOT_REQUIRED_FILE, users),
                 len(users))
             logging.warning(msg)
             return
