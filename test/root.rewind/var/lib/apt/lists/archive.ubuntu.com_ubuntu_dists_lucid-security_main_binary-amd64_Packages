@@ -3,14 +3,17 @@ Architecture: all
 Version: 2.0
 Depends: test-package-dependency
 Description-en: test package
+Filename: ./test-package_2.0_all.deb
 
 Package: test-package-dependency
 Architecture: all
 Version: 1.0
 Description-en: test package 2
+Filename: ./test-package-dependency_1.0_all.deb
 
 Package: z-package
 Architecture: all
 Version: 1.0
 Depends: forbidden-dependency
 Description-en: test package with a forbidden dependency
+Filename: ./z-package_1.0_all.deb

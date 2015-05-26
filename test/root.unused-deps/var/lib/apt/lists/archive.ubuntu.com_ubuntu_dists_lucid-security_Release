@@ -1,0 +1,13 @@
+Origin: Ubuntu
+Label: Ubuntu
+Suite: lucid-security
+Version: 10.04
+Codename: lucid
+Date: Tue, 08 Apr 2014  6:19:06 UTC
+Architectures: amd64 arm64 armhf i386 powerpc ppc64el
+Components: main restricted universe multiverse
+Description: Ubuntu Lucid 12.04
+MD5Sum:
+ 3a6b95734cc916b62d6d50e654bda9c3          8341434 main/binary-amd64/Packages
+SHA1:
+ 33cf496dc33f5c22c16e007f60a5b1be9481be48           116140 main/binary-amd64/Packages

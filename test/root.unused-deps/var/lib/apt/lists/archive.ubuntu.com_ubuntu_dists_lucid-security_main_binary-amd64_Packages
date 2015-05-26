@@ -1,0 +1,15 @@
+Package: test-package
+Architecture: all
+Version: 2.0
+Description-en: test package
+Filename: test-package_2.0_all.deb
+SHA256: 01704da7de63ca12109abff5c2c480ad9c757e669c4428424de23ec97bf24248
+Size: 624
+
+Package: test-package-dependency
+Architecture: all
+Version: 1.0
+Description-en: test package 2
+Filename: test-package-dependency_1.0_all.deb
+SHA256: 01704da7de63ca12109abff5c2c480ad9c757e669c4428424de23ec97bf24248
+Size: 624
