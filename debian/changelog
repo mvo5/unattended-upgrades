@@ -1,3 +1,18 @@
+unattended-upgrades (0.85) unstable; urgency=medium
+
+  [ Alexandre Detiste ]
+  * Add new Unattended-Upgrade::Automatic-Reboot-WithUsers option
+  * add Build-Depends: for python{,3}-mock
+
+  [ Alexander Skiba ]
+  * Fix Unattended-Upgrade::Remove-Unused-Dependencies and apply to
+    all automatic dependencies
+
+  [ Michael Vogt ]
+  * Test fixes
+
+ -- Michael Vogt <mvo@debian.org>  Wed, 27 May 2015 14:01:38 +0200
+
 unattended-upgrades (0.83.8) unstable; urgency=low
 
   * fix default configuration to match the jessie security
