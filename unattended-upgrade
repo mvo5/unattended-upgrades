@@ -1,5 +1,5 @@
 #!/usr/bin/python3
-# Copyright (c) 2005-2012 Canonical Ltd
+# Copyright (c) 2005-2015 Canonical Ltd
 #
 # AUTHOR:
 # Michael Vogt <mvo@ubuntu.com>
@@ -388,6 +388,7 @@ def match_whitelist_string(whitelist, origin):
 
 
 def cache_commit(cache, logfile_dpkg, verbose, iprogress=None):
+    """Commit the changes from the given cache to the system"""
     # set debconf to NON_INTERACTIVE, redirect output
     os.putenv("DEBIAN_FRONTEND", "noninteractive")
 
@@ -1066,9 +1067,13 @@ def get_dpkg_log_content(logfile_dpkg, install_start_time):
     return "".join(content)
 
 
+def get_auto_removable(cache):
+    return set([pkg.name for pkg in cache
+                if pkg.is_auto_removable])
+
+
 def do_auto_remove(cache, options, logfile_dpkg, verbose=False):
-    auto_removable = set([pkg.name for pkg in cache
-                         if pkg.is_auto_removable])
+    auto_removable = get_auto_removable(cache)
 
     for pkgname in auto_removable:
         logging.debug("marking %s for remove" % pkgname)
@@ -1276,12 +1281,19 @@ def main(options, rootdir=""):
     else:
         logging.debug("dpkg is configured not to cause conffile prompts")
 
+    # auto-removal
+    if apt_pkg.config.find_b(
+            "Unattended-Upgrade::Remove-Unused-Dependencies", False):
+        pending_autoremovals = get_auto_removable(cache)
+    else:
+        pending_autoremovals = []
+
     # exit if there is nothing to do and nothing to report
-    #
-    # XXX: note that this means we only do cleanup of unused-dependencies
-    # if we also upgrade some packages.
-    if len(pkgs_to_upgrade) == 0 and len(pkgs_kept_back) == 0:
-        logging.info(_("No packages found that can be upgraded unattended"))
+    if (len(pending_autoremovals) == 0 and
+            len(pkgs_to_upgrade) == 0 and
+            len(pkgs_kept_back) == 0):
+        logging.info(_("No packages found that can be upgraded unattended "
+                       "and no pending auto-removals"))
         # FIXME: DRY violation, write_stamp_file() is used below as well
         write_stamp_file()
         # check if we couldn't reboot on previous run because
