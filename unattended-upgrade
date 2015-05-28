@@ -1084,7 +1084,7 @@ def do_auto_remove(cache, options, logfile_dpkg, verbose=False):
     # do it
     res, error = cache_commit(cache, logfile_dpkg, verbose)
     if res:
-        logging.info(_("Packages auto-removed"))
+        logging.info(_("Packages were successfully auto-removed"))
     else:
         logging.error(_("Auto-removing the packages failed!"))
         logging.error(_("Error message: '%s'") % error)
