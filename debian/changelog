@@ -1,3 +1,11 @@
+unattended-upgrades (0.83.3.2) stable; urgency=low
+
+  * Rebuild in a clean schroot (closes: #783690, #788066)
+  * Cherry pick 4c755d7 so that the optional automatic-reboot
+    feature works again (closes: #788358)
+
+ -- Michael Vogt <mvo@debian.org>  Mon, 15 Jun 2015 15:32:33 +0200
+
 unattended-upgrades (0.83.3.1) stable; urgency=low
 
   * fix default configuration to match the jessie security
