@@ -14,8 +14,8 @@ set -e
 
 PATH=/usr/local/sbin:/usr/local/bin:/sbin:/bin:/usr/sbin:/usr/bin
 
-NAME="unattended-upgrades"
-DESC="unattended package upgrades"
+NAME="unattended-upgrades-shutdown"
+DESC="unattended package upgrades shutdown"
 SCRIPTNAME="/etc/init.d/$NAME"
 SHUTDOWN_HELPER="/usr/share/unattended-upgrades/unattended-upgrade-shutdown"
 

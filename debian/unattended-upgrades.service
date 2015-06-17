@@ -1,5 +1,5 @@
 [Unit]
-Description=Unattended Upgrades
+Description=Unattended Upgrades Shutdown
 DefaultDependencies=no
 Before=shutdown.target reboot.target halt.target
 Documentation=man:unattended-upgrade(8)
