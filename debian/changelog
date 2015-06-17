@@ -1,3 +1,10 @@
+unattended-upgrades (0.85.1) UNRELEASED; urgency=low
+
+  * debian/tests/control:
+    - fix missing python{,3}-mock dependency to fix autopkgtest failure
+
+ -- Michael Vogt <michael.vogt@ubuntu.com>  Wed, 17 Jun 2015 08:18:08 +0200
+
 unattended-upgrades (0.85) unstable; urgency=medium
 
   [ Alexandre Detiste ]
