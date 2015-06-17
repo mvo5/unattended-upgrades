@@ -787,7 +787,10 @@ def send_summary_mail(pkgs, res, pkgs_kept_back, mem_log, dpkg_log_content):
         return
     # if the operation was successful and the user has requested to get
     # mails on on errors, just exit here
-    if (res and apt_pkg.config.find_b(
+    if (res and
+        # see Debian Bug #703621
+        not re.search("^WARNING:", mem_log.getvalue(), re.MULTILINE) and
+        apt_pkg.config.find_b(
             "Unattended-Upgrade::MailOnlyOnError", False)):
         return
     # Check if reboot-required flag is present
