@@ -1,12 +1,19 @@
-unattended-upgrades (0.85.1) UNRELEASED; urgency=low
+unattended-upgrades (0.86) unstable; urgency=medium
 
+  * unattended-upgrade:
+    - improve log message on successful auto-removal (thanks to a-detiste)
   * debian/tests/control:
     - fix missing python{,3}-mock dependency to fix autopkgtest failure
   * debian/control:
     - lower dh-systemd build-dependency to 1.5 (as recommended in the
       systemd/Packaging wiki page) to make it backport friendlier
+  * Also send mails on WARNINGS if in MailOnlyOnError mode
+    (Closes: #703621)
+  * Rename NAME/Description to "unattended-upgrades-shutdown"
+    (Closes: #783810)
+  * Fix conffile detection for removed conffiles (Closes: #788049)
 
- -- Michael Vogt <michael.vogt@ubuntu.com>  Wed, 17 Jun 2015 08:18:08 +0200
+ -- Michael Vogt <mvo@debian.org>  Wed, 17 Jun 2015 10:28:25 +0200
 
 unattended-upgrades (0.85) unstable; urgency=medium
 
