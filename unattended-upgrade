@@ -643,8 +643,8 @@ def conffile_prompt(destFile, prefix=""):
             obs = l[2]
         else:
             obs = None
-        # ignore if conffile is obsolete or does not exist
-        if obs == "obsolete" or not os.path.exists(prefix + conf_file):
+        # ignore if conffile is obsolete
+        if obs == "obsolete":
             continue
         # ignore state "newconffile" until its clearer if there
         # might be a dpkg prompt (LP: #936870)
@@ -656,10 +656,16 @@ def conffile_prompt(destFile, prefix=""):
             continue
         # record for later
         dpkg_status_conffiles[conf_file] = md5
-        # test against the installed file
-        with open(prefix + conf_file, 'rb') as fb:
-            current_md5 = apt_pkg.md5sum(fb)
+
+        # test against the installed file, if the local file got deleted
+        # by the admin thats ok but it may still trigger a conffile prompt
+        # (see debian #788049)
+        current_md5 = ""
+        if os.path.exists(prefix + conf_file):
+            with open(prefix + conf_file, 'rb') as fb:
+                current_md5 = apt_pkg.md5sum(fb)
         logging.debug("current md5: %s" % current_md5)
+
         # hashes are the same, no conffile prompt
         if current_md5 == md5:
             continue

@@ -1,8 +1,10 @@
 #!/usr/bin/python3
 
-import apt_pkg
+import os
 import logging
 import unittest
+
+import apt_pkg
 
 from unattended_upgrade import (
     conffile_prompt,
@@ -15,10 +17,23 @@ class ConffilePromptTestCase(unittest.TestCase):
     def setUp(self):
         apt_pkg.config.set("Dir::State::status",
                            "./root.conffile/var/lib/dpkg/status")
+        with open("./root.conffile/etc/configuration-file", "w") as fp:
+            fp.write("""This is a configuration file,
+dfasddfasdff
+No really.
+""")
 
     def test_will_prompt(self):
         # conf-test 0.9 is installed, 1.1 gets installed
         # they both have different config files
+        test_pkg = "./packages/conf-test-package_1.1.deb"
+        self.assertTrue(conffile_prompt(test_pkg, prefix="./root.conffile"),
+                        "conffile prompt detection incorrect")
+
+    def test_prompt_on_deleted_modified_conffile(self):
+        # conf-test 0.9 is installed, 1.1 gets installed
+        # they both have different config files, this triggers a prompt
+        os.remove("./root.conffile/etc/configuration-file")
         test_pkg = "./packages/conf-test-package_1.1.deb"
         self.assertTrue(conffile_prompt(test_pkg, prefix="./root.conffile"),
                         "conffile prompt detection incorrect")
