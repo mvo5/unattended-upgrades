@@ -1,0 +1,14 @@
+Package: test-package
+Status: install ok installed
+Architecture: all
+Version: 1.0
+
+Package: test-package-dependency
+Status: install ok installed
+Architecture: all
+Version: 1.0
+
+Package: z-package
+Status: install ok installed
+Architecture: all
+Version: 1.0

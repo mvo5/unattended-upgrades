@@ -541,6 +541,11 @@ def check_changes_for_sanity(cache, allowed_origins, blacklist, whitelist):
             logging.debug("pkg '%s' now marked delete" % pkg.name)
             return False
         if pkg.marked_install or pkg.marked_upgrade:
+            # apt will never fallback from a trusted to a untrusted
+            # origin so its good enough if we have a single trusted one
+            if not any([o.trusted for o in pkg.candidate.origins]):
+                logging.debug("pkg '%s' is untrusted" % pkg.name)
+                return False
             if not is_allowed_origin(pkg.candidate, allowed_origins):
                 logging.debug("pkg '%s' not in allowed origin" % pkg.name)
                 return False

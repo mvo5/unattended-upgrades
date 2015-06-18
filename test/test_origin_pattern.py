@@ -15,7 +15,7 @@ from unattended_upgrade import (
 
 
 class MockOrigin():
-    pass
+    trusted = True
 
 
 class MockCandidate():
