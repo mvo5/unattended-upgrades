@@ -1,6 +1,6 @@
 #!/usr/bin/make -f
 
-PYTHON=python3
+PYTHON=python
 DIST=$(shell dpkg-vendor --query Vendor)
 
 %:
@@ -23,7 +23,6 @@ override_dh_auto_clean:
 	# Sanity-check before upload.
 	set -e; for f in unattended-upgrade unattended-upgrade-shutdown; do \
 		ln -nsf $$f $$f.py; \
-		py3compile $$f.py; \
 	        pycompile $$f.py; \
 		rm -f $$f.py; \
 	done
