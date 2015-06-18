@@ -4,7 +4,7 @@ PYTHON=python
 DIST=$(shell dpkg-vendor --query Vendor)
 
 %:
-	dh $@ --with=systemd
+	dh $@
 
 override_dh_auto_build:
 	# copy the right template into place
