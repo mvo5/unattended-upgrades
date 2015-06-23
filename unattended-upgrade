@@ -185,7 +185,7 @@ class LogInstallProgress(apt.progress.base.InstallProgress):
                     continue
                 try:
                     os.close(fd)
-                    #print("closed: ", fd)
+                    # print("closed: ", fd)
                 except OSError as e:
                     # there will be one fd that can not be closed
                     # as its the fd from pythons internal diropen()
@@ -360,7 +360,7 @@ def match_whitelist_string(whitelist, origin):
         # strip and unquote the "," back
         (what, value) = [s.strip().replace("%2C", ",")
                          for s in token.split("=")]
-        #logging.debug("matching '%s'='%s' against '%s'" % (
+        # logging.debug("matching '%s'='%s' against '%s'" % (
         #              what, value, origin))
         # support substitution here as well
         value = substitute(value)
@@ -382,7 +382,7 @@ def match_whitelist_string(whitelist, origin):
             raise UnknownMatcherError(
                 "Unknown whitelist entry for macher '%s' (token '%s')" % (
                     what, token))
-        #logging.debug("matching '%s'='%s' against '%s'" % (
+        # logging.debug("matching '%s'='%s' against '%s'" % (
         #              what, value, origin))
     return res
 
@@ -1235,8 +1235,8 @@ def main(options, rootdir=""):
                               item.desc_uri)
                 sys.exit(1)
             if not os.path.exists(item.destfile):
-                print(_("Download finished, but file '%s' not there?!?" %
-                        item.destfile))
+                print(_("Download finished, but file '%s' not there?!?") %
+                      item.destfile)
                 logging.error("Download finished, but file '%s' not "
                               "there?!?" % item.destfile)
                 sys.exit(1)
@@ -1327,7 +1327,7 @@ def main(options, rootdir=""):
 
     # do the install based on the new list of pkgs
     pkgs = " ".join([pkg.name for pkg in pkgs_to_upgrade])
-    logging.info(_("Packages that will be upgraded: %s" % pkgs))
+    logging.info(_("Packages that will be upgraded: %s") % pkgs)
 
     # get log
     logfile_dpkg = os.path.join(_get_logdir(), 'unattended-upgrades-dpkg.log')
