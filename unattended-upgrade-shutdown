@@ -150,7 +150,7 @@ if __name__ == "__main__":
         log_progress()
         time.sleep(5)
         if (time.time() - start_time) > options.delay * 60:
-            logging.warning(_("Giving up on lockfile after %s delay") %
+            logging.warning(_("Giving up on lockfile after %s delay"),
                             options.delay)
             sys.exit(1)
 
