@@ -1,3 +1,11 @@
+unattended-upgrades (0.86.1) unstable; urgency=medium
+
+  * fix missing package authentication check for apt
+     configurations that force-{confold,confnew} (CVE-2015-1330)
+     LP: #1466380
+
+ -- Michael Vogt <mvo@debian.org>  Mon, 29 Jun 2015 19:28:06 +0200
+
 unattended-upgrades (0.86) unstable; urgency=medium
 
   * unattended-upgrade:
