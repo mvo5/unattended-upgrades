@@ -1088,6 +1088,8 @@ def get_auto_removable(cache):
 
 def do_auto_remove(cache, options, logfile_dpkg, verbose=False):
     auto_removable = get_auto_removable(cache)
+    if not auto_removable:
+        return True
 
     for pkgname in auto_removable:
         logging.debug("marking %s for remove" % pkgname)
