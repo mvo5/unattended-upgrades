@@ -110,8 +110,8 @@ msgstr "Écriture du journal de dpkg dans « %s »"
 #, python-format
 msgid "Found %s, but not rebooting because %s is logged in."
 msgid_plural "Found %s, but not rebooting because %s are logged in."
-msgstr[0] ""
-msgstr[1] ""
+msgstr[0] "Trouvé %s, mais ne redémarre pas car %s est connecté."
+msgstr[1] "Trouvé %s, mais ne redémarre pas car %s sont connectés."
 
 #: ../unattended-upgrade:1033
 #, python-format
@@ -273,7 +273,7 @@ msgstr "Unattended-upgrade en cours durant l'extinction, en pause pour 5 s"
 #: ../unattended-upgrade-shutdown:125
 #,
 msgid "Running unattended-upgrades in shutdown mode"
-msgstr "excécuter unattended-upgrades lors de l'extinction"
+msgstr "Exécuter unattended-upgrades lors de l'extinction"
 
 #: ../unattended-upgrade-shutdown:153
 #, python-format
