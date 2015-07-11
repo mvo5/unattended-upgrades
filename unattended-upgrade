@@ -41,7 +41,7 @@ import sys
 
 
 from email.message import Message
-from gettext import gettext as _
+from gettext import lgettext as _
 from io import StringIO
 from optparse import (
     OptionParser,
@@ -418,8 +418,8 @@ def upgrade_normal(cache, logfile_dpkg, verbose):
         logging.info(_("All upgrades installed"))
     else:
         logging.error(_("Installing the upgrades failed!"))
-        logging.error(_("error message: '%s'") % error)
-        logging.error(_("dpkg returned a error! See '%s' for details") %
+        logging.error(_("error message: '%s'"), error)
+        logging.error(_("dpkg returned a error! See '%s' for details"),
                       logfile_dpkg)
     return res
 
@@ -491,8 +491,8 @@ def upgrade_in_minimal_steps(cache, pkgs_to_upgrade, blacklist,
             if verbose:
                 logging.exception("Exception happened during upgrade.")
             logging.error(_("Installing the upgrades failed!"))
-            logging.error(_("error message: '%s'") % error)
-            logging.error(_("dpkg returned a error! See '%s' for details") %
+            logging.error(_("error message: '%s'"), error)
+            logging.error(_("dpkg returned a error! See '%s' for details"),
                           logfile_dpkg)
             return False
         to_upgrade = to_upgrade - set(smallest_partition)
@@ -843,7 +843,7 @@ def send_summary_mail(pkgs, res, pkgs_kept_back, mem_log, dpkg_log_content):
         raise AssertionError(
             "This should never be reached, if we are here we either "
             "have sendmail or mailx. Please report this as a bug.")
-    logging.debug("mail returned: %s" % ret)
+    logging.debug("mail returned: %s", ret)
 
 
 def do_install(cache, pkgs_to_upgrade, blacklisted_pkgs, whitelisted_pkgs,
@@ -852,7 +852,7 @@ def do_install(cache, pkgs_to_upgrade, blacklisted_pkgs, whitelisted_pkgs,
     os.putenv("DEBIAN_FRONTEND", "noninteractive")
     setup_apt_listchanges()
 
-    logging.info(_("Writing dpkg log to '%s'") % logfile_dpkg)
+    logging.info(_("Writing dpkg log to '%s'"), logfile_dpkg)
 
     marked_delete = [pkg for pkg in cache.get_changes() if pkg.marked_delete]
     if marked_delete:
@@ -1031,7 +1031,7 @@ def try_to_upgrade(pkg, pkgs_to_upgrade, pkgs_kept_back, cache,
         # can't upgrade
         logging.warning(
             _("package '%s' upgradable but fails to "
-                "be marked for upgrade (%s)") % (pkg.name, e))
+                "be marked for upgrade (%s)"), pkg.name, e)
         rewind_cache(cache, pkgs_to_upgrade)
         pkgs_kept_back.append(pkg.name)
 
@@ -1094,8 +1094,8 @@ def do_auto_remove(cache, options, logfile_dpkg, verbose=False):
     for pkgname in auto_removable:
         logging.debug("marking %s for remove" % pkgname)
         cache[pkgname].mark_delete()
-    logging.info(_("Packages that are auto removed: '%s'")
-                 % " ".join(auto_removable))
+    logging.info(_("Packages that are auto removed: '%s'"),
+                 " ".join(auto_removable))
 
     # do it
     res, error = cache_commit(cache, logfile_dpkg, verbose)
@@ -1103,9 +1103,9 @@ def do_auto_remove(cache, options, logfile_dpkg, verbose=False):
         logging.info(_("Packages were successfully auto-removed"))
     else:
         logging.error(_("Auto-removing the packages failed!"))
-        logging.error(_("Error message: '%s'") % error)
-        logging.error(_("dpkg returned an error! See '%s' for details")
-                      % logfile_dpkg)
+        logging.error(_("Error message: '%s'"), error)
+        logging.error(_("dpkg returned an error! See '%s' for details"),
+                      logfile_dpkg)
     return res
 
 
@@ -1133,7 +1133,7 @@ def main(options, rootdir=""):
     logging.info(_("Starting unattended upgrades script"))
 
     # display available origin
-    logging.info(_("Allowed origins are: %s") % allowed_origins)
+    logging.info(_("Allowed origins are: %s"), allowed_origins)
 
     # see debian #776752
     install_start_time = datetime.datetime.now().replace(microsecond=0)
@@ -1161,7 +1161,7 @@ def main(options, rootdir=""):
                     universal_newlines=True)
             except subprocess.CalledProcessError as e:
                 output = e.output
-            logging.warning(_("dpkg --configure -a output:\n%s" % output))
+            logging.warning(_("dpkg --configure -a output:\n%s"), output)
         else:
             logging.debug("Unclean dpkg state, but locked, another package "
                           "manager working?")
@@ -1223,9 +1223,9 @@ def main(options, rootdir=""):
     try:
         pm.get_archives(fetcher, list, recs)
     except SystemError as e:
-        logging.error(_("GetArchives() failed: '%s'") % e)
+        logging.error(_("GetArchives() failed: '%s'"), e)
     res = fetcher.run()
-    logging.debug("fetch.run() result: %s" % res)
+    logging.debug("fetch.run() result: %s", res)
 
     if dpkg_conffile_prompt():
         # now check the downloaded debs for conffile conflicts and build
@@ -1234,18 +1234,18 @@ def main(options, rootdir=""):
             logging.debug("%s" % item)
             if item.status == item.STAT_ERROR:
                 print(_("An error occurred: '%s'") % item.error_text)
-                logging.error(_("An error occurred: '%s'") % item.error_text)
+                logging.error(_("An error occurred: '%s'"), item.error_text)
             if not item.complete:
                 print(_("The URI '%s' failed to download, aborting") %
                       item.desc_uri)
-                logging.error(_("The URI '%s' failed to download, aborting") %
+                logging.error(_("The URI '%s' failed to download, aborting"),
                               item.desc_uri)
                 sys.exit(1)
             if not os.path.exists(item.destfile):
                 print(_("Download finished, but file '%s' not there?!?") %
                       item.destfile)
                 logging.error("Download finished, but file '%s' not "
-                              "there?!?" % item.destfile)
+                              "there?!?", item.destfile)
                 sys.exit(1)
             if not item.is_trusted:
                 blacklisted_pkgs.append(pkgname_from_deb(item.destfile))
@@ -1263,7 +1263,7 @@ def main(options, rootdir=""):
                           pkgname_from_deb(item.destfile))
                 # log to the logfile
                 logging.warning(_("Package '%s' has conffile prompt and "
-                                  "needs to be upgraded manually") %
+                                  "needs to be upgraded manually"),
                                 pkgname_from_deb(item.destfile))
                 blacklisted_pkgs.append(pkgname_from_deb(item.destfile))
                 pkgs_kept_back.append(pkgname_from_deb(item.destfile))
@@ -1290,7 +1290,7 @@ def main(options, rootdir=""):
                 else:
                     if not (pkg.name in pkgs_kept_back):
                         pkgs_kept_back.append(pkg.name)
-                    logging.info(_("package '%s' not upgraded") % pkg.name)
+                    logging.info(_("package '%s' not upgraded"), pkg.name)
                     cache.clear()
                     for pkg2 in pkgs_to_upgrade:
                         pkg2.mark_upgrade()
@@ -1334,7 +1334,7 @@ def main(options, rootdir=""):
 
     # do the install based on the new list of pkgs
     pkgs = " ".join([pkg.name for pkg in pkgs_to_upgrade])
-    logging.info(_("Packages that will be upgraded: %s") % pkgs)
+    logging.info(_("Packages that will be upgraded: %s"), pkgs)
 
     # get log
     logfile_dpkg = os.path.join(_get_logdir(), 'unattended-upgrades-dpkg.log')
