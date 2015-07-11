@@ -1,3 +1,15 @@
+unattended-upgrades (0.86.2) unstable; urgency=medium
+
+  [ Antoine Beaupré ]
+  * display translations in proper locale
+  * use logging arguments instead of formatting everywhere
+    (closes: #789277)
+
+  [ Alexandre Detiste ]
+  * auto-remove: don't print a message with empty list of pkg
+
+ -- Michael Vogt <mvo@debian.org>  Sat, 11 Jul 2015 11:18:44 +0200
+
 unattended-upgrades (0.86.1) unstable; urgency=medium
 
   * fix missing package authentication check for apt
