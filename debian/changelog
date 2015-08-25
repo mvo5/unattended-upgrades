@@ -1,3 +1,9 @@
+unattended-upgrades (0.86.3) unstable; urgency=medium
+
+  * Fix new pep8 errors (Closes: 796405)
+
+ -- Michael Vogt <mvo@debian.org>  Tue, 25 Aug 2015 10:17:38 +0200
+
 unattended-upgrades (0.86.2) unstable; urgency=medium
 
   [ Antoine Beaupré ]
