@@ -4,7 +4,7 @@ import os
 import subprocess
 import unittest
 
-IGNORE = "E265"
+IGNORE = "E265,E402"
 
 
 class PackagePep8TestCase(unittest.TestCase):
