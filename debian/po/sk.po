@@ -7,10 +7,11 @@ msgid ""
 msgstr ""
 "Project-Id-Version: unattended-upgrades\n"
 "Report-Msgid-Bugs-To: unattended-upgrades@packages.debian.org\n"
-"POT-Creation-Date: 2009-06-10 21:24+0200\n"
+"POT-Creation-Date: 2015-09-07 20:07-0400\n"
 "PO-Revision-Date: 2009-06-13 10:28+0100\n"
 "Last-Translator: Ivan Masár <helix84@centrum.sk>\n"
 "Language-Team: Slovak <sk-i18n@lists.linux.sk>\n"
+"Language: sk\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
@@ -24,6 +25,27 @@ msgstr "Automaticky sťahovať a inštalovať stabilné aktualizácie?"
 #. Type: boolean
 #. Description
 #: ../templates:2001
-msgid "Applying updates on a frequent basis is an important part of keeping systems secure. By default, updates need to be applied manually using package  management tools. Alternatively, you can choose to have this system  automatically download and install security updates."
-msgstr "Častá aktualizácia je dôležitou súčasťou udrživania zabezpečeného systému. Štandardne je nutné aktualizácie spúšťať ručne pomocou nástrojov na správu balíkov. Namiesto toho môžete nechať tento systém aby za vás autoamticky sťahoval a inštaloval bezpečnostné aktualizácie."
+msgid ""
+"Applying updates on a frequent basis is an important part of keeping systems "
+"secure. By default, updates need to be applied manually using package  "
+"management tools. Alternatively, you can choose to have this system  "
+"automatically download and install security updates."
+msgstr ""
+"Častá aktualizácia je dôležitou súčasťou udrživania zabezpečeného systému. "
+"Štandardne je nutné aktualizácie spúšťať ručne pomocou nástrojov na správu "
+"balíkov. Namiesto toho môžete nechať tento systém aby za vás autoamticky "
+"sťahoval a inštaloval bezpečnostné aktualizácie."
 
+#. Type: string
+#. Description
+#: ../templates:3001
+msgid "Origins-Pattern that packages must match to be upgraded:"
+msgstr ""
+
+#. Type: string
+#. Description
+#: ../templates:3001
+msgid ""
+"A package will be upgraded only if its metadata values match all the "
+"supplied keywords in the origin line."
+msgstr ""
