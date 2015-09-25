@@ -7,10 +7,11 @@ msgid ""
 msgstr ""
 "Project-Id-Version: 0.35debian1\n"
 "Report-Msgid-Bugs-To: unattended-upgrades@packages.debian.org\n"
-"POT-Creation-Date: 2009-01-05 10:34+0100\n"
+"POT-Creation-Date: 2015-09-07 20:07-0400\n"
 "PO-Revision-Date: 2008-12-03 12:00+0200\n"
 "Last-Translator: Steve Petruzzello <dlist@bluewin.ch>\n"
 "Language-Team: French <debian-l10n-french@lists.debian.org>\n"
+"Language: fr\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
@@ -37,3 +38,17 @@ msgstr ""
 "appliquées manuellement à l'aide d'un outil de gestion de paquets. À "
 "l'inverse, vous pouvez choisir d'automatiser ce processus avec unattended-"
 "upgrades."
+
+#. Type: string
+#. Description
+#: ../templates:3001
+msgid "Origins-Pattern that packages must match to be upgraded:"
+msgstr ""
+
+#. Type: string
+#. Description
+#: ../templates:3001
+msgid ""
+"A package will be upgraded only if its metadata values match all the "
+"supplied keywords in the origin line."
+msgstr ""

@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: unattended-upgrades 0.82.7\n"
 "Report-Msgid-Bugs-To: unattended-upgrades@packages.debian.org\n"
-"POT-Creation-Date: 2009-07-06 17:32+0100\n"
+"POT-Creation-Date: 2015-09-07 20:07-0400\n"
 "PO-Revision-Date: 2014-06-04 22:34+0100\n"
 "Last-Translator: Chris Leick <c.leick@vollbio.de>\n"
 "Language-Team: German <debian-l10n-german@lists.debian.org>\n"
@@ -22,7 +22,8 @@ msgstr ""
 #. Description
 #: ../templates:2001
 msgid "Automatically download and install stable updates?"
-msgstr "Aktualisierungen für Stable automatisch herunterladen und installieren?"
+msgstr ""
+"Aktualisierungen für Stable automatisch herunterladen und installieren?"
 
 #. Type: boolean
 #. Description
@@ -38,3 +39,17 @@ msgstr ""
 "Paketverwaltungswerkzeugen durchgeführt werden. Alternativ können Sie "
 "auswählen, dass dieses System Sicherheitsaktualisierungen automatisch "
 "herunterlädt und installiert."
+
+#. Type: string
+#. Description
+#: ../templates:3001
+msgid "Origins-Pattern that packages must match to be upgraded:"
+msgstr ""
+
+#. Type: string
+#. Description
+#: ../templates:3001
+msgid ""
+"A package will be upgraded only if its metadata values match all the "
+"supplied keywords in the origin line."
+msgstr ""

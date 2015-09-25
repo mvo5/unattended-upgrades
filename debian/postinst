@@ -45,6 +45,16 @@ case "$1" in
 	    ucfr unattended-upgrades "$CONFIG"
         fi
 
+	CONFIG="/etc/apt/apt.conf.d/50unattended-upgrades"
+	NEWFILE="$CONFIG.ucftmp"
+	TEMPLATE="/usr/share/unattended-upgrades/50unattended-upgrades"
+	cp -a -f "$TEMPLATE" "$NEWFILE"
+	db_get unattended-upgrades/origins_pattern || true
+	sed -i 's/"origin=Debian,codename=${distro_codename},label=Debian-Security";/'"${RET}"'/' "$NEWFILE"
+	ucf --three-way --debconf-ok "$NEWFILE" "$CONFIG"
+	ucfr unattended-upgrades "$CONFIG"
+	rm -f "$NEWFILE"
+
         # Recover from incorrect init.d script header in versions < 0.64
         if dpkg --compare-versions "$2" lt "0.64" \
             && [ -f /etc/rc0.d/S[0-9][0-9]unattended-upgrades ] \

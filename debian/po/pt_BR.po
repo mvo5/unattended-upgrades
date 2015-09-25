@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: unattended-upgrades\n"
 "Report-Msgid-Bugs-To: unattended-upgrades@packages.debian.org\n"
-"POT-Creation-Date: 2009-07-06 17:32+0100\n"
+"POT-Creation-Date: 2015-09-07 20:07-0400\n"
 "PO-Revision-Date: 2010-12-17 21:58-0200\n"
 "Last-Translator: Adriano Rafael Gomes <adrianorg@gmail.com>\n"
 "Language-Team: Brazilian Portuguese <debian-l10n-portuguese@lists.debian."
@@ -38,3 +38,17 @@ msgstr ""
 "manualmente usando ferramentas de gerenciamento de pacotes. "
 "Alternativamente, você pode escolher que esse sistema baixe e instale "
 "automaticamente as atualizações de segurança."
+
+#. Type: string
+#. Description
+#: ../templates:3001
+msgid "Origins-Pattern that packages must match to be upgraded:"
+msgstr ""
+
+#. Type: string
+#. Description
+#: ../templates:3001
+msgid ""
+"A package will be upgraded only if its metadata values match all the "
+"supplied keywords in the origin line."
+msgstr ""
