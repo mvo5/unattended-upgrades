@@ -805,15 +805,16 @@ def send_summary_mail(pkgs, res, pkgs_kept_back, mem_log, dpkg_log_content):
             "Unattended-Upgrade::MailOnlyOnError", False)):
         return
     # Check if reboot-required flag is present
+    reboot_flag_str = _(
+        "[reboot required]") if os.path.isfile(REBOOT_REQUIRED_FILE) else ""
+    # Check if packages are kept on hold
+    hold_flag_str = _("[package on hold]") if pkgs_kept_back else ""
     logging.debug("Sending mail to '%s'" % to_email)
-    subject = _("unattended-upgrades result for '%s': %s") % (host(), res)
-    flags = ""
-    if os.path.isfile(REBOOT_REQUIRED_FILE):
-        flags += _("[reboot required]")
-    if pkgs_kept_back:
-        flags += _("[package on hold]")
-    if flags:
-        subject = flags + " " + subject
+    subject = _(
+        "{hold_flag}{reboot_flag} unattended-upgrades result for "
+        "'{machine}': {result}").format(
+            hold_flag=hold_flag_str, reboot_flag=reboot_flag_str,
+            machine=host(), result=res).strip()
     body = _("Unattended upgrade returned: %s\n\n") % res
     if os.path.isfile(REBOOT_REQUIRED_FILE):
         body += _(
