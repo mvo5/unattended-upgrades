@@ -1,0 +1,18 @@
+# This provides integration into the travis-ci.org CI system. For a overview
+# check http://about.travis-ci.org/docs/user/getting-started/
+# 
+# Some notes:
+# - language is "C" because the travis chroot for python installs a non-repo
+#   python3.3 from a PPA
+language: c
+before_install:
+ - sudo apt-get update -q
+ - sudo apt-get install distro-info
+ - echo "deb http://archive.ubuntu.com/ubuntu $(distro-info --stable) main"|sudo tee -a /etc/apt/sources.list.d/added.list
+ - sudo apt-get update -q
+ # the horror the horror, dpkg will break otherwise
+ - sudo rm /etc/dpkg/dpkg.cfg.d/multiarch
+ # ideally we would use "$(gdebi -q --apt-line debian/control)" here but
+ # thats currently broken (in vivid)
+ - sudo apt-get install python python3-distutils-extra python3-setuptools python-dev python3-dev python-coverage pep8 pyflakes python-apt python3-apt python-mock python3-mock lsb-release dh-systemd
+script: fakeroot ./debian/rules binary
