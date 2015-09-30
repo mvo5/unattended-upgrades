@@ -41,7 +41,7 @@ import sys
 
 
 from email.message import Message
-from gettext import lgettext as _
+from gettext import gettext as _
 from io import StringIO
 from optparse import (
     OptionParser,
