@@ -1,3 +1,17 @@
+unattended-upgrades (0.86.4) unstable; urgency=medium
+
+  [ Jérôme Lafréchoux ]
+  * Add [package on hold] to mail subject
+
+  [ James Valleroy ]
+  * Add debconf question to set default line of Origins-Pattern.
+  * Ran debconf-updatepo.
+
+  [ Michael Vogt ]
+  * Revert usage of "lgettext()" (9ec6c4b)
+
+ -- Michael Vogt <mvo@debian.org>  Mon, 05 Oct 2015 18:17:26 +0200
+
 unattended-upgrades (0.86.3) unstable; urgency=medium
 
   * Fix new pep8 errors (Closes: 796405)
