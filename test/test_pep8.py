@@ -4,7 +4,8 @@ import os
 import subprocess
 import unittest
 
-IGNORE = "E265,E402"
+# E126: I don't even know what its supposed to tell me :(
+IGNORE = "E126,E265,E402"
 
 
 class PackagePep8TestCase(unittest.TestCase):
