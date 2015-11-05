@@ -1,3 +1,4 @@
+[![Build Status][travis-image]][travis-url]
 Unattended upgrades
 ===================
 
@@ -218,3 +219,5 @@ Supported Options Reference
  Acquire::http::Dl-Limit "70";
  ```
 
+[travis-image]: https://travis-ci.org/mvo5/unattended-upgrades.svg?branch=debian/sid
+[travis-url]: https://travis-ci.org/mvo5/unattended-upgrades
