@@ -6,7 +6,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: unattended-upgrades 0.36debian1\n"
 "Report-Msgid-Bugs-To: unattended-upgrades@packages.debian.org\n"
-"POT-Creation-Date: 2015-09-07 20:07-0400\n"
+"POT-Creation-Date: 2015-11-03 07:12+0100\n"
 "PO-Revision-Date: 2008-12-21 22:32+0900\n"
 "Last-Translator: Hideki Yamane (Debian-JP) <henrich@debian.or.jp>\n"
 "Language-Team: Japanese <debian-japanese@lists.debian.org>\n"
@@ -24,11 +24,17 @@ msgstr "自動的に安定版の更新をダウンロードしてインストー
 #. Type: boolean
 #. Description
 #: ../templates:2001
+#, fuzzy
+#| msgid ""
+#| "Applying updates on a frequent basis is an important part of keeping "
+#| "systems secure. By default, updates need to be applied manually using "
+#| "package  management tools. Alternatively, you can choose to have this "
+#| "system  automatically download and install security updates."
 msgid ""
 "Applying updates on a frequent basis is an important part of keeping systems "
 "secure. By default, updates need to be applied manually using package  "
 "management tools. Alternatively, you can choose to have this system  "
-"automatically download and install security updates."
+"automatically download and install important updates."
 msgstr ""
 "更新の適用を頻繁に実施するのは、システムを安全に保つために重要なことです。標"
 "準の状態では、更新の適用はパッケージ管理ツールを使って手動で行う必要がありま"
@@ -39,6 +45,12 @@ msgstr ""
 #. Description
 #: ../templates:3001
 msgid "Origins-Pattern that packages must match to be upgraded:"
+msgstr ""
+
+#. Type: string
+#. Description
+#: ../templates:3001
+msgid "Please specify a value for the unattended-upgrades Origins-Pattern."
 msgstr ""
 
 #. Type: string

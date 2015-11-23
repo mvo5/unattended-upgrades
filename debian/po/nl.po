@@ -2,25 +2,28 @@
 # Copyright (C) 2011 THE PACKAGE'S COPYRIGHT HOLDER
 # This file is distributed under the same license as the unattended-upgrades package.
 # Jeroen Schot <schot@a-eskwadraat.nl>, 2011.
+# Frans Spiesschaert <Frans.Spiesschaert@yucom.be>, 2015.
 #
 msgid ""
 msgstr ""
 "Project-Id-Version: unattended-upgrades_0.70\n"
 "Report-Msgid-Bugs-To: unattended-upgrades@packages.debian.org\n"
-"POT-Creation-Date: 2015-09-07 20:07-0400\n"
-"PO-Revision-Date: 2011-05-09 11:21+0200\n"
-"Last-Translator: Jeroen Schot <schot@a-eskwadraat.nl>\n"
-"Language-Team: Debian l10n Dutch <debian-l10n-dutch@lists.debian.org>\n"
+"POT-Creation-Date: 2015-11-03 07:12+0100\n"
+"PO-Revision-Date: 2015-11-05 15:05+0100\n"
+"Last-Translator: Frans Spiesschaert <Frans.Spiesschaert@yucom.be>\n"
+"Language-Team: Debian Dutch l10n Team <debian-l10n-dutch@lists.debian.org>\n"
 "Language: nl\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+"X-Generator: Gtranslator 2.91.6\n"
 
 #. Type: boolean
 #. Description
 #: ../templates:2001
 msgid "Automatically download and install stable updates?"
-msgstr "Updates van 'stable' automatisch binnenhalen en installeren?"
+msgstr "Updates uit 'stable' automatisch ophalen en installeren?"
 
 #. Type: boolean
 #. Description
@@ -29,19 +32,27 @@ msgid ""
 "Applying updates on a frequent basis is an important part of keeping systems "
 "secure. By default, updates need to be applied manually using package  "
 "management tools. Alternatively, you can choose to have this system  "
-"automatically download and install security updates."
+"automatically download and install important updates."
 msgstr ""
 "Regelmatig updates installeren is een belangrijk onderdeel van de "
 "beveiliging van systemen. Standaard moeten updates handmatig worden "
 "toegepast met een van de hulpprogramma's voor pakketbeheer. U kunt er ook "
-"voor kiezen om op dit systeem beveilingingsupdates automatisch binnen te "
-"halen en te installeren."
+"voor kiezen om op dit systeem belangrijke updates automatisch te laten "
+"ophalen en installeren."
 
 #. Type: string
 #. Description
 #: ../templates:3001
 msgid "Origins-Pattern that packages must match to be upgraded:"
 msgstr ""
+"Origins-Pattern (origine-patroon) waaraan pakketten moeten beantwoorden om "
+"opgewaardeerd te worden:"
+
+#. Type: string
+#. Description
+#: ../templates:3001
+msgid "Please specify a value for the unattended-upgrades Origins-Pattern."
+msgstr "Geef een waarde op voor Origins-Pattern van unattended-upgrades."
 
 #. Type: string
 #. Description
@@ -50,3 +61,5 @@ msgid ""
 "A package will be upgraded only if its metadata values match all the "
 "supplied keywords in the origin line."
 msgstr ""
+"Een pakket zal enkel opgewaardeerd worden als de waarden van zijn metadata "
+"overeenkomen met al de opgegeven trefwoorden in de 'origin'-regel."

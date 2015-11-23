@@ -3,13 +3,14 @@
 # This file is distributed under the same license as the unattended-upgrades package.
 #
 # António Moreira <antoniocostamoreira@gmail.com>, 2008.
+# Miguel Figueiredo <elmig@debianpt.org>, 2015.
 msgid ""
 msgstr ""
 "Project-Id-Version: unattended-upgrades 0.35debian2\n"
 "Report-Msgid-Bugs-To: unattended-upgrades@packages.debian.org\n"
-"POT-Creation-Date: 2015-09-07 20:07-0400\n"
-"PO-Revision-Date: 2008-12-14 11:49+0000\n"
-"Last-Translator: António Moreira <antoniocostamoreira@gmail.com>\n"
+"POT-Creation-Date: 2015-11-03 07:12+0100\n"
+"PO-Revision-Date: 2015-11-21 19:57+0000\n"
+"Last-Translator: Miguel Figueiredo <elmig@debianpt.org>\n"
 "Language-Team: Portuguese <traduz@debianpt.org>\n"
 "Language: pt\n"
 "MIME-Version: 1.0\n"
@@ -29,19 +30,27 @@ msgid ""
 "Applying updates on a frequent basis is an important part of keeping systems "
 "secure. By default, updates need to be applied manually using package  "
 "management tools. Alternatively, you can choose to have this system  "
-"automatically download and install security updates."
+"automatically download and install important updates."
 msgstr ""
 "Aplicar actualizações regularmente é uma parte importante para manter os "
 "sistemas seguros. Por regra, as actualizações precisam de ser aplicadas "
 "manualmente usando ferramentas de gestão de pacotes. Em alternativa, você "
 "pode escolher ter este sistema a descarregar e instalar automaticamente as "
-"actualizações de segurança."
+"actualizações importantes."
 
 #. Type: string
 #. Description
 #: ../templates:3001
 msgid "Origins-Pattern that packages must match to be upgraded:"
 msgstr ""
+"Origins-Pattern que os pacotes têm de coincidir para serem actualizados:"
+
+#. Type: string
+#. Description
+#: ../templates:3001
+msgid "Please specify a value for the unattended-upgrades Origins-Pattern."
+msgstr ""
+"Por favor especifique um valor para Origin-Pattern do unatteded-upgrades."
 
 #. Type: string
 #. Description
@@ -50,3 +59,5 @@ msgid ""
 "A package will be upgraded only if its metadata values match all the "
 "supplied keywords in the origin line."
 msgstr ""
+"Um pacote será actualizado apenas se o valor dos seus metadados coincidir "
+"com todas as palavras-chave fornecidas na linha original."

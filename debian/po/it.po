@@ -1,13 +1,13 @@
 # Translation of unattended-upgrades debconf templates to Italian
 # This file is distributed under the same license as the unattended-upgrades package.
-# Luca Monducci <luca.mo@tiscali.it>, 2008.
+# Luca Monducci <luca.mo@tiscali.it>, 2008, 2015.
 #
 msgid ""
 msgstr ""
 "Project-Id-Version: unattended-upgrades 0.35debian2 debconf\n"
 "Report-Msgid-Bugs-To: unattended-upgrades@packages.debian.org\n"
-"POT-Creation-Date: 2015-09-07 20:07-0400\n"
-"PO-Revision-Date: 2008-12-08 20:35+0100\n"
+"POT-Creation-Date: 2015-11-03 07:12+0100\n"
+"PO-Revision-Date: 2015-11-15 09:15+0100\n"
 "Last-Translator: Luca Monducci <luca.mo@tiscali.it>\n"
 "Language-Team: Italian <debian-l10n-italian@lists.debian.org>\n"
 "Language: it\n"
@@ -28,19 +28,26 @@ msgid ""
 "Applying updates on a frequent basis is an important part of keeping systems "
 "secure. By default, updates need to be applied manually using package  "
 "management tools. Alternatively, you can choose to have this system  "
-"automatically download and install security updates."
+"automatically download and install important updates."
 msgstr ""
-"L'applicazione a cadenza regolare degli aggiornamenti è una parte importante "
-"per la sicurezza del proprio sistema. Normalmente gli aggiornamenti devono "
-"essere applicati manualmente usando gli strumenti di gestione dei pacchetti; "
-"in alternativa è possibile utilizzare questo sistema per scaricare e "
-"installare automaticamente gli aggiornamenti di sicurezza."
+"La regolare applicazione degli aggiornamenti è una pratica importante per "
+"mantenere in sicurezza il sistema. Normalmente gli aggiornamenti devono "
+"essere installati manualmente usando gli strumenti di gestione dei "
+"pacchetti; in alternativa è possibile su questo sistema scaricare e "
+"installare automaticamente gli aggiornamenti importanti."
 
 #. Type: string
 #. Description
 #: ../templates:3001
 msgid "Origins-Pattern that packages must match to be upgraded:"
 msgstr ""
+"Per essere aggiornati i pacchetti devono corrispondere a Origins-Pattern:"
+
+#. Type: string
+#. Description
+#: ../templates:3001
+msgid "Please specify a value for the unattended-upgrades Origins-Pattern."
+msgstr "Indicare il valore di Origins-Pattern per unattended-upgrades."
 
 #. Type: string
 #. Description
@@ -49,3 +56,5 @@ msgid ""
 "A package will be upgraded only if its metadata values match all the "
 "supplied keywords in the origin line."
 msgstr ""
+"Un pacchetto sarà aggiornato solo se i valori dei suoi metadati "
+"corrispondono con tutte le parole chiave nella riga origine."

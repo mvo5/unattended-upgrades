@@ -1,21 +1,23 @@
-# translation of eu.po to Euskara
+# Basque translation for unattended-upgrades
 # Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
 # This file is distributed under the same license as the PACKAGE package.
 #
-# Piarres Beobide <pi@beobide.net>, 2008, 2009.
+# Piarres Beobide <pi@beobide.net>, 2008, 2009, 2015.
+# Iñaki Larrañaga Murgoitio <dooteo@zundan.com>, 2015.
 msgid ""
 msgstr ""
-"Project-Id-Version: eu\n"
+"Project-Id-Version: unattended-upgrades 0.86.6\n"
 "Report-Msgid-Bugs-To: unattended-upgrades@packages.debian.org\n"
-"POT-Creation-Date: 2015-09-07 20:07-0400\n"
-"PO-Revision-Date: 2009-01-29 01:50+0100\n"
-"Last-Translator: Piarres Beobide <pi@beobide.net>\n"
-"Language-Team: Euskara <debian-l10n-basque@lists.debian.org>\n"
-"Language: \n"
+"POT-Creation-Date: 2015-11-03 07:12+0100\n"
+"PO-Revision-Date: 2015-11-05 11:19+0100\n"
+"Last-Translator: Iñaki Larrañaga Murgoitio <dooteo@zundan.com>\n"
+"Language-Team: Basque <librezale@librezale.org>\n"
+"Language: eu\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"X-Generator: KBabel 1.11.4\n"
+"X-Generator: Lokalize 1.5\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
 
 #. Type: boolean
 #. Description
@@ -30,19 +32,26 @@ msgid ""
 "Applying updates on a frequent basis is an important part of keeping systems "
 "secure. By default, updates need to be applied manually using package  "
 "management tools. Alternatively, you can choose to have this system  "
-"automatically download and install security updates."
+"automatically download and install important updates."
 msgstr ""
 "Maiztasunean oinarritutako bertsio-berritze ezarpenak sistema seguru "
-"mantentzearen zati garrantzitsu bat da. Lehenespenez bertsio-berritzeak "
-"eskuz pakete kudeaketa elementuak erabiliaz egin behar dira. Bestela "
-"segurtasun eguneraketak sistemak automatikoki deskargatu eta instalatzea "
-"hautatu dezakezu."
+"mantentzearen zati garrantzitsu bat da. Lehenetsi gisa, eguneraketek "
+"paketeak kudeatzeko tresnak eskuz erabiltzea eskatzen dute. Bestela, sistema "
+"honek automatikoki eguneraketa garrantzitsuak deskargatzea eta instalatzea "
+"aukera dezakezu."
 
 #. Type: string
 #. Description
 #: ../templates:3001
 msgid "Origins-Pattern that packages must match to be upgraded:"
+msgstr "Jatorriko eredua (bertsio-berrituko diren paketeekin bat etortzeko):"
+
+#. Type: string
+#. Description
+#: ../templates:3001
+msgid "Please specify a value for the unattended-upgrades Origins-Pattern."
 msgstr ""
+"Galdetu gabe bertsio-berrituko diren 'Jatorriko eredua'ren balioa zehaztu."
 
 #. Type: string
 #. Description
@@ -51,3 +60,5 @@ msgid ""
 "A package will be upgraded only if its metadata values match all the "
 "supplied keywords in the origin line."
 msgstr ""
+"Pakete bat bertsio-berrituko da baldin eta bere meta-datuen balioak emandako "
+"jatorriaren lerroko gako-hitz guztiekin bat etortzen bada."

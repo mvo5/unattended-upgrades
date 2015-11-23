@@ -2,14 +2,14 @@
 # Copyright (C) 2005-2009 Canonical Ltd.
 # This file is distributed under the same license as the
 # unattended-upgrades package.
-# Copyright (C) of this file 2012-2014 Chris Leick.
+# Copyright (C) of this file 2012-2015 Chris Leick.
 #
 msgid ""
 msgstr ""
-"Project-Id-Version: unattended-upgrades 0.82.7\n"
+"Project-Id-Version: unattended-upgrades 0.86.6\n"
 "Report-Msgid-Bugs-To: unattended-upgrades@packages.debian.org\n"
-"POT-Creation-Date: 2015-09-07 20:07-0400\n"
-"PO-Revision-Date: 2014-06-04 22:34+0100\n"
+"POT-Creation-Date: 2015-11-03 07:12+0100\n"
+"PO-Revision-Date: 2015-11-03 21:14+0100\n"
 "Last-Translator: Chris Leick <c.leick@vollbio.de>\n"
 "Language-Team: German <debian-l10n-german@lists.debian.org>\n"
 "Language: de\n"
@@ -32,12 +32,12 @@ msgid ""
 "Applying updates on a frequent basis is an important part of keeping systems "
 "secure. By default, updates need to be applied manually using package  "
 "management tools. Alternatively, you can choose to have this system  "
-"automatically download and install security updates."
+"automatically download and install important updates."
 msgstr ""
 "Häufige Aktualisierungen sind wichtig, um Systeme sicher zu halten. "
 "Standardmäßig müssen Aktualisierungen manuell mittels "
 "Paketverwaltungswerkzeugen durchgeführt werden. Alternativ können Sie "
-"auswählen, dass dieses System Sicherheitsaktualisierungen automatisch "
+"auswählen, dass dieses System wichtige Aktualisierungen automatisch "
 "herunterlädt und installiert."
 
 #. Type: string
@@ -45,6 +45,15 @@ msgstr ""
 #: ../templates:3001
 msgid "Origins-Pattern that packages must match to be upgraded:"
 msgstr ""
+"Ursprungsmuster, zu dem Pakete passen müssen, damit ein Upgrade von ihnen "
+"durchgeführt wird:"
+
+#. Type: string
+#. Description
+#: ../templates:3001
+msgid "Please specify a value for the unattended-upgrades Origins-Pattern."
+msgstr ""
+"Geben Sie bitte einen Wert für das Unattended-Upgrades-Ursprungsmuster an."
 
 #. Type: string
 #. Description
@@ -53,3 +62,5 @@ msgid ""
 "A package will be upgraded only if its metadata values match all the "
 "supplied keywords in the origin line."
 msgstr ""
+"Es wird nur dann ein Upgrade eines Pakets durchgeführt, falls dessen "
+"Metadaten zu allen angegebenen Schlüsselworten in der Urpsrungszeile passen."

@@ -7,8 +7,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: 0.35debian1\n"
 "Report-Msgid-Bugs-To: unattended-upgrades@packages.debian.org\n"
-"POT-Creation-Date: 2015-09-07 20:07-0400\n"
-"PO-Revision-Date: 2008-12-03 12:00+0200\n"
+"POT-Creation-Date: 2015-11-03 07:12+0100\n"
+"PO-Revision-Date: 2015-11-05 09:34+0100\n"
 "Last-Translator: Steve Petruzzello <dlist@bluewin.ch>\n"
 "Language-Team: French <debian-l10n-french@lists.debian.org>\n"
 "Language: fr\n"
@@ -31,19 +31,29 @@ msgid ""
 "Applying updates on a frequent basis is an important part of keeping systems "
 "secure. By default, updates need to be applied manually using package  "
 "management tools. Alternatively, you can choose to have this system  "
-"automatically download and install security updates."
+"automatically download and install important updates."
 msgstr ""
 "Il est important de mettre régulièrement son système à jour pour maintenir "
 "un haut niveau de sécurité. Par défaut, les mises à jour doivent être "
-"appliquées manuellement à l'aide d'un outil de gestion de paquets. À "
-"l'inverse, vous pouvez choisir d'automatiser ce processus avec unattended-"
-"upgrades."
+"appliquées manuellement à l'aide d'un outil de gestion de paquets. "
+"Autrement, vous pouvez choisir d'automatiser ce processus de téléchargement "
+"et d'installation des mises à jour de sécurité."
 
 #. Type: string
 #. Description
 #: ../templates:3001
 msgid "Origins-Pattern that packages must match to be upgraded:"
 msgstr ""
+"Motif « Origin-Pattern » auquel les paquets doivent correspondre pour être "
+"mis à jour :"
+
+#. Type: string
+#. Description
+#: ../templates:3001
+msgid "Please specify a value for the unattended-upgrades Origins-Pattern."
+msgstr ""
+"Veuillez indiquer une valeur pour le motif de correspondance « Origin-"
+"Pattern » pour unattended-upgrades."
 
 #. Type: string
 #. Description
@@ -52,3 +62,5 @@ msgid ""
 "A package will be upgraded only if its metadata values match all the "
 "supplied keywords in the origin line."
 msgstr ""
+"Un paquet sera mis à jour uniquement si ses métadonnées correspondent à tous "
+"les mots clés indiqués ici."

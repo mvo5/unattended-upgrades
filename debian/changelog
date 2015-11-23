@@ -1,3 +1,20 @@
+unattended-upgrades (0.86.5) UNRELEASED; urgency=low
+
+  * Debconf templates and debian/control reviewed by the debian-l10n-
+    english team as part of the Smith review project. Closes: #801166
+  * Russian (Yuri Kozlov).  Closes: #803950
+  * Danish (Joe Hansen).  Closes: #804086
+  * Basque (Iñaki Larrañaga Murgoitio).  Closes: #804136
+  * German (Chris Leick).  Closes: #804309
+  * Czech (Michal Simunek).  Closes: #804665
+  * Italian (Luca Monducci).  Closes: #805138
+  * Catalan; (Innocent De Marchi).  Closes: #805298
+  * Dutch; (Frans Spiesschaert).  Closes: #805303
+  * French (Steve Petruzzello).  Closes: #805468
+  * Portuguese (Miguel Figueiredo).  Closes: #805735
+
+ -- Christian Perrier <bubulle@debian.org>  Mon, 12 Oct 2015 08:19:40 +0200
+
 unattended-upgrades (0.86.4) unstable; urgency=medium
 
   [ Jérôme Lafréchoux ]
