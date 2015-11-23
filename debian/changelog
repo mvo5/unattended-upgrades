@@ -1,5 +1,6 @@
-unattended-upgrades (0.86.5) UNRELEASED; urgency=low
+unattended-upgrades (0.86.5) unstable; urgency=low
 
+  [ Christian Perrier ]
   * Debconf templates and debian/control reviewed by the debian-l10n-
     english team as part of the Smith review project. Closes: #801166
   * Russian (Yuri Kozlov).  Closes: #803950
@@ -13,7 +14,7 @@ unattended-upgrades (0.86.5) UNRELEASED; urgency=low
   * French (Steve Petruzzello).  Closes: #805468
   * Portuguese (Miguel Figueiredo).  Closes: #805735
 
- -- Christian Perrier <bubulle@debian.org>  Mon, 12 Oct 2015 08:19:40 +0200
+ -- Michael Vogt <mvo@debian.org>  Mon, 23 Nov 2015 11:47:33 +0100
 
 unattended-upgrades (0.86.4) unstable; urgency=medium
 
