@@ -1088,8 +1088,7 @@ def get_auto_removable(cache):
                 if pkg.is_auto_removable])
 
 
-def do_auto_remove(cache, options, logfile_dpkg, verbose=False):
-    auto_removable = get_auto_removable(cache)
+def do_auto_remove(cache, auto_removable, logfile_dpkg, verbose=False):
     if not auto_removable:
         return True
 
@@ -1300,9 +1299,10 @@ def main(options, rootdir=""):
         logging.debug("dpkg is configured not to cause conffile prompts")
 
     # auto-removal
+    previous_autoremovals = get_auto_removable(cache)
     if apt_pkg.config.find_b(
             "Unattended-Upgrade::Remove-Unused-Dependencies", False):
-        pending_autoremovals = get_auto_removable(cache)
+        pending_autoremovals = previous_autoremovals
     else:
         pending_autoremovals = []
 
@@ -1342,7 +1342,7 @@ def main(options, rootdir=""):
     logfile_dpkg = os.path.join(_get_logdir(), 'unattended-upgrades-dpkg.log')
 
     # only perform install step if we actually have packages to install
-    pkg_install_success = None
+    pkg_install_success = True
     shutdown_lock = -1
     if len(pkgs_to_upgrade) > 0:
         # lock for the shutdown check - its fine if the system
@@ -1356,21 +1356,30 @@ def main(options, rootdir=""):
                                          options,
                                          logfile_dpkg)
 
-    # remove unneeded packages if there are any
+    # now check if any auto-removing needs to be done
+    cache = UnattendedUpgradesCache(
+        rootdir=rootdir, allowed_origins=allowed_origins)
+    if cache._depcache.broken_count > 0:
+        print(_("Cache has broken packages, exiting"))
+        logging.error(_("Cache has broken packages, exiting"))
+        sys.exit(1)
+
+    # the user wants *all* auto-removals to be removed
     if apt_pkg.config.find_b(
             "Unattended-Upgrade::Remove-Unused-Dependencies", False):
-        cache = UnattendedUpgradesCache(rootdir=rootdir,
-                                        allowed_origins=allowed_origins)
-        if cache._depcache.broken_count > 0:
-            print(_("Cache has broken packages, exiting"))
-            logging.error(_("Cache has broken packages, exiting"))
-            sys.exit(1)
-
-        remove_success = do_auto_remove(
-            cache, options, logfile_dpkg,
+        auto_removals = get_auto_removable(cache)
+        pkg_install_success &= do_auto_remove(
+            cache, auto_removals, logfile_dpkg,
             options.verbose or options.debug)
-        if pkg_install_success is not False:
-            pkg_install_success = remove_success
+    # the user wants *only new* auto-removals to be removed
+    elif apt_pkg.config.find_b(
+            "Unattended-Upgrade::Remove-New-Unused-Dependencies", True):
+        # calculate the new auto-removals
+        new_pending_autoremovals = get_auto_removable(cache)
+        auto_removals = new_pending_autoremovals - previous_autoremovals
+        pkg_install_success &= do_auto_remove(
+            cache, auto_removals, logfile_dpkg,
+            options.verbose or options.debug)
 
     logging.debug("InstCount=%i DelCount=%i BrokenCount=%i"
                   % (cache._depcache.inst_count,
