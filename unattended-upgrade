@@ -1111,6 +1111,11 @@ def do_auto_remove(cache, options, logfile_dpkg, verbose=False):
     return res
 
 
+def clean_downloaded_packages(fetcher):
+    for item in fetcher.items:
+        os.unlink(item.destfile)
+
+
 def main(options, rootdir=""):
     # useful for testing
     if rootdir:
@@ -1382,6 +1387,13 @@ def main(options, rootdir=""):
         log_content = get_dpkg_log_content(logfile_dpkg, install_start_time)
         send_summary_mail(
             pkgs, pkg_install_success, pkgs_kept_back, mem_log, log_content)
+
+    # clean after success install (if needed)
+    keep_key = "Unattended-Upgrade::Keep-Debs-After-Install"
+    if (not apt_pkg.config.find_b(keep_key, False) and
+            not options.dry_run and
+            pkg_install_success):
+        clean_downloaded_packages(fetcher)
 
     # FIXME: DRY violation, write_stamp_file() is used above as well
     # write timestamp file

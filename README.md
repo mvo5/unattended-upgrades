@@ -209,6 +209,11 @@ Supported Options Reference
 
  Automatically reboot even if users are logged in.
 
+* `Unattended-Upgrade::Keep-Debs-After-Install` - boolean (default:False)
+
+ Keep the downloaded deb packages after successful installs. By default
+ those are removed after successful installs.
+
 * `Acquire::http::Dl-Limit` - integer (default:0)
 
  Use apt bandwidth limit feature when fetching the upgrades. The
