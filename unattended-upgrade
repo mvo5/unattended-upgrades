@@ -1112,8 +1112,11 @@ def do_auto_remove(cache, options, logfile_dpkg, verbose=False):
 
 
 def clean_downloaded_packages(fetcher):
+    archivedir = os.path.dirname(
+        apt_pkg.config.find_dir("Dir::Cache::archives"))
     for item in fetcher.items:
-        os.unlink(item.destfile)
+        if os.path.dirname(os.path.abspath(item.destfile)) == archivedir:
+            os.unlink(item.destfile)
 
 
 def main(options, rootdir=""):
