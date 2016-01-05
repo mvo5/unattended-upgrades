@@ -766,10 +766,11 @@ def _send_mail_using_mailx(to_address, subject, body):
     return ret
 
 
-def _send_mail_using_sendmail(to_address, subject, body):
+def _send_mail_using_sendmail(from_address, to_address, subject, body):
     # format as a proper mail
     msg = Message()
     msg['Subject'] = subject
+    msg['From'] = from_address
     msg['To'] = to_address
     # order is important here, Message() first, then Charset()
     #  then msg.set_charset()
@@ -837,8 +838,10 @@ def send_summary_mail(pkgs, res, pkgs_kept_back, mem_log, dpkg_log_content):
     body += _("Unattended-upgrades log:\n")
     body += mem_log.getvalue()
 
+    from_email = apt_pkg.config.find("Unattended-Upgrade::Sender", "root")
+
     if os.path.exists(SENDMAIL_BINARY):
-        ret = _send_mail_using_sendmail(to_email, subject, body)
+        ret = _send_mail_using_sendmail(from_email, to_email, subject, body)
     elif os.path.exists(MAIL_BINARY):
         ret = _send_mail_using_mailx(to_email, subject, body)
     else:
