@@ -191,6 +191,15 @@ Supported Options Reference
  Unattended-Upgrade::Mail "user@example.com";
  ```
 
+* `Unattended-Upgrade::Sender` - string (default:"root")
+
+ Use the specified value in the "From" field of outgoing mails.
+ 
+  Example:
+ ```
+ Unattended-Upgrade::Sender "server@example.com";
+ ```
+
 * `Unattended-Upgrade::MailOnlyOnError` - boolean (default:False)
  
  Only generate a email if some problem occured during the 
