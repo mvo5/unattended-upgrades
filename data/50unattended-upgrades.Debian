@@ -7,7 +7,7 @@
 // keywords are wild cards.) The keywords originate from the Release
 // file, but several aliases are accepted.  The accepted keywords are:
 //   a,archive,suite (eg, "stable")
-//   c,component     (eg, "main", "crontrib", "non-free")
+//   c,component     (eg, "main", "contrib", "non-free")
 //   l,label         (eg, "Debian", "Debian-Security")
 //   o,origin        (eg, "Debian", "Unofficial Multimedia Packages")
 //   n,codename      (eg, "jessie", "jessie-updates")

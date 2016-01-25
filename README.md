@@ -22,7 +22,7 @@ every day.
 
 The main way to specify which packages will be auto-upgraded is by
 means of their "origin" and "archive".  These are taken respectively
-from the Origin and Suite fields of the respository's Release file,
+from the Origin and Suite fields of the repository's Release file,
 or can be found in the output of:
 ```
 $ apt-cache policy
