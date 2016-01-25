@@ -749,7 +749,7 @@ def setup_apt_listchanges(conf="/etc/apt/listchanges.conf"):
         os.environ["APT_LISTCHANGES_FRONTEND"] = "none"
 
 
-def _send_mail_using_mailx(to_address, subject, body):
+def _send_mail_using_mailx(from_address, to_address, subject, body):
     # ensure that the body is a byte stream and that we do not
     # break on encoding errors (the default error mode is "strict")
     encoded_body = body.encode(
@@ -758,7 +758,7 @@ def _send_mail_using_mailx(to_address, subject, body):
     # unicode encoding errors (e.g. because the user is running a
     # ascii only system like the buildds)
     mail = subprocess.Popen(
-        [MAIL_BINARY, "-s", subject, to_address],
+        [MAIL_BINARY, "-r", from_address, "-s", subject, to_address],
         stdin=subprocess.PIPE, universal_newlines=False)
     mail.stdin.write(encoded_body)
     mail.stdin.close()
@@ -843,7 +843,7 @@ def send_summary_mail(pkgs, res, pkgs_kept_back, mem_log, dpkg_log_content):
     if os.path.exists(SENDMAIL_BINARY):
         ret = _send_mail_using_sendmail(from_email, to_email, subject, body)
     elif os.path.exists(MAIL_BINARY):
-        ret = _send_mail_using_mailx(to_email, subject, body)
+        ret = _send_mail_using_mailx(from_email, to_email, subject, body)
     else:
         raise AssertionError(
             "This should never be reached, if we are here we either "
