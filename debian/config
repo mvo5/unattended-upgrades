@@ -1,7 +1,18 @@
 #!/bin/sh -e
 
+AUTO_UPGRADE="/etc/apt/apt.conf.d/20auto-upgrades"
+
 # Source debconf library.
 . /usr/share/debconf/confmodule
+
+# Load configuration from disk, if it exists.
+if [ -e "$AUTO_UPGRADE" ]; then
+    if grep -q 'APT::Periodic::Unattended-Upgrade "1";' $AUTO_UPGRADE ; then
+	db_set unattended-upgrades/enable_auto_updates true
+    elif grep -q 'APT::Periodic::Unattended-Upgrade "0";' $AUTO_UPGRADE ; then
+	db_set unattended-upgrades/enable_auto_updates false
+    fi
+fi
 
 db_input medium unattended-upgrades/enable_auto_updates || true
 db_input medium unattended-upgrades/origins_pattern || true
