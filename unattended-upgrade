@@ -29,6 +29,7 @@ import fcntl
 import fnmatch
 import gettext
 import grp
+import io
 import locale
 import logging
 import re
@@ -1068,7 +1069,7 @@ def get_dpkg_log_content(logfile_dpkg, install_start_time):
         logfile_dpkg, install_start_time))
     content = []
     found_start = False
-    with open(logfile_dpkg) as fp:
+    with io.open(logfile_dpkg, encoding='utf-8') as fp:
         # read until we find the last "Log started: "
         for line in fp.readlines():
             # scan for the first entry we need (minimal-step mode
