@@ -1100,7 +1100,7 @@ def do_auto_remove(cache, auto_removable, logfile_dpkg, verbose=False):
         logging.debug("marking %s for remove" % pkgname)
         cache[pkgname].mark_delete()
     logging.info(_("Packages that are auto removed: '%s'"),
-                 " ".join(auto_removable))
+                 " ".join(sorted(auto_removable)))
 
     # do it
     res, error = cache_commit(cache, logfile_dpkg, verbose)

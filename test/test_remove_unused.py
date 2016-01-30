@@ -97,7 +97,7 @@ Unattended-Upgrade::Remove-Unused-Dependencies "true";
         with open(self.log) as f:
             # both the new and the old unused dependency are removed
             needle = "Packages that are auto removed: "\
-                     "'test-package-dependency old-unused-dependency'"
+                     "'old-unused-dependency test-package-dependency'"
             haystack = f.read()
             self.assertTrue(needle in haystack,
                             "Can not find '%s' in '%s'" % (needle, haystack))
