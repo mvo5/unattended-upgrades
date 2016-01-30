@@ -165,6 +165,15 @@ Debian-Security']
         setup_apt_listchanges("./data/listchanges.conf.pager")
         self.assertEqual(os.environ["APT_LISTCHANGES_FRONTEND"], "none")
 
+    def test_summary_mail_from_address(self):
+        apt_pkg.config.set("Unattended-Upgrade::Sender", "rootolv")
+        self.addCleanup(apt_pkg.config.set, "Unattended-Upgrade::Sender", "")
+        send_summary_mail(*self._return_mock_data())
+        with open("mail.txt", "rb") as fp:
+            mail_txt = fp.read().decode("utf-8")
+        self.assertTrue(
+            "From: rootolv" in mail_txt, "missing From: in %s" % mail_txt)
+
 
 class MailxTestCase(CommonTestsForMailxAndSendmail, unittest.TestCase):
 
