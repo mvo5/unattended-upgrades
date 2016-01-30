@@ -1121,7 +1121,10 @@ def clean_downloaded_packages(fetcher):
         apt_pkg.config.find_dir("Dir::Cache::archives"))
     for item in fetcher.items:
         if os.path.dirname(os.path.abspath(item.destfile)) == archivedir:
-            os.unlink(item.destfile)
+            try:
+                os.unlink(item.destfile)
+            except OSError:
+                pass
 
 
 def main(options, rootdir=""):
