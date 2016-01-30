@@ -1,0 +1,16 @@
+#!/usr/bin/python
+
+import os
+import sys
+import subprocess
+
+if __name__ == "__main__":
+   if "--unpack" in sys.argv:
+      dpkg_status = os.path.join(
+          os.path.dirname(sys.argv[0]), "..", "..",
+          "var", "lib", "dpkg", "status")
+      # pretend a new version without the previous dependency got installed
+      subprocess.check_call(
+          ["sed", "-i", "/Depends:\ test-package-dependency/d", dpkg_status])
+      subprocess.check_call(
+          ["sed", "-i", "s/1.0.test.pkg/2.0.test.pkg/", dpkg_status])
