@@ -1,3 +1,34 @@
+unattended-upgrades (0.89) unstable; urgency=medium
+
+  [ Michael Vogt ]
+  * Add `Unattended-Upgrade::Remove-New-Unused-Dependencies` that
+    defaults to "yes". This ensures that older kernel
+    get automatically cleaned up and /boot will not overflow.
+    LP: #1267059
+  * Remove downloaded deb packages after successful installs.
+    This can be controlled via the option:
+    `Unattended-Upgrade::Keep-Debs-After-Install`
+    (Closes: #809428)
+  * Only remove debs in the cache dir
+
+  [ Steffen Köhler ]
+  * Allow to configure sender email via `Unattended-Upgrade::Sender`
+
+  [ Antti Riikonen ]
+  * Minor typo fix in comment
+
+  [ Cleto Martin ]
+  * bugfix: non-ascii chars in dpkg log file crashes unattended upgrades
+    Closes: #812857
+
+  [ James Valleroy ]
+  * Set debconf value for auto updates based on current configuration.
+
+  [ Alexandre Detiste ]
+  * update French transalation
+
+ -- Michael Vogt <mvo@debian.org>  Sat, 30 Jan 2016 16:04:52 +0100
+
 unattended-upgrades (0.86.5) unstable; urgency=low
 
   [ Christian Perrier ]
