@@ -1,3 +1,9 @@
+unattended-upgrades (0.89.1) unstable; urgency=medium
+
+  * fix FTBFS
+
+ -- Michael Vogt <mvo@debian.org>  Wed, 03 Feb 2016 12:37:49 +0100
+
 unattended-upgrades (0.89) unstable; urgency=medium
 
   [ Michael Vogt ]
