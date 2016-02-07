@@ -95,11 +95,11 @@ msgstr ""
 
 #: ../unattended-upgrade:832
 msgid "Package installation log:"
-msgstr "Journal d'installation du paquet :"
+msgstr "Journal d'installation des paquets:"
 
 #: ../unattended-upgrade:835
 msgid "Unattended-upgrades log:\n"
-msgstr "Journal de unattended-upgrades :\n"
+msgstr "Journal de unattended-upgrades:\n"
 
 #: ../unattended-upgrade:855
 #, python-format
@@ -123,7 +123,7 @@ msgstr ""
 #: ../unattended-upgrade:1097
 #, python-format
 msgid "Packages that are auto removed: '%s'"
-msgstr "Suppression automatique des paquets : %s"
+msgstr "Suppression automatique des paquets: %s"
 
 #: ../unattended-upgrade:1103
 #,
@@ -148,12 +148,12 @@ msgstr "dpkg a renvoyé une erreur! Voir '%s' pour les détails"
 #: ../unattended-upgrade:1125
 #, python-format
 msgid "Initial blacklisted packages: %s"
-msgstr "Paquets initialement sur la liste noire : %s"
+msgstr "Paquets initialement sur la liste noire: %s"
 
 #: ../unattended-upgrade:1130
 #, python-format
 msgid "Initial whitelisted packages: %s"
-msgstr "Paquets initialement sur la liste blanche : %s"
+msgstr "Paquets initialement sur la liste blanche: %s"
 
 #: ../unattended-upgrade:1133
 msgid "Starting unattended upgrades script"
@@ -162,7 +162,7 @@ msgstr "Démarrage du script de mise à niveau automatique"
 #: ../unattended-upgrade:1136
 #, python-format
 msgid "Allowed origins are: %s"
-msgstr "Les origines permises sont : %s"
+msgstr "Les origines permises sont: %s"
 
 #: ../unattended-upgrade:1152 ../unattended-upgrade:1153
 msgid "Unclean dpkg state detected, trying to correct"
@@ -174,7 +174,7 @@ msgid ""
 "dpkg --configure -a output:\n"
 "%s"
 msgstr ""
-"sortie de « dpkg --configure -a output » :\n"
+"sortie de « dpkg --configure -a »:\n"
 "%s"
 
 #: ../unattended-upgrade:1173
@@ -195,12 +195,12 @@ msgstr "Le cache contient des paquets cassés, abandon"
 #: ../unattended-upgrade:1226
 #, python-format
 msgid "GetArchives() failed: '%s'"
-msgstr "Échec de GetArchives() : %s"
+msgstr "Échec de GetArchives(): %s"
 
 #: ../unattended-upgrade:1236 ../unattended-upgrade:1237
 #, python-format
 msgid "An error occurred: '%s'"
-msgstr "Une erreur s'est produite : %s"
+msgstr "Une erreur s'est produite: %s"
 
 #: ../unattended-upgrade:1239 ../unattended-upgrade:1241
 #, python-format
@@ -235,7 +235,7 @@ msgstr "Aucun paquet à mettre à niveau automatiquement ni à"
 #: ../unattended-upgrade:1337
 #, python-format
 msgid "Packages that will be upgraded: %s"
-msgstr "Paquets mis à niveau : %s"
+msgstr "Paquets mis à niveau: %s"
 
 #: ../unattended-upgrade:1406
 msgid "print debug messages"
