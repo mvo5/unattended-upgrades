@@ -10,7 +10,7 @@ unattended-upgrades (0.89) unstable; urgency=medium
   * Add `Unattended-Upgrade::Remove-New-Unused-Dependencies` that
     defaults to "yes". This ensures that older kernel
     get automatically cleaned up and /boot will not overflow.
-    LP: #1267059
+    LP: #1054927
   * Remove downloaded deb packages after successful installs.
     This can be controlled via the option:
     `Unattended-Upgrade::Keep-Debs-After-Install`
