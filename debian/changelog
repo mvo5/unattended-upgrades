@@ -1,3 +1,15 @@
+unattended-upgrades (0.90) unstable; urgency=medium
+
+  [ Alexandre Detiste ]
+  * tweak a bit the French translations
+
+  [ Michael Vogt ]
+  * debian/templates: set unattended-upgrades/enable_auto_updates to
+    "true" (Closes: #707055)
+  * debian/config: set debconf questions about origin/enable to low
+
+ -- Michael Vogt <mvo@debian.org>  Thu, 18 Feb 2016 14:05:58 -0800
+
 unattended-upgrades (0.89.1) unstable; urgency=medium
 
   * fix FTBFS
