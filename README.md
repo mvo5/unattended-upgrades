@@ -237,5 +237,17 @@ Supported Options Reference
  Acquire::http::Dl-Limit "70";
  ```
 
+* `Dpkg::Options` - list of strings
+
+ Set a dpkg commandline option. This is useful to e.g. force conffile
+ handling in dpkg.
+
+ Example - force dpkg to keep the old configuration files:
+ ```
+ Dpkg::Options {"--force-confold"};
+ ```
+ Note that unattended-upgrades detects this options and ensures that
+ packages with configuration prompts will never be held back.
+
 [travis-image]: https://travis-ci.org/mvo5/unattended-upgrades.svg?branch=debian/sid
 [travis-url]: https://travis-ci.org/mvo5/unattended-upgrades
