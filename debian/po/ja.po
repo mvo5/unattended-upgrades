@@ -1,19 +1,22 @@
 # Copyright (C) 2008 Michael Vogt <michael.vogt@ubuntu.com>
 # This file is distributed under the same license as the unattended-upgrades package.
 # Hideki Yamane (Debian-JP) <henrich@debian.or.jp>, 2008.
-# 
+# Takuma Yamada <tyamada@takumayamada.com>, 2016.
+#
 msgid ""
 msgstr ""
 "Project-Id-Version: unattended-upgrades 0.36debian1\n"
 "Report-Msgid-Bugs-To: unattended-upgrades@packages.debian.org\n"
 "POT-Creation-Date: 2015-11-03 07:12+0100\n"
-"PO-Revision-Date: 2008-12-21 22:32+0900\n"
-"Last-Translator: Hideki Yamane (Debian-JP) <henrich@debian.or.jp>\n"
-"Language-Team: Japanese <debian-japanese@lists.debian.org>\n"
+"PO-Revision-Date: 2016-02-20 15:58+0900\n"
+"Last-Translator: Takuma Yamada <tyamada@takumayamada.com>\n"
+"Language-Team: 日本語 <debian-japanese@lists.debian.org>\n"
 "Language: ja\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=1; plural=0;\n"
+"X-Generator: Gtranslator 2.91.6\n"
 
 #. Type: boolean
 #. Description
@@ -24,12 +27,6 @@ msgstr "自動的に安定版の更新をダウンロードしてインストー
 #. Type: boolean
 #. Description
 #: ../templates:2001
-#, fuzzy
-#| msgid ""
-#| "Applying updates on a frequent basis is an important part of keeping "
-#| "systems secure. By default, updates need to be applied manually using "
-#| "package  management tools. Alternatively, you can choose to have this "
-#| "system  automatically download and install security updates."
 msgid ""
 "Applying updates on a frequent basis is an important part of keeping systems "
 "secure. By default, updates need to be applied manually using package  "
@@ -46,12 +43,13 @@ msgstr ""
 #: ../templates:3001
 msgid "Origins-Pattern that packages must match to be upgraded:"
 msgstr ""
+"Origins-Pattern (アップグレードされるパッケージと一致しなければなりません):"
 
 #. Type: string
 #. Description
 #: ../templates:3001
 msgid "Please specify a value for the unattended-upgrades Origins-Pattern."
-msgstr ""
+msgstr "unattended-upgrades Origins-Pattern の値を指定してください。"
 
 #. Type: string
 #. Description
@@ -60,3 +58,5 @@ msgid ""
 "A package will be upgraded only if its metadata values match all the "
 "supplied keywords in the origin line."
 msgstr ""
+"パッケージは、そのメタデータの値が origin 行のすべてのキーワードと一致する場"
+"合にのみアップグレードされます。"
