@@ -41,6 +41,7 @@ import subprocess
 import sys
 
 
+from datetime import date
 from email.message import Message
 from gettext import gettext as _
 from io import StringIO
@@ -1125,6 +1126,50 @@ def clean_downloaded_packages(fetcher):
                 pass
 
 
+def is_update_day():
+    weekday_map = {
+        # by num
+        '0': 0,
+        '1': 1,
+        '2': 2,
+        '3': 3,
+        '4': 4,
+        '5': 5,
+        '6': 6,
+        # abbrev
+        'Mon': 0,
+        'Tue': 1,
+        'Wed': 2,
+        'Thu': 3,
+        'Fri': 4,
+        'Sat': 5,
+        'Sun': 6,
+        # long
+        'Monday': 0,
+        'Tuesday': 1,
+        'Wednesday': 2,
+        'Thursday': 3,
+        'Friday': 4,
+        'Saturday': 5,
+        'Sunday': 6,
+    }
+    # if the user has nothing configured always run
+    patch_days = apt_pkg.config.value_list("Unattended-Upgrade::Update-Days")
+    if not patch_days:
+        return True
+    # validate patch days
+    for v in patch_days:
+        if v not in weekday_map:
+            logging.error("invalid udpate day '%s', ignoring the Update-Days config", v)
+            return True
+    # check if today is a patch day
+    today = date.today()
+    if today.weekday() in [weekday_map.get(name) for name in patch_days]:
+        return True
+    logging.info("Skipping update check: today is '%s' but patch days are '%s'", today.strftime("%A"), patch_days)
+    return False
+
+
 def main(options, rootdir=""):
     # useful for testing
     if rootdir:
@@ -1132,6 +1177,10 @@ def main(options, rootdir=""):
 
     # setup logging
     mem_log = _setup_logging(options)
+
+    # check if today is a patch day
+    if not is_update_day():
+        return
 
     # format (origin, archive), e.g. ("Ubuntu","dapper-security")
     allowed_origins = get_allowed_origins()
