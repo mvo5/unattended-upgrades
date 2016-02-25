@@ -1142,8 +1142,11 @@ def is_update_day():
     # by number (Sun: 0, Mon: 1, ...)
     if today.strftime("%w") in patch_days:
         return True
-    # not found
-    logging.info("Skipping update check: today is '%s' but patch days are '%s'", today.strftime("%A"), patch_days)
+    # today is not a patch day
+    logging.info(
+        "Skipping update check: today is '%s,%s,%s' but patch days are '%s'",
+        today.strftime("%w"), today.strftime("%a"), today.strftime("%A"),
+        patch_days)
     return False
 
 
