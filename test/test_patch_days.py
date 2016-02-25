@@ -32,9 +32,9 @@ class TestUpdateDays(unittest.TestCase):
     @patch("unattended_upgrade.date")
     def test_update_days_by_number(self, mock_date):
         mock_date.side_effect = lambda *args, **kw: date(*args, **kw)
-        # 0: Mon, 1: Tue, ...
-        apt.apt_pkg.config.set("Unattended-Upgrade::Update-Days::", "2")
-        apt.apt_pkg.config.set("Unattended-Upgrade::Update-Days::", "6")
+        # 0: Sun, 1: Mon, ...
+        apt.apt_pkg.config.set("Unattended-Upgrade::Update-Days::", "3")
+        apt.apt_pkg.config.set("Unattended-Upgrade::Update-Days::", "0")
         # that was a Wed
         mock_date.today.return_value = date(2007, 8, 22)
         self.assertTrue(unattended_upgrade.is_update_day())
@@ -45,11 +45,6 @@ class TestUpdateDays(unittest.TestCase):
         mock_date.today.return_value = date(2007, 7, 29)
         self.assertTrue(unattended_upgrade.is_update_day())
 
-    def test_update_days_validation(self):
-        # an invalid setting makes every day a patch day 
-        # (err on the safe side)
-        apt.apt_pkg.config.set("Unattended-Upgrade::Update-Days::", "invalid")
-        self.assertTrue(unattended_upgrade.is_update_day())
 
 
 if __name__ == "__main__":

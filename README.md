@@ -251,7 +251,9 @@ Supported Options Reference
 
 * `Unattended-Upgrade::Update-Days` - list of strings (default:empty)
 
- Set the days of the week that updates should be applied.
+ Set the days of the week that updates should be applied. The days
+ can be specified as localized abbreviated or full names. Or as
+ integers where "0" is Sunday, "1" is Monday etc.
 
  Example - apply updates only on Monday and Friday
  ```
