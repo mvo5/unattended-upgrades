@@ -1,3 +1,16 @@
+unattended-upgrades (0.91) unstable; urgency=medium
+
+  * Updated japanese debconf templates.
+    Thanks to Takuma Yamada (Closes: 815389)
+  * Increase TimeoutStartSec in the shutdown script
+  * Document how to set Dpkg::Options.
+    Thanks to Matt Bearup
+  * add Unattended-Upgrade::Update-Days config
+  * [INTL:pt_BR] Brazilian Portuguese.
+    Thanks to Adriano Rafael Gomes (Closes: #805460)
+
+ -- Michael Vogt <mvo@debian.org>  Fri, 04 Mar 2016 17:15:25 +0100
+
 unattended-upgrades (0.90) unstable; urgency=medium
 
   [ Alexandre Detiste ]
