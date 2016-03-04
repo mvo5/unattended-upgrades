@@ -249,5 +249,20 @@ Supported Options Reference
  Note that unattended-upgrades detects this options and ensures that
  packages with configuration prompts will never be held back.
 
+* `Unattended-Upgrade::Update-Days` - list of strings (default:empty)
+
+ Set the days of the week that updates should be applied. The days
+ can be specified as localized abbreviated or full names. Or as
+ integers where "0" is Sunday, "1" is Monday etc.
+
+ Example - apply updates only on Monday and Friday
+ ```
+ Unattended-Upgrade::Update-Days {"Mon","Fri"};
+ ```
+ The default is an empty list which means updates are applied every day.
+
+
+
+
 [travis-image]: https://travis-ci.org/mvo5/unattended-upgrades.svg?branch=debian/sid
 [travis-url]: https://travis-ci.org/mvo5/unattended-upgrades

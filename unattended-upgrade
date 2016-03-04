@@ -41,6 +41,7 @@ import subprocess
 import sys
 
 
+from datetime import date
 from email.message import Message
 from gettext import gettext as _
 from io import StringIO
@@ -1125,6 +1126,30 @@ def clean_downloaded_packages(fetcher):
                 pass
 
 
+def is_update_day():
+    # check if patch days are configured
+    patch_days = apt_pkg.config.value_list("Unattended-Upgrade::Update-Days")
+    if not patch_days:
+        return True
+    # validate patch days
+    today = date.today()
+    # abbreviated localized dayname
+    if today.strftime("%a") in patch_days:
+        return True
+    # full localized dayname
+    if today.strftime("%A") in patch_days:
+        return True
+    # by number (Sun: 0, Mon: 1, ...)
+    if today.strftime("%w") in patch_days:
+        return True
+    # today is not a patch day
+    logging.info(
+        "Skipping update check: today is '%s,%s,%s' but patch days are '%s'",
+        today.strftime("%w"), today.strftime("%a"), today.strftime("%A"),
+        patch_days)
+    return False
+
+
 def main(options, rootdir=""):
     # useful for testing
     if rootdir:
@@ -1132,6 +1157,10 @@ def main(options, rootdir=""):
 
     # setup logging
     mem_log = _setup_logging(options)
+
+    # check if today is a patch day
+    if not is_update_day():
+        return
 
     # format (origin, archive), e.g. ("Ubuntu","dapper-security")
     allowed_origins = get_allowed_origins()
