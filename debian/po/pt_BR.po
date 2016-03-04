@@ -1,22 +1,21 @@
 # Debconf translations for unattended-upgrades.
 # Copyright (C) 2009 THE unattended-upgrades'S COPYRIGHT HOLDER
 # This file is distributed under the same license as the unattended-upgrades package.
-# Adriano Rafael Gomes <adrianorg@gmail.com>, 2009-2010.
+# Adriano Rafael Gomes <adrianorg@arg.eti.br>, 2009-2015.
 #
 msgid ""
 msgstr ""
 "Project-Id-Version: unattended-upgrades\n"
 "Report-Msgid-Bugs-To: unattended-upgrades@packages.debian.org\n"
 "POT-Creation-Date: 2015-11-03 07:12+0100\n"
-"PO-Revision-Date: 2010-12-17 21:58-0200\n"
-"Last-Translator: Adriano Rafael Gomes <adrianorg@gmail.com>\n"
+"PO-Revision-Date: 2015-11-12 22:56-0200\n"
+"Last-Translator: Adriano Rafael Gomes <adrianorg@arg.eti.br>\n"
 "Language-Team: Brazilian Portuguese <debian-l10n-portuguese@lists.debian."
 "org>\n"
 "Language: pt_BR\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"pt_BR utf-8\n"
 
 #. Type: boolean
 #. Description
@@ -27,7 +26,6 @@ msgstr "Baixar e instalar atualizações estáveis automaticamente?"
 #. Type: boolean
 #. Description
 #: ../templates:2001
-#, fuzzy
 #| msgid ""
 #| "Applying updates on a frequent basis is an important part of keeping "
 #| "systems secure. By default, updates need to be applied manually using "
@@ -43,19 +41,23 @@ msgstr ""
 "sistemas seguros. Por padrão, as atualizações precisam ser aplicadas "
 "manualmente usando ferramentas de gerenciamento de pacotes. "
 "Alternativamente, você pode escolher que esse sistema baixe e instale "
-"automaticamente as atualizações de segurança."
+"automaticamente as atualizações importantes."
 
 #. Type: string
 #. Description
 #: ../templates:3001
 msgid "Origins-Pattern that packages must match to be upgraded:"
 msgstr ""
+"\"Origins-Pattern\" com o qual os pacotes devem coincidir para serem "
+"atualizados:"
 
 #. Type: string
 #. Description
 #: ../templates:3001
 msgid "Please specify a value for the unattended-upgrades Origins-Pattern."
 msgstr ""
+"Por favor, especifique um valor para o \"Origins-Pattern\" do unattended-"
+"upgrades."
 
 #. Type: string
 #. Description
@@ -64,3 +66,5 @@ msgid ""
 "A package will be upgraded only if its metadata values match all the "
 "supplied keywords in the origin line."
 msgstr ""
+"Um pacote será atualizado somente se os valores dos seus metadados "
+"coincidirem com todas as palavras-chave fornecidas na linha de origem."
