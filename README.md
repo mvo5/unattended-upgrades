@@ -262,6 +262,27 @@ Supported Options Reference
  The default is an empty list which means updates are applied every day.
 
 
+* `Unattended-Upgrade::SyslogEnable` - boolean (default:False)
+
+ Write events to syslog, which is useful in environments where
+ syslog is shipped to a central store.
+
+ Example - Enable writing to syslog
+ ```
+ Unattended-Upgrade::SyslogEnable true;
+ ```
+ The default is False - events will not be written to syslog
+
+* `Unattended-Upgrade::SyslogFacility` - string (default:"daemon")
+
+ Write events to the specified facility, or the daemon facility if not specified.
+ Requires the `Unattended-Upgrade::SyslogEnable` option to be set to true
+
+ Example - Use the syslog auth facility
+ ```
+ Unattended-Upgrade::SyslogFacility "auth";
+ ```
+ The default is the daemon facility
 
 
 [travis-image]: https://travis-ci.org/mvo5/unattended-upgrades.svg?branch=debian/sid
