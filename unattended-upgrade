@@ -966,8 +966,9 @@ def _setup_logging(options):
         syslogFacility = apt_pkg.config.find(
             "Unattended-Upgrade::SyslogFacility",
             "daemon")
-        syslogHandler = logging.handlers.SysLogHandler(address='/dev/log',
-                                                     facility=syslogFacility)
+        syslogHandler = logging.handlers.SysLogHandler(
+            address='/dev/log',
+            facility=syslogFacility)
         syslogHandler.setFormatter(
             logging.Formatter("unattended-upgrade: %(message)s"))
         if syslogFacility.lower() in syslogHandler.facility_names.keys():
