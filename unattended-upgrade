@@ -960,16 +960,23 @@ def _setup_logging(options):
         mem_log_handler = logging.StreamHandler(mem_log)
         logger.addHandler(mem_log_handler)
     # Configure syslog if necessary
-    syslogEnable = apt_pkg.config.find_b("Unattended-Upgrade::SyslogEnable", False)
+    syslogEnable = apt_pkg.config.find_b("Unattended-Upgrade::SyslogEnable",
+                                         False)
     if syslogEnable:
-        syslogFacility = apt_pkg.config.find("Unattended-Upgrade::SyslogFacility", "daemon")
-        syslogHandler=logging.handlers.SysLogHandler(address='/dev/log', facility=syslogFacility)
-        syslogHandler.setFormatter(logging.Formatter("unattended-upgrade: %(message)s"))
+        syslogFacility = apt_pkg.config.find(
+            "Unattended-Upgrade::SyslogFacility", 
+            "daemon")
+        syslogHandler=logging.handlers.SysLogHandler(address = '/dev/log', 
+                                                     facility = syslogFacility)
+        syslogHandler.setFormatter(
+            logging.Formatter("unattended-upgrade: %(message)s"))
         if syslogFacility.lower() in syslogHandler.facility_names.keys():
             logger.addHandler(syslogHandler)
-            logging.info("Enabled logging to syslog via %s facility " % syslogFacility)
+            logging.info("Enabled logging to syslog via %s facility " 
+                         % syslogFacility)
         else:
-            logging.warning("Cannot log events to syslog because facility %s was not found" % syslogFacility)
+            logging.warning("Syslog facility %s was not found" 
+                            % syslogFacility)
     return mem_log
 
 
