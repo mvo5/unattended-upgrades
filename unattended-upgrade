@@ -443,7 +443,7 @@ def upgrade_in_minimal_steps(cache, pkgs_to_upgrade, blacklist,
     to_upgrade = set(pkgs_to_upgrade)
     while True:
         # find smallest set
-        smallest_partition = to_upgrade
+        smallest_partition = set()
         for pkgname in to_upgrade:
             if SIGNAL_STOP_REQUEST:
                 logging.warning("SIGNAL received, stopping")
@@ -470,11 +470,17 @@ def upgrade_in_minimal_steps(cache, pkgs_to_upgrade, blacklist,
                 logging.debug("found leaf package %s" % pkg.name)
                 smallest_partition = changes
                 break
-            if len(changes) < len(smallest_partition):
+            if (len(changes) < len(smallest_partition) or
+                    len(smallest_partition) == 0):
                 logging.debug("found partition of size %s (%s)" % (
                     len(changes), changes))
                 smallest_partition = changes
             cache.clear()
+
+        if len(smallest_partition) == 0:
+            logging.info(
+                _("Some packages can not be upgraded: %s") % (to_upgrade))
+            break
 
         # write progress log information
         if len(pkgs_to_upgrade) > 0:
@@ -488,6 +494,14 @@ def upgrade_in_minimal_steps(cache, pkgs_to_upgrade, blacklist,
         # apply changes
         logging.debug("applying set %s" % smallest_partition)
         rewind_cache(cache, [cache[name] for name in smallest_partition])
+
+        # one last check, just to be sure
+        if not check_changes_for_sanity(cache, allowed_origins, blacklist,
+                                        whitelist):
+            logging.error("Failed sanity check while attempting to commit: "
+                          "this should never happen")
+            cache.clear()
+            return False
 
         res, error = cache_commit(cache, logfile_dpkg, verbose, install_log)
         if error:
