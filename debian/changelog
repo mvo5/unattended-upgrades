@@ -1,3 +1,13 @@
+unattended-upgrades (0.92) unstable; urgency=medium
+
+  [ Matt Bearup ]
+  * Add support for logging to syslog
+
+  [ Raphael Geissert ]
+  * Fix bug in minimal upgrade step calculation
+
+ -- Michael Vogt <mvo@debian.org>  Fri, 29 Apr 2016 22:09:43 +0200
+
 unattended-upgrades (0.91) unstable; urgency=medium
 
   * Updated japanese debconf templates.
