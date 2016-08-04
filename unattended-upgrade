@@ -450,9 +450,9 @@ def upgrade_in_minimal_steps(cache, pkgs_to_upgrade, blacklist,
                 return True
             pkg = cache[pkgname]
             if pkg.is_upgradable:
-                pkg.mark_upgrade()
+                pkg.mark_upgrade(from_user=not pkg.is_auto_installed)
             elif not pkg.is_installed:
-                pkg.mark_install()
+                pkg.mark_install(from_user=False)
             else:
                 continue
             # double check that we are not running into side effects like
@@ -734,7 +734,7 @@ def rewind_cache(cache, pkgs_to_upgrade):
     """ set the cache back to the state with packages_to_upgrade """
     cache.clear()
     for pkg2 in pkgs_to_upgrade:
-        pkg2.mark_install()
+        pkg2.mark_install(from_user=not pkg2.is_auto_installed)
     if cache.broken_count > 0:
         raise AssertionError("rewind_cache created a broken cache")
 
@@ -1051,7 +1051,7 @@ def try_to_upgrade(pkg, pkgs_to_upgrade, pkgs_kept_back, cache,
                    allowed_origins, blacklisted_pkgs, whitelisted_pkgs):
 
     try:
-        pkg.mark_upgrade()
+        pkg.mark_upgrade(from_user=not pkg.is_auto_installed)
         if check_changes_for_sanity(cache, allowed_origins,
                                     blacklisted_pkgs, whitelisted_pkgs):
             # add to packages to upgrade
@@ -1360,7 +1360,7 @@ def main(options, rootdir=""):
             for pkg in old_pkgs_to_upgrade:
                 logging.debug("Checking the black and whitelist: %s" %
                               (pkg.name))
-                pkg.mark_upgrade()
+                pkg.mark_upgrade(from_user=not pkg.is_auto_installed)
                 if check_changes_for_sanity(cache,
                                             allowed_origins,
                                             blacklisted_pkgs,
@@ -1372,7 +1372,7 @@ def main(options, rootdir=""):
                     logging.info(_("package '%s' not upgraded"), pkg.name)
                     cache.clear()
                     for pkg2 in pkgs_to_upgrade:
-                        pkg2.mark_upgrade()
+                        pkg2.mark_upgrade(from_user=not pkg2.is_auto_installed)
     else:
         logging.debug("dpkg is configured not to cause conffile prompts")
 
