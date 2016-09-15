@@ -325,7 +325,8 @@ def get_allowed_origins_legacy():
         if ":" in s:
             # don't handle escaped colons '\:' as separator. Only plain colon
             # but replace escaped colons with plain colons when done splitting
-            (distro_id, distro_codename) = [re.sub(r'\\:', ':', x) for x in re.split(r'(?<!\\):', s)]
+            (distro_id, distro_codename) = [re.sub(r'\\:', ':', x)
+                                            for x in re.split(r'(?<!\\):', s)]
         else:
             (distro_id, distro_codename) = s.split()
         # escape "," (see LP: #824856) - i wonder if there is a simpler way?
