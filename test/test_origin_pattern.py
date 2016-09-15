@@ -96,6 +96,14 @@ class TestOriginPatern(unittest.TestCase):
         pkg = self._get_mock_package()
         self.assertTrue(is_allowed_origin(pkg.candidate, allowed_origins))
 
+    def test_escaped_colon(self):
+        apt_pkg.config.clear("Unattended-Upgrade")
+        apt_pkg.read_config_file(
+            apt_pkg.config, "./data/50unattended-upgrades.colon")
+        allowed_origins = unattended_upgrade.get_allowed_origins()
+
+        self.assertIn('o=http://foo.bar,a=stable', allowed_origins)
+
     def test_unkown_matcher(self):
         apt_pkg.config.clear("Unattended-Upgrade")
         s = "xxx=OriginUbuntu"
