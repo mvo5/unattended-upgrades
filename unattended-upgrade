@@ -553,7 +553,7 @@ def is_pkgname_in_whitelist(pkgname, whitelist):
 def check_changes_for_sanity(cache, allowed_origins, blacklist, whitelist):
     if cache._depcache.broken_count != 0:
         return False
-    for pkg in cache:
+    for pkg in cache.get_changes():
         if pkg.marked_delete:
             logging.debug("pkg '%s' now marked delete" % pkg.name)
             return False
