@@ -33,3 +33,8 @@ override_dh_installinit:
 	# we do not want to run the init script in the postinst/prerm, its
 	#  really only useful on shutdown, see Debian bug #645919
 	dh_installinit $@ --no-start -- stop 10 0 6 .
+
+override_dh_systemd_start:
+	# see bug Bug#841763:
+	# dh_systemd_start will kill our apt-daily.service script otherwise
+	dh_systemd_start apt-daily.timer
