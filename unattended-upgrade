@@ -1418,6 +1418,9 @@ def main(options, rootdir=""):
 
     # get log
     logfile_dpkg = os.path.join(_get_logdir(), 'unattended-upgrades-dpkg.log')
+    if not os.path.exists(logfile_dpkg):
+        with open(logfile_dpkg, 'w'):
+            pass
 
     # only perform install step if we actually have packages to install
     pkg_install_success = True
