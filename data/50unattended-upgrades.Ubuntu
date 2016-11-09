@@ -1,4 +1,8 @@
 // Automatically upgrade packages from these (origin:archive) pairs
+//
+// Note that in Ubuntu security updates may pull in new dependencies
+// from non-security sources (e.g. chromium). By allowing the release
+// pocket these get automatically pulled in.
 Unattended-Upgrade::Allowed-Origins {
         "${distro_id}:${distro_codename}";
 	"${distro_id}:${distro_codename}-security";
