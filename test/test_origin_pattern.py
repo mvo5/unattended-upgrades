@@ -203,9 +203,9 @@ class TestOriginPatern(unittest.TestCase):
         ):
             apt_pkg.config.clear("Unattended-Upgrade::Allowed-Origins")
             apt_pkg.config.set("Unattended-Upgrade::Allowed-Origins::", cfg)
-            l = unattended_upgrade.get_allowed_origins_legacy()
-            self.assertEqual(len(l), 1)
-            self.assertEqual(l[0], "o=%s,a=%s" % (distro_id, distro_codename))
+            li = unattended_upgrade.get_allowed_origins_legacy()
+            self.assertEqual(len(li), 1)
+            self.assertEqual(li[0], "o=%s,a=%s" % (distro_id, distro_codename))
 
 
 if __name__ == "__main__":

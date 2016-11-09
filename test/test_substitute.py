@@ -26,8 +26,8 @@ class TestSubstitude(unittest.TestCase):
         apt_pkg.config.clear("Unattended-Upgrade::Allowed-Origins")
         apt_pkg.config.set("Unattended-Upgrade::Allowed-Origins::",
                            "${distro_id} ${distro_codename}-security")
-        l = get_allowed_origins()
-        self.assertTrue(("o=MyDistroID,a=nacked-security") in l)
+        li = get_allowed_origins()
+        self.assertTrue(("o=MyDistroID,a=nacked-security") in li)
 
 
 if __name__ == "__main__":

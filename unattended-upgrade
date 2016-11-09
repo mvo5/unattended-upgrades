@@ -660,11 +660,11 @@ def conffile_prompt(destFile, prefix=""):
             continue
         # show what we do
         logging.debug("conffile line: '%s'", line)
-        l = line.split()
-        conf_file = l[0]
-        md5 = l[1]
-        if len(l) > 2:
-            obs = l[2]
+        li = line.split()
+        conf_file = li[0]
+        md5 = li[1]
+        if len(li) > 2:
+            obs = li[2]
         else:
             obs = None
         # ignore if conffile is obsolete

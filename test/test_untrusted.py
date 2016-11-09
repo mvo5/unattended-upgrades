@@ -49,6 +49,7 @@ class TestUntrusted(unittest.TestCase):
                             "Can not find '%s' in '%s'" % (needle, haystack))
             self.assertTrue("pkg 'test-package' is untrusted" in haystack)
 
+
 if __name__ == "__main__":
     # do not setup logging in here or the test will break
     unittest.main()
