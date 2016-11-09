@@ -1045,6 +1045,8 @@ def reboot_if_requested_and_needed(shutdown_lock=0):
 
 def write_stamp_file():
     statedir = os.path.join(apt_pkg.config.find_dir("Dir::State"), "periodic")
+    if not os.path.exists(statedir):
+        os.makedirs(statedir)
     with open(os.path.join(statedir, "unattended-upgrades-stamp"), "w"):
         pass
 
