@@ -1,3 +1,19 @@
+unattended-upgrades (0.93) unstable; urgency=medium
+
+  [ Michael Vogt ]
+  * Ensure to keep "automatic install" information (Closes: #828215)
+  * add recommends to "need-restart" to ensure that all running serivces
+    affected by library updates get restarted
+
+  [ Brian Murray ]
+  * Update 50unattended-upgrades.Ubuntu
+
+  [ Germar Reitze ]
+  * enable escaped colons in Unattended-Upgrade::Allowed-Origins
+  * fix pep8 warning
+
+ -- Michael Vogt <mvo@debian.org>  Wed, 09 Nov 2016 10:42:55 +0100
+
 unattended-upgrades (0.92) unstable; urgency=medium
 
   [ Matt Bearup ]
