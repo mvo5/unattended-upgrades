@@ -322,13 +322,12 @@ def get_allowed_origins_legacy():
     allowed_origins = []
     for s in apt_pkg.config.value_list("Unattended-Upgrade::Allowed-Origins"):
         # if there is a ":" use that as seperator, else use spaces
-        if ":" in s:
-            # don't handle escaped colons '\:' as separator. Only plain colon
-            # but replace escaped colons with plain colons when done splitting
-            (distro_id, distro_codename) = [re.sub(r'\\:', ':', x)
-                                            for x in re.split(r'(?<!\\):', s)]
+        if re.findall(r'(?<!\\):', s):
+            (distro_id, distro_codename) = re.split(r'(?<!\\):', s)
         else:
             (distro_id, distro_codename) = s.split()
+        # unescape "\:" back to ":"
+        distro_id = re.sub(r'\\:', ':', distro_id)
         # escape "," (see LP: #824856) - i wonder if there is a simpler way?
         distro_id = re.sub(r'([^\\]),', r'\1\\,', distro_id)
         distro_codename = re.sub(r'([^\\]),', r'\1\\,', distro_codename)

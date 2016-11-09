@@ -192,6 +192,21 @@ class TestOriginPatern(unittest.TestCase):
         s = "o=*Ubunt?"
         self.assertTrue(match_whitelist_string(s, origin))
 
+    def test_get_allowed_origins_legacy(self):
+        for cfg, (distro_id, distro_codename) in (
+                # ":" as separator
+                ("Ubuntu:lucid-security", ("Ubuntu", "lucid-security")),
+                ("http\://foo.bar:stable", ("http://foo.bar", "stable")),
+                # space as separator
+                ("Ubuntu lucid-security", ("Ubuntu", "lucid-security")),
+                ("http\://baz.mee stable", ("http://baz.mee", "stable")),
+        ):
+            apt_pkg.config.clear("Unattended-Upgrade::Allowed-Origins")
+            apt_pkg.config.set("Unattended-Upgrade::Allowed-Origins::", cfg)
+            l = unattended_upgrade.get_allowed_origins_legacy()
+            self.assertEqual(len(l), 1)
+            self.assertEqual(l[0], "o=%s,a=%s" % (distro_id, distro_codename))
+
 
 if __name__ == "__main__":
     logging.basicConfig(level=logging.DEBUG)
