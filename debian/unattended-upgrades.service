@@ -1,7 +1,7 @@
 [Unit]
 Description=Unattended Upgrades Shutdown
 DefaultDependencies=no
-Before=shutdown.target reboot.target halt.target
+Before=shutdown.target reboot.target halt.target network.target local-fs.target
 Documentation=man:unattended-upgrade(8)
 
 [Service]
