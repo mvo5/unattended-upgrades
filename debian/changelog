@@ -1,3 +1,29 @@
+unattended-upgrades (0.93.1) unstable; urgency=medium
+
+  [ Brian Murray ]
+  * Create logfile_dpkg if it doesn't exist
+  * Make sure the statedir exists too
+  * ensure network and local-fs are available in shutdown
+
+  [ Michael Vogt ]
+  * fix incorrect "needrestart" package name, move to sugests
+    (Closes: #844051, #846652)
+
+  [ Manuel "Venturi" Porras Peralta ]
+  * [INTL:es] Spanish po translation (Closes: #817160)
+
+  [ Takuma Yamada ]
+  * [INTL:ja] Japanese translation of po file update (Closes: #820755)
+
+  [ Jonatan Nyberg ]
+  * [INTL:sv] Swedish strings for unattended-upgrades debconf (Closes: #822119)
+
+  [ Frans Spiesschaert ]
+  * [INTL:nl] Dutch po file for the unattended-upgrades package
+    (Closes: #823975)
+
+ -- Michael Vogt <mvo@debian.org>  Sun, 11 Dec 2016 11:31:26 +0100
+
 unattended-upgrades (0.93) unstable; urgency=medium
 
   [ Michael Vogt ]
