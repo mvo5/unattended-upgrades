@@ -19,3 +19,5 @@ def add_info(report, ui):
     attach_conffiles(report, 'update-notifier-common', ui=ui)
     attach_file_if_exists(
         report, '/var/log/unattended-upgrades/unattended-upgrades.log')
+    attach_file_if_exists(
+        report, '/var/log/apt/history.log')
