@@ -1149,13 +1149,15 @@ def get_auto_removable(cache):
                 if pkg.is_auto_removable])
 
 
-def do_auto_remove(cache, auto_removable, logfile_dpkg, verbose=False):
+def do_auto_remove(cache, auto_removable, logfile_dpkg,
+                   verbose=False, dry_run=False):
     if not auto_removable:
         return True
 
     for pkgname in auto_removable:
-        logging.debug("marking %s for remove" % pkgname)
-        cache[pkgname].mark_delete()
+        if not dry_run:
+            logging.debug("marking %s for remove" % pkgname)
+            cache[pkgname].mark_delete()
     logging.info(_("Packages that are auto removed: '%s'"),
                  " ".join(sorted(auto_removable)))
 
@@ -1473,7 +1475,8 @@ def main(options, rootdir=""):
         auto_removals = get_auto_removable(cache)
         pkg_install_success &= do_auto_remove(
             cache, auto_removals, logfile_dpkg,
-            options.verbose or options.debug)
+            options.verbose or options.debug,
+            options.dry_run)
     # the user wants *only new* auto-removals to be removed
     elif apt_pkg.config.find_b(
             "Unattended-Upgrade::Remove-New-Unused-Dependencies", True):
@@ -1482,7 +1485,8 @@ def main(options, rootdir=""):
         auto_removals = new_pending_autoremovals - previous_autoremovals
         pkg_install_success &= do_auto_remove(
             cache, auto_removals, logfile_dpkg,
-            options.verbose or options.debug)
+            options.verbose or options.debug,
+            options.dry_run)
 
     logging.debug("InstCount=%i DelCount=%i BrokenCount=%i"
                   % (cache._depcache.inst_count,
