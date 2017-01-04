@@ -1,3 +1,10 @@
+unattended-upgrades (0.93.2) UNRELEASED; urgency=medium
+
+  * Do not mark packages for deletion / autoremoval if unattended-upgrades is
+    being run in dry-run mode. (LP: #1544942)
+
+ -- Brian Murray <brian@ubuntu.com>  Wed, 04 Jan 2017 08:47:09 -0800
+
 unattended-upgrades (0.93.1) unstable; urgency=medium
 
   [ Brian Murray ]
