@@ -1,3 +1,11 @@
+unattended-upgrades (0.93.2) UNRELEASED; urgency=medium
+
+  * When performing a sanity check for packages to install or upgrade return
+    false when either there are no packages in the cache or the package to
+    upgrade is not in the change set. (LP: #1654070)
+
+ -- Brian Murray <brian@ubuntu.com>  Fri, 06 Jan 2017 13:00:24 -0800
+
 unattended-upgrades (0.93.1) unstable; urgency=medium
 
   [ Brian Murray ]

@@ -552,8 +552,12 @@ def is_pkgname_in_whitelist(pkgname, whitelist):
     return False
 
 
-def check_changes_for_sanity(cache, allowed_origins, blacklist, whitelist):
+def check_changes_for_sanity(cache, allowed_origins, blacklist, whitelist,
+                             desired_pkg=None):
     if cache._depcache.broken_count != 0:
+        return False
+    # If there are no packages to be installed they were kept back
+    if cache.install_count == 0:
         return False
     for pkg in cache:
         if pkg.marked_delete:
@@ -596,6 +600,9 @@ def check_changes_for_sanity(cache, allowed_origins, blacklist, whitelist):
                 logging.debug("pkg '%s' requires app-restart, not safe to "
                               "upgrade unattended")
                 return False
+    # check that the package we want to upgrade is in the change set
+    if desired_pkg and desired_pkg not in cache.get_changes():
+        return False
     return True
 
 
@@ -1057,7 +1064,8 @@ def try_to_upgrade(pkg, pkgs_to_upgrade, pkgs_kept_back, cache,
     try:
         pkg.mark_upgrade(from_user=not pkg.is_auto_installed)
         if check_changes_for_sanity(cache, allowed_origins,
-                                    blacklisted_pkgs, whitelisted_pkgs):
+                                    blacklisted_pkgs, whitelisted_pkgs,
+                                    pkg):
             # add to packages to upgrade
             pkgs_to_upgrade.append(pkg)
             # re-eval pkgs_kept_back as the resolver may fail to
@@ -1283,7 +1291,7 @@ def main(options, rootdir=""):
     actiongroup = apt_pkg.ActionGroup(cache._depcache)
     actiongroup  # pyflakes
 
-    # find out about the packages that are upgradable (in a allowed_origin)
+    # find out about the packages that are upgradable (in an allowed_origin)
     pkgs_to_upgrade, pkgs_kept_back = calculate_upgradable_pkgs(
         cache, options, allowed_origins, blacklisted_pkgs, whitelisted_pkgs)
     pkgs_to_upgrade.sort(key=lambda p: p.name)
