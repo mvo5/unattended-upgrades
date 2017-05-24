@@ -19,6 +19,10 @@ Unattended-Upgrade::Package-Blacklist {
 //	"libc6-i686";
 };
 
+// This option will controls whether the development release of Ubuntu will be
+// upgraded automatically.
+Unattended-Upgrade::DevRelease "false";
+
 // This option allows you to control if on a unclean dpkg exit
 // unattended-upgrades will automatically run 
 //   dpkg --force-confold --configure -a

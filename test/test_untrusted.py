@@ -35,11 +35,18 @@ class TestUntrusted(unittest.TestCase):
         os.remove(self.log)
 
     def test_untrusted_check_without_conffile_check(self):
+        apt_conf = os.path.join(self.rootdir, "etc", "apt", "apt.conf")
+        with open(apt_conf, "w") as fp:
+            fp.write("""Unattended-Upgrade::Allowed-Origins {
+"Ubuntu:lucid-security";
+};
+""")
         # ensure there is no conffile_prompt check
         apt.apt_pkg.config.set("DPkg::Options::", "--force-confold")
 
         # run it
         options = MockOptions()
+        unattended_upgrade.DISTRO_DESC = "Ubuntu 10.04"
         unattended_upgrade.main(options, rootdir=self.rootdir)
         # read the log to see what happend
         with open(self.log) as f:

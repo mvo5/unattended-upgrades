@@ -92,6 +92,7 @@ Unattended-Upgrade::Allowed-Origins {
 Unattended-Upgrade::Remove-Unused-Dependencies "true";
 """)
         options = MockOptions()
+        unattended_upgrade.DISTRO_DESC = "Ubuntu 10.04"
         unattended_upgrade.main(
             options, rootdir="./root.unused-deps")
         with open(self.log) as f:
@@ -113,6 +114,7 @@ Unattended-Upgrade::Allowed-Origins {
 Unattended-Upgrade::Remove-New-Unused-Dependencies "true";
 """)
         options = MockOptions()
+        unattended_upgrade.DISTRO_DESC = "Ubuntu 10.04"
         unattended_upgrade.main(
             options, rootdir="./root.unused-deps")
         with open(self.log) as f:
