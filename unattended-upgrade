@@ -1200,6 +1200,12 @@ def main(options, rootdir=""):
     if not is_update_day():
         return
 
+    specialCondScript = apt_pkg.config.find("Unattended-Upgrade::Special-Conditions-Script", "")
+    if specialCondScript:
+        if subprocess.call([specialCondScript]) != 0:
+            logging.info("The script configured with Unattended-Upgrade::Special-Conditions-Script didn't return 0, stopping here!")
+            return
+
     # format (origin, archive), e.g. ("Ubuntu","dapper-security")
     allowed_origins = get_allowed_origins()
 
