@@ -25,7 +25,6 @@
 #
 
 import copy
-import signal
 import sys
 import time
 import logging
@@ -143,12 +142,6 @@ if __name__ == "__main__":
             logging.debug("lock not taken")
             break
         lock_was_taken = True
-        # signal unattended-upgrades to stop
-        p = "/var/run/unattended-upgrades.pid"
-        if os.path.exists(p):
-            pid = int(open(p).read())
-            logging.debug("found running unattended-upgrades pid %s" % pid)
-            os.kill(pid, signal.SIGUSR1)
         # show log
         log_progress()
         time.sleep(5)

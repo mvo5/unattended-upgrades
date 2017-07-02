@@ -77,9 +77,6 @@ PID_FILE = "/var/run/unattended-upgrades.pid"
 LOCK_FILE = "/var/run/unattended-upgrades.lock"
 INHIBIT_FILE = "/var/run/unattended-upgrades.inhibit"
 
-# set from the sigint signal handler
-SIGNAL_STOP_REQUEST = False
-
 
 class LoggingDateTime:
     """The date/time representation for the dpkg log file timestamps"""
@@ -295,12 +292,6 @@ def is_dpkg_journal_dirty():
     return False
 
 
-def signal_handler(signal, frame):
-    logging.warning("SIGUSR1 received, will stop")
-    global SIGNAL_STOP_REQUEST
-    SIGNAL_STOP_REQUEST = True
-
-
 def substitute(line):
     """ substitude known mappings and return a new string
 
@@ -317,6 +308,14 @@ def get_distro_codename():
 
 def get_distro_id():
     return DISTRO_ID
+
+
+def bail_out_for_shutdown():
+    """ test if shutdown is running and execution should stop """
+    if os.path.exists(INHIBIT_FILE):
+        logging.debug("Shutdown is in progress, stopping")
+        return True
+    return False
 
 
 def get_allowed_origins_legacy():
@@ -447,9 +446,6 @@ def upgrade_in_minimal_steps(cache, pkgs_to_upgrade, blacklist,
     install_log = LogInstallProgress(logfile_dpkg, verbose)
     install_log.progress_log += ".minimal-steps"
 
-    # setup signal handler
-    signal.signal(signal.SIGUSR1, signal_handler)
-
     # double check any changes we do
     allowed_origins = get_allowed_origins()
 
@@ -459,8 +455,7 @@ def upgrade_in_minimal_steps(cache, pkgs_to_upgrade, blacklist,
         # find smallest set
         smallest_partition = set()
         for pkgname in to_upgrade:
-            if SIGNAL_STOP_REQUEST:
-                logging.warning("SIGNAL received, stopping")
+            if bail_out_for_shutdown():
                 return True
             pkg = cache[pkgname]
             if pkg.is_upgradable:
@@ -1240,8 +1235,7 @@ def main(options, rootdir=""):
     if shutdown_lock < 0:
         logging.error("Lock file is already taken, exiting")
         sys.exit(1)
-    if os.path.exists(INHIBIT_FILE):
-        logging.debug("Shutdown is already in progress, exiting")
+    if bail_out_for_shutdown():
         sys.exit(0)
 
     # display available origin
