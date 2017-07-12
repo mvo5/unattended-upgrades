@@ -10,7 +10,7 @@ If you would prefer to enable it from the command line, run
 "sudo dpkg-reconfigure -plow unattended-upgrades".
 
 It will not install packages that require dependencies that can't be
-fetched from allowed origins and it will check for conffile prompts
+fetched from allowed origins, and it will check for conffile prompts
 before the install and holds back any package that requires them. 
 
 Setup
@@ -63,10 +63,10 @@ simply use "origin=*", e.g.:
  };
 ```
 
-All operations are be logged in /var/log/unattended-upgrades/. This
+All operations are logged in /var/log/unattended-upgrades/. This
 includes the dpkg output as well. The file
 /etc/logrotate.d/unattended-upgrades controls how long logfiles are
-kept and how often they are rotated. See the `logrotate` manpage for
+kept, and how often they are rotated. See the `logrotate` manpage for
 details.
 
 If you want mail support you need to have a mail-transport-agent (e.g
@@ -75,14 +75,14 @@ postfix) or mailx installed.
 Debugging
 ---------
 
-If something goes wrong or if you want to report a bug about the way
-the script works its a good idea to run:
+If something goes wrong, or if you want to report a bug about the way
+the script works, it's a good idea to run:
 ```
 $ sudo unattended-upgrade --debug --dry-run
 ```
 and look at the resulting logfile in:
 /var/log/unattended-upgrades/unattended-upgrades.log 
-then. It will contain additional debug information.
+It will also contain additional debug information.
 
 
 Manual Setup
@@ -95,7 +95,7 @@ graphical "Software Source" program or via dpkg-reconfigure as well):
 APT::Periodic::Update-Package-Lists "1";
 APT::Periodic::Unattended-Upgrade "1";
 ```
-This means that it will check for upates every day and install them
+This means that it will check for updates every day, and install them
 (if that is possible). If you have update-notifier installed, it will
 setup /etc/apt/apt.conf.d/10periodic. Just edit this file then to fit
 your needs. If you do not have this file, just create it or
@@ -125,8 +125,8 @@ Supported Options Reference
  No packages that match the regular expressions in this list will be
  marked for upgrade. If a package A has a blacklisted package B as a
  dependency then both packages A and B will not be upgraded. Note
- that its a list of regular expressions so you may need to escape special
- charackters like "+" as "\+".
+ that it's a list of regular expressions, so you may need to escape special
+ characters like "+" as "\\+".
  
  Example:
  ```
@@ -139,7 +139,7 @@ Supported Options Reference
  
  Only packages that match the regular expressions in this list will be
  marked for upgrade. By default dependencies of whitelisted packages
- are allowed. This can be changed to allow only ever allow whitelisted
+ are allowed. This can be changed to only ever allow whitelisted
  packages with the `Unattended-Upgrade::Package-Whitelist-Strict`
  boolean option.
  
@@ -153,8 +153,8 @@ Supported Options Reference
 * `Unattended-Upgrade::Package-Whitelist-Strict` - boolean (default:False)
  
  When set, allow only packages in `Unattended-Upgrade::Package-Whitelist`
- to be upgraded. This means that you also need to list all dependencies
- of a whitelisted packages, e.g. if A depends on B and only A is
+ to be upgraded. This means that you also need to list all the dependencies
+ of a whitelisted package, e.g. if A depends on B and only A is
  whitelisted, it will be held back.
  
  Example:
@@ -172,18 +172,18 @@ Supported Options Reference
  
  Optimize for safety against e.g. power failure by performing the upgrade
  in minimal self-contained chunks. This also allows sending a SIGINT to
- unattended-upgrades and it will stop the upgrade when it finishes the
+ unattended-upgrades, and it will stop the upgrade when it finishes the
  current upgrade step.
 
 * `Unattended-Upgrade::InstallOnShutdown` - boolean (default:False)
  
  Perform the upgrade when the machine is shutting down instead of
- doing it in he background while the machine is running.
+ doing it in the background while the machine is running.
 
 * `Unattended-Upgrade::Mail` - string (default:"")
 
  Send an email to this address with information about the packages
- upgraded. If empty or unset no email is send. This option requires
+ upgraded. If empty or unset no email is sent. This option requires
  a working local mail setup.
  
   Example:
@@ -202,21 +202,21 @@ Supported Options Reference
 
 * `Unattended-Upgrade::MailOnlyOnError` - boolean (default:False)
  
- Only generate a email if some problem occured during the 
+ Only generate an email if some problem occurred during the 
  unattended-upgrades run.
 
 * `Unattended-Upgrade::Remove-Unused-Dependencies` - boolean (default:False)
  
- Remove all unused dependencies after the upgrade finished.
+ Remove all unused dependencies after the upgrade has finished.
 
 * `Unattended-Upgrade::Remove-New-Unused-Dependencies` - boolean (default:True)
 
- Remove any new unused dependencies after the upgrade finished.
+ Remove any new unused dependencies after the upgrade has finished.
 
 * `Unattended-Upgrade::Automatic-Reboot` - boolean (default:False)
  
  Automatically reboot *WITHOUT CONFIRMATION* if the file
- /var/run/reboot-required is found after the upgrade
+ /var/run/reboot-required is found after the upgrade.
 
 * `Unattended-Upgrade::Automatic-Reboot-WithUsers` - boolean (default:True)
 
@@ -225,12 +225,12 @@ Supported Options Reference
 * `Unattended-Upgrade::Keep-Debs-After-Install` - boolean (default:False)
 
  Keep the downloaded deb packages after successful installs. By default
- those are removed after successful installs.
+ these are removed after successful installs.
 
 * `Acquire::http::Dl-Limit` - integer (default:0)
 
  Use apt bandwidth limit feature when fetching the upgrades. The
- number is how many kb/sec apt is allowed to use
+ number is how many kb/sec apt is allowed to use.
 
  Example - limit the download to 70kb/sec:
  ```
@@ -239,14 +239,14 @@ Supported Options Reference
 
 * `Dpkg::Options` - list of strings
 
- Set a dpkg commandline option. This is useful to e.g. force conffile
+ Set a dpkg command-line option. This is useful to e.g. force conffile
  handling in dpkg.
 
  Example - force dpkg to keep the old configuration files:
  ```
  Dpkg::Options {"--force-confold"};
  ```
- Note that unattended-upgrades detects this options and ensures that
+ Note that unattended-upgrades detects this option, and ensures that
  packages with configuration prompts will never be held back.
 
 * `Unattended-Upgrade::Update-Days` - list of strings (default:empty)
@@ -255,7 +255,7 @@ Supported Options Reference
  can be specified as localized abbreviated or full names. Or as
  integers where "0" is Sunday, "1" is Monday etc.
 
- Example - apply updates only on Monday and Friday
+ Example - apply updates only on Monday and Friday:
  ```
  Unattended-Upgrade::Update-Days {"Mon","Fri"};
  ```
@@ -265,24 +265,24 @@ Supported Options Reference
 * `Unattended-Upgrade::SyslogEnable` - boolean (default:False)
 
  Write events to syslog, which is useful in environments where
- syslog is shipped to a central store.
+ syslog messages are sent to a central store.
 
- Example - Enable writing to syslog
+ Example - Enable writing to syslog:
  ```
  Unattended-Upgrade::SyslogEnable true;
  ```
- The default is False - events will not be written to syslog
+ The default is False - events will not be written to syslog.
 
 * `Unattended-Upgrade::SyslogFacility` - string (default:"daemon")
 
- Write events to the specified facility, or the daemon facility if not specified.
- Requires the `Unattended-Upgrade::SyslogEnable` option to be set to true
+ Write events to the specified syslog facility, or the daemon facility if not specified.
+ Requires the `Unattended-Upgrade::SyslogEnable` option to be set to true.
 
- Example - Use the syslog auth facility
+ Example - Use the syslog auth facility:
  ```
  Unattended-Upgrade::SyslogFacility "auth";
  ```
- The default is the daemon facility
+ The default is the daemon facility.
 
 
 [travis-image]: https://travis-ci.org/mvo5/unattended-upgrades.svg?branch=debian/sid
