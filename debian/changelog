@@ -1,3 +1,10 @@
+unattended-upgrades (0.93.2) UNRELEASED; urgency=medium
+
+  * unattended-upgrades: Provide some information and create a log entry when
+    there is a failure to parse the allowed origins. (LP: #1680599)
+
+ -- Brian Murray <brian@ubuntu.com>  Wed, 24 May 2017 12:03:02 -0700
+
 unattended-upgrades (0.93.1) unstable; urgency=medium
 
   [ Brian Murray ]
