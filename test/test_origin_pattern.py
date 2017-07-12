@@ -148,6 +148,7 @@ class TestOriginPatern(unittest.TestCase):
         cache = MockCache()
         cache._depcache = MockDepCache()
         cache._depcache.broken_count = 0
+        cache.install_count = 1
         return cache
 
     def _get_mock_origin(self, aorigin="", label="", archive="",
