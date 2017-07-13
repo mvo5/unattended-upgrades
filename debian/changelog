@@ -1,3 +1,59 @@
+unattended-upgrades (0.93.2) UNRELEASED; urgency=medium
+
+  [ Peter Lewis ]
+  * Multiple typo fixes
+
+  [ Brian Murray ]
+  * Add in apt history log
+
+  [ Louis Bouchard ]
+  * Fix --delay type in unattended-upgrade-shutdown
+
+  [ John Horne ]
+  * Some typos corrected in the README file.
+
+  [ Michael Vogt ]
+  * add HACKING.md
+
+  [ Balint Reczey ]
+  * ACK NMU
+
+ -- Balint Reczey <rbalint@ubuntu.com>  Thu, 13 Jul 2017 02:11:49 +0200
+
+unattended-upgrades (0.93.1+nmu1) unstable; urgency=medium
+
+  * Non-maintainer upload.
+
+  [ Louis Bouchard ]
+  * Fix the unattended-upgrades.service unit not correctly working:
+    - d/rules : Remove the override_dh_installinit. The stop option is no longer
+      available so the command falls back to default. This is the normal
+      behavior so the override is not required
+    - d/unattended-upgrades.init : Add Default-Start runlevels, otherwise the 
+      unattended-upgrades.service unit cannot be enabled on boot
+    - d/postinst : Cleanup the stop symlinks created by the wrong
+      override_dh_installinit. Without that, the systemd unit cannot be
+      enabled correctly.
+      Force disable the service before deb-systemd-helper runs so the old 
+      symlink is not left dangling (workaround for Debian Bug #797108).
+      Force enable and start of the systemd unit to work around Debian Bug
+      #797108 which fails to enable systemd units correctly when WantedBy=
+      statement is changed which is the case here.
+    - d/unattended-upgrades.service : Fix the service so it runs correctly on
+      shutdown :
+        Remove DefaultDependencies=no : Breaks normal shutdown dependencies
+        Set After= to network.target and local-fs.target. Since our service is
+        now ExecStop, it will run before network and local-fs become
+        unavailable. Add RequiresMountsFor=/var/log /var/run /var/lib /boot : 
+        Necessary if /var is a separate file system. Set WantedBy= to
+        multi-user.target
+    - Add DEP8 tests to verify the following :
+      Verify that the unattended-upgrades.service unit is enabled and started.
+      Verify that InstallOnShutdown works when configured.
+    (Closes: #809669)
+
+ -- Gaudenz Steinlin <gaudenz@debian.org>  Sat, 06 May 2017 19:42:14 +0200
+
 unattended-upgrades (0.93.1) unstable; urgency=medium
 
   [ Brian Murray ]

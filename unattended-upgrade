@@ -269,13 +269,13 @@ class Unlocked:
     def __enter__(self):
         try:
             apt_pkg.pkgsystem_unlock()
-        except:
+        except Exception:
             pass
 
     def __exit__(self, exc_type, exc_value, exc_tb):
         try:
             apt_pkg.pkgsystem_unlock()
-        except:
+        except Exception:
             pass
 
 
@@ -320,20 +320,25 @@ def get_distro_id():
 def get_allowed_origins_legacy():
     """ legacy support for old Allowed-Origins var """
     allowed_origins = []
-    for s in apt_pkg.config.value_list("Unattended-Upgrade::Allowed-Origins"):
-        # if there is a ":" use that as seperator, else use spaces
-        if re.findall(r'(?<!\\):', s):
-            (distro_id, distro_codename) = re.split(r'(?<!\\):', s)
-        else:
-            (distro_id, distro_codename) = s.split()
-        # unescape "\:" back to ":"
-        distro_id = re.sub(r'\\:', ':', distro_id)
-        # escape "," (see LP: #824856) - i wonder if there is a simpler way?
-        distro_id = re.sub(r'([^\\]),', r'\1\\,', distro_id)
-        distro_codename = re.sub(r'([^\\]),', r'\1\\,', distro_codename)
-        # convert to new format
-        allowed_origins.append("o=%s,a=%s" % (substitute(distro_id),
-                                              substitute(distro_codename)))
+    key = "Unattended-Upgrade::Allowed-Origins"
+    try:
+        for s in apt_pkg.config.value_list(key):
+            # if there is a ":" use that as seperator, else use spaces
+            if re.findall(r'(?<!\\):', s):
+                (distro_id, distro_codename) = re.split(r'(?<!\\):', s)
+            else:
+                (distro_id, distro_codename) = s.split()
+            # unescape "\:" back to ":"
+            distro_id = re.sub(r'\\:', ':', distro_id)
+            # escape "," (see LP: #824856) - can this be simpler?
+            distro_id = re.sub(r'([^\\]),', r'\1\\,', distro_id)
+            distro_codename = re.sub(r'([^\\]),', r'\1\\,', distro_codename)
+            # convert to new format
+            allowed_origins.append("o=%s,a=%s" % (substitute(distro_id),
+                                   substitute(distro_codename)))
+    except ValueError:
+        logging.error(_("Unable to parse %s." % key))
+        raise
     return allowed_origins
 
 
@@ -343,8 +348,13 @@ def get_allowed_origins():
     This will take substitutions (like distro_id) into account.
     """
     allowed_origins = get_allowed_origins_legacy()
-    for s in apt_pkg.config.value_list("Unattended-Upgrade::Origins-Pattern"):
-        allowed_origins.append(substitute(s))
+    key = "Unattended-Upgrade::Origins-Pattern"
+    try:
+        for s in apt_pkg.config.value_list(key):
+            allowed_origins.append(substitute(s))
+    except ValueError:
+        logging.error(_("Unable to parse %s." % key))
+        raise
     return allowed_origins
 
 
@@ -552,8 +562,12 @@ def is_pkgname_in_whitelist(pkgname, whitelist):
     return False
 
 
-def check_changes_for_sanity(cache, allowed_origins, blacklist, whitelist):
+def check_changes_for_sanity(cache, allowed_origins, blacklist, whitelist,
+                             desired_pkg=None):
     if cache._depcache.broken_count != 0:
+        return False
+    # If there are no packages to be installed they were kept back
+    if cache.install_count == 0:
         return False
     for pkg in cache:
         if pkg.marked_delete:
@@ -596,6 +610,9 @@ def check_changes_for_sanity(cache, allowed_origins, blacklist, whitelist):
                 logging.debug("pkg '%s' requires app-restart, not safe to "
                               "upgrade unattended")
                 return False
+    # check that the package we want to upgrade is in the change set
+    if desired_pkg and desired_pkg not in cache.get_changes():
+        return False
     return True
 
 
@@ -1057,7 +1074,8 @@ def try_to_upgrade(pkg, pkgs_to_upgrade, pkgs_kept_back, cache,
     try:
         pkg.mark_upgrade(from_user=not pkg.is_auto_installed)
         if check_changes_for_sanity(cache, allowed_origins,
-                                    blacklisted_pkgs, whitelisted_pkgs):
+                                    blacklisted_pkgs, whitelisted_pkgs,
+                                    pkg):
             # add to packages to upgrade
             pkgs_to_upgrade.append(pkg)
             # re-eval pkgs_kept_back as the resolver may fail to
@@ -1131,13 +1149,15 @@ def get_auto_removable(cache):
                 if pkg.is_auto_removable])
 
 
-def do_auto_remove(cache, auto_removable, logfile_dpkg, verbose=False):
+def do_auto_remove(cache, auto_removable, logfile_dpkg,
+                   verbose=False, dry_run=False):
     if not auto_removable:
         return True
 
     for pkgname in auto_removable:
-        logging.debug("marking %s for remove" % pkgname)
-        cache[pkgname].mark_delete()
+        if not dry_run:
+            logging.debug("marking %s for remove" % pkgname)
+            cache[pkgname].mark_delete()
     logging.info(_("Packages that are auto removed: '%s'"),
                  " ".join(sorted(auto_removable)))
 
@@ -1283,7 +1303,7 @@ def main(options, rootdir=""):
     actiongroup = apt_pkg.ActionGroup(cache._depcache)
     actiongroup  # pyflakes
 
-    # find out about the packages that are upgradable (in a allowed_origin)
+    # find out about the packages that are upgradable (in an allowed_origin)
     pkgs_to_upgrade, pkgs_kept_back = calculate_upgradable_pkgs(
         cache, options, allowed_origins, blacklisted_pkgs, whitelisted_pkgs)
     pkgs_to_upgrade.sort(key=lambda p: p.name)
@@ -1455,7 +1475,8 @@ def main(options, rootdir=""):
         auto_removals = get_auto_removable(cache)
         pkg_install_success &= do_auto_remove(
             cache, auto_removals, logfile_dpkg,
-            options.verbose or options.debug)
+            options.verbose or options.debug,
+            options.dry_run)
     # the user wants *only new* auto-removals to be removed
     elif apt_pkg.config.find_b(
             "Unattended-Upgrade::Remove-New-Unused-Dependencies", True):
@@ -1464,7 +1485,8 @@ def main(options, rootdir=""):
         auto_removals = new_pending_autoremovals - previous_autoremovals
         pkg_install_success &= do_auto_remove(
             cache, auto_removals, logfile_dpkg,
-            options.verbose or options.debug)
+            options.verbose or options.debug,
+            options.dry_run)
 
     logging.debug("InstCount=%i DelCount=%i BrokenCount=%i"
                   % (cache._depcache.inst_count,
