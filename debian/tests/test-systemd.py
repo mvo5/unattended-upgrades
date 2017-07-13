@@ -16,7 +16,7 @@ def test_systemd_service():
         subprocess.check_output(['systemctl', '--quiet', 'is-active', Service])
     except subprocess.CalledProcessError:
         out = subprocess.getoutput(
-              'systemctl status unattended-upgrades.service')
+            'systemctl status unattended-upgrades.service')
         print('test_systemd_service() FAILED\n%s' % out)
         return False
     return True
