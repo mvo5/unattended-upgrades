@@ -269,13 +269,13 @@ class Unlocked:
     def __enter__(self):
         try:
             apt_pkg.pkgsystem_unlock()
-        except:
+        except Exception:
             pass
 
     def __exit__(self, exc_type, exc_value, exc_tb):
         try:
             apt_pkg.pkgsystem_unlock()
-        except:
+        except Exception:
             pass
 
 
