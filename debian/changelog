@@ -5,9 +5,14 @@ unattended-upgrades (0.93.2) UNRELEASED; urgency=medium
 
   [ Brian Murray ]
   * Add in apt history log
+  * unattended-upgrades: Provide some information and create a log entry when
+    there is a failure to parse the allowed origins. (LP: #1680599)
+  * improve the changes sanity check to cache more insane cases
+  * Do not mark packages for deletion / autoremoval if unattended-upgrades
+    is being run in dry-run mode.
 
   [ Louis Bouchard ]
-  * Fix --delay type in unattended-upgrade-shutdown
+  * Fix --delay type in unattended-upgrade-shutdown (Closes: #837161)
 
   [ John Horne ]
   * Some typos corrected in the README file.
@@ -17,8 +22,45 @@ unattended-upgrades (0.93.2) UNRELEASED; urgency=medium
 
   [ Balint Reczey ]
   * ACK NMU
+  * Fix indentation in test-systemd.py
+  * Keep apt's partial dir in tests.
+    This fixes make -C test in a clean repository
+  * Clean up all generated files in override_dh_auto_clean
+  * Update debhelper compat level to 9
+  * Fix lock handling between unattended-upgrade and u-u-shutdown.
+    Move acquiring shutdown_lock earlier in u-u to cover dpkg --configure
+    step.
+    Inhibit u-u start when shutdown is already started.
+    Exit from u-u when another u-u process is still running.
+  * Stop unattended-upgrade with inhibitor file instead of wih SIGUSR1
+  * Protect periodically run unattended-upgrades from being killed early.
+    Add --with-install-on-shutdown option to unattended-upgrades-shutdown
+    and don't start u-u-s with it when it just have to stop and wait for
+    u-u.
+    The u-u.service is changed to wait for periodically ran u-u then
+    install all updates on shutdown.
+    The newly provided drop-in for apt-daily-upgrade.service prevents
+    the service from just being killed the added ExecStop=
+    uses u-u-s to stop the running u-u instead gracefully and showing
+    progress. The ExecStop= call does not pass --with-install-on-shutdown
+    thus no extra package installation is started by u-u-s.
+    Depend on apt >= 1.4.2 which split apt-daily-upgrade.service from
+    apt-daily.service. (LP: #1690980)
+  * Don't start package downloads when shutdown has already started
 
- -- Balint Reczey <rbalint@ubuntu.com>  Thu, 13 Jul 2017 02:11:49 +0200
+  [ Julian Andres Klode ]
+  * Fix PEP8 failures (replace except: with except Exception:)
+    (Closes: #865897)
+  * Add a --download-only option (Closes: #863911)
+
+  [ Steve Langasek ]
+  * Add UbuntuESM to the list of sources automatically upgraded from by default
+    (LP: #1687129)
+
+  [ Jonatan Nyberg ]
+  * Update Swedish debconf strings (Closes: #855361)
+
+ -- Balint Reczey <rbalint@ubuntu.com>  Sat, 15 Jul 2017 01:03:22 +0200
 
 unattended-upgrades (0.93.1+nmu1) unstable; urgency=medium
 
