@@ -1322,6 +1322,12 @@ def main(options, rootdir=""):
     list.read_main_list()
     recs = cache._records
     pm = apt_pkg.PackageManager(cache._depcache)
+    # don't start downloading during shutdown
+    # TODO: download files one by one and check for stop request after each of
+    # them
+    if SIGNAL_STOP_REQUEST:
+        logging.warning("SIGNAL received, stopping")
+        return True
     try:
         pm.get_archives(fetcher, list, recs)
     except SystemError as e:
