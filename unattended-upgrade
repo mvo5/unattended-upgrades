@@ -1327,6 +1327,9 @@ def main(options, rootdir=""):
     list.read_main_list()
     recs = cache._records
     pm = apt_pkg.PackageManager(cache._depcache)
+    # don't start downloading during shutdown
+    if bail_out_for_shutdown():
+        sys.exit(0)
     try:
         pm.get_archives(fetcher, list, recs)
     except SystemError as e:
