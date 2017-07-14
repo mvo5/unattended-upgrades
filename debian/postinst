@@ -34,15 +34,34 @@ case "$1" in
 
         db_get unattended-upgrades/enable_auto_updates || true
 	CONFIG="/etc/apt/apt.conf.d/20auto-upgrades"
+	DROPIN="/etc/systemd/system/apt-daily-upgrade.service.d/unattended-upgrades-shutdown.conf"
         if [ "${RET}" = "true" ]; then
 	    NEWFILE="/usr/share/unattended-upgrades/20auto-upgrades"
 	    ucf --three-way --debconf-ok "$NEWFILE" "$CONFIG"
 	    ucfr unattended-upgrades "$CONFIG"
+	    NEWDROPIN="/usr/share/unattended-upgrades/unattended-upgrades-shutdown.conf"
+	    mkdir -p $(dirname "$DROPIN")
+	    ucf --three-way --debconf-ok "$NEWDROPIN" "$DROPIN"
+	    ucfr unattended-upgrades "$DROPIN"
+	    # call systemctl directly because the script doesn't change any
+	    # service just removes a drop-in
+	    if [ -d /run/systemd/system ]; then
+	        systemctl --system daemon-reload >/dev/null || true
+	    fi
         elif [ "${RET}" = "false" ] && [ -e "$CONFIG" ]; then
             # disable again
 	    NEWFILE="/usr/share/unattended-upgrades/20auto-upgrades-disabled"
 	    ucf --three-way --debconf-ok "$NEWFILE" "$CONFIG"
 	    ucfr unattended-upgrades "$CONFIG"
+	    ucf --purge "$DROPIN"
+	    rm -f "$DROPIN"
+	    test ! -d $(dirname "$DROPIN") || \
+	        rmdir $(dirname "$DROPIN") || true
+	    # call systemctl directly because the script doesn't change any
+	    # service just removes a drop-in
+	    if [ -d /run/systemd/system ]; then
+	        systemctl --system daemon-reload >/dev/null || true
+	    fi
         fi
 
 	CONFIG="/etc/apt/apt.conf.d/50unattended-upgrades"

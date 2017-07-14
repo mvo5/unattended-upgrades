@@ -39,7 +39,7 @@ start|restart|force-reload|status)
 stop)
 	if [ -e $SHUTDOWN_HELPER ]; then
 		[ "$VERBOSE" != "no" ] && log_action_begin_msg "Checking for running $DESC"
-		$PYTHON $SHUTDOWN_HELPER
+		$PYTHON $SHUTDOWN_HELPER --with-install-on-shutdown
 		[ "$VERBOSE" != "no" ] && log_action_end_msg $? "$NAME"
 	fi
 	;;

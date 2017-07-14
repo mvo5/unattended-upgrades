@@ -17,6 +17,18 @@ set -e
 # for details, see http://www.debian.org/doc/debian-policy/ or
 # the debian-policy package
 
+DROPIN=/etc/systemd/system/apt-daily-upgrade.service.d/unattended-upgrades-shutdown.conf
+if [ -x "`which ucf 2>/dev/null`" ]; then
+    ucf --purge "$DROPIN"
+fi
+rm -f "$DROPIN"
+test ! -d $(dirname "$DROPIN") || \
+    rmdir $(dirname "$DROPIN") || true
+# call systemctl directly because this script doesn't change any service
+# just removes a drop-in
+if [ -d /run/systemd/system ]; then
+    systemctl --system daemon-reload >/dev/null || true
+fi
 
 case "$1" in
     purge)

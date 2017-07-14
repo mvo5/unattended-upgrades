@@ -312,7 +312,8 @@ def get_distro_id():
 
 def bail_out_for_shutdown():
     """ test if shutdown is running and execution should stop """
-    if os.path.exists(INHIBIT_FILE):
+    if ("UNATTENDED_UPGRADES_FORCE_INSTALL_ON_SHUTDOWN" not in os.environ and
+            os.path.exists(INHIBIT_FILE)):
         logging.debug("Shutdown is in progress, stopping")
         return True
     return False

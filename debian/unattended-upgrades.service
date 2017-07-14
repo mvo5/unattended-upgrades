@@ -7,7 +7,7 @@ Documentation=man:unattended-upgrade(8)
 [Service]
 Type=oneshot
 RemainAfterExit=yes
-ExecStop=/usr/share/unattended-upgrades/unattended-upgrade-shutdown
+ExecStop=/usr/share/unattended-upgrades/unattended-upgrade-shutdown --with-install-on-shutdown
 TimeoutStopSec=900
 
 [Install]

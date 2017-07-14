@@ -94,6 +94,10 @@ if __name__ == "__main__":
     parser.add_option("", "--lock-file",
                       default="/var/run/unattended-upgrades.lock",
                       help="lock file location")
+    parser.add_option("", "--with-install-on-shutdown",
+                      action="store_true", dest="with_install_on_shutdown",
+                      default=False, help="Run unattended-upgrades if "
+                      "Unattended-Upgrade::InstallOnShutdown=True is set")
     (options, args) = parser.parse_args()
 
     # setup logging
@@ -111,22 +115,6 @@ if __name__ == "__main__":
     logging.basicConfig(filename=logfile,
                         level=level,
                         format="%(asctime)s %(levelname)s - %(message)s")
-
-    # check if we need to run unattended-upgrades on shutdown and if so,
-    # run it
-    p = None
-    apt_pkg.init_config()
-    if apt_pkg.config.find_b("Unattended-Upgrade::InstallOnShutdown", False):
-        env = copy.copy(os.environ)
-        env["UNATTENDED_UPGRADES_FORCE_INSTALL_ON_SHUTDOWN"] = "1"
-        logging.debug("starting unattended-upgrades in shutdown mode")
-        p = subprocess.Popen(["unattended-upgrade"], env=env)
-        log_msg(_("Running unattended-upgrades in shutdown mode"))
-        while True:
-            log_progress()
-            if p.poll() is not None:
-                break
-            time.sleep(5)
 
     # run the monitoring loop and keep the "UI" updated
     start_time = time.time()
@@ -148,11 +136,36 @@ if __name__ == "__main__":
         if (time.time() - start_time) > options.delay * 60:
             logging.warning(_("Giving up on lockfile after %s delay"),
                             options.delay)
+            # exiting here prevents installing the updates in shutdown
+            # mode but attempting to do so would most probably fail
+            # anyway since u-u failed to finish for at least 10
+            # minutes by default and u-u-s would be killed after 5 more
+            # minutes
             sys.exit(1)
 
     # add finished info to the log/terminal to help tracking down
     # LP: #434835
     if lock_was_taken:
         # re-use existing string
-        log_msg(_("All upgrades installed"), logging.INFO)
+        log_msg(_("Finished running unattended upgrades in periodic mode"),
+                logging.INFO)
+
+    # check if we need to run unattended-upgrades on shutdown and if so,
+    # run it
+    if options.with_install_on_shutdown:
+        p = None
+        apt_pkg.init_config()
+        if apt_pkg.config.find_b("Unattended-Upgrade::InstallOnShutdown",
+                                 False):
+            env = copy.copy(os.environ)
+            env["UNATTENDED_UPGRADES_FORCE_INSTALL_ON_SHUTDOWN"] = "1"
+            logging.debug("starting unattended-upgrades in shutdown mode")
+            p = subprocess.Popen(["unattended-upgrade"], env=env)
+            log_msg(_("Running unattended-upgrades in shutdown mode"))
+            while True:
+                log_progress()
+                if p.poll() is not None:
+                    break
+                time.sleep(5)
+
     sys.exit(0)
