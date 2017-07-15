@@ -1,0 +1,1 @@
+unattended-upgrades: maintainer-script-calls-systemctl *
