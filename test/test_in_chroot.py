@@ -54,6 +54,7 @@ class MockOptions(object):
     debug = False
     verbose = True
     apt_debug = False
+    download_only = False
     dry_run = False
     minimal_upgrade_steps = False
 
