@@ -1330,6 +1330,9 @@ def main(options, rootdir=""):
     res = fetcher.run()
     logging.debug("fetch.run() result: %s", res)
 
+    if options.download_only:
+        return
+
     if dpkg_conffile_prompt():
         # now check the downloaded debs for conffile conflicts and build
         # a blacklist
@@ -1538,6 +1541,9 @@ if __name__ == "__main__":
     parser.add_option("", "--dry-run",
                       action="store_true", default=False,
                       help=_("Simulation, download but do not install"))
+    parser.add_option("", "--download-only",
+                      action="store_true", default=False,
+                      help=_("Only download, do not even try to install."))
     parser.add_option("", "--minimal-upgrade-steps",
                       action="store_true", default=False,
                       help=_("Upgrade in minimal steps (and allow "
