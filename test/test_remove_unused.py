@@ -14,6 +14,7 @@ apt.apt_pkg.config.set("APT::Architecture", "amd64")
 class MockOptions(object):
     debug = False
     verbose = False
+    download_only = False
     dry_run = False
     apt_debug = False
     minimal_upgrade_steps = False

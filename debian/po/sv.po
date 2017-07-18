@@ -8,32 +8,32 @@ msgstr ""
 "Project-Id-Version: unattended-upgrades\n"
 "Report-Msgid-Bugs-To: unattended-upgrades@packages.debian.org\n"
 "POT-Creation-Date: 2015-11-03 07:12+0100\n"
-"PO-Revision-Date: 2016-04-21 14:42+0100\n"
+"PO-Revision-Date: 2017-02-17 08:25+0100\n"
 "Last-Translator: Jonatan Nyberg <jonatan@autistici.org>\n"
 "Language-Team: swedish <debian-l10n-swedish@lists.debian.org>\n"
 "Language: sv\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"X-Generator: Poedit 1.6.10\n"
+"X-Generator: Poedit 1.8.11\n"
 
 #. Type: boolean
 #. Description
 #: ../templates:2001
 msgid "Automatically download and install stable updates?"
-msgstr "Automatiskt hämta och installera stabila uppdateringar?"
+msgstr "Automatiskt ladda ner och installera stabila uppdateringar?"
 
 #. Type: boolean
 #. Description
 #: ../templates:2001
 msgid "Applying updates on a frequent basis is an important part of keeping systems secure. By default, updates need to be applied manually using package  management tools. Alternatively, you can choose to have this system  automatically download and install important updates."
-msgstr "Tillämpa uppdateringar på en frekvent basis är en viktig del för att hålla systemen säkra. Som standard, uppdateringar måste appliceras manuellt med hjälp av pakethanteringsverktyg. Alternativt kan du välja att ha detta system automatiskt hämtar och installerar viktiga uppdateringar."
+msgstr "Tillämpa uppdateringar på en frekvent basis är en viktig del för att hålla system säkra. Som standard, behöver uppdateringar appliceras manuellt med hjälp av pakethanteringsverktyg. Alternativt kan du välja att detta system automatiskt hämtar och installerar viktiga uppdateringar."
 
 #. Type: string
 #. Description
 #: ../templates:3001
 msgid "Origins-Pattern that packages must match to be upgraded:"
-msgstr "Origins-Pattern som paketet måste matcha för att uppgraderas:"
+msgstr "Origins-Pattern som paket måste matcha för att bli uppgraderade:"
 
 #. Type: string
 #. Description
@@ -45,5 +45,4 @@ msgstr "Ange ett värde för unattended-upgrades Origins-Pattern."
 #. Description
 #: ../templates:3001
 msgid "A package will be upgraded only if its metadata values match all the supplied keywords in the origin line."
-msgstr "Ett paket kommer att uppgraderas endast om dess metadatavärden matchar alla de medföljande nyckelord i origin-linjen."
-
+msgstr "Ett paket kommer att uppgraderas endast om dess metadatavärden matchar alla medföljande nyckelord i origin linjen."
