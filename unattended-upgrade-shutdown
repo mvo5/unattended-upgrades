@@ -45,6 +45,10 @@ except Exception:
     sys.exit(0)
 
 
+def get_inhibit_file():
+    return "/var/run/unattended-upgrades.inhibit.{}".format(os.getpid())
+
+
 def do_usplash(msg):
     if os.path.exists("/sbin/usplash_write"):
         logging.debug("Running usplash_write")
@@ -120,7 +124,7 @@ if __name__ == "__main__":
     start_time = time.time()
     lock_was_taken = False
     # inhibit further upgrade rounds of unattended-upgrade
-    with open("/var/run/unattended-upgrades.inhibit", 'w') as f:
+    with open(get_inhibit_file(), 'w') as f:
         pass
     while True:
         res = apt_pkg.get_lock(options.lock_file)
@@ -141,6 +145,7 @@ if __name__ == "__main__":
             # anyway since u-u failed to finish for at least 10
             # minutes by default and u-u-s would be killed after 5 more
             # minutes
+            os.remove(get_inhibit_file())
             sys.exit(1)
 
     # add finished info to the log/terminal to help tracking down
@@ -168,4 +173,5 @@ if __name__ == "__main__":
                     break
                 time.sleep(5)
 
+    os.remove(get_inhibit_file())
     sys.exit(0)

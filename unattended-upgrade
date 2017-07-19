@@ -28,6 +28,7 @@ import email.charset
 import fcntl
 import fnmatch
 import gettext
+import glob
 import grp
 import io
 import locale
@@ -75,7 +76,6 @@ DISTRO_ID = subprocess.check_output(
 PROGRESS_LOG = "/var/run/unattended-upgrades.progress"
 PID_FILE = "/var/run/unattended-upgrades.pid"
 LOCK_FILE = "/var/run/unattended-upgrades.lock"
-INHIBIT_FILE = "/var/run/unattended-upgrades.inhibit"
 
 
 class LoggingDateTime:
@@ -313,7 +313,7 @@ def get_distro_id():
 def bail_out_for_shutdown():
     """ test if shutdown is running and execution should stop """
     if ("UNATTENDED_UPGRADES_FORCE_INSTALL_ON_SHUTDOWN" not in os.environ and
-            os.path.exists(INHIBIT_FILE)):
+            glob.glob("/var/run/unattended-upgrades.inhibit.[0-9]*")):
         logging.debug("Shutdown is in progress, stopping")
         return True
     return False
