@@ -30,6 +30,7 @@ import time
 import logging
 import logging.handlers
 import gettext
+import glob
 import subprocess
 import os.path
 
@@ -65,8 +66,12 @@ def do_plymouth(msg):
 def log_msg(msg, level=logging.WARN):
     """ helper that will print msg to usplash, plymouth, console """
     logging.log(level, msg)
-    do_plymouth(msg)
-    do_usplash(msg)
+    # update usplash and plymouth only from one u-u-s, most likely from the one
+    # started first
+    if get_inhibit_file() == sorted(
+            glob.glob("/var/run/unattended-upgrades.inhibit.[0-9]*"))[0]:
+        do_plymouth(msg)
+        do_usplash(msg)
 
 
 def log_progress():
