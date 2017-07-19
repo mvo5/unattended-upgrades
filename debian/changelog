@@ -47,6 +47,9 @@ unattended-upgrades (0.93.2) UNRELEASED; urgency=medium
     Depend on apt >= 1.4.2 which split apt-daily-upgrade.service from
     apt-daily.service. (LP: #1690980)
   * Don't start package downloads when shutdown has already started
+  * Use per u-u-s inhibit file and remove them when each u-u-s is finished
+  * Update usplash and plymouth only from one u-u-s
+
 
   [ Julian Andres Klode ]
   * Fix PEP8 failures (replace except: with except Exception:)
@@ -60,7 +63,7 @@ unattended-upgrades (0.93.2) UNRELEASED; urgency=medium
   [ Jonatan Nyberg ]
   * Update Swedish debconf strings (Closes: #855361)
 
- -- Balint Reczey <rbalint@ubuntu.com>  Sat, 15 Jul 2017 01:03:22 +0200
+ -- Balint Reczey <rbalint@ubuntu.com>  Wed, 19 Jul 2017 16:51:01 +0200
 
 unattended-upgrades (0.93.1+nmu1) unstable; urgency=medium
 
