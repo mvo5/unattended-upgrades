@@ -1112,7 +1112,8 @@ def calculate_upgradable_pkgs(cache, options, allowed_origins,
                 pkg.name, getattr(pkg.candidate, "origins", [])))
 
         if (pkg.is_upgradable and
-                not is_pkgname_in_blacklist(pkg.name, blacklisted_pkgs, pkgs_kept_back) and
+                not is_pkgname_in_blacklist(pkg.name, blacklisted_pkgs,
+                                            pkgs_kept_back) and
                 is_pkgname_in_whitelist(pkg.name, whitelisted_pkgs) and
                 is_allowed_origin(pkg.candidate, allowed_origins)):
 
