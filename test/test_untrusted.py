@@ -41,6 +41,7 @@ class TestUntrusted(unittest.TestCase):
 
         # run it
         options = MockOptions()
+        unattended_upgrade.LOCK_FILE = "./u-u.lock"
         unattended_upgrade.main(options, rootdir=self.rootdir)
         # read the log to see what happend
         with open(self.log) as f:
