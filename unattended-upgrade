@@ -21,6 +21,7 @@
 # Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 #
 
+import atexit
 import copy
 import datetime
 import errno
@@ -445,9 +446,6 @@ def upgrade_in_minimal_steps(cache, pkgs_to_upgrade, blacklist,
 
     install_log = LogInstallProgress(logfile_dpkg, verbose)
     install_log.progress_log += ".minimal-steps"
-
-    # setup signal handler
-    signal.signal(signal.SIGUSR1, signal_handler)
 
     # double check any changes we do
     allowed_origins = get_allowed_origins()
@@ -910,10 +908,6 @@ def do_install(cache, pkgs_to_upgrade, blacklisted_pkgs, whitelisted_pkgs,
                 "Unattended-Upgrades::MinimalSteps", False) or
             apt_pkg.config.find_b(
                 "Unattended-Upgrade::MinimalSteps", False)):
-            pidf = os.path.join(apt_pkg.config.find_dir("Dir"),
-                                "var", "run", "unattended-upgrades.pid")
-            with open(pidf, "w") as fp:
-                fp.write("%s" % os.getpid())
             # try upgrade all "pkgs" in minimal steps
             pkg_install_success = upgrade_in_minimal_steps(
                 cache, [pkg.name for pkg in pkgs_to_upgrade],
@@ -1565,6 +1559,17 @@ if __name__ == "__main__":
     # ensure that we are not killed when the terminal goes away e.g. on
     # shutdown
     signal.signal(signal.SIGHUP, signal.SIG_IGN)
+
+    # setup signal handler for graceful stopping
+    signal.signal(signal.SIGUSR1, signal_handler)
+
+    # write pid to let other processes find this one
+    pidf = os.path.join(apt_pkg.config.find_dir("Dir"),
+                        "var", "run", "unattended-upgrades.pid")
+    # clean up pid file on exit
+    with open(pidf, "w") as fp:
+        fp.write("%s" % os.getpid())
+    atexit.register(os.remove, pidf)
 
     # run the main code
     main(options)
