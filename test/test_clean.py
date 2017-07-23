@@ -9,9 +9,15 @@ import unittest
 import apt
 import unattended_upgrade
 
+try:
+    from typing import List
+    List   # pyflaks
+except ImportError:
+    pass
+
 
 class MockFetcher:
-    items = []
+    items = []  # type: List[MockAcquireItem]
 
 
 class MockAcquireItem:
