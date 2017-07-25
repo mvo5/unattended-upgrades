@@ -145,7 +145,7 @@ if __name__ == "__main__":
         if os.path.exists(p):
             pid = int(open(p).read())
             logging.debug("found running unattended-upgrades pid %s" % pid)
-            os.kill(pid, signal.SIGUSR1)
+            os.kill(pid, signal.SIGTERM)
         # show log
         log_progress()
         time.sleep(5)

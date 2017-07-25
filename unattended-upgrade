@@ -296,7 +296,7 @@ def is_dpkg_journal_dirty():
 
 
 def signal_handler(signal, frame):
-    logging.warning("SIGUSR1 received, will stop")
+    logging.warning("SIGTERM received, will stop")
     global SIGNAL_STOP_REQUEST
     SIGNAL_STOP_REQUEST = True
 
@@ -1567,7 +1567,7 @@ if __name__ == "__main__":
     signal.signal(signal.SIGHUP, signal.SIG_IGN)
 
     # setup signal handler for graceful stopping
-    signal.signal(signal.SIGUSR1, signal_handler)
+    signal.signal(signal.SIGTERM, signal_handler)
 
     # write pid to let other processes find this one
     pidf = os.path.join(apt_pkg.config.find_dir("Dir"),
