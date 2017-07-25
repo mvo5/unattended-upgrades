@@ -27,12 +27,14 @@ unattended-upgrades (0.93.2) UNRELEASED; urgency=medium
     This fixes make -C test in a clean repository
   * Clean up all generated files in override_dh_auto_clean
   * Update debhelper compat level to 9
-  * Move acquiring shutdown_lock earlier in u-u to cover dpkg --configure step.
+  * Move acquiring shutdown_lock earlier in u-u to cover dpkg --configure step
   * Start handling SIGUSR1 gracefully earlier in unattended-upgrade
     (LP: #1690980)
+  * Handle SIGTERM instead of SIGUSR1 as a graceful shutdown signal
   * Place unattended-upgrade pid file early and remove it on exit.
   * Override maintainer-script-calls-systemctl lintian warnings
   * Don't start package downloads when shutdown has already started
+  * Let unattended-upgrade run uninterrupted in shutdown mode until timeout
 
   [ Julian Andres Klode ]
   * Add a --download-only option (Closes: #863911) (LP: #1686470)
@@ -44,7 +46,7 @@ unattended-upgrades (0.93.2) UNRELEASED; urgency=medium
   [ Jonatan Nyberg ]
   * Update Swedish debconf strings (Closes: #855361)
 
- -- Balint Reczey <rbalint@ubuntu.com>  Sat, 15 Jul 2017 01:03:22 +0200
+ -- Balint Reczey <rbalint@ubuntu.com>  Wed, 26 Jul 2017 12:32:09 +0200
 
 unattended-upgrades (0.93.1+nmu2) unstable; urgency=medium
 
