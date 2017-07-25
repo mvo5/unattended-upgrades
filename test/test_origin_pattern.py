@@ -200,8 +200,7 @@ class TestOriginPatern(unittest.TestCase):
                 ("http\://foo.bar:stable", ("http://foo.bar", "stable")),
                 # space as separator
                 ("Ubuntu lucid-security", ("Ubuntu", "lucid-security")),
-                ("http\://baz.mee stable", ("http://baz.mee", "stable")),
-        ):
+                ("http\://baz.mee stable", ("http://baz.mee", "stable"))):
             apt_pkg.config.clear("Unattended-Upgrade::Allowed-Origins")
             apt_pkg.config.set("Unattended-Upgrade::Allowed-Origins::", cfg)
             li = unattended_upgrade.get_allowed_origins_legacy()
