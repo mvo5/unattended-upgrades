@@ -47,6 +47,7 @@ except Exception:
 
 
 def do_usplash(msg):
+    # type: (str) -> None
     if os.path.exists("/sbin/usplash_write"):
         logging.debug("Running usplash_write")
         subprocess.call(["/sbin/usplash_write", "TEXT", msg])
@@ -54,12 +55,14 @@ def do_usplash(msg):
 
 
 def do_plymouth(msg):
+    # type: (str) -> None
     if os.path.exists("/bin/plymouth"):
         logging.debug("Running plymouth --text")
         subprocess.call(["/bin/plymouth", "message", "--text", msg])
 
 
 def log_msg(msg, level=logging.WARN):
+    # type: (str, int) -> None
     """ helper that will print msg to usplash, plymouth, console """
     logging.log(level, msg)
     do_plymouth(msg)
@@ -67,6 +70,7 @@ def log_msg(msg, level=logging.WARN):
 
 
 def log_progress():
+    # type: () -> None
     """ helper to log the install progress (if any) """
     # wait a some seconds and try again
     msg = _("Unattended-upgrade in progress during shutdown, "
