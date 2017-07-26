@@ -47,6 +47,7 @@ except Exception:
 
 
 def do_usplash(msg):
+    # type: (str) -> None
     if os.path.exists("/sbin/usplash_write"):
         logging.debug("Running usplash_write")
         subprocess.call(["/sbin/usplash_write", "TEXT", msg])
@@ -54,12 +55,14 @@ def do_usplash(msg):
 
 
 def do_plymouth(msg):
+    # type: (str) -> None
     if os.path.exists("/bin/plymouth"):
         logging.debug("Running plymouth --text")
         subprocess.call(["/bin/plymouth", "message", "--text", msg])
 
 
 def log_msg(msg, level=logging.WARN):
+    # type: (str, int) -> None
     """ helper that will print msg to usplash, plymouth, console """
     logging.log(level, msg)
     do_plymouth(msg)
@@ -67,6 +70,7 @@ def log_msg(msg, level=logging.WARN):
 
 
 def log_progress():
+    # type: () -> None
     """ helper to log the install progress (if any) """
     # wait a some seconds and try again
     msg = _("Unattended-upgrade in progress during shutdown, "
@@ -77,6 +81,15 @@ def log_progress():
         msg += "\n" + open(progress).read()
     # log it
     log_msg(msg)
+
+
+def signal_stop_unattended_upgrade():
+    """ send SIGTERM to running unattended-upgrade if there is any """
+    pidfile = "/var/run/unattended-upgrades.pid"
+    if os.path.exists(pidfile):
+        pid = int(open(pidfile).read())
+        logging.debug("found running unattended-upgrades pid %s" % pid)
+        os.kill(pid, signal.SIGTERM)
 
 
 if __name__ == "__main__":
@@ -115,9 +128,10 @@ if __name__ == "__main__":
 
     # check if we need to run unattended-upgrades on shutdown and if so,
     # run it
-    p = None
     apt_pkg.init_config()
-    if apt_pkg.config.find_b("Unattended-Upgrade::InstallOnShutdown", False):
+    shutdown_mode = apt_pkg.config.find_b(
+        "Unattended-Upgrade::InstallOnShutdown", False)
+    if shutdown_mode:
         env = copy.copy(os.environ)
         env["UNATTENDED_UPGRADES_FORCE_INSTALL_ON_SHUTDOWN"] = "1"
         logging.debug("starting unattended-upgrades in shutdown mode")
@@ -140,18 +154,18 @@ if __name__ == "__main__":
             logging.debug("lock not taken")
             break
         lock_was_taken = True
-        # signal unattended-upgrades to stop
-        p = "/var/run/unattended-upgrades.pid"
-        if os.path.exists(p):
-            pid = int(open(p).read())
-            logging.debug("found running unattended-upgrades pid %s" % pid)
-            os.kill(pid, signal.SIGUSR1)
+        if not shutdown_mode:
+            signal_stop_unattended_upgrade()
         # show log
         log_progress()
         time.sleep(5)
         if (time.time() - start_time) > options.delay * 60:
             logging.warning(_("Giving up on lockfile after %s delay"),
                             options.delay)
+            if shutdown_mode:
+                # unattended-upgrade did not finish in time, but stopping
+                # it gracefully is better than waiting for it to be killed
+                signal_stop_unattended_upgrade()
             sys.exit(1)
 
     # add finished info to the log/terminal to help tracking down

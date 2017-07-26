@@ -7,6 +7,13 @@ import shutil
 import tempfile
 import unittest
 
+try:
+    from typing import List, Tuple
+    List   # pyflaks
+    Tuple  # pyflakes
+except ImportError:
+    pass
+
 import unattended_upgrade
 
 
@@ -14,7 +21,7 @@ class LogInstallProgressMock(unattended_upgrade.LogInstallProgress):
 
     # klass data so that we can verify in the test as the actual
     # object is destroyed
-    DATA = []
+    DATA = []  # type: List[Tuple[str, float]]
 
     # overwrite to log the data
     def status_change(self, pkg, percent, status):
