@@ -1,0 +1,24 @@
+project: unattended-upgrades
+
+backends:
+  qemu:
+    systems:
+      - ubuntu-16.04-64:
+          username: ubuntu
+          password: ubuntu
+  lxd:
+    systems:
+      - ubuntu-16.04
+
+path: /home/ubuntu/unattended-upgrades
+  
+suites:
+  spread_tests/:
+    summary: run integration test
+    prepare: |
+      echo "deb http://security.ubuntu.com/ubuntu $(lsb_release -c -s)-security main restricted universe" >> /etc/apt/sources.list
+      apt update
+      apt install -y fakeroot
+      apt build-dep -y /home/ubuntu/unattended-upgrades
+      (cd  /home/ubuntu/unattended-upgrades && dpkg-buildpackage)
+      dpkg -i /home/ubuntu/*.deb

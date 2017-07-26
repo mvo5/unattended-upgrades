@@ -1,0 +1,4 @@
+summary: Run unattended-upgrades and ensure it does something
+
+execute: |
+  unattended-upgrades -v | MATCH "Allowed origins"

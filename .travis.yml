@@ -13,4 +13,6 @@ before_install:
  - which python3
 # travis is "funny" it has a non-distro python3 that will not find
 # python modules installed via apt-get
-script: (cd test ; PATH=/usr/bin:$PATH make)
+script:
+  - (cd test ; PATH=/usr/bin:$PATH make)
+  - sudo unattended-upgrades -v
