@@ -11,8 +11,10 @@ before_install:
  - sudo apt-get update
  - sudo apt-get install -y python python3-distutils-extra python3-setuptools python-dev python3-dev python-coverage pep8 pyflakes python-apt python3-apt python-mock python3-mock lsb-release dh-systemd
  - which python3
+ - sudo apt-get install python3-pip
+ - sudo python3 -m pip install -U mypy
 # travis is "funny" it has a non-distro python3 that will not find
 # python modules installed via apt-get
 script:
-  - (cd test ; PATH=/usr/bin:$PATH make)
+  - (cd test ; PATH=/usr/bin:/usr/local/bin:$PATH make)
   - sudo unattended-upgrades -v
