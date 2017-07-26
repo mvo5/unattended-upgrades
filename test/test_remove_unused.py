@@ -93,6 +93,7 @@ Unattended-Upgrade::Allowed-Origins {
 Unattended-Upgrade::Remove-Unused-Dependencies "true";
 """)
         options = MockOptions()
+        unattended_upgrade.LOCK_FILE = "./u-u.lock"
         unattended_upgrade.main(
             options, rootdir="./root.unused-deps")
         with open(self.log) as f:
@@ -114,6 +115,7 @@ Unattended-Upgrade::Allowed-Origins {
 Unattended-Upgrade::Remove-New-Unused-Dependencies "true";
 """)
         options = MockOptions()
+        unattended_upgrade.LOCK_FILE = "./u-u.lock"
         unattended_upgrade.main(
             options, rootdir="./root.unused-deps")
         with open(self.log) as f:
