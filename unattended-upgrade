@@ -21,6 +21,7 @@
 # Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 #
 
+import atexit
 import copy
 import datetime
 import errno
@@ -74,6 +75,7 @@ DISTRO_ID = subprocess.check_output(
 # progress information is written here
 PROGRESS_LOG = "/var/run/unattended-upgrades.progress"
 PID_FILE = "/var/run/unattended-upgrades.pid"
+LOCK_FILE = "/var/run/unattended-upgrades.lock"
 
 # set from the sigint signal handler
 SIGNAL_STOP_REQUEST = False
@@ -294,7 +296,7 @@ def is_dpkg_journal_dirty():
 
 
 def signal_handler(signal, frame):
-    logging.warning("SIGUSR1 received, will stop")
+    logging.warning("SIGTERM received, will stop")
     global SIGNAL_STOP_REQUEST
     SIGNAL_STOP_REQUEST = True
 
@@ -444,9 +446,6 @@ def upgrade_in_minimal_steps(cache, pkgs_to_upgrade, blacklist,
 
     install_log = LogInstallProgress(logfile_dpkg, verbose)
     install_log.progress_log += ".minimal-steps"
-
-    # setup signal handler
-    signal.signal(signal.SIGUSR1, signal_handler)
 
     # double check any changes we do
     allowed_origins = get_allowed_origins()
@@ -909,10 +908,6 @@ def do_install(cache, pkgs_to_upgrade, blacklisted_pkgs, whitelisted_pkgs,
                 "Unattended-Upgrades::MinimalSteps", False) or
             apt_pkg.config.find_b(
                 "Unattended-Upgrade::MinimalSteps", False)):
-            pidf = os.path.join(apt_pkg.config.find_dir("Dir"),
-                                "var", "run", "unattended-upgrades.pid")
-            with open(pidf, "w") as fp:
-                fp.write("%s" % os.getpid())
             # try upgrade all "pkgs" in minimal steps
             pkg_install_success = upgrade_in_minimal_steps(
                 cache, [pkg.name for pkg in pkgs_to_upgrade],
@@ -1031,7 +1026,7 @@ def logged_in_users():
     return set(users.split())
 
 
-def reboot_if_requested_and_needed(shutdown_lock=0):
+def reboot_if_requested_and_needed():
     """auto-reboot (if required and the config for this is set)"""
     if not os.path.exists(REBOOT_REQUIRED_FILE):
         return
@@ -1054,8 +1049,6 @@ def reboot_if_requested_and_needed(shutdown_lock=0):
     # reboot at the specified time
     when = apt_pkg.config.find(
         "Unattended-Upgrade::Automatic-Reboot-Time", "now")
-    if shutdown_lock > 0:
-        os.close(shutdown_lock)
     logging.warning("Found %s, rebooting" % REBOOT_REQUIRED_FILE)
     subprocess.call(["/sbin/shutdown", "-r", when])
 
@@ -1235,6 +1228,12 @@ def main(options, rootdir=""):
 
     logging.info(_("Starting unattended upgrades script"))
 
+    # lock for the shutdown check
+    shutdown_lock = apt_pkg.get_lock(LOCK_FILE)
+    if shutdown_lock < 0:
+        logging.error("Lock file is already taken, exiting")
+        sys.exit(1)
+
     # display available origin
     logging.info(_("Allowed origins are: %s"), allowed_origins)
 
@@ -1323,6 +1322,12 @@ def main(options, rootdir=""):
     list.read_main_list()
     recs = cache._records
     pm = apt_pkg.PackageManager(cache._depcache)
+    # don't start downloading during shutdown
+    # TODO: download files one by one and check for stop request after each of
+    # them
+    if SIGNAL_STOP_REQUEST:
+        logging.warning("SIGNAL received, stopping")
+        return True
     try:
         pm.get_archives(fetcher, list, recs)
     except SystemError as e:
@@ -1421,6 +1426,7 @@ def main(options, rootdir=""):
         write_stamp_file()
         # check if we couldn't reboot on previous run because
         # a user was logged-in at this time
+        os.close(shutdown_lock)
         reboot_if_requested_and_needed()
         return
 
@@ -1432,6 +1438,7 @@ def main(options, rootdir=""):
                 "Unattended-Upgrade::InstallOnShutdown", False)):
         logger = logging.getLogger()
         logger.debug("Configured to install on shutdown, so exiting now")
+        os.close(shutdown_lock)
         return
 
     # check if we are in dry-run mode
@@ -1451,11 +1458,7 @@ def main(options, rootdir=""):
 
     # only perform install step if we actually have packages to install
     pkg_install_success = True
-    shutdown_lock = -1
     if len(pkgs_to_upgrade) > 0:
-        # lock for the shutdown check - its fine if the system
-        # is shutdown while downloading but not so much while installing
-        shutdown_lock = apt_pkg.get_lock("/var/run/unattended-upgrades.lock")
         # do install
         pkg_install_success = do_install(cache,
                                          pkgs_to_upgrade,
@@ -1513,9 +1516,10 @@ def main(options, rootdir=""):
     # write timestamp file
     write_stamp_file()
 
+    os.close(shutdown_lock)
     # check if the user wants a reboot
     if not options.dry_run:
-        reboot_if_requested_and_needed(shutdown_lock)
+        reboot_if_requested_and_needed()
 
 
 if __name__ == "__main__":
@@ -1561,6 +1565,17 @@ if __name__ == "__main__":
     # ensure that we are not killed when the terminal goes away e.g. on
     # shutdown
     signal.signal(signal.SIGHUP, signal.SIG_IGN)
+
+    # setup signal handler for graceful stopping
+    signal.signal(signal.SIGTERM, signal_handler)
+
+    # write pid to let other processes find this one
+    pidf = os.path.join(apt_pkg.config.find_dir("Dir"),
+                        "var", "run", "unattended-upgrades.pid")
+    # clean up pid file on exit
+    with open(pidf, "w") as fp:
+        fp.write("%s" % os.getpid())
+    atexit.register(os.remove, pidf)
 
     # run the main code
     main(options)
