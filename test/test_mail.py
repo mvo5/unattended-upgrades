@@ -79,7 +79,7 @@ class CommonTestsForMailxAndSendmail(object):
         """ return input tuple for send_summary_mail """
         pkgs = "\n".join(["2vcard"])
         res = successful
-        pkgs_kept_back = []
+        pkgs_kept_back = ["linux-image"]
         # include some unicode chars here for good measure
         mem_log = StringIO("""mem_log text üöä
 Allowed origins are: ['o=Debian,n=wheezy', 'o=Debian,n=wheezy-updates',\
@@ -154,6 +154,36 @@ Debian-Security']
         mem_log.write("\nWARNING: some warning\n")
         send_summary_mail(pkgs, res, pkgs_kept_back, mem_log, logf_dpkg)
         self.assertTrue(os.path.exists("mail.txt"))
+
+    def test_summary_mail_blacklisted(self):
+        # Test that blacklisted packages are mentioned in the mail message.
+        send_summary_mail(*self._return_mock_data())
+        self.assertTrue(os.path.exists("mail.txt"))
+        with open("mail.txt", "rb") as fp:
+            mail_txt = fp.read().decode("utf-8")
+        self.assertTrue("[package on hold]" in mail_txt)
+        self._verify_common_mail_content(mail_txt)
+        self.assertTrue(
+            "Packages with upgradable origin but kept back:\n linux-image"
+            in mail_txt)
+
+    def test_summary_mail_blacklisted_only(self):
+        # Test that when only blacklisted packages are available, they
+        # are still mentioned in the mail message.
+        pkgs, res, pkgs_kept_back, mem_log, logf_dpkg = self._return_mock_data(
+            successful=True)
+        pkgs = ""
+        send_summary_mail(pkgs, res, pkgs_kept_back, mem_log, logf_dpkg)
+        self.assertTrue(os.path.exists("mail.txt"))
+        with open("mail.txt", "rb") as fp:
+            mail_txt = fp.read().decode("utf-8")
+        self.assertTrue("[package on hold]" in mail_txt)
+        self._verify_common_mail_content(mail_txt)
+        self.assertTrue(
+            "Packages with upgradable origin but kept back:\n linux-image"
+            in mail_txt)
+        self.assertFalse(
+            "Packages that attempted to upgrade:\n 2vcard" in mail_txt)
 
     def test_apt_listchanges(self):
         # test with sendmail available

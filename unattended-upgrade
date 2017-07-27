@@ -432,7 +432,7 @@ def match_whitelist_string(whitelist, origin):
             match = fnmatch.fnmatch(origin.codename, value)
         else:
             raise UnknownMatcherError(
-                "Unknown whitelist entry for macher '%s' (token '%s')" % (
+                "Unknown whitelist entry for matcher '%s' (token '%s')" % (
                     what, token))
         # update res
         res = res and match
@@ -590,11 +590,12 @@ def is_allowed_origin(ver, allowed_origins):
     return False
 
 
-def is_pkgname_in_blacklist(pkgname, blacklist):
-    # type: (str, List[str]) -> bool
+def is_pkgname_in_blacklist(pkgname, blacklist, pkgs_kept_back):
+    # type: (str, List[str], List[str]) -> bool
     for blacklist_regexp in blacklist:
         if re.match(blacklist_regexp, pkgname):
             logging.debug("skipping blacklisted package '%s'" % pkgname)
+            pkgs_kept_back.append(pkgname)
             return True
     return False
 
@@ -633,7 +634,7 @@ def check_changes_for_sanity(cache, allowed_origins, blacklist, whitelist,
             if not is_allowed_origin(pkg.candidate, allowed_origins):
                 logging.debug("pkg '%s' not in allowed origin" % pkg.name)
                 return False
-            if is_pkgname_in_blacklist(pkg.name, blacklist):
+            if is_pkgname_in_blacklist(pkg.name, blacklist, []):
                 logging.debug("pkg '%s' package has been blacklisted" %
                               pkg.name)
                 return False
@@ -1192,8 +1193,10 @@ def calculate_upgradable_pkgs(cache,             # type: apt.Cache
         if options.debug and pkg.is_upgradable:
             logging.debug("Checking: %s (%s)" % (
                 pkg.name, getattr(pkg.candidate, "origins", [])))
+
         if (pkg.is_upgradable and
-                not is_pkgname_in_blacklist(pkg.name, blacklisted_pkgs) and
+                not is_pkgname_in_blacklist(pkg.name, blacklisted_pkgs,
+                                            pkgs_kept_back) and
                 is_pkgname_in_whitelist(pkg.name, whitelisted_pkgs) and
                 is_allowed_origin(pkg.candidate, allowed_origins)):
 
