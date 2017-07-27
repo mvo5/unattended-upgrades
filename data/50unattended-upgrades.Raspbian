@@ -8,7 +8,7 @@
 // file, but several aliases are accepted.  The accepted keywords are:
 //   a,archive,suite (eg, "stable")
 //   c,component     (eg, "main", "contrib", "non-free")
-//   l,label         (eg, "Rapsbian", "Raspbian-Security")
+//   l,label         (eg, "Rapsbian", "Raspbian")
 //   o,origin        (eg, "Raspbian", "Unofficial Multimedia Packages")
 //   n,codename      (eg, "jessie", "jessie-updates")
 //     site          (eg, "http.debian.net")
