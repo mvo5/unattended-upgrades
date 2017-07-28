@@ -8,7 +8,7 @@ import unittest
 def hasMyPy():
     try:
         subprocess.check_call(["mypy", "--version"])
-    except:
+    except Exception:
         return False
     return True
 
