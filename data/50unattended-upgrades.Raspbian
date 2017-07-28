@@ -89,3 +89,6 @@ Unattended-Upgrade::Package-Blacklist {
 // Use apt bandwidth limit feature, this example limits the download
 // speed to 70kb/sec
 //Acquire::http::Dl-Limit "70";
+
+// Do "apt-get autoclean" every n-days (0=disable)
+APT::Periodic::AutocleanInterval "7";
