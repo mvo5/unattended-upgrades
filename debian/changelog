@@ -1,10 +1,7 @@
-unattended-upgrades (0.93.2) UNRELEASED; urgency=medium
-
-  [ Peter Lewis ]
-  * Multiple typo fixes
+unattended-upgrades (0.94) unstable; urgency=medium
 
   [ Brian Murray ]
-  * Add in apt history log
+  * Add apt history log to apport reports
   * unattended-upgrades: Provide some information and create a log entry when
     there is a failure to parse the allowed origins. (LP: #1680599)
   * improve the changes sanity check to cache more insane cases
@@ -13,12 +10,6 @@ unattended-upgrades (0.93.2) UNRELEASED; urgency=medium
 
   [ Louis Bouchard ]
   * Fix --delay type in unattended-upgrade-shutdown (Closes: #837161)
-
-  [ John Horne ]
-  * Some typos corrected in the README file.
-
-  [ Michael Vogt ]
-  * add HACKING.md
 
   [ Balint Reczey ]
   * ACK NMU
@@ -35,9 +26,12 @@ unattended-upgrades (0.93.2) UNRELEASED; urgency=medium
   * Override maintainer-script-calls-systemctl lintian warnings
   * Don't start package downloads when shutdown has already started
   * Let unattended-upgrade run uninterrupted in shutdown mode until timeout
+  * Fix indentation in test-systemd.py
 
   [ Julian Andres Klode ]
   * Add a --download-only option (Closes: #863911) (LP: #1686470)
+  * Fix PEP8 failures (replace except: with except Exception:)
+    (Closes: #865897)
 
   [ Steve Langasek ]
   * Add UbuntuESM to the list of sources automatically upgraded from by default
@@ -46,7 +40,27 @@ unattended-upgrades (0.93.2) UNRELEASED; urgency=medium
   [ Jonatan Nyberg ]
   * Update Swedish debconf strings (Closes: #855361)
 
- -- Balint Reczey <rbalint@ubuntu.com>  Wed, 26 Jul 2017 12:32:09 +0200
+  [ Peter Lewis ]
+  * Multiple typo fixes
+
+  [ Michael Vogt ]
+  * add HACKING.md
+  * add pep484 type hints
+  * add spread test
+  * Enable updates on Raspbian
+
+  [ John Horne ]
+  * Blacklisted packages are now added to the pkgs_kept_back list.
+  * Reduced instance of line too long.
+  * Some typos corrected in the README file.
+  * Fix for pep8 - closing bracket missing visual indentation
+  * Added tests that blacklisted packages are mentioned in email messages.
+  * Updated argument type comment for is_pkgname_in_blacklist function.
+
+  [ nachoparker ]
+  * There is noRaspbian-Security label
+
+ -- Michael Vogt <mvo@debian.org>  Fri, 28 Jul 2017 10:11:07 +0200
 
 unattended-upgrades (0.93.1+nmu2) unstable; urgency=medium
 
