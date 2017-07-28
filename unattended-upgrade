@@ -1105,7 +1105,7 @@ def logged_in_users():
 
 
 def reboot_if_requested_and_needed():
-    # type: (int) -> None
+    # type: () -> None
     """auto-reboot (if required and the config for this is set)"""
     if not os.path.exists(REBOOT_REQUIRED_FILE):
         return
@@ -1426,7 +1426,7 @@ def main(options, rootdir=""):
     # them
     if SIGNAL_STOP_REQUEST:
         logging.warning("SIGNAL received, stopping")
-        return True
+        return
     try:
         pm.get_archives(fetcher, list, recs)
     except SystemError as e:
