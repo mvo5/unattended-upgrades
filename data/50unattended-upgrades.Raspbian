@@ -27,7 +27,7 @@ Unattended-Upgrade::Origins-Pattern {
 //      "o=Raspbian,n=jessie";
 //      "o=Raspbian,n=jessie-updates";
 //      "o=Raspbian,n=jessie-proposed-updates";
-//      "o=Raspbian,n=jessie,l=Raspbian-Security";
+//      "o=Raspbian,n=jessie,l=Raspbian";
 
         // Archive or Suite based matching:
         // Note that this will silently match a different release after
@@ -35,7 +35,7 @@ Unattended-Upgrade::Origins-Pattern {
         // new stable).
 //      "o=Raspbian,a=stable";
 //      "o=Raspbian,a=testing";
-        "origin=Raspbian,archive=${distro_codename},label=Raspbian-Security";
+        "origin=Raspbian,archive=${distro_codename},label=Raspbian";
 };
 
 // List of packages to not update (regexp are supported)
