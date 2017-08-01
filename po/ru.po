@@ -270,9 +270,9 @@ msgid "Simulation, download but do not install"
 msgstr "Имитация, скачивать но не устанавливать"
 
 #: ../unattended-upgrade:1418
-msgid "Upgrade in minimal steps (and allow interrupting with SIGINT"
+msgid "Upgrade in minimal steps (and allow interrupting with SIGTERM"
 msgstr ""
-"Обновление с минимальным количеством этапов (можно прервать с помощью SIGINT"
+"Обновление с минимальным количеством этапов (можно прервать с помощью SIGTERM"
 
 #: ../unattended-upgrade:1427
 msgid "You need to be root to run this application"

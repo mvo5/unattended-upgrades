@@ -267,9 +267,9 @@ msgid "Simulation, download but do not install"
 msgstr "Simulácia - sťahovať, ale neinštalovať"
 
 #: ../unattended-upgrade:1418
-msgid "Upgrade in minimal steps (and allow interrupting with SIGINT"
+msgid "Upgrade in minimal steps (and allow interrupting with SIGTERM"
 msgstr ""
-"Aktualizovať po minimálnych krokoch (a umožniť prerušenie pomocou SIGINT"
+"Aktualizovať po minimálnych krokoch (a umožniť prerušenie pomocou SIGTERM"
 
 #: ../unattended-upgrade:1427
 msgid "You need to be root to run this application"

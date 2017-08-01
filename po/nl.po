@@ -257,9 +257,9 @@ msgid "Simulation, download but do not install"
 msgstr "Simulatie, download maar installeer niet"
 
 #: ../unattended-upgrade:1418
-msgid "Upgrade in minimal steps (and allow interrupting with SIGINT"
+msgid "Upgrade in minimal steps (and allow interrupting with SIGTERM"
 msgstr ""
-"Opwaardering in zo weinig mogelijk stappen (en laat onderbreking door SIGINT "
+"Opwaardering in zo weinig mogelijk stappen (en laat onderbreking door SIGTERM "
 "toe"
 
 #: ../unattended-upgrade:1427

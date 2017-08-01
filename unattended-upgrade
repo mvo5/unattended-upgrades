@@ -1660,7 +1660,7 @@ if __name__ == "__main__":
     parser.add_option("", "--minimal-upgrade-steps",
                       action="store_true", default=False,
                       help=_("Upgrade in minimal steps (and allow "
-                             "interrupting with SIGINT"))
+                             "interrupting with SIGTERM"))
     parser.add_option("", "--minimal_upgrade_steps",
                       action="store_true",
                       help=SUPPRESS_HELP,

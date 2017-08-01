@@ -171,7 +171,7 @@ Supported Options Reference
 * `Unattended-Upgrade::MinimalSteps` - boolean (default:False)
  
  Optimize for safety against e.g. power failure by performing the upgrade
- in minimal self-contained chunks. This also allows sending a SIGINT to
+ in minimal self-contained chunks. This also allows sending a SIGTERM to
  unattended-upgrades, and it will stop the upgrade when it finishes the
  current upgrade step.
 
