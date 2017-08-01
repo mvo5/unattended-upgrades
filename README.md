@@ -168,7 +168,7 @@ Supported Options Reference
  detected. This defaults to true to ensure that updates get installed
  even when the system got interrupted during a previous run.
 
-* `Unattended-Upgrade::MinimalSteps` - boolean (default:False)
+* `Unattended-Upgrade::MinimalSteps` - boolean (default:True)
  
  Optimize for safety against e.g. power failure by performing the upgrade
  in minimal self-contained chunks. This also allows sending a SIGTERM to

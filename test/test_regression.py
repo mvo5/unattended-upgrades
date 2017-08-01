@@ -1,6 +1,7 @@
 #!/usr/bin/python3
 # -*- coding: utf-8 -*-
 
+import apt_pkg
 import io
 import os
 import sys
@@ -44,6 +45,7 @@ class TestRegression(unittest.TestCase):
         # mock options
         options = Mock()
         options.minimal_upgrade_steps = False
+        apt_pkg.config.set("Unattended-Upgrade::MinimalSteps", "False")
         do_install(cache=MockCache(), pkgs_to_upgrade=[pkg],
                    blacklisted_pkgs=[],
                    whitelisted_pkgs=[], options=options,

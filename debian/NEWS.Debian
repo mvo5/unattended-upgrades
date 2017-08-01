@@ -1,3 +1,16 @@
+unattended-upgrades (0.95) UNRELEASED; urgency=medium
+
+ Unattended-upgrades now defaults to installing upgrades in minimal
+ steps to ensure leaving the system in a consisten state when the
+ system starts shutting in the middle of an upgrade.
+
+ With the previous default of performing all upgrades in one shot
+ the installations could take more than 15 minutes which was the
+ final timeout after which unattended-upgrade and dpkg were killed
+ leaving half-installed packages behind on shutdown.
+
+ -- Balint Reczey <rbalint@ubuntu.com>  Tue, 01 Aug 2017 19:43:50 +0200
+
 unattended-upgrades (0.50) unstable; urgency=low
 
   When running with the --debug switch, previous versions of

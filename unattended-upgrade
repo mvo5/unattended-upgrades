@@ -974,10 +974,10 @@ def do_install(cache,             # type: apt.Cache
     try:
         if (options.minimal_upgrade_steps or
             # COMPAT with the mispelling
-            apt_pkg.config.find_b(
-                "Unattended-Upgrades::MinimalSteps", False) or
-            apt_pkg.config.find_b(
-                "Unattended-Upgrade::MinimalSteps", False)):
+            (apt_pkg.config.find_b(
+                "Unattended-Upgrades::MinimalSteps", True) and
+             apt_pkg.config.find_b(
+                 "Unattended-Upgrade::MinimalSteps", True))):
             # try upgrade all "pkgs" in minimal steps
             pkg_install_success = upgrade_in_minimal_steps(
                 cache, [pkg.name for pkg in pkgs_to_upgrade],
