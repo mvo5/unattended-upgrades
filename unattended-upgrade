@@ -493,7 +493,6 @@ def upgrade_in_minimal_steps(cache,            # type: apt.Cache
                              ):
     # type: (...) -> bool
     install_log = LogInstallProgress(logfile_dpkg, verbose)
-    install_log.progress_log += ".minimal-steps"
 
     # double check any changes we do
     allowed_origins = get_allowed_origins()
