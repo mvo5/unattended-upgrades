@@ -493,7 +493,6 @@ def upgrade_in_minimal_steps(cache,            # type: apt.Cache
                              ):
     # type: (...) -> bool
     install_log = LogInstallProgress(logfile_dpkg, verbose)
-    install_log.progress_log += ".minimal-steps"
 
     # double check any changes we do
     allowed_origins = get_allowed_origins()
@@ -974,10 +973,10 @@ def do_install(cache,             # type: apt.Cache
     try:
         if (options.minimal_upgrade_steps or
             # COMPAT with the mispelling
-            apt_pkg.config.find_b(
-                "Unattended-Upgrades::MinimalSteps", False) or
-            apt_pkg.config.find_b(
-                "Unattended-Upgrade::MinimalSteps", False)):
+            (apt_pkg.config.find_b(
+                "Unattended-Upgrades::MinimalSteps", True) and
+             apt_pkg.config.find_b(
+                 "Unattended-Upgrade::MinimalSteps", True))):
             # try upgrade all "pkgs" in minimal steps
             pkg_install_success = upgrade_in_minimal_steps(
                 cache, [pkg.name for pkg in pkgs_to_upgrade],
@@ -1660,7 +1659,7 @@ if __name__ == "__main__":
     parser.add_option("", "--minimal-upgrade-steps",
                       action="store_true", default=False,
                       help=_("Upgrade in minimal steps (and allow "
-                             "interrupting with SIGINT"))
+                             "interrupting with SIGTERM"))
     parser.add_option("", "--minimal_upgrade_steps",
                       action="store_true",
                       help=SUPPRESS_HELP,

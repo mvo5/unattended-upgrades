@@ -232,7 +232,7 @@ msgid "Simulation, download but do not install"
 msgstr ""
 
 #: ../unattended-upgrade:1418
-msgid "Upgrade in minimal steps (and allow interrupting with SIGINT"
+msgid "Upgrade in minimal steps (and allow interrupting with SIGTERM"
 msgstr ""
 
 #: ../unattended-upgrade:1427

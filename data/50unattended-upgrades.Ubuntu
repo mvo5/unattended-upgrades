@@ -34,7 +34,7 @@ Unattended-Upgrade::Package-Blacklist {
 // they can be interrupted with SIGTERM. This makes the upgrade
 // a bit slower but it has the benefit that shutdown while a upgrade
 // is running is possible (with a small delay)
-//Unattended-Upgrade::MinimalSteps "true";
+//Unattended-Upgrade::MinimalSteps "false";
 
 // Install all unattended-upgrades when the machine is shutting down
 // instead of doing it in the background while the machine is running

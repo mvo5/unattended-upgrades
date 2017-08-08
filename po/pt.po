@@ -267,8 +267,8 @@ msgid "Simulation, download but do not install"
 msgstr "Simulação, fazer o download mas não instalar"
 
 #: ../unattended-upgrade:1418
-msgid "Upgrade in minimal steps (and allow interrupting with SIGINT"
-msgstr "Atualizar em pequenos passos (e permitir interrupções com o SIGINT"
+msgid "Upgrade in minimal steps (and allow interrupting with SIGTERM"
+msgstr "Atualizar em pequenos passos (e permitir interrupções com o SIGTERM"
 
 #: ../unattended-upgrade:1427
 msgid "You need to be root to run this application"
