@@ -8,7 +8,7 @@ Documentation=man:unattended-upgrade(8)
 Type=oneshot
 RemainAfterExit=yes
 ExecStop=/usr/share/unattended-upgrades/unattended-upgrade-shutdown
-TimeoutStopSec=900
+TimeoutStopSec=1800
 
 [Install]
 WantedBy=multi-user.target
