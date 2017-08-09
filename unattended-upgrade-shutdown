@@ -146,6 +146,7 @@ if __name__ == "__main__":
     # run the monitoring loop and keep the "UI" updated
     start_time = time.time()
     lock_was_taken = False
+    signal_sent = False
     while True:
         res = apt_pkg.get_lock(options.lock_file)
         logging.debug("get_lock returned %i" % res)
@@ -156,6 +157,7 @@ if __name__ == "__main__":
         lock_was_taken = True
         if not shutdown_mode:
             signal_stop_unattended_upgrade()
+            signal_sent = True
         # show log
         log_progress()
         time.sleep(5)
@@ -166,11 +168,16 @@ if __name__ == "__main__":
                 # unattended-upgrade did not finish in time, but stopping
                 # it gracefully is better than waiting for it to be killed
                 signal_stop_unattended_upgrade()
+                signal_sent = True
             sys.exit(1)
 
     # add finished info to the log/terminal to help tracking down
     # LP: #434835
     if lock_was_taken:
-        # re-use existing string
-        log_msg(_("All upgrades installed"), logging.INFO)
+        if signal_sent:
+            log_msg(_("Unattended-upgrades stopped. There may be upgrades"
+                      " left to be installed in the next run."), logging.INFO)
+        else:
+            # re-use existing string
+            log_msg(_("All upgrades installed"), logging.INFO)
     sys.exit(0)
