@@ -43,8 +43,9 @@ import subprocess
 import sys
 
 try:
-    from typing import AbstractSet, List, Tuple
+    from typing import AbstractSet, Iterable, List, Tuple
     AbstractSet  # pyflakes
+    Iterable  # pyflakes
     List  # pyflakes
     Tuple  # pyflakes
 except ImportError:
@@ -485,7 +486,7 @@ def upgrade_normal(cache, logfile_dpkg, verbose):
 
 
 def upgrade_in_minimal_steps(cache,            # type: apt.Cache
-                             pkgs_to_upgrade,  # type: List[apt.Package]
+                             pkgs_to_upgrade,  # type: List[str]
                              blacklist,        # type: List[str]
                              whitelist,        # type: List[str]
                              logfile_dpkg="",  # type: str
@@ -501,7 +502,7 @@ def upgrade_in_minimal_steps(cache,            # type: apt.Cache
     to_upgrade = set(pkgs_to_upgrade)
     while True:
         # find smallest set
-        smallest_partition = []  # type: List[apt.Package]
+        smallest_partition = []  # type: List[str]
         for pkgname in to_upgrade:
             if SIGNAL_STOP_REQUEST:
                 logging.warning("SIGNAL received, stopping")
@@ -1183,9 +1184,9 @@ def calculate_upgradable_pkgs(cache,             # type: apt.Cache
                               blacklisted_pkgs,  # type: List[str]
                               whitelisted_pkgs,  # type: List[str]
                               ):
-    # type: (...) -> Tuple[List[apt.Package], List[apt.Package]]
-    pkgs_to_upgrade = []  # type: apt.Package
-    pkgs_kept_back = []   # type: apt.Package
+    # type: (...) -> Tuple[List[apt.Package], List[str]]
+    pkgs_to_upgrade = []  # type: List[apt.Package]
+    pkgs_kept_back = []   # type: List[str]
 
     # now do the actual upgrade
     for pkg in cache:
@@ -1231,14 +1232,14 @@ def get_dpkg_log_content(logfile_dpkg, install_start_time):
 
 
 def get_auto_removable(cache):
-    # type: (apt.Cache) -> AbstractSet[apt.Package]
+    # type: (apt.Cache) -> AbstractSet[str]
     return set([pkg.name for pkg in cache
                 if pkg.is_auto_removable])
 
 
 def do_auto_remove(cache, auto_removable, logfile_dpkg,
                    verbose=False, dry_run=False):
-    # type: (apt.Cache, AbstractSet[apt.Package], str, bool, bool) -> bool
+    # type: (apt.Cache, Iterable[str], str, bool, bool) -> bool
     if not auto_removable:
         return True
 
