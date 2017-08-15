@@ -36,6 +36,7 @@ Unattended-Upgrade::Origins-Pattern {
 //      "o=Debian,a=stable";
 //      "o=Debian,a=stable-updates";
 //      "o=Debian,a=proposed-updates";
+//      "o=Debian Backports,a=${distro_codename}-backports,l=Debian Backports";
         "origin=Debian,codename=${distro_codename},label=Debian-Security";
 };
 
