@@ -1,1 +1,2 @@
 unattended-upgrades: maintainer-script-calls-systemctl *
+unattended-upgrades: init.d-script-possible-missing-stop etc/init.d/unattended-upgrades 1
