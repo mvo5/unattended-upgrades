@@ -257,7 +257,7 @@ Supported Options Reference
 
  Example - apply updates only on Monday and Friday:
  ```
- Unattended-Upgrade::Update-Days {"Mon","Fri"};
+ Unattended-Upgrade::Update-Days {"Mon";"Fri"};
  ```
  The default is an empty list which means updates are applied every day.
 
