@@ -1,3 +1,26 @@
+unattended-upgrades (0.95) unstable; urgency=medium
+
+  [ Michael Vogt ]
+  * fix some type hints
+
+  [ Balint Reczey ]
+  * Increase timeout to 30 minutes for u-u-s to finish before killing it.
+    Soft timeout until u-u-s is considered to be finished properly
+    is also increased to 25 minutes from 10 minutes.
+  * Update the signal used to SIGTERM in the documentation
+  * Default to performing upgrades in minimal steps
+  * Use same progress logfile when performing upgrades in minimal steps.
+    This allows u-u-s to always show the progress.
+  * Joining maintaining the package as an uploader
+  * Log when not all upgrades could be installed
+  * Fix incorrect example for Update-Days.
+  * Add Debian backports example to Origins-Pattern.
+  * Don't restart unattended-upgrades when the package is upgraded
+  * Silence lintinan warning  init.d-script-possible-missing-stop
+  * Update .pot and .po file
+
+ -- Balint Reczey <rbalint@ubuntu.com>  Wed, 23 Aug 2017 17:35:57 +0200
+
 unattended-upgrades (0.94) unstable; urgency=medium
 
   [ Brian Murray ]
