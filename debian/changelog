@@ -1,3 +1,10 @@
+unattended-upgrades (0.96) unstable; urgency=medium
+
+  * Use test/aptroot instead of / as APT root directory in tests
+    (Closes: #873079)
+
+ -- Balint Reczey <rbalint@ubuntu.com>  Tue, 29 Aug 2017 18:54:04 +0200
+
 unattended-upgrades (0.95) unstable; urgency=medium
 
   [ Michael Vogt ]
