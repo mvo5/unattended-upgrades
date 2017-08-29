@@ -5,8 +5,9 @@ Note that this test is not run by the makefile in this folder, as it requires
 network access, and it fails in some situations (unclear which).
 """
 
-import apt
 import apt_pkg
+apt_pkg.config.set("Dir", "./aptroot")
+import apt
 import glob
 import logging
 import os

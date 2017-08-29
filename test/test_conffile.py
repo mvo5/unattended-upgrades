@@ -5,6 +5,7 @@ import logging
 import unittest
 
 import apt_pkg
+apt_pkg.config.set("Dir", "./aptroot")
 
 from unattended_upgrade import (
     conffile_prompt,
