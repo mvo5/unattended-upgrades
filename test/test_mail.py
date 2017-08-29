@@ -11,6 +11,7 @@ import unittest
 
 
 import apt_pkg
+apt_pkg.config.set("Dir", "./aptroot")
 
 import unattended_upgrade
 from unattended_upgrade import (

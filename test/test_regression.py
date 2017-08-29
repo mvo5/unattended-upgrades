@@ -2,6 +2,7 @@
 # -*- coding: utf-8 -*-
 
 import apt_pkg
+apt_pkg.config.set("Dir", "./aptroot")
 import io
 import os
 import sys

@@ -4,6 +4,8 @@ import os
 import subprocess
 import unittest
 
+import apt_pkg
+apt_pkg.config.set("Dir", "./aptroot")
 import apt
 
 import unattended_upgrade

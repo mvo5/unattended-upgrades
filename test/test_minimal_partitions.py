@@ -1,7 +1,8 @@
 #!/usr/bin/python3
 
-import apt
 import apt_pkg
+apt_pkg.config.set("Dir", "./aptroot")
+import apt
 import os
 import shutil
 import tempfile
@@ -33,6 +34,7 @@ class TestMinimalPartitions(unittest.TestCase):
 
     def setUp(self):
         # setup dry-run mode for apt
+        apt_pkg.config.set("Dir", "./aptroot")
         apt_pkg.config.set("Dir::Cache", "/tmp")
         apt_pkg.config.set("Debug::NoLocking", "1")
         apt_pkg.config.set("Debug::pkgDPkgPM", "1")

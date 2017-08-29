@@ -1,6 +1,7 @@
 #!/usr/bin/python3
 
 import apt_pkg
+apt_pkg.config.set("Dir", "./aptroot")
 import logging
 import unittest
 

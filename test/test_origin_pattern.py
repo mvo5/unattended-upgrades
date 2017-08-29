@@ -4,6 +4,8 @@ import apt_pkg
 import logging
 import unittest
 
+apt_pkg.config.set("Dir", "./aptroot")
+
 import unattended_upgrade
 from unattended_upgrade import (
     check_changes_for_sanity,
