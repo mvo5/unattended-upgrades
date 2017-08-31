@@ -95,6 +95,7 @@ Unattended-Upgrade::Allowed-Origins {
 Unattended-Upgrade::Remove-Unused-Dependencies "true";
 """)
         options = MockOptions()
+        unattended_upgrade.DISTRO_DESC = "Ubuntu 10.04"
         unattended_upgrade.LOCK_FILE = "./u-u.lock"
         unattended_upgrade.main(
             options, rootdir="./root.unused-deps")
@@ -117,6 +118,7 @@ Unattended-Upgrade::Allowed-Origins {
 Unattended-Upgrade::Remove-New-Unused-Dependencies "true";
 """)
         options = MockOptions()
+        unattended_upgrade.DISTRO_DESC = "Ubuntu 10.04"
         unattended_upgrade.LOCK_FILE = "./u-u.lock"
         unattended_upgrade.main(
             options, rootdir="./root.unused-deps")
