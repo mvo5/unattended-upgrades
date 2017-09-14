@@ -1431,8 +1431,11 @@ def main(options, rootdir=""):
         pm.get_archives(fetcher, list, recs)
     except SystemError as e:
         logging.error(_("GetArchives() failed: '%s'"), e)
-    res = fetcher.run()
-    logging.debug("fetch.run() result: %s", res)
+    try:
+        res = fetcher.run()
+        logging.debug("fetch.run() result: %s", res)
+    except SystemError as e:
+        logging.error("fetch.run() result: %s", e)
 
     if options.download_only:
         return
