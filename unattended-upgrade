@@ -621,7 +621,7 @@ def check_changes_for_sanity(cache, allowed_origins, blacklist, whitelist,
     # If there are no packages to be installed they were kept back
     if cache.install_count == 0:
         return False
-    for pkg in cache:
+    for pkg in cache.get_changes():
         if pkg.marked_delete:
             logging.debug("pkg '%s' now marked delete" % pkg.name)
             return False
