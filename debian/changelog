@@ -1,3 +1,9 @@
+unattended-upgrades (0.98) UNRELEASED; urgency=medium
+
+  * 
+
+ -- Balint Reczey <rbalint@ubuntu.com>  Tue, 19 Sep 2017 17:48:48 +0200
+
 unattended-upgrades (0.97) unstable; urgency=medium
 
   * Handle recovering from broken dh_installinit override on Ubuntu, too
