@@ -1,4 +1,4 @@
-unattended-upgrades (0.97) UNRELEASED; urgency=medium
+unattended-upgrades (0.97) unstable; urgency=medium
 
   * Handle recovering from broken dh_installinit override on Ubuntu, too
   * Declare needs-reboot for autopkgtests
@@ -9,7 +9,7 @@ unattended-upgrades (0.97) UNRELEASED; urgency=medium
   * Check only changed packages in check_changes_for_sanity()
   * Store candidate versions to adjust in UnattendedUpgradesCache()'s constructor
 
- -- Balint Reczey <rbalint@ubuntu.com>  Tue, 19 Sep 2017 12:51:44 +0200
+ -- Balint Reczey <rbalint@ubuntu.com>  Tue, 19 Sep 2017 17:40:32 +0200
 
 unattended-upgrades (0.96) unstable; urgency=medium
 
