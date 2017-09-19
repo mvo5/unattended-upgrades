@@ -25,7 +25,7 @@ class MockOptions():
         self.debug = debug
         self.dry_run = dry_run
         self.apt_debug = False
-        self.minimal_upgrade_steps = False
+        self.minimal_upgrade_steps = True
         self.verbose = False
 
 

@@ -19,7 +19,7 @@ class MockOptions(object):
     download_only = False
     dry_run = False
     apt_debug = False
-    minimal_upgrade_steps = False
+    minimal_upgrade_steps = True
 
 
 class TestRemoveUnused(unittest.TestCase):

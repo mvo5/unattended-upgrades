@@ -117,23 +117,28 @@ class UnattendedUpgradesCache(apt.Cache):
         apt.Cache.__init__(self, rootdir=rootdir)
         self.allowed_origins = allowed_origins
         # ensure we update the candidate versions
-        self.adjust_candidate_versions()
+        self.candidates_to_adjust = self.get_candidates_to_adjust()
+        for pkgname, candidate in self.candidates_to_adjust.items():
+            self[pkgname].candidate = candidate
 
     def clear(self):
         # type: () -> None
         apt.Cache.clear(self)
         # ensure we update the candidate versions
-        self.adjust_candidate_versions()
+        for pkgname, candidate in self.candidates_to_adjust.items():
+            self[pkgname].candidate = candidate
 
-    def adjust_candidate_versions(self):
-        # type: () -> None
-        """ Adjust candidate versions to match highest allowed origin
+    def get_candidates_to_adjust(self):
+        # type: () -> dict[str, Version()]
+        """ Get candidate versions needed to be adjusted to match highest
+            allowed origin
 
-            This adjusts the origin even if the candidate has a higher
+            This lets adjusting the origin even if the candidate has a higher
             version. This is needed when e.g. a package is available in
             the security pocket but there is also a package in the
             updates pocket with a higher version number
         """
+        candidates = {}
         for pkg in self:
             # important! this avoids downgrades below
             if not pkg.is_upgradable:
@@ -158,7 +163,8 @@ class UnattendedUpgradesCache(apt.Cache):
                     break
             if new_cand and new_cand != pkg.candidate:
                 logging.debug("adjusting candidate version: '%s'" % new_cand)
-                pkg.candidate = new_cand
+                candidates[pkg.name] = new_cand
+        return candidates
 
 
 class LogInstallProgress(apt.progress.base.InstallProgress):
@@ -621,7 +627,7 @@ def check_changes_for_sanity(cache, allowed_origins, blacklist, whitelist,
     # If there are no packages to be installed they were kept back
     if cache.install_count == 0:
         return False
-    for pkg in cache:
+    for pkg in cache.get_changes():
         if pkg.marked_delete:
             logging.debug("pkg '%s' now marked delete" % pkg.name)
             return False
@@ -1431,8 +1437,11 @@ def main(options, rootdir=""):
         pm.get_archives(fetcher, list, recs)
     except SystemError as e:
         logging.error(_("GetArchives() failed: '%s'"), e)
-    res = fetcher.run()
-    logging.debug("fetch.run() result: %s", res)
+    try:
+        res = fetcher.run()
+        logging.debug("fetch.run() result: %s", res)
+    except SystemError as e:
+        logging.error("fetch.run() result: %s", e)
 
     if options.download_only:
         return

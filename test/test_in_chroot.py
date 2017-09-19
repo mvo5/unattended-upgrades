@@ -58,7 +58,7 @@ class MockOptions(object):
     apt_debug = False
     download_only = False
     dry_run = False
-    minimal_upgrade_steps = False
+    minimal_upgrade_steps = True
 
 
 class TestUnattendedUpgrade(unittest.TestCase):
@@ -85,7 +85,7 @@ class TestUnattendedUpgrade(unittest.TestCase):
     def test_normal_upgrade(self):
         print("Running normal unattended upgrade in chroot")
         options = MockOptions()
-        options.minimal_upgrade_steps = False
+        options.minimal_upgrade_steps = True
         # run it
         target = self._run_upgrade_test_in_real_chroot(options)
         # ensure we upgraded the expected packages
@@ -93,9 +93,9 @@ class TestUnattendedUpgrade(unittest.TestCase):
             self._verify_install_log_in_real_chroot(target, "ca-certificates"))
 
     def test_minimal_steps_upgrade(self):
-        print("Running minimal steps unattended upgrade in chroot")
+        print("Running non-minimal steps unattended upgrade in chroot")
         options = MockOptions()
-        options.minimal_upgrade_steps = True
+        options.minimal_upgrade_steps = False
         # run it
         target = self._run_upgrade_test_in_real_chroot(options)
         # ensure we upgraded the expected packages
