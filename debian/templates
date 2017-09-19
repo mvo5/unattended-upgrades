@@ -15,12 +15,3 @@ _Description: Automatically download and install stable updates?
  systems secure. By default, updates need to be applied manually using package 
  management tools. Alternatively, you can choose to have this system 
  automatically download and install important updates.
-
-Template: unattended-upgrades/origins_pattern
-Type: string
-Default: "origin=Debian,codename=${distro_codename},label=Debian-Security";
-_Description: Origins-Pattern that packages must match to be upgraded:
- Please specify a value for the unattended-upgrades Origins-Pattern.
- .
- A package will be upgraded only if its metadata values match all the supplied
- keywords in the origin line.

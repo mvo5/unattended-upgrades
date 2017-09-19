@@ -49,8 +49,6 @@ case "$1" in
 	NEWFILE="$CONFIG.ucftmp"
 	TEMPLATE="/usr/share/unattended-upgrades/50unattended-upgrades"
 	cp -a -f "$TEMPLATE" "$NEWFILE"
-	db_get unattended-upgrades/origins_pattern || true
-	sed -i 's/"origin=Debian,codename=${distro_codename},label=Debian-Security";/'"${RET}"'/' "$NEWFILE"
 	ucf --three-way --debconf-ok "$NEWFILE" "$CONFIG"
 	ucfr unattended-upgrades "$CONFIG"
 	rm -f "$NEWFILE"
