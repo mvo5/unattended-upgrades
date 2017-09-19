@@ -26,9 +26,9 @@ Unattended-Upgrade::Origins-Pattern {
         // archives (e.g. from testing to stable and later oldstable).
 	// Software will be the latest available for the named release,
 	// but the Debian release itself will not be automatically upgraded.
-//	"origin=Debian,codename=${distro_codename}";
 //	"origin=Debian,codename=${distro_codename}-updates";
 //	"origin=Debian,codename=${distro_codename}-proposed-updates";
+        "origin=Debian,codename=${distro_codename},label=Debian";
 	"origin=Debian,codename=${distro_codename},label=Debian-Security";
 
         // Archive or Suite based matching:
