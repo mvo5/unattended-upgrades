@@ -2,11 +2,9 @@
 Unattended upgrades
 ===================
 
-This script can upgrade packages automatically and unattended.  
-However, it is not enabled by default.  Most users enable it via the
-Software Sources program (available in System/Administration). 
+This script upgrades packages automatically and unattended.
 
-If you would prefer to enable it from the command line, run 
+If you would prefer to disable it from the command line, run
 "sudo dpkg-reconfigure -plow unattended-upgrades".
 
 It will not install packages that require dependencies that can't be
@@ -16,9 +14,7 @@ before the install and holds back any package that requires them.
 Setup
 -----
 
-The unattended-upgrades package is normally activated by
-software-properties or via debconf. By default this runs an update
-every day.
+By default unattended-upgrades runs an update every day.
 
 The main way to specify which packages will be auto-upgraded is by
 means of their "origin" and "archive".  These are taken respectively
