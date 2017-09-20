@@ -108,6 +108,11 @@ if __name__ == "__main__":
     parser.add_option("", "--lock-file",
                       default="/var/run/unattended-upgrades.lock",
                       help="lock file location")
+    parser.add_option("", "--stop-only",
+                      action="store_true", dest="stop_only", default=False,
+                      help="only stop running unattended-upgrades, don't "
+                      "start it even when "
+                      "Unattended-Upgrade::InstallOnShutdown is true")
     (options, args) = parser.parse_args()
 
     # setup logging
@@ -129,9 +134,9 @@ if __name__ == "__main__":
     # check if we need to run unattended-upgrades on shutdown and if so,
     # run it
     apt_pkg.init_config()
-    shutdown_mode = apt_pkg.config.find_b(
+    on_shutdown_mode = not options.stop_only and apt_pkg.config.find_b(
         "Unattended-Upgrade::InstallOnShutdown", False)
-    if shutdown_mode:
+    if on_shutdown_mode:
         env = copy.copy(os.environ)
         env["UNATTENDED_UPGRADES_FORCE_INSTALL_ON_SHUTDOWN"] = "1"
         logging.debug("starting unattended-upgrades in shutdown mode")
@@ -155,7 +160,7 @@ if __name__ == "__main__":
             logging.debug("lock not taken")
             break
         lock_was_taken = True
-        if not shutdown_mode:
+        if not on_shutdown_mode:
             signal_stop_unattended_upgrade()
             signal_sent = True
         # show log
@@ -164,7 +169,7 @@ if __name__ == "__main__":
         if (time.time() - start_time) > options.delay * 60:
             logging.warning(_("Giving up on lockfile after %s delay"),
                             options.delay)
-            if shutdown_mode:
+            if on_shutdown_mode:
                 # unattended-upgrade did not finish in time, but stopping
                 # it gracefully is better than waiting for it to be killed
                 signal_stop_unattended_upgrade()
