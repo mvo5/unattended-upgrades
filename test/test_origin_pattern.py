@@ -33,6 +33,10 @@ class MockCache(dict):
         for pkgname in self.keys():
             yield self[pkgname]
 
+    def get_changes(self):
+        for pkgname in self.keys():
+            yield self[pkgname]
+
 
 class MockDepCache():
     pass

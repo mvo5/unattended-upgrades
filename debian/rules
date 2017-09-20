@@ -34,8 +34,11 @@ override_dh_auto_clean:
 	done
 	$(PYTHON) setup.py clean -a
 	rm -rf .coverage \
+		test/.coverage \
 		test/root.*/var/cache/apt/*.bin \
 		test/root.*/var/log \
+		test/root.unused-deps/var/cache/apt/archives/lock \
 		test/root.unused-deps/var/lib/apt/extended_states \
 		test/root.unused-deps/var/lib/dpkg/status \
-		test/root.unused-deps/var/run/unattended-upgrades.progress
+		test/root.unused-deps/var/run/unattended-upgrades.progress \
+		test/u-u.lock

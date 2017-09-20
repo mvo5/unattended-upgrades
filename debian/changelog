@@ -1,3 +1,27 @@
+unattended-upgrades (0.97ubuntu1) artful; urgency=medium
+
+  * Merge from Debian unstable (LP: #1718419)
+    - Remaining changes:
+      - unattended-upgrades: Do not automatically upgrade the development
+        release of Ubuntu unless Unattended-Upgrade::DevRelease is true.
+    - Dropped changes, included in Debian:
+      - Recover from broken dh_installinit override in versions < 0.93.1ubuntu3
+
+ -- Balint Reczey <rbalint@ubuntu.com>  Wed, 20 Sep 2017 14:46:47 +0200
+
+unattended-upgrades (0.97) unstable; urgency=medium
+
+  * Handle recovering from broken dh_installinit override on Ubuntu, too
+  * Declare needs-reboot for autopkgtests
+  * Clean up more test artifacts
+  * Run u-u-s only when running on AC power
+  * Catch SystemError from fetcher.run(), too
+  * Default to MinimalSteps=True in most tests to excercise default setting
+  * Check only changed packages in check_changes_for_sanity()
+  * Store candidate versions to adjust in UnattendedUpgradesCache()'s constructor
+
+ -- Balint Reczey <rbalint@ubuntu.com>  Tue, 19 Sep 2017 17:40:32 +0200
+
 unattended-upgrades (0.96ubuntu1) artful; urgency=low
 
   * Merge from Debian unstable (LP: #1714019)
