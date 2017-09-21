@@ -26,6 +26,8 @@ if __name__ == "__main__":
                 ["pm/sleep.d/10_unattended-upgrades-hibernate"]),
             ('../etc/kernel/postinst.d/',
                 glob.glob("kernel/postinst.d/*")),
+            ('../lib/systemd/system-sleep/',
+                ["debian/systemd-sleep/unattended-upgrades"]),
             ('../usr/share/apport/package-hooks/',
                 ["debian/source_unattended-upgrades.py"])
         ],
