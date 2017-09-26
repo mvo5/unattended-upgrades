@@ -62,8 +62,8 @@ case "$1" in
             update-rc.d -f unattended-upgrades remove
         fi
         # Recover from broken dh_installinit override in versions < 0.93.1+nmu1 (or < 0.93.1ubuntu3 in Ubuntu)
-        if ((! dpkg-vendor --derives-from Ubuntu) && dpkg --compare-versions "$2" lt "0.93.1+nmu1") || \
-               (dpkg-vendor --derives-from Ubuntu && dpkg --compare-versions "$2" lt "0.93.1ubuntu3"); then
+        if ([ "$(lsb_release -i -s)" != "Ubuntu" ] && dpkg --compare-versions "$2" lt "0.93.1+nmu1") || \
+               ([ "$(lsb_release -i -s)" = "Ubuntu" ] && dpkg --compare-versions "$2" lt "0.93.1ubuntu3"); then
             if [ -f /etc/rc0.d/K[0-9][0-9]unattended-upgrades ] \
             && [ -f /etc/rc6.d/K[0-9][0-9]unattended-upgrades ] ; then
             	update-rc.d -f unattended-upgrades remove
@@ -98,8 +98,8 @@ esac
 # sees the service as disable and will not enable it.
 case "$1" in
     configure)
-        if (((! dpkg-vendor --derives-from Ubuntu) && dpkg --compare-versions "$2" lt "0.93.1+nmu1") || \
-                (dpkg-vendor --derives-from Ubuntu && dpkg --compare-versions "$2" lt "0.93.1ubuntu3")) \
+        if ([ "$(lsb_release -i -s)" != "Ubuntu" ] && dpkg --compare-versions "$2" lt "0.93.1+nmu1") || \
+               ([ "$(lsb_release -i -s)" = "Ubuntu" ] && dpkg --compare-versions "$2" lt "0.93.1ubuntu3") \
 	    && [ -d /run/systemd/system ]; then
                 # workaround systemd bug with enable --now which
                 # fails to start the unit
