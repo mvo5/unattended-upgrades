@@ -1,3 +1,9 @@
+unattended-upgrades (0.97ubuntu2) artful; urgency=medium
+
+  * Use lsb_release instead of dpkg-vendor in postinst (LP: #1719630)
+
+ -- Balint Reczey <rbalint@ubuntu.com>  Tue, 26 Sep 2017 10:21:42 -0400
+
 unattended-upgrades (0.97ubuntu1) artful; urgency=medium
 
   * Merge from Debian unstable (LP: #1718419)
