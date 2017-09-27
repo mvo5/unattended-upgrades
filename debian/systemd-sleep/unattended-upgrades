@@ -1,0 +1,10 @@
+#!/bin/sh
+set -e
+
+if [ "$2" = "hibernate" ] || [ "$2" = "hybrid-sleep" ]; then
+    case "$1" in
+        pre)
+            /usr/share/unattended-upgrades/unattended-upgrade-shutdown --stop-only
+            ;;
+    esac
+fi

@@ -23,7 +23,7 @@ fi
 case "${1}" in
         hibernate)
                 if [ -e $SHUTDOWN_HELPER ]; then
-         	    $PYTHON $SHUTDOWN_HELPER
+         	    $PYTHON $SHUTDOWN_HELPER --stop-only
                 fi
                 ;;
         resume|thaw)
