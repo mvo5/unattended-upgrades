@@ -92,7 +92,7 @@ class TestUnattendedUpgrade(unittest.TestCase):
         self.assertTrue(
             self._verify_install_log_in_real_chroot(target, "ca-certificates"))
 
-    def test_minimal_steps_upgrade(self):
+    def test_non_minimal_steps_upgrade(self):
         print("Running non-minimal steps unattended upgrade in chroot")
         options = MockOptions()
         options.minimal_upgrade_steps = False

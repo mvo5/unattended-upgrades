@@ -470,11 +470,11 @@ def cache_commit(cache,           # type: apt.Cache
     if iprogress is None:
         iprogress = LogInstallProgress(logfile_dpkg, verbose)
 
-    try:
-        with Unlocked():
+    with Unlocked():
+        try:
             res = cache.commit(install_progress=iprogress)
-    except SystemError as e:
-        error = e
+        except SystemError as e:
+            error = e
         if verbose:
             logging.exception("Exception happened during upgrade.")
     return res, error

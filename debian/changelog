@@ -1,3 +1,30 @@
+unattended-upgrades (0.98ubuntu1) artful; urgency=medium
+
+  * Merge from Debian unstable (LP: #1722426)
+    - Remaining changes:
+      - unattended-upgrades: Do not automatically upgrade the development
+        release of Ubuntu unless Unattended-Upgrade::DevRelease is true.
+    - Dropped changes, included in Debian:
+      - Use lsb_release instead of dpkg-vendor in postinst
+
+ -- Balint Reczey <rbalint@ubuntu.com>  Tue, 10 Oct 2017 03:47:58 +0200
+
+unattended-upgrades (0.98) unstable; urgency=medium
+
+  * Rename test to test_non_minimal_steps_upgrade to reflect content
+  * Catch SystemError while keeping apt lock unlocked (LP: #1632361)
+  * Add --stop-only option to unattended-upgrade-shutdown and use it on
+    hibernation. This prevents starting unattended-upgrades right before
+    hibernating when Unattended-Upgrade::InstallOnShutdown is true.
+    (Closes: #610333)
+  * Stop already running unattended-upgrades before hibernation even with
+    systemd (LP: #1455097)
+  * Use lsb_release instead of dpkg-vendor in postinst (LP: #1719630)
+  * Update README.md with the fact that unattended=upgrades is enabled
+    by default (Closes: #865519)
+
+ -- Balint Reczey <rbalint@ubuntu.com>  Tue, 26 Sep 2017 11:38:21 -0400
+
 unattended-upgrades (0.97ubuntu2) artful; urgency=medium
 
   * Use lsb_release instead of dpkg-vendor in postinst (LP: #1719630)
