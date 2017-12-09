@@ -876,6 +876,7 @@ def _send_mail_using_sendmail(from_address, to_address, subject, body):
     msg['Subject'] = subject
     msg['From'] = from_address
     msg['To'] = to_address
+    msg['Auto-Submitted'] = "auto-generated"
     # order is important here, Message() first, then Charset()
     #  then msg.set_charset()
     charset = email.charset.Charset("utf-8")
