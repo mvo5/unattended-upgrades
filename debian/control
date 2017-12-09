@@ -4,7 +4,7 @@ Uploaders: Balint Reczey <rbalint@ubuntu.com>
 Section: admin
 Testsuite: autopkgtest
 Priority: optional
-Build-Depends: debhelper (>= 9~),
+Build-Depends: debhelper (>= 9.20160709),
                po-debconf
 Build-Depends-Indep: python,
                      python3-distutils-extra,
@@ -18,8 +18,7 @@ Build-Depends-Indep: python,
                      python3-apt,
                      python-mock,
                      python3-mock,
-                     lsb-release,
-                     dh-systemd
+                     lsb-release
 Standards-Version: 3.9.3
 Vcs-Git: https://github.com/mvo5/unattended-upgrades.git
 
