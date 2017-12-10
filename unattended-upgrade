@@ -1408,8 +1408,16 @@ def main(options, rootdir=""):
         sys.exit(1)
 
     # get a cache
-    cache = UnattendedUpgradesCache(rootdir=rootdir,
-                                    allowed_origins=allowed_origins)
+    try:
+        cache = UnattendedUpgradesCache(rootdir=rootdir,
+                                        allowed_origins=allowed_origins)
+    except apt_pkg.Error as error:
+        print(_("Apt returned an error, exiting"))
+        print(_("error message: '%s'") % error)
+        logging.error(_("Apt returned an error, exiting"))
+        logging.error(_("error message: '%s'"), error)
+        sys.exit(1)
+
     if cache._depcache.broken_count > 0:
         print(_("Cache has broken packages, exiting"))
         logging.error(_("Cache has broken packages, exiting"))
