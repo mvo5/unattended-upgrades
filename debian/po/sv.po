@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: unattended-upgrades\n"
 "Report-Msgid-Bugs-To: unattended-upgrades@packages.debian.org\n"
-"POT-Creation-Date: 2015-11-03 07:12+0100\n"
+"POT-Creation-Date: 2017-12-12 23:02+0100\n"
 "PO-Revision-Date: 2017-02-17 08:25+0100\n"
 "Last-Translator: Jonatan Nyberg <jonatan@autistici.org>\n"
 "Language-Team: swedish <debian-l10n-swedish@lists.debian.org>\n"
@@ -26,23 +26,26 @@ msgstr "Automatiskt ladda ner och installera stabila uppdateringar?"
 #. Type: boolean
 #. Description
 #: ../templates:2001
-msgid "Applying updates on a frequent basis is an important part of keeping systems secure. By default, updates need to be applied manually using package  management tools. Alternatively, you can choose to have this system  automatically download and install important updates."
-msgstr "Tillämpa uppdateringar på en frekvent basis är en viktig del för att hålla system säkra. Som standard, behöver uppdateringar appliceras manuellt med hjälp av pakethanteringsverktyg. Alternativt kan du välja att detta system automatiskt hämtar och installerar viktiga uppdateringar."
+msgid ""
+"Applying updates on a frequent basis is an important part of keeping systems "
+"secure. By default, updates need to be applied manually using package  "
+"management tools. Alternatively, you can choose to have this system  "
+"automatically download and install important updates."
+msgstr ""
+"Tillämpa uppdateringar på en frekvent basis är en viktig del för att hålla "
+"system säkra. Som standard, behöver uppdateringar appliceras manuellt med "
+"hjälp av pakethanteringsverktyg. Alternativt kan du välja att detta system "
+"automatiskt hämtar och installerar viktiga uppdateringar."
 
-#. Type: string
-#. Description
-#: ../templates:3001
-msgid "Origins-Pattern that packages must match to be upgraded:"
-msgstr "Origins-Pattern som paket måste matcha för att bli uppgraderade:"
+#~ msgid "Origins-Pattern that packages must match to be upgraded:"
+#~ msgstr "Origins-Pattern som paket måste matcha för att bli uppgraderade:"
 
-#. Type: string
-#. Description
-#: ../templates:3001
-msgid "Please specify a value for the unattended-upgrades Origins-Pattern."
-msgstr "Ange ett värde för unattended-upgrades Origins-Pattern."
+#~ msgid "Please specify a value for the unattended-upgrades Origins-Pattern."
+#~ msgstr "Ange ett värde för unattended-upgrades Origins-Pattern."
 
-#. Type: string
-#. Description
-#: ../templates:3001
-msgid "A package will be upgraded only if its metadata values match all the supplied keywords in the origin line."
-msgstr "Ett paket kommer att uppgraderas endast om dess metadatavärden matchar alla medföljande nyckelord i origin linjen."
+#~ msgid ""
+#~ "A package will be upgraded only if its metadata values match all the "
+#~ "supplied keywords in the origin line."
+#~ msgstr ""
+#~ "Ett paket kommer att uppgraderas endast om dess metadatavärden matchar "
+#~ "alla medföljande nyckelord i origin linjen."

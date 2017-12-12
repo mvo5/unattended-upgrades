@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: unattended-upgrades 0.82.8\n"
 "Report-Msgid-Bugs-To: unattended-upgrades@packages.debian.org\n"
-"POT-Creation-Date: 2015-11-03 07:12+0100\n"
+"POT-Creation-Date: 2017-12-12 23:02+0100\n"
 "PO-Revision-Date: 2014-08-03 17:03+0200\n"
 "Last-Translator: Mert Dirik <mertdirik@gmail.com>\n"
 "Language-Team: Debian L10n Turkish <debian-l10n-turkish@lists.debian.org>\n"
@@ -44,23 +44,3 @@ msgstr ""
 "paket yönetim araçlarını kullanarak elle uygulamanız gerekir. Bunun yerine, "
 "bu sistemi güvenlik güncellemelerini otomatik olarak indirecek ve kuracak "
 "şekilde ayarlayabilirsiniz."
-
-#. Type: string
-#. Description
-#: ../templates:3001
-msgid "Origins-Pattern that packages must match to be upgraded:"
-msgstr ""
-
-#. Type: string
-#. Description
-#: ../templates:3001
-msgid "Please specify a value for the unattended-upgrades Origins-Pattern."
-msgstr ""
-
-#. Type: string
-#. Description
-#: ../templates:3001
-msgid ""
-"A package will be upgraded only if its metadata values match all the "
-"supplied keywords in the origin line."
-msgstr ""

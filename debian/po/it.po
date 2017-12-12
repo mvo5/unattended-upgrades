@@ -6,7 +6,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: unattended-upgrades 0.35debian2 debconf\n"
 "Report-Msgid-Bugs-To: unattended-upgrades@packages.debian.org\n"
-"POT-Creation-Date: 2015-11-03 07:12+0100\n"
+"POT-Creation-Date: 2017-12-12 23:02+0100\n"
 "PO-Revision-Date: 2015-11-15 09:15+0100\n"
 "Last-Translator: Luca Monducci <luca.mo@tiscali.it>\n"
 "Language-Team: Italian <debian-l10n-italian@lists.debian.org>\n"
@@ -36,25 +36,16 @@ msgstr ""
 "pacchetti; in alternativa è possibile su questo sistema scaricare e "
 "installare automaticamente gli aggiornamenti importanti."
 
-#. Type: string
-#. Description
-#: ../templates:3001
-msgid "Origins-Pattern that packages must match to be upgraded:"
-msgstr ""
-"Per essere aggiornati i pacchetti devono corrispondere a Origins-Pattern:"
+#~ msgid "Origins-Pattern that packages must match to be upgraded:"
+#~ msgstr ""
+#~ "Per essere aggiornati i pacchetti devono corrispondere a Origins-Pattern:"
 
-#. Type: string
-#. Description
-#: ../templates:3001
-msgid "Please specify a value for the unattended-upgrades Origins-Pattern."
-msgstr "Indicare il valore di Origins-Pattern per unattended-upgrades."
+#~ msgid "Please specify a value for the unattended-upgrades Origins-Pattern."
+#~ msgstr "Indicare il valore di Origins-Pattern per unattended-upgrades."
 
-#. Type: string
-#. Description
-#: ../templates:3001
-msgid ""
-"A package will be upgraded only if its metadata values match all the "
-"supplied keywords in the origin line."
-msgstr ""
-"Un pacchetto sarà aggiornato solo se i valori dei suoi metadati "
-"corrispondono con tutte le parole chiave nella riga origine."
+#~ msgid ""
+#~ "A package will be upgraded only if its metadata values match all the "
+#~ "supplied keywords in the origin line."
+#~ msgstr ""
+#~ "Un pacchetto sarà aggiornato solo se i valori dei suoi metadati "
+#~ "corrispondono con tutte le parole chiave nella riga origine."
