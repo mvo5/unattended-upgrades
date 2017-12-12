@@ -1,3 +1,23 @@
+unattended-upgrades (0.99) unstable; urgency=medium
+
+  Unattended-upgrades in previous versions defaulted to install
+  security updates only on Debian by using the label=Debian-Security
+  origin pattern. Now it is changed to allow updates with label=Debian,
+  which allows applying stable updates in stable releases and following
+  all package updates in testing and unstable.
+
+  In stable releases this unlocks installation of security updates
+  depending on package versions present only in stable updates.
+
+  Note that testing and unstable can often contain packages for which
+  installation or upgrade performed by unattended-upgrades fails and
+  requires the administrator to fix the system later.
+
+  If you would like to prevent unattended-upgrades from performing
+  updates please run "sudo dpkg-reconfigure unattended-upgrades".
+
+ -- Balint Reczey <rbalint@ubuntu.com>  Tue, 12 Dec 2017 12:13:08 +0100
+
 unattended-upgrades (0.95) unstable; urgency=medium
 
   Unattended-upgrades now defaults to installing upgrades in minimal
