@@ -745,10 +745,16 @@ def conffile_prompt(destFile, prefix=""):
     # get conffile value from pkg, its ok if the new version
     # does not have conffiles anymore
     pkg_conffiles = ""
-    deb = apt_inst.DebFile(destFile)
     try:
+        deb = apt_inst.DebFile(destFile)
         pkg_conffiles = deb.control.extractdata("conffiles").strip().decode(
             "utf-8")
+    except apt_pkg.Error as e:
+        print(_("Apt returned an error, exiting"))
+        print(_("error message: '%s'") % e)
+        logging.error(_("Apt returned an error, exiting"))
+        logging.error(_("error message: '%s'"), e)
+        sys.exit(1)
     except LookupError as e:
         logging.debug("No conffiles in deb '%s' (%s)" % (destFile, e))
 
