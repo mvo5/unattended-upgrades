@@ -473,8 +473,8 @@ def cache_commit(cache,           # type: apt.Cache
             res = cache.commit(install_progress=iprogress)
         except SystemError as e:
             error = e
-        if verbose:
-            logging.exception("Exception happened during upgrade.")
+            if verbose:
+                logging.exception("Exception happened during upgrade.")
     return res, error
 
 
