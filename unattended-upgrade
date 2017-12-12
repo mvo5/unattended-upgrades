@@ -783,6 +783,15 @@ def conffile_prompt(destFile, prefix=""):
         # record for later
         dpkg_status_conffiles[conf_file] = md5
 
+        # the package replaces a directory wih a configuration file
+        #
+        # if the package changed this way it is safe to assume that
+        # the transition happens without showing a prompt but if the admin
+        # created the directory the admin will need to resolve it after
+        # being notified about the unexpected prompt
+        if os.path.isdir(prefix + conf_file):
+            continue
+
         # test against the installed file, if the local file got deleted
         # by the admin thats ok but it may still trigger a conffile prompt
         # (see debian #788049)
