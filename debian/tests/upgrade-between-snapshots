@@ -3,8 +3,8 @@
 set -e
 
 chroot_dir=$AUTOPKGTEST_TMP/chroot
-start_date=20171004T111800Z
-end_date=20171210T034902Z
+start_date=20171001T000000Z
+end_date=20171210T000000Z
 
 case "$(lsb_release -s -i)" in
     Debian)
@@ -16,7 +16,8 @@ case "$(lsb_release -s -i)" in
         # install u-u to pull in dependencies and mark python3.5-minimal
         # because otherwise u-u autoremoves it while running python3.5 code
         chroot $chroot_dir apt-get install -y unattended-upgrades python3.5-minimal
-        # TODO add a few interesting packages to upgrade
+        # add package set with many dependencies
+        chroot $chroot_dir apt-get install -y xfce4
         chroot $chroot_dir apt-mark showmanual > $chroot_dir/tmp/manual
         cp ../unattended-upgrades_*.deb $chroot_dir/tmp/
         chroot $chroot_dir bash -c 'dpkg -i /tmp/unattended-upgrades_*deb' 2>&1
