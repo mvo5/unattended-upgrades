@@ -15,17 +15,21 @@ case "$(lsb_release -s -i)" in
         chroot $chroot_dir apt-get update
         # install u-u to pull in dependencies and mark python3.5-minimal
         # because otherwise u-u autoremoves it while running python3.5 code
-        chroot $chroot_dir apt-get install -y unattended-upgrades python3.5-minimal
+        chroot $chroot_dir apt-get install -y unattended-upgrades python3.5-minimal mailutils
         # add package set with many dependencies
         chroot $chroot_dir apt-get install -y xfce4
+        chroot $chroot_dir apt-get clean
         chroot $chroot_dir apt-mark showmanual > $chroot_dir/tmp/manual
         cp ../unattended-upgrades_*.deb $chroot_dir/tmp/
         chroot $chroot_dir bash -c 'dpkg -i /tmp/unattended-upgrades_*deb' 2>&1
+        # enable a few features to test
+        sed -i 's|//Unattended-Upgrade::Mail |Unattended-Upgrade::Mail |' $chroot_dir/etc/apt/apt.conf.d/50unattended-upgrades
         sed -i "s/$start_date/$end_date/" $chroot_dir/etc/apt/sources.list
         chroot $chroot_dir apt-get update
         chroot $chroot_dir unattended-upgrade --verbose
         echo "new packages marked as manually installed (should be none): "
         chroot $chroot_dir apt-mark showmanual | diff $chroot_dir/tmp/manual -
+        chroot $chroot_dir perl -MMIME::QuotedPrint -pe '$_=MIME::QuotedPrint::decode($_);' /var/mail/mail
         # cleanup
         umount $chroot_dir/dev/pts
         rm -rf $chroot_dir
