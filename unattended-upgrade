@@ -749,7 +749,7 @@ def conffile_prompt(destFile, prefix=""):
         deb = apt_inst.DebFile(destFile)
         pkg_conffiles = deb.control.extractdata("conffiles").strip().decode(
             "utf-8")
-    except apt_pkg.Error as e:
+    except SystemError as e:
         print(_("Apt returned an error, exiting"))
         print(_("error message: '%s'") % e)
         logging.error(_("Apt returned an error, exiting"))
@@ -1426,7 +1426,7 @@ def main(options, rootdir=""):
     try:
         cache = UnattendedUpgradesCache(rootdir=rootdir,
                                         allowed_origins=allowed_origins)
-    except apt_pkg.Error as error:
+    except SystemError as error:
         print(_("Apt returned an error, exiting"))
         print(_("error message: '%s'") % error)
         logging.error(_("Apt returned an error, exiting"))
