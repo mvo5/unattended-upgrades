@@ -1583,7 +1583,9 @@ def main(options, rootdir=""):
         # check if we couldn't reboot on previous run because
         # a user was logged-in at this time
         os.close(shutdown_lock)
-        reboot_if_requested_and_needed()
+        # never reboot during a dry run
+        if not options.dry_run:
+            reboot_if_requested_and_needed()
         return
 
     # check if its configured for install on shutdown, if so, the
