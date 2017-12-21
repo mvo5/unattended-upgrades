@@ -1587,7 +1587,7 @@ def main(options, rootdir=""):
         # never reboot during a dry run
         if not options.dry_run:
             reboot_if_requested_and_needed()
-        return
+        return 0
 
     # check if its configured for install on shutdown, if so, the
     # environment UNATTENDED_UPGRADES_FORCE_INSTALL_ON_SHUTDOWN will
@@ -1598,7 +1598,7 @@ def main(options, rootdir=""):
         logger = logging.getLogger()
         logger.debug("Configured to install on shutdown, so exiting now")
         os.close(shutdown_lock)
-        return
+        return 0
 
     # check if we are in dry-run mode
     if options.dry_run:
