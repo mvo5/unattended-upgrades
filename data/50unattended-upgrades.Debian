@@ -19,15 +19,17 @@
 // Within lines unattended-upgrades allows 2 macros whose values are
 // derived from /etc/debian_version:
 //   ${distro_id}            Installed origin.
-//   ${distro_codename}      Installed codename (eg, "jessie")
+//   ${distro_codename}      Installed codename (eg, "buster")
 Unattended-Upgrade::Origins-Pattern {
         // Codename based matching:
         // This will follow the migration of a release through different
         // archives (e.g. from testing to stable and later oldstable).
-//      "o=Debian,n=jessie";
-//      "o=Debian,n=jessie-updates";
-//      "o=Debian,n=jessie-proposed-updates";
-//      "o=Debian,n=jessie,l=Debian-Security";
+        // Software will be the latest available for the named release,
+        // but the Debian release itself will not be automatically upgraded.
+//      "origin=Debian,codename=${distro_codename}-updates";
+//      "origin=Debian,codename=${distro_codename}-proposed-updates";
+        "origin=Debian,codename=${distro_codename},label=Debian";
+        "origin=Debian,codename=${distro_codename},label=Debian-Security";
 
         // Archive or Suite based matching:
         // Note that this will silently match a different release after
@@ -37,15 +39,14 @@ Unattended-Upgrade::Origins-Pattern {
 //      "o=Debian,a=stable-updates";
 //      "o=Debian,a=proposed-updates";
 //      "o=Debian Backports,a=${distro_codename}-backports,l=Debian Backports";
-        "origin=Debian,codename=${distro_codename},label=Debian-Security";
 };
 
 // List of packages to not update (regexp are supported)
 Unattended-Upgrade::Package-Blacklist {
-//	"vim";
-//	"libc6";
-//	"libc6-dev";
-//	"libc6-i686";
+//     "vim";
+//     "libc6";
+//     "libc6-dev";
+//     "libc6-i686";
 };
 
 // This option allows you to control if on a unclean dpkg exit

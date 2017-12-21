@@ -1,1 +1,2 @@
-usr/bin/unattended-upgrade usr/bin/unattended-upgrades 
+usr/bin/unattended-upgrade usr/bin/unattended-upgrades
+usr/share/man/man8/unattended-upgrade.8.gz usr/share/man/man8/unattended-upgrades.8.gz

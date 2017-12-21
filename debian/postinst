@@ -49,8 +49,6 @@ case "$1" in
 	NEWFILE="$CONFIG.ucftmp"
 	TEMPLATE="/usr/share/unattended-upgrades/50unattended-upgrades"
 	cp -a -f "$TEMPLATE" "$NEWFILE"
-	db_get unattended-upgrades/origins_pattern || true
-	sed -i 's/"origin=Debian,codename=${distro_codename},label=Debian-Security";/'"${RET}"'/' "$NEWFILE"
 	ucf --three-way --debconf-ok "$NEWFILE" "$CONFIG"
 	ucfr unattended-upgrades "$CONFIG"
 	rm -f "$NEWFILE"
@@ -98,9 +96,9 @@ esac
 # sees the service as disable and will not enable it.
 case "$1" in
     configure)
-        if ([ "$(lsb_release -i -s)" != "Ubuntu" ] && dpkg --compare-versions "$2" lt "0.93.1+nmu1") || \
-               ([ "$(lsb_release -i -s)" = "Ubuntu" ] && dpkg --compare-versions "$2" lt "0.93.1ubuntu3") \
-	    && [ -d /run/systemd/system ]; then
+        if ( ([ "$(lsb_release -i -s)" != "Ubuntu" ] && dpkg --compare-versions "$2" lt "0.93.1+nmu1") || \
+                 ([ "$(lsb_release -i -s)" = "Ubuntu" ] && dpkg --compare-versions "$2" lt "0.93.1ubuntu3") )\
+	       && [ -d /run/systemd/system ]; then
                 # workaround systemd bug with enable --now which
                 # fails to start the unit
 		systemctl enable unattended-upgrades || true
