@@ -43,8 +43,9 @@ import subprocess
 import sys
 
 try:
-    from typing import AbstractSet, Iterable, List, Tuple
+    from typing import AbstractSet, Dict, Iterable, List, Tuple
     AbstractSet  # pyflakes
+    Dict  # pyflakes
     Iterable  # pyflakes
     List  # pyflakes
     Tuple  # pyflakes
@@ -129,7 +130,7 @@ class UnattendedUpgradesCache(apt.Cache):
             self[pkgname].candidate = candidate
 
     def get_candidates_to_adjust(self):
-        # type: () -> dict[str, Version()]
+        # type: () -> Dict[str, apt.Version]
         """ Get candidate versions needed to be adjusted to match highest
             allowed origin
 
