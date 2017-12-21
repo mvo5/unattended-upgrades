@@ -1,3 +1,72 @@
+unattended-upgrades (0.99) UNRELEASED; urgency=medium
+
+  [ Peter Nowee ]
+  * Fix Raspbian default config codename matching.
+    Using `archive=${distro_codename}` does not match, at least not in
+    Raspbian Stretch anymore. Changing it to `codename=${distro_codename}`.
+    I tested that it now works and did not notice any regressions.
+    Same change was made to the Debian-specific configuration 3 years ago,
+    see commit 9a2afa5.
+  * Enable RPi-specific upgrades on Raspbian.
+    In addition to the Raspbian repository, Raspbian images distributed by
+    the Raspberry Pi Foundation (RPF) depend on the RPF repository for
+    kernel and firmware updates.
+    This commit adds a pattern matching line for packages from the RPF
+    repository to the Raspbian config file for unattended-upgrades.
+
+  [ Alexandre Detiste ]
+  * Drop unused dependency on apt-utils (Closes: #876425)
+
+  [ Frans Spiesschaert ]
+  * Dutch translation update
+
+  [ Chris Leick ]
+  * German translation update
+
+  [ Ben Wong ]
+  * Fix configuration file examples (Closes: #877395)
+
+  [ Balint Reczey ]
+  * Test for running systemd on Debian, too, when applying workaround for it
+  * Fix calling dh_installinit during build
+  * Tidy up d/control using cme fix
+  * Fix log file location in man page.
+    Thanks to Jaakov for the bug report (Closes: #817974)
+  * Build-depend on debhelper (>= 9.20160709) instead of dh-systemd
+  * Link unattended-upgrades.8 to unattended-upgrade.8 man page
+  * Add Auto-Submitted header to email report (LP: #1230246)
+  * Exit with error when package installation failed or u-u is signalled to
+    stop (Closes: #838368)
+  * Process packages needing smaller upgrade sets earlier in generating
+    minimal upgrade sets.
+    Inspired by Michael Vogt's partition pre-calculation code
+  * Exit with printing error when apt errors prevent initialization
+    (LP: #1737442)
+  * Mark invalid UTF-8 characters in dpkg's log, but don't crash
+    (LP: #1737635)
+  * Try upgrading packages replacing configuration dir with configuration file
+    (LP: #1737637)
+  * Make unattended-upgrade-shutdown exit with error when apt config is
+    invalid (LP: #1737717)
+  * Exit when an apt error prevents checking a package for conffile prompt
+  * Install upgrades from ${distro_codename}, label=Debian by default.
+    This enables updates from stable point releases but also lets testing
+    and sid being updated with the package updates.
+    Fixes #33. (Closes: #787945, #597061)
+  * Fix debian/NEWS.Debian's format
+  * Add NEWS item about unattended-uprades installing stable/all updates
+  * Stop asking debconf question about Origins-Pattern.
+    50unattended-upgrades now contains multiple origins by default and setting
+    them from debconf can't be made really easy. Users should change the
+    configuration file itself instead. (LP: #1577215)
+  * Update PO files about debconf templates
+  * Don't log exceptions which did not happen
+  * Add autopkgtest for upgrading unstable between two snapshots from
+    snapshot.d.o
+  * Remove tabs from Debian's configuration file
+
+ -- Balint Reczey <rbalint@ubuntu.com>  Wed, 13 Dec 2017 00:35:52 +0100
+
 unattended-upgrades (0.98) unstable; urgency=medium
 
   * Rename test to test_non_minimal_steps_upgrade to reflect content

@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: unattended-upgrades\n"
 "Report-Msgid-Bugs-To: unattended-upgrades@packages.debian.org\n"
-"POT-Creation-Date: 2015-11-03 07:12+0100\n"
+"POT-Creation-Date: 2017-12-12 23:02+0100\n"
 "PO-Revision-Date: 2015-11-12 22:56-0200\n"
 "Last-Translator: Adriano Rafael Gomes <adrianorg@arg.eti.br>\n"
 "Language-Team: Brazilian Portuguese <debian-l10n-portuguese@lists.debian."
@@ -26,11 +26,6 @@ msgstr "Baixar e instalar atualizações estáveis automaticamente?"
 #. Type: boolean
 #. Description
 #: ../templates:2001
-#| msgid ""
-#| "Applying updates on a frequent basis is an important part of keeping "
-#| "systems secure. By default, updates need to be applied manually using "
-#| "package  management tools. Alternatively, you can choose to have this "
-#| "system  automatically download and install security updates."
 msgid ""
 "Applying updates on a frequent basis is an important part of keeping systems "
 "secure. By default, updates need to be applied manually using package  "
@@ -43,28 +38,19 @@ msgstr ""
 "Alternativamente, você pode escolher que esse sistema baixe e instale "
 "automaticamente as atualizações importantes."
 
-#. Type: string
-#. Description
-#: ../templates:3001
-msgid "Origins-Pattern that packages must match to be upgraded:"
-msgstr ""
-"\"Origins-Pattern\" com o qual os pacotes devem coincidir para serem "
-"atualizados:"
+#~ msgid "Origins-Pattern that packages must match to be upgraded:"
+#~ msgstr ""
+#~ "\"Origins-Pattern\" com o qual os pacotes devem coincidir para serem "
+#~ "atualizados:"
 
-#. Type: string
-#. Description
-#: ../templates:3001
-msgid "Please specify a value for the unattended-upgrades Origins-Pattern."
-msgstr ""
-"Por favor, especifique um valor para o \"Origins-Pattern\" do unattended-"
-"upgrades."
+#~ msgid "Please specify a value for the unattended-upgrades Origins-Pattern."
+#~ msgstr ""
+#~ "Por favor, especifique um valor para o \"Origins-Pattern\" do unattended-"
+#~ "upgrades."
 
-#. Type: string
-#. Description
-#: ../templates:3001
-msgid ""
-"A package will be upgraded only if its metadata values match all the "
-"supplied keywords in the origin line."
-msgstr ""
-"Um pacote será atualizado somente se os valores dos seus metadados "
-"coincidirem com todas as palavras-chave fornecidas na linha de origem."
+#~ msgid ""
+#~ "A package will be upgraded only if its metadata values match all the "
+#~ "supplied keywords in the origin line."
+#~ msgstr ""
+#~ "Um pacote será atualizado somente se os valores dos seus metadados "
+#~ "coincidirem com todas as palavras-chave fornecidas na linha de origem."

@@ -2,14 +2,14 @@
 # Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
 # This file is distributed under the same license as the unattended-upgrades package.
 # FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
-# Frans Spiesschaert <Frans.Spiesschaert@yucom.be>, 2016.
+# Frans Spiesschaert <Frans.Spiesschaert@yucom.be>, 2016, 2017.
 #
 msgid ""
 msgstr ""
-"Project-Id-Version: unattended-upgrades_0.91\n"
+"Project-Id-Version: unattended-upgrades_0.96\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2015-07-02 12:27+0200\n"
-"PO-Revision-Date: 2016-04-27 15:00+0200\n"
+"PO-Revision-Date: 2017-09-08 11:33+0200\n"
 "Last-Translator: Frans Spiesschaert <Frans.Spiesschaert@yucom.be>\n"
 "Language-Team: Debian Dutch l10n Team <debian-l10n-dutch@lists.debian.org>\n"
 "Language: nl\n"
@@ -17,7 +17,7 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
-"X-Generator: Gtranslator 2.91.6\n"
+"X-Generator: Gtranslator 2.91.7\n"
 
 #: ../unattended-upgrade:182
 #, python-format
@@ -27,7 +27,7 @@ msgstr "Voortgang: %s %% (%s)"
 #: ../unattended-upgrade:376 ../unattended-upgrade:393
 #, python-format
 msgid "Unable to parse %s."
-msgstr ""
+msgstr "Kan %s niet ontleden."
 
 #: ../unattended-upgrade:479 ../unattended-upgrade:577
 #: ../unattended-upgrade-shutdown:182
@@ -49,10 +49,10 @@ msgid "dpkg returned a error! See '%s' for details"
 msgstr "dpkg signaleerde een fout! Zie '%s' voor details"
 
 #: ../unattended-upgrade:541
-#, fuzzy, python-format
+#, python-format
 #| msgid "Packages that will be upgraded: %s"
 msgid "Some packages can not be upgraded: %s"
-msgstr "Pakketten die opgewaardeerd zullen worden: %s"
+msgstr "Sommige pakketten kunnen niet opgewaardeerd worden: %s"
 
 #: ../unattended-upgrade:895
 msgid ""
@@ -64,18 +64,19 @@ msgstr ""
 
 #: ../unattended-upgrade:909
 msgid "[reboot required]"
-msgstr ""
+msgstr "[herstart is vereist]"
 
 #: ../unattended-upgrade:911
 msgid "[package on hold]"
-msgstr ""
+msgstr "[pakket is te handhaven]"
 
 #: ../unattended-upgrade:914
-#, fuzzy
 #| msgid "[reboot required] unattended-upgrades result for '%s': %s"
 msgid ""
 "{hold_flag}{reboot_flag} unattended-upgrades result for '{machine}': {result}"
-msgstr "[herstart vereist] resultaat van unattended-upgrades voor '%s': %s"
+msgstr ""
+"{hold_flag}{reboot_flag} resultaat van unattended-upgrades voor '{machine}': "
+"{result}"
 
 #: ../unattended-upgrade:918
 #, python-format
@@ -100,9 +101,7 @@ msgstr "Pakketten die opgewaardeerd werden:\n"
 
 #: ../unattended-upgrade:925
 msgid "Packages that attempted to upgrade:\n"
-msgstr ""
-"Pakketten waarvoor een opwaardering geprobeerd werd:\n"
-"\n"
+msgstr "Pakketten waarvoor een opwaardering geprobeerd werd:\n"
 
 #: ../unattended-upgrade:929
 msgid "Packages with upgradable origin but kept back:\n"
@@ -273,10 +272,9 @@ msgid "Simulation, download but do not install"
 msgstr "Simulatie, download maar installeer niet"
 
 #: ../unattended-upgrade:1659
-#, fuzzy
 #| msgid "Simulation, download but do not install"
 msgid "Only download, do not even try to install."
-msgstr "Simulatie, download maar installeer niet"
+msgstr "Download, maar doe zelfs geen poging om te installeren."
 
 #: ../unattended-upgrade:1662
 msgid "Upgrade in minimal steps (and allow interrupting with SIGTERM"
@@ -292,12 +290,12 @@ msgstr ""
 #: ../unattended-upgrade-shutdown:76
 msgid "Unattended-upgrade in progress during shutdown, sleeping for 5s"
 msgstr ""
-"Unattended-upgrade is bezig bij het afsluiten van de computer; er wordt 5 "
-"sec gewacht"
+"Een opwaardering zonder toezicht is bezig bij het afsluiten van de computer; "
+"er wordt 5 sec gewacht"
 
 #: ../unattended-upgrade-shutdown:139
 msgid "Running unattended-upgrades in shutdown mode"
-msgstr "unattended-upgrades wordt in afsluitmodus uitgevoerd"
+msgstr "Unattended-upgrades wordt in afsluitmodus uitgevoerd"
 
 #: ../unattended-upgrade-shutdown:165
 #, python-format
@@ -310,6 +308,8 @@ msgid ""
 "Unattended-upgrades stopped. There may be upgrades left to be installed in "
 "the next run."
 msgstr ""
+"Unattended-upgrades is gestopt. Mogelijk zijn er nog opwaarderingen die in "
+"de volgende doorloop geïnstalleerd moeten worden."
 
 #~ msgid "unattended-upgrades result for '%s': '%s'"
 #~ msgstr "resultaat van unattended-upgrades voor '%s': '%s'"

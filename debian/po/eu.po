@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: unattended-upgrades 0.86.6\n"
 "Report-Msgid-Bugs-To: unattended-upgrades@packages.debian.org\n"
-"POT-Creation-Date: 2015-11-03 07:12+0100\n"
+"POT-Creation-Date: 2017-12-12 23:02+0100\n"
 "PO-Revision-Date: 2015-11-05 11:19+0100\n"
 "Last-Translator: Iñaki Larrañaga Murgoitio <dooteo@zundan.com>\n"
 "Language-Team: Basque <librezale@librezale.org>\n"
@@ -40,25 +40,17 @@ msgstr ""
 "honek automatikoki eguneraketa garrantzitsuak deskargatzea eta instalatzea "
 "aukera dezakezu."
 
-#. Type: string
-#. Description
-#: ../templates:3001
-msgid "Origins-Pattern that packages must match to be upgraded:"
-msgstr "Jatorriko eredua (bertsio-berrituko diren paketeekin bat etortzeko):"
+#~ msgid "Origins-Pattern that packages must match to be upgraded:"
+#~ msgstr ""
+#~ "Jatorriko eredua (bertsio-berrituko diren paketeekin bat etortzeko):"
 
-#. Type: string
-#. Description
-#: ../templates:3001
-msgid "Please specify a value for the unattended-upgrades Origins-Pattern."
-msgstr ""
-"Galdetu gabe bertsio-berrituko diren 'Jatorriko eredua'ren balioa zehaztu."
+#~ msgid "Please specify a value for the unattended-upgrades Origins-Pattern."
+#~ msgstr ""
+#~ "Galdetu gabe bertsio-berrituko diren 'Jatorriko eredua'ren balioa zehaztu."
 
-#. Type: string
-#. Description
-#: ../templates:3001
-msgid ""
-"A package will be upgraded only if its metadata values match all the "
-"supplied keywords in the origin line."
-msgstr ""
-"Pakete bat bertsio-berrituko da baldin eta bere meta-datuen balioak emandako "
-"jatorriaren lerroko gako-hitz guztiekin bat etortzen bada."
+#~ msgid ""
+#~ "A package will be upgraded only if its metadata values match all the "
+#~ "supplied keywords in the origin line."
+#~ msgstr ""
+#~ "Pakete bat bertsio-berrituko da baldin eta bere meta-datuen balioak "
+#~ "emandako jatorriaren lerroko gako-hitz guztiekin bat etortzen bada."

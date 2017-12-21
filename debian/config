@@ -15,5 +15,4 @@ if [ -e "$AUTO_UPGRADE" ]; then
 fi
 
 db_input low unattended-upgrades/enable_auto_updates || true
-db_input low unattended-upgrades/origins_pattern || true
 db_go
