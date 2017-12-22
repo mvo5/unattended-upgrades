@@ -43,8 +43,9 @@ import subprocess
 import sys
 
 try:
-    from typing import AbstractSet, Iterable, List, Tuple
+    from typing import AbstractSet, Dict, Iterable, List, Tuple
     AbstractSet  # pyflakes
+    Dict  # pyflakes
     Iterable  # pyflakes
     List  # pyflakes
     Tuple  # pyflakes
@@ -129,7 +130,7 @@ class UnattendedUpgradesCache(apt.Cache):
             self[pkgname].candidate = candidate
 
     def get_candidates_to_adjust(self):
-        # type: () -> dict[str, Version()]
+        # type: () -> Dict[str, apt.Version]
         """ Get candidate versions needed to be adjusted to match highest
             allowed origin
 
@@ -1586,7 +1587,7 @@ def main(options, rootdir=""):
         # never reboot during a dry run
         if not options.dry_run:
             reboot_if_requested_and_needed()
-        return
+        return 0
 
     # check if its configured for install on shutdown, if so, the
     # environment UNATTENDED_UPGRADES_FORCE_INSTALL_ON_SHUTDOWN will
@@ -1597,7 +1598,7 @@ def main(options, rootdir=""):
         logger = logging.getLogger()
         logger.debug("Configured to install on shutdown, so exiting now")
         os.close(shutdown_lock)
-        return
+        return 0
 
     # check if we are in dry-run mode
     if options.dry_run:
