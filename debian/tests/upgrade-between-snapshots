@@ -12,17 +12,21 @@ debootstrap --include eatmydata sid $chroot_dir "http://snapshot.debian.org/arch
 mount --bind /dev/pts $chroot_dir/dev/pts
 sed -i 's/^deb /deb [check-valid-until=no] /' $chroot_dir/etc/apt/sources.list
 $chroot_exec apt-get update
-# install u-u to pull in dependencies and mark python3.5-minimal
+
+# install mailutils for testing u-u email and mark python3.5-minimal
 # because otherwise u-u autoremoves it while running python3.5 code
-$chroot_exec apt-get install -y unattended-upgrades python3.5-minimal mailutils
+$chroot_exec apt-get install -y python3.5-minimal mailutils
+
 # add package set with many dependencies
 $chroot_exec apt-get install -y xfce4
-$chroot_exec apt-get clean
 $chroot_exec apt-mark showmanual > $chroot_dir/tmp/manual
 
 # install package version just built
 cp ../unattended-upgrades_*.deb $chroot_dir/tmp/
-$chroot_exec bash -c 'dpkg -i /tmp/unattended-upgrades_*deb' 2>&1
+$chroot_exec bash -c 'apt install -y /tmp/unattended-upgrades_*deb' 2>&1
+
+# clean up to need less space for the test
+$chroot_exec apt-get clean
 
 # install Debian's configuration file to make this test work as expected even on other distributions
 cp data/50unattended-upgrades.Debian $chroot_dir/etc/apt/apt.conf.d/50unattended-upgrades
