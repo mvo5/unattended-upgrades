@@ -74,7 +74,7 @@ def log_progress():
     """ helper to log the install progress (if any) """
     # wait a some seconds and try again
     msg = _("Unattended-upgrade in progress during shutdown, "
-            "sleeping for 5s")
+            "please don't turn off the computer")
     # progress info
     progress = "/var/run/unattended-upgrades.progress"
     if os.path.exists(progress):
