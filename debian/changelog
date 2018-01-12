@@ -1,3 +1,9 @@
+unattended-upgrades (0.98ubuntu3) bionic; urgency=medium
+
+  *  Do not touch reboot-required on linux-image-extra removal (LP: #1458204)
+
+ -- Julian Andres Klode <juliank@ubuntu.com>  Fri, 12 Jan 2018 09:58:04 +0100
+
 unattended-upgrades (0.98ubuntu2) bionic; urgency=medium
 
   * unattended-upgrades: Do not reboot during a dry-run. (LP: #1269177)
