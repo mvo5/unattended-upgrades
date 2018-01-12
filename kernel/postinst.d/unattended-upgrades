@@ -1,5 +1,10 @@
 #!/bin/sh
 
+case "$DPKG_MAINTSCRIPT_PACKAGE::$DPKG_MAINTSCRIPT_NAME" in
+   linux-image-extra*::postrm)
+      exit 0;;
+esac
+
 if [ -d /var/run ]; then
    touch /var/run/reboot-required
 fi
