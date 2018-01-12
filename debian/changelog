@@ -1,3 +1,10 @@
+unattended-upgrades (0.98ubuntu4) bionic; urgency=medium
+
+  * Cherry pick from git:
+    - Fix version of test package in test_remove_unused_dependencies (Closes: #886803)
+
+ -- Julian Andres Klode <juliank@ubuntu.com>  Fri, 12 Jan 2018 10:10:29 +0100
+
 unattended-upgrades (0.98ubuntu3) bionic; urgency=medium
 
   *  Do not touch reboot-required on linux-image-extra removal (LP: #1458204)
