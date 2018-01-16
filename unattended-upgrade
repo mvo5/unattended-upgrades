@@ -142,7 +142,7 @@ class UnattendedUpgradesCache(apt.Cache):
         candidates = {}
         for pkg in self:
             # important! this avoids downgrades below
-            if not pkg.is_upgradable:
+            if pkg.is_installed and not pkg.is_upgradable:
                 continue
             # check if the candidate is already pointing to a allowed
             # origin and if so, do not mess with it
