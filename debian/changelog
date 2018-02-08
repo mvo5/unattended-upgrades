@@ -1,4 +1,4 @@
-unattended-upgrades (0.99) UNRELEASED; urgency=medium
+unattended-upgrades (0.99) unstable; urgency=medium
 
   [ Peter Nowee ]
   * Fix Raspbian default config codename matching.
