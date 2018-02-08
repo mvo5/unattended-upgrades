@@ -472,6 +472,7 @@ def cache_commit(cache,           # type: apt.Cache
     with Unlocked():
         try:
             res = cache.commit(install_progress=iprogress)
+            cache.open()
         except SystemError as e:
             error = e
             if verbose:
