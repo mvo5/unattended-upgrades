@@ -1,4 +1,4 @@
-unattended-upgrades (0.99) UNRELEASED; urgency=medium
+unattended-upgrades (0.99) unstable; urgency=medium
 
   [ Peter Nowee ]
   * Fix Raspbian default config codename matching.
@@ -64,8 +64,48 @@ unattended-upgrades (0.99) UNRELEASED; urgency=medium
   * Add autopkgtest for upgrading unstable between two snapshots from
     snapshot.d.o
   * Remove tabs from Debian's configuration file
+  * Catch SystemError instead of apt_pkg.Error for backwards compatibility
+  * Check in autopkgtest if unattended-upgrades mark additional packages as
+    manually installed
+  * Test upgrading a full system with desktop packages in autopkgtest.
+    Also pick different shapshots with which does not contain
+    broken packages.
+  * Test sending email after upgrading a full system
+  * Show "please don't turn off the computer" while installing updates on
+    shutdown.
+    This is more informational for users than the original "sleeping for 5s".
+    Thanks to Mario Loderer for the suggestion (LP: #1741579)
+  * Use eatmydata for system upgrade autopkgtest
+  * Run upgrade-between-snapshots autopkgtest even on other distros
+  * Apt install built u-u in snapshot upgrade test
+  * Update .pot file
+  * Fix version of test package in test_remove_unused_dependencies
+    (Closes: #886803)
+  * Refresh cache after committing changes to avoid reinstalling packages
+    (Closes: #875383)
+  * Relax calculating truly minimal sets to sets expected to be minimal.
+    This speeds up calculation by making it from ~O(n^2) to ~O(n) at the
+    expense of creating slightly bigger sets in rare cases.
 
- -- Balint Reczey <rbalint@ubuntu.com>  Wed, 13 Dec 2017 00:35:52 +0100
+  [ Evilham ]
+  * Add Devuan support.
+
+  [ Brian Murray ]
+  * unattended-upgrades: Do not reboot during a dry-run (LP: #1269177)
+
+  [ Michael Vogt ]
+  * enable pep484 test
+  * mypy fixes
+  * add two missing return values
+  * tests: cleanup test_mail.py to use proper tmpdirs
+
+  [ Julian Andres Klode ]
+  * Do not touch reboot-required on linux-image-extra removal (LP: #1458204)
+
+  [ Sjoerd Job Postmus ]
+  * Adjust candidate version of packages to be newly installed (LP: #1446552)
+
+ -- Balint Reczey <rbalint@ubuntu.com>  Fri, 09 Feb 2018 02:52:19 +0700
 
 unattended-upgrades (0.98) unstable; urgency=medium
 

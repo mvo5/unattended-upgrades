@@ -19,11 +19,13 @@ $chroot_exec apt-get install -y python3.5-minimal mailutils
 
 # add package set with many dependencies
 $chroot_exec apt-get install -y xfce4
-$chroot_exec apt-mark showmanual > $chroot_dir/tmp/manual
 
 # install package version just built
 cp ../unattended-upgrades_*.deb $chroot_dir/tmp/
 $chroot_exec bash -c 'apt install -y /tmp/unattended-upgrades_*deb' 2>&1
+
+# save list of manually installed packages
+$chroot_exec apt-mark showmanual > $chroot_dir/tmp/manual
 
 # clean up to need less space for the test
 $chroot_exec apt-get clean
