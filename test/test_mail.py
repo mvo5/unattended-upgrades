@@ -154,15 +154,6 @@ Debian-Security']
         self.assertTrue(
             "Packages that attempted to upgrade:\n 2vcard" in mail_txt)
 
-    def test_mail_on_error_with_warning_in_log(self):
-        apt_pkg.config.set("Unattended-Upgrade::MailOnlyOnError", "true")
-        pkgs, res, pkgs_kept_back, mem_log, logf_dpkg = self._return_mock_data(
-            successful=True)
-        mem_log.write("\nWARNING: some warning\n")
-        send_summary_mail(pkgs, res, pkgs_kept_back, mem_log, logf_dpkg)
-        self.assertTrue(
-            os.path.exists(os.path.join(self.tmpdir, "mail.txt")))
-
     def test_summary_mail_blacklisted(self):
         # Test that blacklisted packages are mentioned in the mail message.
         send_summary_mail(*self._return_mock_data())
