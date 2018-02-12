@@ -1336,7 +1336,7 @@ def main(options, rootdir=""):
     if "(development branch)" in DISTRO_DESC and not\
             apt_pkg.config.find_b("Unattended-Upgrade::DevRelease", False):
         logging.info(_("Not running on the development release."))
-        return
+        return 0
     # format (origin, archive), e.g. ("Ubuntu","dapper-security")
     allowed_origins = get_allowed_origins()
 
