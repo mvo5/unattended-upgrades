@@ -35,7 +35,11 @@ Unattended-Upgrade::Origins-Pattern {
         // new stable).
 //      "o=Raspbian,a=stable";
 //      "o=Raspbian,a=testing";
-        "origin=Raspbian,archive=${distro_codename},label=Raspbian";
+        "origin=Raspbian,codename=${distro_codename},label=Raspbian";
+
+        // Additionally, for those running Raspbian on a Raspberry Pi,
+        // match packages from the Raspberry Pi Foundation as well.
+        "origin=Raspberry Pi Foundation,codename=${distro_codename},label=Raspberry Pi Foundation";
 };
 
 // List of packages to not update (regexp are supported)

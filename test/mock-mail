@@ -1,5 +1,0 @@
-#!/bin/sh
-
-echo "From: $2" > mail.txt
-echo "Subject: $4" >> mail.txt
-cat - -- >> mail.txt

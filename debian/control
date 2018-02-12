@@ -1,25 +1,43 @@
 Source: unattended-upgrades
-Section: admin
-Priority: optional
 Maintainer: Ubuntu Developers <ubuntu-devel-discuss@lists.ubuntu.com>
 XSBC-Original-Maintainer: Michael Vogt <mvo@debian.org>
 Uploaders: Balint Reczey <rbalint@ubuntu.com>
-Build-Depends: debhelper (>= 9~), po-debconf
-Build-Depends-Indep: python (>= 2.6.6-3~), python3-distutils-extra,
- python3-setuptools, python-dev, python3-dev, python-coverage, pep8,
- pyflakes, python-apt, python3-apt, python-mock, python3-mock,
- lsb-release, dh-systemd (>= 1.5)
+Section: admin
+Testsuite: autopkgtest
+Priority: optional
+Build-Depends: debhelper (>= 9.20160709),
+               po-debconf
+Build-Depends-Indep: python,
+                     python3-distutils-extra,
+                     python3-setuptools,
+                     python-dev,
+                     python3-dev,
+                     python-coverage,
+                     pep8,
+                     pyflakes,
+                     python-apt,
+                     python3-apt,
+                     python-mock,
+                     python3-mock,
+                     lsb-release
 Standards-Version: 3.9.3
 Vcs-Git: https://github.com/mvo5/unattended-upgrades.git
-XS-Testsuite: autopkgtest
 
 Package: unattended-upgrades
 Architecture: all
-Depends: ${shlibs:Depends}, ${misc:Depends}, debconf, python3, 
- python3-apt, apt-utils, apt, ucf, lsb-release, lsb-base (>= 3.2-14),
- xz-utils
+Depends: ${shlibs:Depends},
+         ${misc:Depends},
+         debconf,
+         python3,
+         python3-apt,
+         ucf,
+         lsb-release,
+         lsb-base,
+         xz-utils
 Recommends: cron | cron-daemon | anacron
-Suggests: bsd-mailx, mail-transport-agent, needrestart
+Suggests: bsd-mailx,
+          mail-transport-agent,
+          needrestart
 Description: automatic installation of security upgrades
  This package can download and install security upgrades automatically
  and unattended, taking care to only install packages from the

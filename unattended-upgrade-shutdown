@@ -74,7 +74,7 @@ def log_progress():
     """ helper to log the install progress (if any) """
     # wait a some seconds and try again
     msg = _("Unattended-upgrade in progress during shutdown, "
-            "sleeping for 5s")
+            "please don't turn off the computer")
     # progress info
     progress = "/var/run/unattended-upgrades.progress"
     if os.path.exists(progress):
@@ -133,7 +133,13 @@ if __name__ == "__main__":
 
     # check if we need to run unattended-upgrades on shutdown and if so,
     # run it
-    apt_pkg.init_config()
+    try:
+        apt_pkg.init_config()
+    except apt_pkg.Error as error:
+        logging.error(_("Apt returned an error, exiting"))
+        logging.error(_("error message: '%s'"), error)
+        sys.exit(1)
+
     on_shutdown_mode = not options.stop_only and apt_pkg.config.find_b(
         "Unattended-Upgrade::InstallOnShutdown", False)
     if on_shutdown_mode:

@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: unattended-upgrades 0.86.6\n"
 "Report-Msgid-Bugs-To: unattended-upgrades@packages.debian.org\n"
-"POT-Creation-Date: 2015-11-03 07:12+0100\n"
+"POT-Creation-Date: 2017-12-12 23:02+0100\n"
 "PO-Revision-Date: 2015-11-10 09:15+0100\n"
 "Last-Translator: Michal Simunek <michal.simunek@gmail.com>\n"
 "Language-Team: Czech <debian-l10n-czech@lists.debian.org>\n"
@@ -36,24 +36,16 @@ msgstr ""
 "použití příslušných nástrojů pro správu balíčků. Můžete ovšem zvolit, aby "
 "tento systém automaticky sám stahoval a instaloval důležité aktualizace."
 
-#. Type: string
-#. Description
-#: ../templates:3001
-msgid "Origins-Pattern that packages must match to be upgraded:"
-msgstr "Vzor původu, kterému musí balíčky odpovídat, aby byly aktualizovány:"
+#~ msgid "Origins-Pattern that packages must match to be upgraded:"
+#~ msgstr ""
+#~ "Vzor původu, kterému musí balíčky odpovídat, aby byly aktualizovány:"
 
-#. Type: string
-#. Description
-#: ../templates:3001
-msgid "Please specify a value for the unattended-upgrades Origins-Pattern."
-msgstr "Zadejte prosím hodnotu pro Vzor původu u bezobslužných aktualizací."
+#~ msgid "Please specify a value for the unattended-upgrades Origins-Pattern."
+#~ msgstr "Zadejte prosím hodnotu pro Vzor původu u bezobslužných aktualizací."
 
-#. Type: string
-#. Description
-#: ../templates:3001
-msgid ""
-"A package will be upgraded only if its metadata values match all the "
-"supplied keywords in the origin line."
-msgstr ""
-"Balíček se bude aktualizovat pouze pokud jeho hodnoty metadat odpovídají "
-"všem zadaným klíčovým slovům na řádku s původem."
+#~ msgid ""
+#~ "A package will be upgraded only if its metadata values match all the "
+#~ "supplied keywords in the origin line."
+#~ msgstr ""
+#~ "Balíček se bude aktualizovat pouze pokud jeho hodnoty metadat odpovídají "
+#~ "všem zadaným klíčovým slovům na řádku s původem."

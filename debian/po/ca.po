@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: unattended-upgrades 0.86.6\n"
 "Report-Msgid-Bugs-To: unattended-upgrades@packages.debian.org\n"
-"POT-Creation-Date: 2015-11-03 07:12+0100\n"
+"POT-Creation-Date: 2017-12-12 23:02+0100\n"
 "PO-Revision-Date: 2015-11-07 18:35+0100\n"
 "Last-Translator: Innocent De Marchi <tangram.peces@gmail.com>\n"
 "Language-Team: Catalan <<debian-l10n-catalan@lists.debian.org>>\n"
@@ -41,28 +41,20 @@ msgstr ""
 "paquets. Si ho preferiu, podeu optar per fer que el sistema descarregui i "
 "instal·li automàticament les actualitzacions de seguretat."
 
-#. Type: string
-#. Description
-#: ../templates:3001
-msgid "Origins-Pattern that packages must match to be upgraded:"
-msgstr ""
-"Patrons de les fonts de paquets («Origins-Pattern») que han de verificar els "
-"paquets a actualitzar:"
+#~ msgid "Origins-Pattern that packages must match to be upgraded:"
+#~ msgstr ""
+#~ "Patrons de les fonts de paquets («Origins-Pattern») que han de verificar "
+#~ "els paquets a actualitzar:"
 
-#. Type: string
-#. Description
-#: ../templates:3001
-msgid "Please specify a value for the unattended-upgrades Origins-Pattern."
-msgstr ""
-"Especificau el valor dels patrons de les fonts de paquets («Origins-"
-"Pattern») per a les actualitzacions desateses."
+#~ msgid "Please specify a value for the unattended-upgrades Origins-Pattern."
+#~ msgstr ""
+#~ "Especificau el valor dels patrons de les fonts de paquets («Origins-"
+#~ "Pattern») per a les actualitzacions desateses."
 
-#. Type: string
-#. Description
-#: ../templates:3001
-msgid ""
-"A package will be upgraded only if its metadata values match all the "
-"supplied keywords in the origin line."
-msgstr ""
-"Un paquet s'actualitzarà només si els seus valors de metadades coincideixen "
-"amb totes les paraules clau subministrades en la línia d'origen."
+#~ msgid ""
+#~ "A package will be upgraded only if its metadata values match all the "
+#~ "supplied keywords in the origin line."
+#~ msgstr ""
+#~ "Un paquet s'actualitzarà només si els seus valors de metadades "
+#~ "coincideixen amb totes les paraules clau subministrades en la línia "
+#~ "d'origen."

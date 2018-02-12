@@ -1,13 +1,33 @@
-unattended-upgrades (0.95) UNRELEASED; urgency=medium
+unattended-upgrades (0.99) unstable; urgency=medium
 
- Unattended-upgrades now defaults to installing upgrades in minimal
- steps to ensure leaving the system in a consisten state when the
- system starts shutting in the middle of an upgrade.
+  Unattended-upgrades in previous versions defaulted to install
+  security updates only on Debian by using the label=Debian-Security
+  origin pattern. Now it is changed to allow updates with label=Debian,
+  which allows applying stable updates in stable releases and following
+  all package updates in testing and unstable.
 
- With the previous default of performing all upgrades in one shot
- the installations could take more than 15 minutes which was the
- final timeout after which unattended-upgrade and dpkg were killed
- leaving half-installed packages behind on shutdown.
+  In stable releases this unlocks installation of security updates
+  depending on package versions present only in stable updates.
+
+  Note that testing and unstable can often contain packages for which
+  installation or upgrade performed by unattended-upgrades fails and
+  requires the administrator to fix the system later.
+
+  If you would like to prevent unattended-upgrades from performing
+  updates please run "sudo dpkg-reconfigure unattended-upgrades".
+
+ -- Balint Reczey <rbalint@ubuntu.com>  Tue, 12 Dec 2017 12:13:08 +0100
+
+unattended-upgrades (0.95) unstable; urgency=medium
+
+  Unattended-upgrades now defaults to installing upgrades in minimal
+  steps to ensure leaving the system in a consisten state when the
+  system starts shutting in the middle of an upgrade.
+
+  With the previous default of performing all upgrades in one shot
+  the installations could take more than 15 minutes which was the
+  final timeout after which unattended-upgrade and dpkg were killed
+  leaving half-installed packages behind on shutdown.
 
  -- Balint Reczey <rbalint@ubuntu.com>  Tue, 01 Aug 2017 19:43:50 +0200
 
