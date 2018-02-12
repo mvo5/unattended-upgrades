@@ -6,6 +6,19 @@ chroot_dir=$AUTOPKGTEST_TMP/chroot
 start_date=20171001T000000Z
 end_date=20171210T000000Z
 chroot_exec="chroot $chroot_dir eatmydata"
+architecture=$(dpkg --print-architecture)
+
+# run test only on amd64 because it tests only Python code and dependencies
+# are used from the frozen historical Debian archive
+case $architecture in
+    amd64)
+        echo "Running Debian snapshot upgrade test on $architecture"
+        ;;
+    *)
+        echo "Skipping Debian snapshot upgrade test on $architecture"
+        exit 0
+        ;;
+esac
 
 dpkg-buildpackage -us -uc 2>&1
 debootstrap --include eatmydata sid $chroot_dir "http://snapshot.debian.org/archive/debian/$start_date/ unstable main"
