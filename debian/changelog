@@ -1,3 +1,16 @@
+unattended-upgrades (0.99ubuntu1) bionic; urgency=medium
+
+  * Merge from Debian unstable (LP: #1722426)
+    - Remaining changes:
+      - unattended-upgrades: Do not automatically upgrade the development
+        release of Ubuntu unless Unattended-Upgrade::DevRelease is true.
+    - Dropped changes, included in Debian:
+      - Fix version of test package in test_remove_unused_dependencies
+      - Do not touch reboot-required on linux-image-extra removal
+      - unattended-upgrades: Do not reboot during a dry-run.
+
+ -- Balint Reczey <rbalint@ubuntu.com>  Mon, 12 Feb 2018 17:54:00 +0700
+
 unattended-upgrades (0.99) unstable; urgency=medium
 
   [ Peter Nowee ]
