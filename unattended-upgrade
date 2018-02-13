@@ -1492,8 +1492,7 @@ def main(options, rootdir=""):
     if options.download_only:
         return 0
 
-    pkg_install_manual = False
-
+    pkg_conffile_prompt = False
     if dpkg_conffile_prompt():
         # now check the downloaded debs for conffile conflicts and build
         # a blacklist
@@ -1534,7 +1533,7 @@ def main(options, rootdir=""):
                                 pkgname_from_deb(item.destfile))
                 blacklisted_pkgs.append(pkgname_from_deb(item.destfile))
                 pkgs_kept_back.append(pkgname_from_deb(item.destfile))
-                pkg_install_manual = True
+                pkg_conffile_prompt = True
 
         # redo the selection about the packages to upgrade based on the new
         # blacklist
@@ -1625,6 +1624,9 @@ def main(options, rootdir=""):
                                          whitelisted_pkgs,
                                          options,
                                          logfile_dpkg)
+    # Was the overall run succesful: only if everything installed
+    # fine and nothing was held back because of a conffile prompt.
+    successful_run = pkg_install_success and not pkg_conffile_prompt
 
     # now check if any auto-removing needs to be done
     cache = UnattendedUpgradesCache(
@@ -1664,7 +1666,7 @@ def main(options, rootdir=""):
     if not options.dry_run:
         log_content = get_dpkg_log_content(logfile_dpkg, install_start_time)
         send_summary_mail(
-            pkgs, pkg_install_success and not pkg_install_manual,
+            pkgs, successful_run,
             pkgs_kept_back, mem_log, log_content)
 
     # clean after success install (if needed)
@@ -1682,7 +1684,7 @@ def main(options, rootdir=""):
     # check if the user wants a reboot
     if not options.dry_run:
         reboot_if_requested_and_needed()
-    if pkg_install_success and not pkg_install_manual:
+    if successful_run:
         return 0
     else:
         return 1
