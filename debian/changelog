@@ -1,3 +1,12 @@
+unattended-upgrades (0.99ubuntu2) bionic; urgency=medium
+
+  * Run upgrade-between-snapshots only on amd64.
+    The test exercises only unattented-upgrade's Python code and uses
+    dependencies from the frozen Debian snapshot archive thus running
+    it on all architectures would provide little benefit.
+
+ -- Balint Reczey <rbalint@ubuntu.com>  Tue, 13 Feb 2018 11:41:20 +0700
+
 unattended-upgrades (0.99ubuntu1) bionic; urgency=medium
 
   * Merge from Debian unstable (LP: #1722426)
