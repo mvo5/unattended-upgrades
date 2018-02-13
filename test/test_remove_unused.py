@@ -100,8 +100,8 @@ Unattended-Upgrade::Remove-Unused-Dependencies "true";
             options, rootdir="./root.unused-deps")
         with open(self.log) as f:
             # both the new and the old unused dependency are removed
-            needle = "Packages that are auto removed: "\
-                     "'old-unused-dependency test-package-dependency'"
+            needle = "Packages that were successfully auto-removed: "\
+                     "old-unused-dependency test-package-dependency"
             haystack = f.read()
             self.assertTrue(needle in haystack,
                             "Can not find '%s' in '%s'" % (needle, haystack))
@@ -122,8 +122,8 @@ Unattended-Upgrade::Remove-New-Unused-Dependencies "true";
             options, rootdir="./root.unused-deps")
         with open(self.log) as f:
             # ensure its only exactly one package that is removed
-            needle = "Packages that are auto removed: "\
-                     "'test-package-dependency'"
+            needle = "Packages that were successfully auto-removed: "\
+                     "test-package-dependency"
             haystack = f.read()
             self.assertTrue(needle in haystack,
                             "Can not find '%s' in '%s'" % (needle, haystack))
