@@ -14,7 +14,7 @@ apt.apt_pkg.config.set("APT::Architecture", "amd64")
 
 
 class MockOptions(object):
-    debug = False
+    debug = True
     verbose = False
     download_only = False
     dry_run = False
@@ -107,6 +107,9 @@ Unattended-Upgrade::Remove-Unused-Dependencies "true";
                             "Can not find '%s' in '%s'" % (needle, haystack))
 
     def test_remove_unused_dependencies_new_unused_only(self):
+        apt.apt_pkg.config.set("APT::VersionedKernelPackages::", "linux-image")
+        apt.apt_pkg.config.set("APT::VersionedKernelPackages::",
+                               "linux-headers")
         apt_conf = os.path.join(self.rootdir, "etc", "apt", "apt.conf")
         with open(apt_conf, "w") as fp:
             fp.write("""

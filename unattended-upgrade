@@ -1269,6 +1269,27 @@ def get_auto_removable(cache):
                 if pkg.is_auto_removable])
 
 
+def only_kernel_pkgs(auto_removable):
+    # type: (AbstractSet[str]) -> AbstractSet[str]
+    running_kernel_version = subprocess.check_output(
+        ["uname", "-r"], universal_newlines=True).rstrip()
+    versioned_kernel_pkgs = apt_pkg.config.value_list(
+        "APT::VersionedKernelPackages")
+
+    if versioned_kernel_pkgs:
+        kernel_pkgs_regexp = "(" + "|".join(
+            ["^" + p for p in versioned_kernel_pkgs]) + ")"
+        logging.debug("Using %s regexp to find kernel packages",
+                      kernel_pkgs_regexp)
+
+        return set([pkg for pkg in auto_removable
+                    if (re.match(kernel_pkgs_regexp, pkg) and
+                        not re.match(running_kernel_version, pkg))])
+    else:
+        logging.debug("APT::VersionedKernelPackages is not set")
+        return set()
+
+
 def do_auto_remove(cache, auto_removable, logfile_dpkg, minimal_steps,
                    verbose=False, dry_run=False):
     # type: (apt.Cache, AbstractSet[str], str, bool, bool, bool) -> bool
@@ -1595,8 +1616,32 @@ def main(options, rootdir=""):
     else:
         logging.debug("dpkg is configured not to cause conffile prompts")
 
-    # auto-removal
-    previous_autoremovals = get_auto_removable(cache)
+    # get log
+    logfile_dpkg = os.path.join(_get_logdir(), 'unattended-upgrades-dpkg.log')
+    if not os.path.exists(logfile_dpkg):
+        with open(logfile_dpkg, 'w'):
+            pass
+
+    # auto-removals
+    auto_removable = get_auto_removable(cache)
+    if (auto_removable and apt_pkg.config.find_b(
+            "Unattended-Upgrade::Remove-Unused-Kernel-Packages", True)):
+        # remove unused kernels before installing new ones because the newly
+        # installed ones may fill up /boot and break the system right before
+        # removing old ones could take place
+        #
+        # this step may also remove _auto-removable_ reverse dependencies
+        # of kernel packages
+        auto_removable_kernel_pkgs = only_kernel_pkgs(auto_removable)
+        if auto_removable_kernel_pkgs:
+            logging.info(_("Removing unused kernel packages: %s"),
+                         " ".join(auto_removable_kernel_pkgs))
+            do_auto_remove(cache, auto_removable_kernel_pkgs,
+                           logfile_dpkg, use_minimal_steps(options),
+                           options.verbose or options.debug, options.dry_run)
+            auto_removable = get_auto_removable(cache)
+
+    previous_autoremovals = auto_removable
     if apt_pkg.config.find_b(
             "Unattended-Upgrade::Remove-Unused-Dependencies", False):
         pending_autoremovals = previous_autoremovals
@@ -1638,12 +1683,6 @@ def main(options, rootdir=""):
     # do the install based on the new list of pkgs
     pkgs = " ".join([pkg.name for pkg in pkgs_to_upgrade])
     logging.info(_("Packages that will be upgraded: %s"), pkgs)
-
-    # get log
-    logfile_dpkg = os.path.join(_get_logdir(), 'unattended-upgrades-dpkg.log')
-    if not os.path.exists(logfile_dpkg):
-        with open(logfile_dpkg, 'w'):
-            pass
 
     # only perform install step if we actually have packages to install
     pkg_install_success = True
