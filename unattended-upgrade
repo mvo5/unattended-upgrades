@@ -115,10 +115,18 @@ class UnattendedUpgradesCache(apt.Cache):
 
     def __init__(self, rootdir, allowed_origins):
         # type: (str, List[str]) -> None
+        self.candidates_to_adjust = {}  # type: Dict[str, apt.Version]
         apt.Cache.__init__(self, rootdir=rootdir)
         self.allowed_origins = allowed_origins
         # ensure we update the candidate versions
         self.candidates_to_adjust = self.get_candidates_to_adjust()
+        for pkgname, candidate in self.candidates_to_adjust.items():
+            self[pkgname].candidate = candidate
+
+    def open(self, progress=None):
+        # type: (apt.progress.base.Progress) -> None
+        apt.Cache.open(self, progress)
+        # ensure we update the candidate versions
         for pkgname, candidate in self.candidates_to_adjust.items():
             self[pkgname].candidate = candidate
 
