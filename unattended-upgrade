@@ -708,14 +708,15 @@ def conffile_prompt(destFile, prefix=""):
 
     # get the conffiles for the /var/lib/dpkg/status file
     status_file = apt_pkg.config.find("Dir::State::status")
-    tagfile = apt_pkg.TagFile(open(status_file, "r"))
-    conffiles = ""
-    for section in tagfile:
-        if section.get("Package") == pkgname:
-            logging.debug("found pkg: %s" % pkgname)
-            if "Conffiles" in section:
-                conffiles = section.get("Conffiles")
-                break
+    with open(status_file, "r") as f:
+        tagfile = apt_pkg.TagFile(f)
+        conffiles = ""
+        for section in tagfile:
+            if section.get("Package") == pkgname:
+                logging.debug("found pkg: %s" % pkgname)
+                if "Conffiles" in section:
+                    conffiles = section.get("Conffiles")
+                    break
 
     # get conffile value from pkg, its ok if the new version
     # does not have conffiles anymore
