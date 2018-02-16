@@ -2,7 +2,7 @@ unattended-upgrades (1.0) UNRELEASED; urgency=medium
 
   [ Simon Arlott ]
   * Revert sending mails on WARNINGS when in MailOnlyOnError mode"
-  * Consider conffile prompts to be errors.
+  * Consider conffile prompts to be errors (Closes: #852465)
     Flag packages that have to be upgraded manually because of a conffile
     prompt and consider this to be an error when sending email or exiting.
 
