@@ -694,6 +694,9 @@ def get_md5sum_for_file_in_deb(deb_file, conf_file):
     md5_p = Popen(md5_cmd, stdin=tar_p.stdout, stdout=PIPE,
                   universal_newlines=True)
     pkg_md5sum = md5_p.communicate()[0].split()[0]
+    for p in [dpkg_p, tar_p, md5_p]:
+        p.stdout.close()
+        p.wait()
     return pkg_md5sum
 
 
@@ -705,14 +708,15 @@ def conffile_prompt(destFile, prefix=""):
 
     # get the conffiles for the /var/lib/dpkg/status file
     status_file = apt_pkg.config.find("Dir::State::status")
-    tagfile = apt_pkg.TagFile(open(status_file, "r"))
-    conffiles = ""
-    for section in tagfile:
-        if section.get("Package") == pkgname:
-            logging.debug("found pkg: %s" % pkgname)
-            if "Conffiles" in section:
-                conffiles = section.get("Conffiles")
-                break
+    with open(status_file, "r") as f:
+        tagfile = apt_pkg.TagFile(f)
+        conffiles = ""
+        for section in tagfile:
+            if section.get("Package") == pkgname:
+                logging.debug("found pkg: %s" % pkgname)
+                if "Conffiles" in section:
+                    conffiles = section.get("Conffiles")
+                    break
 
     # get conffile value from pkg, its ok if the new version
     # does not have conffiles anymore
