@@ -115,10 +115,18 @@ class UnattendedUpgradesCache(apt.Cache):
 
     def __init__(self, rootdir, allowed_origins):
         # type: (str, List[str]) -> None
+        self.candidates_to_adjust = {}  # type: Dict[str, apt.Version]
         apt.Cache.__init__(self, rootdir=rootdir)
         self.allowed_origins = allowed_origins
         # ensure we update the candidate versions
         self.candidates_to_adjust = self.get_candidates_to_adjust()
+        for pkgname, candidate in self.candidates_to_adjust.items():
+            self[pkgname].candidate = candidate
+
+    def open(self, progress=None):
+        # type: (apt.progress.base.Progress) -> None
+        apt.Cache.open(self, progress)
+        # ensure we update the candidate versions
         for pkgname, candidate in self.candidates_to_adjust.items():
             self[pkgname].candidate = candidate
 
@@ -491,6 +499,16 @@ def upgrade_normal(cache, logfile_dpkg, verbose):
         logging.error(_("dpkg returned a error! See '%s' for details"),
                       logfile_dpkg)
     return res
+
+
+def use_minimal_steps(options):
+    # type: (Options) -> bool
+    return (options.minimal_upgrade_steps or
+            # COMPAT with the mispelling
+            (apt_pkg.config.find_b("Unattended-Upgrades::MinimalSteps",
+                                   True) and
+             apt_pkg.config.find_b("Unattended-Upgrade::MinimalSteps",
+                                   True)))
 
 
 def upgrade_in_minimal_steps(cache,            # type: apt.Cache
@@ -991,12 +1009,7 @@ def do_install(cache,             # type: apt.Cache
 
     pkg_install_success = False
     try:
-        if (options.minimal_upgrade_steps or
-            # COMPAT with the mispelling
-            (apt_pkg.config.find_b(
-                "Unattended-Upgrades::MinimalSteps", True) and
-             apt_pkg.config.find_b(
-                 "Unattended-Upgrade::MinimalSteps", True))):
+        if use_minimal_steps(options):
             # try upgrade all "pkgs" in minimal steps
             pkg_install_success = upgrade_in_minimal_steps(
                 cache, [pkg.name for pkg in pkgs_to_upgrade],
@@ -1256,24 +1269,88 @@ def get_auto_removable(cache):
                 if pkg.is_auto_removable])
 
 
-def do_auto_remove(cache, auto_removable, logfile_dpkg,
+def only_kernel_pkgs(auto_removable):
+    # type: (AbstractSet[str]) -> AbstractSet[str]
+    running_kernel_version = subprocess.check_output(
+        ["uname", "-r"], universal_newlines=True).rstrip()
+    versioned_kernel_pkgs = apt_pkg.config.value_list(
+        "APT::VersionedKernelPackages")
+
+    if versioned_kernel_pkgs:
+        kernel_pkgs_regexp = "(" + "|".join(
+            ["^" + p for p in versioned_kernel_pkgs]) + ")"
+        logging.debug("Using %s regexp to find kernel packages",
+                      kernel_pkgs_regexp)
+
+        return set([pkg for pkg in auto_removable
+                    if (re.match(kernel_pkgs_regexp, pkg) and
+                        not re.match(running_kernel_version, pkg))])
+    else:
+        logging.debug("APT::VersionedKernelPackages is not set")
+        return set()
+
+
+def do_auto_remove(cache, auto_removable, logfile_dpkg, minimal_steps,
                    verbose=False, dry_run=False):
-    # type: (apt.Cache, Iterable[str], str, bool, bool) -> bool
+    # type: (apt.Cache, AbstractSet[str], str, bool, bool, bool) -> bool
     if not auto_removable:
         return True
 
-    for pkgname in auto_removable:
-        if not dry_run:
-            logging.debug("marking %s for remove" % pkgname)
+    if minimal_steps:
+        for pkgname in auto_removable:
+            if SIGNAL_STOP_REQUEST:
+                logging.warning("SIGNAL received, stopping")
+                return False
+            logging.debug("marking %s for removal" % pkgname)
             cache[pkgname].mark_delete()
-    logging.info(_("Packages that are auto removed: '%s'"),
-                 " ".join(sorted(auto_removable)))
+            changes = set([p.name for p in cache.get_changes()])
+            if not changes:
+                # package is already removed
+                continue
+            if not changes.issubset(auto_removable):
+                logging.warning(
+                    _("Keeping auto-removable %s package because it would"
+                      " also remove the following packages which should "
+                      "be kept in this step: %s"), pkgname,
+                    " ".join(sorted(changes - auto_removable)))
 
-    # do it
-    res, error = cache_commit(cache, logfile_dpkg, verbose)
-    if res:
-        logging.info(_("Packages were successfully auto-removed"))
+                cache.clear()
+                # this situation can occur when removing newly unused packages
+                # would also remove old unused packages which are not set
+                # for removal, thus getting there is not handled as an error
+                res = True
+                continue
+            if not dry_run:
+                res, error = cache_commit(cache, logfile_dpkg, verbose)
+                if not res:
+                    break
+            else:
+                res = True
+                cache.clear()
     else:
+        for pkgname in auto_removable:
+            cache[pkgname].mark_delete()
+
+        changes = set([p.name for p in cache.get_changes()])
+        if not changes.issubset(auto_removable):
+            logging.warning(
+                _("Keeping auto-removable packages (%s) because removing"
+                  " them would also remove the following packages which "
+                  "should be kept in this step: %s"), pkgname,
+                " ".join(sorted(changes - auto_removable)))
+            cache.clear()
+        else:
+            # do it in one step
+            if not dry_run:
+                res, error = cache_commit(cache, logfile_dpkg, verbose)
+            else:
+                res = True
+                cache.clear()
+
+    if res:
+        logging.info(_("Packages that were successfully auto-removed: %s"),
+                     " ".join(sorted(auto_removable)))
+    if not res:
         logging.error(_("Auto-removing the packages failed!"))
         logging.error(_("Error message: '%s'"), error)
         logging.error(_("dpkg returned an error! See '%s' for details"),
@@ -1539,8 +1616,32 @@ def main(options, rootdir=""):
     else:
         logging.debug("dpkg is configured not to cause conffile prompts")
 
-    # auto-removal
-    previous_autoremovals = get_auto_removable(cache)
+    # get log
+    logfile_dpkg = os.path.join(_get_logdir(), 'unattended-upgrades-dpkg.log')
+    if not os.path.exists(logfile_dpkg):
+        with open(logfile_dpkg, 'w'):
+            pass
+
+    # auto-removals
+    auto_removable = get_auto_removable(cache)
+    if (auto_removable and apt_pkg.config.find_b(
+            "Unattended-Upgrade::Remove-Unused-Kernel-Packages", True)):
+        # remove unused kernels before installing new ones because the newly
+        # installed ones may fill up /boot and break the system right before
+        # removing old ones could take place
+        #
+        # this step may also remove _auto-removable_ reverse dependencies
+        # of kernel packages
+        auto_removable_kernel_pkgs = only_kernel_pkgs(auto_removable)
+        if auto_removable_kernel_pkgs:
+            logging.info(_("Removing unused kernel packages: %s"),
+                         " ".join(auto_removable_kernel_pkgs))
+            do_auto_remove(cache, auto_removable_kernel_pkgs,
+                           logfile_dpkg, use_minimal_steps(options),
+                           options.verbose or options.debug, options.dry_run)
+            auto_removable = get_auto_removable(cache)
+
+    previous_autoremovals = auto_removable
     if apt_pkg.config.find_b(
             "Unattended-Upgrade::Remove-Unused-Dependencies", False):
         pending_autoremovals = previous_autoremovals
@@ -1583,12 +1684,6 @@ def main(options, rootdir=""):
     pkgs = " ".join([pkg.name for pkg in pkgs_to_upgrade])
     logging.info(_("Packages that will be upgraded: %s"), pkgs)
 
-    # get log
-    logfile_dpkg = os.path.join(_get_logdir(), 'unattended-upgrades-dpkg.log')
-    if not os.path.exists(logfile_dpkg):
-        with open(logfile_dpkg, 'w'):
-            pass
-
     # only perform install step if we actually have packages to install
     pkg_install_success = True
     if len(pkgs_to_upgrade) > 0:
@@ -1618,7 +1713,7 @@ def main(options, rootdir=""):
          not SIGNAL_STOP_REQUEST)):
         auto_removals = get_auto_removable(cache)
         pkg_install_success = pkg_install_success and do_auto_remove(
-            cache, auto_removals, logfile_dpkg,
+            cache, auto_removals, logfile_dpkg, use_minimal_steps(options),
             options.verbose or options.debug,
             options.dry_run)
     # the user wants *only new* auto-removals to be removed
@@ -1628,7 +1723,7 @@ def main(options, rootdir=""):
         new_pending_autoremovals = get_auto_removable(cache)
         auto_removals = new_pending_autoremovals - previous_autoremovals
         pkg_install_success = pkg_install_success and do_auto_remove(
-            cache, auto_removals, logfile_dpkg,
+            cache, auto_removals, logfile_dpkg, use_minimal_steps(options),
             options.verbose or options.debug,
             options.dry_run)
 
