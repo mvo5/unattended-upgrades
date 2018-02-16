@@ -1290,6 +1290,31 @@ def only_kernel_pkgs(auto_removable):
         return set()
 
 
+def is_autoremove_valid(cache, pkgname, auto_removable):
+    # type: (apt.Cache, str, AbstractSet[str]) -> bool
+    changes = set([p.name for p in cache.get_changes()])
+    if not changes:
+        # package is already removed
+        return True
+    if not changes.issubset(auto_removable):
+        if pkgname != "":
+            logging.warning(
+                _("Keeping auto-removable %s package(s) because it would"
+                  " also remove the following packages which should "
+                  "be kept in this step: %s"), pkgname,
+                " ".join(sorted(changes - auto_removable)))
+        else:
+            logging.warning(
+                _("Keeping %s auto-removable package(s) because it would"
+                  " also remove the following packages which should "
+                  "be kept in this step: %s"), len(auto_removable),
+                " ".join(sorted(changes - auto_removable)))
+
+        cache.clear()
+        return False
+    return True
+
+
 def do_auto_remove(cache, auto_removable, logfile_dpkg, minimal_steps,
                    verbose=False, dry_run=False):
     # type: (apt.Cache, AbstractSet[str], str, bool, bool, bool) -> bool
@@ -1303,18 +1328,7 @@ def do_auto_remove(cache, auto_removable, logfile_dpkg, minimal_steps,
                 return False
             logging.debug("marking %s for removal" % pkgname)
             cache[pkgname].mark_delete()
-            changes = set([p.name for p in cache.get_changes()])
-            if not changes:
-                # package is already removed
-                continue
-            if not changes.issubset(auto_removable):
-                logging.warning(
-                    _("Keeping auto-removable %s package because it would"
-                      " also remove the following packages which should "
-                      "be kept in this step: %s"), pkgname,
-                    " ".join(sorted(changes - auto_removable)))
-
-                cache.clear()
+            if not is_autoremove_valid(cache, pkgname, auto_removable):
                 # this situation can occur when removing newly unused packages
                 # would also remove old unused packages which are not set
                 # for removal, thus getting there is not handled as an error
@@ -1330,16 +1344,7 @@ def do_auto_remove(cache, auto_removable, logfile_dpkg, minimal_steps,
     else:
         for pkgname in auto_removable:
             cache[pkgname].mark_delete()
-
-        changes = set([p.name for p in cache.get_changes()])
-        if not changes.issubset(auto_removable):
-            logging.warning(
-                _("Keeping auto-removable packages (%s) because removing"
-                  " them would also remove the following packages which "
-                  "should be kept in this step: %s"), pkgname,
-                " ".join(sorted(changes - auto_removable)))
-            cache.clear()
-        else:
+        if is_autoremove_valid(cache, "", auto_removable):
             # do it in one step
             if not dry_run:
                 res, error = cache_commit(cache, logfile_dpkg, verbose)
