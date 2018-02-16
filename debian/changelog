@@ -15,6 +15,7 @@ unattended-upgrades (1.0) UNRELEASED; urgency=medium
 
   [ Michael Vogt ]
   * unattended-upgrades: tweak mail-on-warnings PR
+  * unattended-upgrade: extract is_autoremove_valid helper
 
   [ Balint Reczey ]
   * Run upgrade-between-snapshots only on amd64.
@@ -31,8 +32,9 @@ unattended-upgrades (1.0) UNRELEASED; urgency=medium
     which were unused before starting starting the upgrade step.
   * Remove unused automatically installed kernel packages
     (LP: #1357093, #1624644, #1675079, #1698159)
+  * Stop including Python syntax in the report (Closes: #876796)
 
- -- Balint Reczey <rbalint@ubuntu.com>  Fri, 16 Feb 2018 13:14:11 +0700
+ -- Balint Reczey <rbalint@ubuntu.com>  Sat, 17 Feb 2018 02:37:49 +0700
 
 unattended-upgrades (0.99) unstable; urgency=medium
 
