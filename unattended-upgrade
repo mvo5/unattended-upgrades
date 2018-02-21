@@ -118,6 +118,28 @@ class UnattendedUpgradesCache(apt.Cache):
         self.candidates_to_adjust = {}  # type: Dict[str, apt.Version]
         apt.Cache.__init__(self, rootdir=rootdir)
         self.allowed_origins = allowed_origins
+
+        # generate versioned_kernel_pkgs_regexp for later use
+        apt_versioned_kernel_pkgs = apt_pkg.config.value_list(
+            "APT::VersionedKernelPackages")
+        if apt_versioned_kernel_pkgs:
+            self.versioned_kernel_pkgs_regexp = re.compile("(" + "|".join(
+                ["^" + p for p in apt_versioned_kernel_pkgs]) + ")")
+            logging.debug("Using %s regexp to find kernel packages",
+                          self.versioned_kernel_pkgs_regexp.pattern)
+            running_kernel_version = subprocess.check_output(
+                ["uname", "-r"], universal_newlines=True).rstrip()
+            self.running_kernel_pkgs_regexp = re.compile("(" + "|".join(
+                [("^" + p + ".*" + running_kernel_version)
+                 if not p.startswith(".*") else (running_kernel_version + p)
+                 for p in apt_versioned_kernel_pkgs]) + ")")
+            logging.debug("Using %s regexp to find running kernel packages",
+                          self.running_kernel_pkgs_regexp.pattern)
+        else:
+            logging.debug("APT::VersionedKernelPackages is not set")
+            self.versioned_kernel_pkgs_regexp = None
+            self.running_kernel_pkgs_regexp = None
+
         # ensure we update the candidate versions
         self.candidates_to_adjust = self.get_candidates_to_adjust()
         for pkgname, candidate in self.candidates_to_adjust.items():
@@ -1269,27 +1291,6 @@ def get_auto_removable(cache):
                 if pkg.is_auto_removable])
 
 
-def only_kernel_pkgs(auto_removable):
-    # type: (AbstractSet[str]) -> AbstractSet[str]
-    running_kernel_version = subprocess.check_output(
-        ["uname", "-r"], universal_newlines=True).rstrip()
-    versioned_kernel_pkgs = apt_pkg.config.value_list(
-        "APT::VersionedKernelPackages")
-
-    if versioned_kernel_pkgs:
-        kernel_pkgs_regexp = "(" + "|".join(
-            ["^" + p for p in versioned_kernel_pkgs]) + ")"
-        logging.debug("Using %s regexp to find kernel packages",
-                      kernel_pkgs_regexp)
-
-        return set([pkg for pkg in auto_removable
-                    if (re.match(kernel_pkgs_regexp, pkg) and
-                        not re.match(running_kernel_version, pkg))])
-    else:
-        logging.debug("APT::VersionedKernelPackages is not set")
-        return set()
-
-
 def is_autoremove_valid(cache, pkgname, auto_removable):
     # type: (apt.Cache, str, AbstractSet[str]) -> bool
     changes = set([p.name for p in cache.get_changes()])
@@ -1637,7 +1638,11 @@ def main(options, rootdir=""):
         #
         # this step may also remove _auto-removable_ reverse dependencies
         # of kernel packages
-        auto_removable_kernel_pkgs = only_kernel_pkgs(auto_removable)
+        auto_removable_kernel_pkgs = {
+            p for p in auto_removable
+            if (cache.versioned_kernel_pkgs_regexp and
+                cache.versioned_kernel_pkgs_regexp.match(p) and
+                not cache.running_kernel_pkgs_regexp.match(p))}
         if auto_removable_kernel_pkgs:
             logging.info(_("Removing unused kernel packages: %s"),
                          " ".join(auto_removable_kernel_pkgs))

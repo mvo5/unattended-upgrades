@@ -108,6 +108,7 @@ Unattended-Upgrade::Remove-Unused-Dependencies "true";
 
     def test_remove_unused_dependencies_new_unused_only(self):
         apt.apt_pkg.config.set("APT::VersionedKernelPackages::", "linux-image")
+        apt.apt_pkg.config.set("APT::VersionedKernelPackages::", ".*-modules")
         apt.apt_pkg.config.set("APT::VersionedKernelPackages::",
                                "linux-headers")
         apt_conf = os.path.join(self.rootdir, "etc", "apt", "apt.conf")
