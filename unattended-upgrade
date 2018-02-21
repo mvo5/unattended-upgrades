@@ -655,6 +655,29 @@ def is_pkgname_in_whitelist(pkgname, whitelist):
     return False
 
 
+def is_pkg_change_allowed(pkg, blacklist, whitelist):
+    # type: (apt.Package, List[str], List[str]) -> bool
+    if is_pkgname_in_blacklist(pkg.name, blacklist, []):
+        logging.debug("pkg %s package has been blacklisted" % pkg.name)
+        return False
+    # a strict whitelist will not allow any changes not in the
+    # whitelist, most people will want the relaxed whitelist
+    # that whitelists a package but pulls in the package
+    # dependencies
+    strict_whitelist = apt_pkg.config.find_b(
+        "Unattended-Upgrade::Package-Whitelist-Strict", False)
+    if strict_whitelist and \
+       not is_pkgname_in_whitelist(pkg.name, whitelist):
+
+        logging.debug("pkg %s package is not whitelisted" %
+                      pkg.name)
+        return False
+    if pkg._pkg.selected_state == apt_pkg.SELSTATE_HOLD:
+        logging.debug("pkg %s is on hold" % pkg.name)
+        return False
+    return True
+
+
 def check_changes_for_sanity(cache, allowed_origins, blacklist, whitelist,
                              desired_pkg=None):
     # type: (apt.Cache, List[str], List[str], List[str], apt.Package) -> bool
@@ -676,24 +699,7 @@ def check_changes_for_sanity(cache, allowed_origins, blacklist, whitelist,
             if not is_allowed_origin(pkg.candidate, allowed_origins):
                 logging.debug("pkg %s not in allowed origin" % pkg.name)
                 return False
-            if is_pkgname_in_blacklist(pkg.name, blacklist, []):
-                logging.debug("pkg %s package has been blacklisted" %
-                              pkg.name)
-                return False
-            # a strict whitelist will not allow any changes not in the
-            # whitelist, most people will want the relaxed whitelist
-            # that whitelists a package but pulls in the package
-            # dependencies
-            strict_whitelist = apt_pkg.config.find_b(
-                "Unattended-Upgrade::Package-Whitelist-Strict", False)
-            if (strict_whitelist and
-                    not is_pkgname_in_whitelist(pkg.name, whitelist)):
-
-                logging.debug("pkg %s package is not whitelisted" %
-                              pkg.name)
-                return False
-            if pkg._pkg.selected_state == apt_pkg.SELSTATE_HOLD:
-                logging.debug("pkg %s is on hold" % pkg.name)
+            if not is_pkg_change_allowed(pkg, blacklist, whitelist):
                 return False
             # check if the package is unsafe to upgrade unattended
             ignore_require_restart = apt_pkg.config.find_b(
@@ -1291,43 +1297,59 @@ def get_auto_removable(cache):
             if pkg.is_auto_removable}
 
 
-def is_autoremove_valid(cache, pkgname, auto_removable):
-    # type: (apt.Cache, str, AbstractSet[str]) -> bool
-    changes = {p.name for p in cache.get_changes()}
+def is_autoremove_valid(cache, pkgname, auto_removable, blacklisted_pkgs,
+                        whitelisted_pkgs):
+    # type: (apt.Cache, str, AbstractSet[str], List[str], List[str]) -> bool
+    changes = cache.get_changes()
     if not changes:
         # package is already removed
         return True
-    if not changes.issubset(auto_removable):
+    pkgnames = {pkg.name for pkg in changes}
+    for pkg in changes:
+        if not is_pkg_change_allowed(pkg, blacklisted_pkgs, whitelisted_pkgs):
+            logging.warning(
+                _("Keeping the following auto-removable package(s) because "
+                  "they include %s which is set to be kept unmodified: %s"),
+                pkg.name, " ".join(sorted(pkgnames)))
+            return False
+    if not pkgnames.issubset(auto_removable):
         if pkgname != "":
             logging.warning(
                 _("Keeping auto-removable %s package(s) because it would"
                   " also remove the following packages which should "
                   "be kept in this step: %s"), pkgname,
-                " ".join(sorted(changes - auto_removable)))
+                " ".join(sorted(pkgnames - auto_removable)))
         else:
             logging.warning(
                 _("Keeping %s auto-removable package(s) because it would"
                   " also remove the following packages which should "
                   "be kept in this step: %s"), len(auto_removable),
-                " ".join(sorted(changes - auto_removable)))
+                " ".join(sorted(pkgnames - auto_removable)))
 
         cache.clear()
         return False
-    for packagename in changes:
+    for packagename in pkgnames:
         if cache.running_kernel_pkgs_regexp and \
            cache.running_kernel_pkgs_regexp.match(packagename):
             logging.warning(
                 _("Keeping the following auto-removable package(s) because "
                   "they include %s which package is related to the running "
-                  "kernel: %s"), packagename, " ".join(sorted(changes)))
+                  "kernel: %s"), packagename, " ".join(sorted(pkgnames)))
             cache.clear()
             return False
     return True
 
 
-def do_auto_remove(cache, auto_removable, logfile_dpkg, minimal_steps,
-                   verbose=False, dry_run=False):
-    # type: (apt.Cache, AbstractSet[str], str, bool, bool, bool) -> bool
+def do_auto_remove(cache,             # type: apt.Cache
+                   auto_removable,    # type: AbstractSet[str]
+                   logfile_dpkg,      # type: str
+                   minimal_steps,     # type: bool
+                   blacklisted_pkgs,  # type: List[str]
+                   whitelisted_pkgs,  # type: List[str]
+                   verbose=False,     # type: bool
+                   dry_run=False      # type: bool
+                   ):
+    # type: (...) -> bool
     if not auto_removable:
         return True
 
@@ -1338,7 +1360,8 @@ def do_auto_remove(cache, auto_removable, logfile_dpkg, minimal_steps,
                 return False
             logging.debug("marking %s for removal" % pkgname)
             cache[pkgname].mark_delete()
-            if not is_autoremove_valid(cache, pkgname, auto_removable):
+            if not is_autoremove_valid(cache, pkgname, auto_removable,
+                                       blacklisted_pkgs, whitelisted_pkgs):
                 # this situation can occur when removing newly unused packages
                 # would also remove old unused packages which are not set
                 # for removal, thus getting there is not handled as an error
@@ -1354,7 +1377,8 @@ def do_auto_remove(cache, auto_removable, logfile_dpkg, minimal_steps,
     else:
         for pkgname in auto_removable:
             cache[pkgname].mark_delete()
-        if is_autoremove_valid(cache, "", auto_removable):
+        if is_autoremove_valid(cache, "", auto_removable, blacklisted_pkgs,
+                               whitelisted_pkgs):
             # do it in one step
             if not dry_run:
                 res, error = cache_commit(cache, logfile_dpkg, verbose)
@@ -1657,6 +1681,7 @@ def main(options, rootdir=""):
                          " ".join(auto_removable_kernel_pkgs))
             do_auto_remove(cache, auto_removable_kernel_pkgs,
                            logfile_dpkg, use_minimal_steps(options),
+                           blacklisted_pkgs, whitelisted_pkgs,
                            options.verbose or options.debug, options.dry_run)
             auto_removable = get_auto_removable(cache)
 
@@ -1733,6 +1758,7 @@ def main(options, rootdir=""):
         auto_removals = get_auto_removable(cache)
         pkg_install_success = pkg_install_success and do_auto_remove(
             cache, auto_removals, logfile_dpkg, use_minimal_steps(options),
+            blacklisted_pkgs, whitelisted_pkgs,
             options.verbose or options.debug,
             options.dry_run)
     # the user wants *only new* auto-removals to be removed
@@ -1743,6 +1769,7 @@ def main(options, rootdir=""):
         auto_removals = new_pending_autoremovals - previous_autoremovals
         pkg_install_success = pkg_install_success and do_auto_remove(
             cache, auto_removals, logfile_dpkg, use_minimal_steps(options),
+            blacklisted_pkgs, whitelisted_pkgs,
             options.verbose or options.debug,
             options.dry_run)
 
