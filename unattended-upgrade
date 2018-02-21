@@ -1313,6 +1313,15 @@ def is_autoremove_valid(cache, pkgname, auto_removable):
 
         cache.clear()
         return False
+    for packagename in changes:
+        if cache.running_kernel_pkgs_regexp and \
+           cache.running_kernel_pkgs_regexp.match(packagename):
+            logging.warning(
+                _("Keeping the following auto-removable package(s) because "
+                  "they include %s which package is related to the running "
+                  "kernel: %s"), packagename, " ".join(sorted(changes)))
+            cache.clear()
+            return False
     return True
 
 
