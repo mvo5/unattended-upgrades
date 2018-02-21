@@ -1287,13 +1287,13 @@ def get_dpkg_log_content(logfile_dpkg, install_start_time):
 
 def get_auto_removable(cache):
     # type: (apt.Cache) -> AbstractSet[str]
-    return set([pkg.name for pkg in cache
-                if pkg.is_auto_removable])
+    return {pkg.name for pkg in cache
+            if pkg.is_auto_removable}
 
 
 def is_autoremove_valid(cache, pkgname, auto_removable):
     # type: (apt.Cache, str, AbstractSet[str]) -> bool
-    changes = set([p.name for p in cache.get_changes()])
+    changes = {p.name for p in cache.get_changes()}
     if not changes:
         # package is already removed
         return True
