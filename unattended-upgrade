@@ -1769,8 +1769,6 @@ def main(options, rootdir=""):
                       not pkg_conffile_prompt)
 
     # now check if any auto-removing needs to be done
-    cache = UnattendedUpgradesCache(
-        rootdir=rootdir, allowed_origins=allowed_origins)
     if cache._depcache.broken_count > 0:
         print(_("Cache has broken packages, exiting"))
         logging.error(_("Cache has broken packages, exiting"))
