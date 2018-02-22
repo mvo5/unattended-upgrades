@@ -953,8 +953,9 @@ def _send_mail_using_sendmail(from_address, to_address, subject, body):
     return ret
 
 
-def send_summary_mail(pkgs, res, pkgs_kept_back, mem_log, dpkg_log_content):
-    # type: (str, bool, List[str], StringIO, str) -> None
+def send_summary_mail(pkgs, res, pkgs_kept_back, pkgs_removed,
+                      pkgs_kept_installed, mem_log, dpkg_log_content):
+    # type: (str, bool, List[str], List[str], List[str], StringIO, str) -> None
     """ send mail (if configured in Unattended-Upgrade::Mail) """
     to_email = apt_pkg.config.find("Unattended-Upgrade::Mail", "")
     if not to_email:
@@ -973,7 +974,8 @@ def send_summary_mail(pkgs, res, pkgs_kept_back, mem_log, dpkg_log_content):
     reboot_flag_str = _(
         "[reboot required]") if os.path.isfile(REBOOT_REQUIRED_FILE) else ""
     # Check if packages are kept on hold
-    hold_flag_str = _("[package on hold]") if pkgs_kept_back else ""
+    hold_flag_str = _("[package on hold]") if (pkgs_kept_back or
+                                               pkgs_kept_installed) else ""
     logging.debug("Sending mail to %s" % to_email)
     subject = _(
         "{hold_flag}{reboot_flag} unattended-upgrades result for "
@@ -993,6 +995,16 @@ def send_summary_mail(pkgs, res, pkgs_kept_back, mem_log, dpkg_log_content):
     if pkgs_kept_back:
         body += _("Packages with upgradable origin but kept back:\n")
         body += " " + wrap(" ".join(pkgs_kept_back), 70, " ")
+        body += "\n"
+    body += "\n"
+    if pkgs_removed:
+        body += _("Packages that were auto-removed:\n")
+        body += " " + wrap(" ".join(pkgs_removed), 70, " ")
+        body += "\n"
+    body += "\n"
+    if pkgs_kept_installed:
+        body += _("Packages that were kept from being auto-removed:\n")
+        body += " " + wrap(" ".join(pkgs_kept_installed), 70, " ")
         body += "\n"
     body += "\n"
     if dpkg_log_content:
@@ -1349,15 +1361,18 @@ def do_auto_remove(cache,             # type: apt.Cache
                    verbose=False,     # type: bool
                    dry_run=False      # type: bool
                    ):
-    # type: (...) -> bool
+    # type: (...) -> Tuple[bool, List[str], List[str]]
     if not auto_removable:
-        return True
+        return (True, [], [])
 
+    pkgs_removed = []         # type: List[str]
+    pkgs_kept_installed = []  # type: List[str]
     if minimal_steps:
         for pkgname in auto_removable:
             if SIGNAL_STOP_REQUEST:
                 logging.warning("SIGNAL received, stopping")
-                return False
+                pkgs_kept_installed = list(auto_removable - set(pkgs_removed))
+                return (False, pkgs_removed, pkgs_kept_installed)
             logging.debug("marking %s for removal" % pkgname)
             cache[pkgname].mark_delete()
             if not is_autoremove_valid(cache, pkgname, auto_removable,
@@ -1365,12 +1380,14 @@ def do_auto_remove(cache,             # type: apt.Cache
                 # this situation can occur when removing newly unused packages
                 # would also remove old unused packages which are not set
                 # for removal, thus getting there is not handled as an error
+                pkgs_kept_installed.append(pkgname)
                 res = True
                 continue
             if not dry_run:
                 res, error = cache_commit(cache, logfile_dpkg, verbose)
                 if not res:
                     break
+                pkgs_removed.append(pkgname)
             else:
                 res = True
                 cache.clear()
@@ -1388,13 +1405,15 @@ def do_auto_remove(cache,             # type: apt.Cache
 
     if res:
         logging.info(_("Packages that were successfully auto-removed: %s"),
-                     " ".join(sorted(auto_removable)))
+                     " ".join(sorted(pkgs_removed)))
+        logging.info(_("Packages that are kept back: %s"),
+                     " ".join(sorted(pkgs_kept_installed)))
     if not res:
         logging.error(_("Auto-removing the packages failed!"))
         logging.error(_("Error message: %s"), error)
         logging.error(_("dpkg returned an error! See %s for details"),
                       logfile_dpkg)
-    return res
+    return (res, pkgs_removed, pkgs_kept_installed)
 
 
 def clean_downloaded_packages(fetcher):
@@ -1663,6 +1682,9 @@ def main(options, rootdir=""):
 
     # auto-removals
     auto_removable = get_auto_removable(cache)
+    kernel_pkgs_remove_success = True  # type: bool
+    kernel_pkgs_removed = []           # type: List[str]
+    kernel_pkgs_kept_installed = []    # type: List[str]
     if (auto_removable and apt_pkg.config.find_b(
             "Unattended-Upgrade::Remove-Unused-Kernel-Packages", True)):
         # remove unused kernels before installing new ones because the newly
@@ -1679,10 +1701,13 @@ def main(options, rootdir=""):
         if auto_removable_kernel_pkgs:
             logging.info(_("Removing unused kernel packages: %s"),
                          " ".join(auto_removable_kernel_pkgs))
-            do_auto_remove(cache, auto_removable_kernel_pkgs,
-                           logfile_dpkg, use_minimal_steps(options),
-                           blacklisted_pkgs, whitelisted_pkgs,
-                           options.verbose or options.debug, options.dry_run)
+            (kernel_pkgs_remove_success,
+             kernel_pkgs_removed,
+             kernel_pkgs_kept_installed) = do_auto_remove(
+                 cache, auto_removable_kernel_pkgs,
+                 logfile_dpkg, use_minimal_steps(options),
+                 blacklisted_pkgs, whitelisted_pkgs,
+                 options.verbose or options.debug, options.dry_run)
             auto_removable = get_auto_removable(cache)
 
     previous_autoremovals = auto_removable
@@ -1740,7 +1765,8 @@ def main(options, rootdir=""):
                                          logfile_dpkg)
     # Was the overall run succesful: only if everything installed
     # fine and nothing was held back because of a conffile prompt.
-    successful_run = pkg_install_success and not pkg_conffile_prompt
+    successful_run = (kernel_pkgs_remove_success and pkg_install_success and
+                      not pkg_conffile_prompt)
 
     # now check if any auto-removing needs to be done
     cache = UnattendedUpgradesCache(
@@ -1752,26 +1778,34 @@ def main(options, rootdir=""):
 
     # the user wants *all* auto-removals to be removed
     # (unless u-u got signalled to stop gracefully quickly)
+    pkgs_removed = []         # type: List[str]
+    pkgs_kept_installed = []  # type: List[str]
     if ((apt_pkg.config.find_b(
             "Unattended-Upgrade::Remove-Unused-Dependencies", False) and
          not SIGNAL_STOP_REQUEST)):
         auto_removals = get_auto_removable(cache)
-        pkg_install_success = pkg_install_success and do_auto_remove(
+        (pkg_remove_success,
+         pkgs_removed,
+         pkgs_kept_installed) = do_auto_remove(
             cache, auto_removals, logfile_dpkg, use_minimal_steps(options),
             blacklisted_pkgs, whitelisted_pkgs,
             options.verbose or options.debug,
             options.dry_run)
+        successful_run = successful_run and pkg_remove_success
     # the user wants *only new* auto-removals to be removed
     elif apt_pkg.config.find_b(
             "Unattended-Upgrade::Remove-New-Unused-Dependencies", True):
         # calculate the new auto-removals
         new_pending_autoremovals = get_auto_removable(cache)
         auto_removals = new_pending_autoremovals - previous_autoremovals
-        pkg_install_success = pkg_install_success and do_auto_remove(
+        (pkg_remove_success,
+         pkgs_removed,
+         pkgs_kept_installed) = do_auto_remove(
             cache, auto_removals, logfile_dpkg, use_minimal_steps(options),
             blacklisted_pkgs, whitelisted_pkgs,
             options.verbose or options.debug,
             options.dry_run)
+        successful_run = successful_run and pkg_remove_success
 
     logging.debug("InstCount=%i DelCount=%i BrokenCount=%i"
                   % (cache._depcache.inst_count,
@@ -1783,7 +1817,10 @@ def main(options, rootdir=""):
         log_content = get_dpkg_log_content(logfile_dpkg, install_start_time)
         send_summary_mail(
             pkgs, successful_run,
-            pkgs_kept_back, mem_log, log_content)
+            pkgs_kept_back,
+            kernel_pkgs_removed + pkgs_removed,
+            kernel_pkgs_kept_installed + pkgs_kept_installed,
+            mem_log, log_content)
 
     # clean after success install (if needed)
     keep_key = "Unattended-Upgrade::Keep-Debs-After-Install"
