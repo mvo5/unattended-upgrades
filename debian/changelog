@@ -1,4 +1,4 @@
-unattended-upgrades (1.0) UNRELEASED; urgency=medium
+unattended-upgrades (1.0) unstable; urgency=medium
 
   [ Simon Arlott ]
   * Revert sending mails on WARNINGS when in MailOnlyOnError mode"
@@ -33,8 +33,16 @@ unattended-upgrades (1.0) UNRELEASED; urgency=medium
   * Remove unused automatically installed kernel packages
     (LP: #1357093, #1624644, #1675079, #1698159)
   * Stop including Python syntax in the report (Closes: #876796)
+  * Do not auto remove packages related to the running kernel (LP: #1615381)
+  * Check packages to be autoremoved against blacklists, whitelists.
+    Also check if the packages are held.
+  * Report package removals in the summary email (Closes: #876797)
+  * Run upgrade-between-snapshots test with debugging enabled
+  * Don't create new UnattendedUpgradesCache for checking for autoremovals
+    .open() refreshes the state in each cache_commit(), this is enough
+  * Update .pot and .po files
 
- -- Balint Reczey <rbalint@ubuntu.com>  Sat, 17 Feb 2018 02:37:49 +0700
+ -- Balint Reczey <rbalint@ubuntu.com>  Thu, 01 Mar 2018 00:22:46 +0700
 
 unattended-upgrades (0.99) unstable; urgency=medium
 
