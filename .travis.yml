@@ -21,4 +21,4 @@ before_install:
 script:
   - dpkg-buildpackage -d -us -uc -rfakeroot
   - sudo dpkg -i ../unattended-upgrades_*.deb
-  - (sudo unattended-upgrades -v --debug || true)
+  - (sudo unattended-upgrades -v --debug | grep -v '^matching .* against ' || true)
