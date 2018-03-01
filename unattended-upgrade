@@ -1704,10 +1704,10 @@ def main(options, rootdir=""):
             (kernel_pkgs_remove_success,
              kernel_pkgs_removed,
              kernel_pkgs_kept_installed) = do_auto_remove(
-                 cache, auto_removable_kernel_pkgs,
-                 logfile_dpkg, use_minimal_steps(options),
-                 blacklisted_pkgs, whitelisted_pkgs,
-                 options.verbose or options.debug, options.dry_run)
+                cache, auto_removable_kernel_pkgs,
+                logfile_dpkg, use_minimal_steps(options),
+                blacklisted_pkgs, whitelisted_pkgs,
+                options.verbose or options.debug, options.dry_run)
             auto_removable = get_auto_removable(cache)
 
     previous_autoremovals = auto_removable
