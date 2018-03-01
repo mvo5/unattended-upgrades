@@ -17,8 +17,7 @@ before_install:
 # travis is "funny" it has a non-distro python3 that will not find
 # python modules installed via apt-get
 # note that tests are run during package build
-# the full upgrade test is failing on Travis, but autopkgtest covers that, too
 script:
   - dpkg-buildpackage -d -us -uc -rfakeroot
   - sudo dpkg -i ../unattended-upgrades_*.deb
-  - (sudo unattended-upgrades -v --debug | grep -v '^matching .* against ' || true)
+  - sudo unattended-upgrades --help
