@@ -42,11 +42,8 @@ unattended-upgrades (1.0) unstable; urgency=medium
     .open() refreshes the state in each cache_commit(), this is enough
   * Update .pot and .po files
   * Update .travis.yml to actually build and test u-u from the repo
-  * Run Travis upgrade test in debug mode to give more information
-  * Ignore results of full upgrade test on Travis.
-    The test is failing, but the output may still be useful and autopkgtest
-    already covers a full upgrade with more up to date dependencies and
-    package set.
+  * Run only a simple installation test on Travis, the system upgrade
+    test was always failing
 
  -- Balint Reczey <rbalint@ubuntu.com>  Thu, 01 Mar 2018 15:54:10 +0700
 
