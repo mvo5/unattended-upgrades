@@ -40,6 +40,13 @@ $chroot_exec bash -c 'apt install -y /tmp/unattended-upgrades_*deb' 2>&1
 # save list of manually installed packages
 $chroot_exec apt-mark showmanual > $chroot_dir/tmp/manual
 
+# hold a package to test if autoremoval honors that
+$chroot_exec apt-mark hold libpoppler68
+
+# also blacklist a package
+echo 'Unattended-Upgrade::Package-Blacklist {"libx265-13.*"};' > \
+     $chroot_dir/etc/apt/apt.conf.d/51unattended-upgrades-blacklist
+
 # clean up to need less space for the test
 $chroot_exec apt-get clean
 
@@ -50,10 +57,17 @@ cp data/50unattended-upgrades.Debian $chroot_dir/etc/apt/apt.conf.d/50unattended
 sed -i 's|//Unattended-Upgrade::Mail |Unattended-Upgrade::Mail |' $chroot_dir/etc/apt/apt.conf.d/50unattended-upgrades
 sed -i "s/$start_date/$end_date/" $chroot_dir/etc/apt/sources.list
 $chroot_exec apt-get update
-$chroot_exec unattended-upgrade --verbose
+$chroot_exec unattended-upgrade --verbose --debug
 echo "new packages marked as manually installed (should be none): "
 $chroot_exec apt-mark showmanual | diff $chroot_dir/tmp/manual -
 $chroot_exec perl -MMIME::QuotedPrint -pe '$_=MIME::QuotedPrint::decode($_);' /var/mail/mail
+
+echo "libpoppler68 should be still installed and held:"
+$chroot_exec dpkg -l libpoppler68 | grep '^hi'
+
+echo "libx265-130 should be still installed thanks to the blacklist"
+$chroot_exec dpkg -l libx265-130 | grep '^ii'
+
 # cleanup
 umount $chroot_dir/dev/pts
 rm -rf $chroot_dir
