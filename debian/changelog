@@ -1,3 +1,17 @@
+unattended-upgrades (1.0ubuntu1) bionic; urgency=medium
+
+  * Merge from Debian unstable
+    - Remaining changes:
+      - unattended-upgrades: Do not automatically upgrade the development
+        release of Ubuntu unless Unattended-Upgrade::DevRelease is true.
+    - Dropped changes, included in Debian:
+      - Run upgrade-between-snapshots only on amd64.
+        The test exercises only unattented-upgrade's Python code and uses
+        dependencies from the frozen Debian snapshot archive thus running
+        it on all architectures would provide little benefit.
+
+ -- Balint Reczey <rbalint@ubuntu.com>  Thu, 01 Mar 2018 17:29:33 +0700
+
 unattended-upgrades (1.0) unstable; urgency=medium
 
   [ Simon Arlott ]
