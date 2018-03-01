@@ -41,8 +41,11 @@ unattended-upgrades (1.0) unstable; urgency=medium
   * Don't create new UnattendedUpgradesCache for checking for autoremovals
     .open() refreshes the state in each cache_commit(), this is enough
   * Update .pot and .po files
+  * Update .travis.yml to actually build and test u-u from the repo
+  * Run only a simple installation test on Travis, the system upgrade
+    test was always failing
 
- -- Balint Reczey <rbalint@ubuntu.com>  Thu, 01 Mar 2018 00:22:46 +0700
+ -- Balint Reczey <rbalint@ubuntu.com>  Thu, 01 Mar 2018 15:54:10 +0700
 
 unattended-upgrades (0.99) unstable; urgency=medium
 
