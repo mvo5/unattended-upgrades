@@ -117,10 +117,40 @@ class UnattendedUpgradesCache(apt.Cache):
 
     def __init__(self, rootdir, allowed_origins):
         # type: (str, List[str]) -> None
+        self.candidates_to_adjust = {}  # type: Dict[str, apt.Version]
         apt.Cache.__init__(self, rootdir=rootdir)
         self.allowed_origins = allowed_origins
+
+        # generate versioned_kernel_pkgs_regexp for later use
+        apt_versioned_kernel_pkgs = apt_pkg.config.value_list(
+            "APT::VersionedKernelPackages")
+        if apt_versioned_kernel_pkgs:
+            self.versioned_kernel_pkgs_regexp = re.compile("(" + "|".join(
+                ["^" + p for p in apt_versioned_kernel_pkgs]) + ")")
+            logging.debug("Using %s regexp to find kernel packages",
+                          self.versioned_kernel_pkgs_regexp.pattern)
+            running_kernel_version = subprocess.check_output(
+                ["uname", "-r"], universal_newlines=True).rstrip()
+            self.running_kernel_pkgs_regexp = re.compile("(" + "|".join(
+                [("^" + p + ".*" + running_kernel_version)
+                 if not p.startswith(".*") else (running_kernel_version + p)
+                 for p in apt_versioned_kernel_pkgs]) + ")")
+            logging.debug("Using %s regexp to find running kernel packages",
+                          self.running_kernel_pkgs_regexp.pattern)
+        else:
+            logging.debug("APT::VersionedKernelPackages is not set")
+            self.versioned_kernel_pkgs_regexp = None
+            self.running_kernel_pkgs_regexp = None
+
         # ensure we update the candidate versions
         self.candidates_to_adjust = self.get_candidates_to_adjust()
+        for pkgname, candidate in self.candidates_to_adjust.items():
+            self[pkgname].candidate = candidate
+
+    def open(self, progress=None):
+        # type: (apt.progress.base.Progress) -> None
+        apt.Cache.open(self, progress)
+        # ensure we update the candidate versions
         for pkgname, candidate in self.candidates_to_adjust.items():
             self[pkgname].candidate = candidate
 
@@ -158,14 +188,14 @@ class UnattendedUpgradesCache(apt.Cache):
                 # (and ensure we have a python-apt that supports this)
                 if (hasattr(ver, "policy_priority") and
                         ver.policy_priority < 100):
-                    logging.debug("ignoring ver '%s' with priority < 0" % ver)
+                    logging.debug("ignoring ver %s with priority < 0" % ver)
                     continue
                 if is_allowed_origin(ver, self.allowed_origins):
                     # leave as soon as we have the highest new candidate
                     new_cand = ver
                     break
             if new_cand and new_cand != pkg.candidate:
-                logging.debug("adjusting candidate version: '%s'" % new_cand)
+                logging.debug("adjusting candidate version: %s" % new_cand)
                 candidates[pkg.name] = new_cand
         return candidates
 
@@ -210,7 +240,7 @@ class LogInstallProgress(apt.progress.base.InstallProgress):
                 try:
                     fd = int(fdname)
                 except Exception as e:
-                    print("ERROR: can not get fd for '%s'" % fdname)
+                    print("ERROR: can not get fd for %s" % fdname)
                 if fd in required_fds:
                     continue
                 try:
@@ -422,7 +452,7 @@ def match_whitelist_string(whitelist, origin):
         # strip and unquote the "," back
         (what, value) = [s.strip().replace("%2C", ",")
                          for s in token.split("=")]
-        # logging.debug("matching '%s'='%s' against '%s'" % (
+        # logging.debug("matching %s=%s against %s" % (
         #              what, value, origin))
         # support substitution here as well
         value = substitute(value)
@@ -442,11 +472,11 @@ def match_whitelist_string(whitelist, origin):
             match = fnmatch.fnmatch(origin.codename, value)
         else:
             raise UnknownMatcherError(
-                "Unknown whitelist entry for matcher '%s' (token '%s')" % (
+                "Unknown whitelist entry for matcher %s (token %s)" % (
                     what, token))
         # update res
         res = res and match
-        # logging.debug("matching '%s'='%s' against '%s'" % (
+        # logging.debug("matching %s=%s against %s" % (
         #              what, value, origin))
     return res
 
@@ -489,10 +519,20 @@ def upgrade_normal(cache, logfile_dpkg, verbose):
         logging.info(_("All upgrades installed"))
     else:
         logging.error(_("Installing the upgrades failed!"))
-        logging.error(_("error message: '%s'"), error)
-        logging.error(_("dpkg returned a error! See '%s' for details"),
+        logging.error(_("error message: %s"), error)
+        logging.error(_("dpkg returned a error! See %s for details"),
                       logfile_dpkg)
     return res
+
+
+def use_minimal_steps(options):
+    # type: (Options) -> bool
+    return (options.minimal_upgrade_steps or
+            # COMPAT with the mispelling
+            (apt_pkg.config.find_b("Unattended-Upgrades::MinimalSteps",
+                                   True) and
+             apt_pkg.config.find_b("Unattended-Upgrade::MinimalSteps",
+                                   True)))
 
 
 def upgrade_in_minimal_steps(cache,            # type: apt.Cache
@@ -571,8 +611,8 @@ def upgrade_in_minimal_steps(cache,            # type: apt.Cache
             if verbose:
                 logging.exception("Exception happened during upgrade.")
             logging.error(_("Installing the upgrades failed!"))
-            logging.error(_("error message: '%s'"), error)
-            logging.error(_("dpkg returned a error! See '%s' for details"),
+            logging.error(_("error message: %s"), error)
+            logging.error(_("dpkg returned a error! See %s for details"),
                           logfile_dpkg)
             return False
         to_upgrade = to_upgrade - set(changes)
@@ -598,7 +638,7 @@ def is_pkgname_in_blacklist(pkgname, blacklist, pkgs_kept_back):
     # type: (str, List[str], List[str]) -> bool
     for blacklist_regexp in blacklist:
         if re.match(blacklist_regexp, pkgname):
-            logging.debug("skipping blacklisted package '%s'" % pkgname)
+            logging.debug("skipping blacklisted package %s" % pkgname)
             pkgs_kept_back.append(pkgname)
             return True
     return False
@@ -611,10 +651,33 @@ def is_pkgname_in_whitelist(pkgname, whitelist):
         return True
     for whitelist_regexp in whitelist:
         if re.match(whitelist_regexp, pkgname):
-            logging.debug("only upgrading the following package '%s'" %
+            logging.debug("only upgrading the following package %s" %
                           pkgname)
             return True
     return False
+
+
+def is_pkg_change_allowed(pkg, blacklist, whitelist):
+    # type: (apt.Package, List[str], List[str]) -> bool
+    if is_pkgname_in_blacklist(pkg.name, blacklist, []):
+        logging.debug("pkg %s package has been blacklisted" % pkg.name)
+        return False
+    # a strict whitelist will not allow any changes not in the
+    # whitelist, most people will want the relaxed whitelist
+    # that whitelists a package but pulls in the package
+    # dependencies
+    strict_whitelist = apt_pkg.config.find_b(
+        "Unattended-Upgrade::Package-Whitelist-Strict", False)
+    if strict_whitelist and \
+       not is_pkgname_in_whitelist(pkg.name, whitelist):
+
+        logging.debug("pkg %s package is not whitelisted" %
+                      pkg.name)
+        return False
+    if pkg._pkg.selected_state == apt_pkg.SELSTATE_HOLD:
+        logging.debug("pkg %s is on hold" % pkg.name)
+        return False
+    return True
 
 
 def check_changes_for_sanity(cache, allowed_origins, blacklist, whitelist,
@@ -627,35 +690,18 @@ def check_changes_for_sanity(cache, allowed_origins, blacklist, whitelist,
         return False
     for pkg in cache.get_changes():
         if pkg.marked_delete:
-            logging.debug("pkg '%s' now marked delete" % pkg.name)
+            logging.debug("pkg %s now marked delete" % pkg.name)
             return False
         if pkg.marked_install or pkg.marked_upgrade:
             # apt will never fallback from a trusted to a untrusted
             # origin so its good enough if we have a single trusted one
             if not any([o.trusted for o in pkg.candidate.origins]):
-                logging.debug("pkg '%s' is untrusted" % pkg.name)
+                logging.debug("pkg %s is untrusted" % pkg.name)
                 return False
             if not is_allowed_origin(pkg.candidate, allowed_origins):
-                logging.debug("pkg '%s' not in allowed origin" % pkg.name)
+                logging.debug("pkg %s not in allowed origin" % pkg.name)
                 return False
-            if is_pkgname_in_blacklist(pkg.name, blacklist, []):
-                logging.debug("pkg '%s' package has been blacklisted" %
-                              pkg.name)
-                return False
-            # a strict whitelist will not allow any changes not in the
-            # whitelist, most people will want the relaxed whitelist
-            # that whitelists a package but pulls in the package
-            # dependencies
-            strict_whitelist = apt_pkg.config.find_b(
-                "Unattended-Upgrade::Package-Whitelist-Strict", False)
-            if (strict_whitelist and
-                    not is_pkgname_in_whitelist(pkg.name, whitelist)):
-
-                logging.debug("pkg '%s' package is not whitelisted" %
-                              pkg.name)
-                return False
-            if pkg._pkg.selected_state == apt_pkg.SELSTATE_HOLD:
-                logging.debug("pkg '%s' is on hold" % pkg.name)
+            if not is_pkg_change_allowed(pkg, blacklist, whitelist):
                 return False
             # check if the package is unsafe to upgrade unattended
             ignore_require_restart = apt_pkg.config.find_b(
@@ -663,7 +709,7 @@ def check_changes_for_sanity(cache, allowed_origins, blacklist, whitelist,
             upgrade_requires = pkg.candidate.record.get("Upgrade-Requires")
             if (pkg.marked_upgrade and ignore_require_restart is False and
                     upgrade_requires == "app-restart"):
-                logging.debug("pkg '%s' requires app-restart, not safe to "
+                logging.debug("pkg %s requires app-restart, not safe to "
                               "upgrade unattended")
                 return False
     # check that the package we want to upgrade is in the change set
@@ -680,7 +726,7 @@ def pkgname_from_deb(debfile):
         sections = apt_pkg.TagSection(control)
         return sections["Package"]
     except (IOError, SystemError) as e:
-        logging.error("failed to read deb file '%s' (%s)" % (debfile, e))
+        logging.error("failed to read deb file %s (%s)" % (debfile, e))
         # dumb fallback
         return debfile.split("_")[0]
 
@@ -696,25 +742,29 @@ def get_md5sum_for_file_in_deb(deb_file, conf_file):
     md5_p = Popen(md5_cmd, stdin=tar_p.stdout, stdout=PIPE,
                   universal_newlines=True)
     pkg_md5sum = md5_p.communicate()[0].split()[0]
+    for p in [dpkg_p, tar_p, md5_p]:
+        p.stdout.close()
+        p.wait()
     return pkg_md5sum
 
 
 # prefix is *only* needed for the build-in tests
 def conffile_prompt(destFile, prefix=""):
     # type: (str, str) -> bool
-    logging.debug("check_conffile_prompt('%s')" % destFile)
+    logging.debug("check_conffile_prompt(%s)" % destFile)
     pkgname = pkgname_from_deb(destFile)
 
     # get the conffiles for the /var/lib/dpkg/status file
     status_file = apt_pkg.config.find("Dir::State::status")
-    tagfile = apt_pkg.TagFile(open(status_file, "r"))
-    conffiles = ""
-    for section in tagfile:
-        if section.get("Package") == pkgname:
-            logging.debug("found pkg: %s" % pkgname)
-            if "Conffiles" in section:
-                conffiles = section.get("Conffiles")
-                break
+    with open(status_file, "r") as f:
+        tagfile = apt_pkg.TagFile(f)
+        conffiles = ""
+        for section in tagfile:
+            if section.get("Package") == pkgname:
+                logging.debug("found pkg: %s" % pkgname)
+                if "Conffiles" in section:
+                    conffiles = section.get("Conffiles")
+                    break
 
     # get conffile value from pkg, its ok if the new version
     # does not have conffiles anymore
@@ -725,12 +775,12 @@ def conffile_prompt(destFile, prefix=""):
             "utf-8")
     except SystemError as e:
         print(_("Apt returned an error, exiting"))
-        print(_("error message: '%s'") % e)
+        print(_("error message: %s") % e)
         logging.error(_("Apt returned an error, exiting"))
-        logging.error(_("error message: '%s'"), e)
+        logging.error(_("error message: %s"), e)
         sys.exit(1)
     except LookupError as e:
-        logging.debug("No conffiles in deb '%s' (%s)" % (destFile, e))
+        logging.debug("No conffiles in deb %s (%s)" % (destFile, e))
 
     # Conffiles:
     #  /etc/bash_completion.d/m-a c7780fab6b14d75ca54e11e992a6c11c
@@ -741,7 +791,7 @@ def conffile_prompt(destFile, prefix=""):
         if not line:
             continue
         # show what we do
-        logging.debug("conffile line: '%s'", line)
+        logging.debug("conffile line: %s", line)
         li = line.split()
         conf_file = li[0]
         md5 = li[1]
@@ -757,7 +807,7 @@ def conffile_prompt(destFile, prefix=""):
         if md5 == "newconffile":
             continue
         if not pkg_conffiles or conf_file not in pkg_conffiles.split("\n"):
-            logging.debug("'%s' not in package conffiles '%s'" % (
+            logging.debug("%s not in package conffiles %s" % (
                 conf_file, pkg_conffiles))
             continue
         # record for later
@@ -803,7 +853,7 @@ def conffile_prompt(destFile, prefix=""):
         for conf_file in pkg_conffiles.split("\n"):
             if (conf_file not in dpkg_status_conffiles and
                     os.path.exists(prefix + conf_file)):
-                logging.debug("found conffile '%s' in new pkg but on dpkg "
+                logging.debug("found conffile %s in new pkg but on dpkg "
                               "status" % conf_file)
                 pkg_md5sum = get_md5sum_for_file_in_deb(destFile, conf_file)
                 with open(prefix + conf_file, 'rb') as fp:
@@ -905,34 +955,33 @@ def _send_mail_using_sendmail(from_address, to_address, subject, body):
     return ret
 
 
-def send_summary_mail(pkgs, res, pkgs_kept_back, mem_log, dpkg_log_content):
-    # type: (str, bool, List[str], StringIO, str) -> None
+def send_summary_mail(pkgs, res, pkgs_kept_back, pkgs_removed,
+                      pkgs_kept_installed, mem_log, dpkg_log_content):
+    # type: (str, bool, List[str], List[str], List[str], StringIO, str) -> None
     """ send mail (if configured in Unattended-Upgrade::Mail) """
     to_email = apt_pkg.config.find("Unattended-Upgrade::Mail", "")
     if not to_email:
         return
     if not os.path.exists(MAIL_BINARY) and not os.path.exists(SENDMAIL_BINARY):
-        logging.error(_("No '/usr/bin/mail' or '/usr/sbin/sendmail',"
+        logging.error(_("No /usr/bin/mail or /usr/sbin/sendmail,"
                         "can not send mail. "
-                        "You probably want to install the 'mailx' package."))
+                        "You probably want to install the mailx package."))
         return
     # if the operation was successful and the user has requested to get
     # mails on on errors, just exit here
-    if (res and
-        # see Debian Bug #703621
-        not re.search("^WARNING:", mem_log.getvalue(), re.MULTILINE) and
-        apt_pkg.config.find_b(
+    if (res and apt_pkg.config.find_b(
             "Unattended-Upgrade::MailOnlyOnError", False)):
         return
     # Check if reboot-required flag is present
     reboot_flag_str = _(
         "[reboot required]") if os.path.isfile(REBOOT_REQUIRED_FILE) else ""
     # Check if packages are kept on hold
-    hold_flag_str = _("[package on hold]") if pkgs_kept_back else ""
-    logging.debug("Sending mail to '%s'" % to_email)
+    hold_flag_str = _("[package on hold]") if (pkgs_kept_back or
+                                               pkgs_kept_installed) else ""
+    logging.debug("Sending mail to %s" % to_email)
     subject = _(
         "{hold_flag}{reboot_flag} unattended-upgrades result for "
-        "'{machine}': {result}").format(
+        "{machine}: {result}").format(
             hold_flag=hold_flag_str, reboot_flag=reboot_flag_str,
             machine=host(), result=res).strip()
     body = _("Unattended upgrade returned: %s\n\n") % res
@@ -948,6 +997,16 @@ def send_summary_mail(pkgs, res, pkgs_kept_back, mem_log, dpkg_log_content):
     if pkgs_kept_back:
         body += _("Packages with upgradable origin but kept back:\n")
         body += " " + wrap(" ".join(pkgs_kept_back), 70, " ")
+        body += "\n"
+    body += "\n"
+    if pkgs_removed:
+        body += _("Packages that were auto-removed:\n")
+        body += " " + wrap(" ".join(pkgs_removed), 70, " ")
+        body += "\n"
+    body += "\n"
+    if pkgs_kept_installed:
+        body += _("Packages that were kept from being auto-removed:\n")
+        body += " " + wrap(" ".join(pkgs_kept_installed), 70, " ")
         body += "\n"
     body += "\n"
     if dpkg_log_content:
@@ -982,7 +1041,7 @@ def do_install(cache,             # type: apt.Cache
     os.putenv("DEBIAN_FRONTEND", "noninteractive")
     setup_apt_listchanges()
 
-    logging.info(_("Writing dpkg log to '%s'"), logfile_dpkg)
+    logging.info(_("Writing dpkg log to %s"), logfile_dpkg)
 
     marked_delete = [pkg for pkg in cache.get_changes() if pkg.marked_delete]
     if marked_delete:
@@ -992,12 +1051,7 @@ def do_install(cache,             # type: apt.Cache
 
     pkg_install_success = False
     try:
-        if (options.minimal_upgrade_steps or
-            # COMPAT with the mispelling
-            (apt_pkg.config.find_b(
-                "Unattended-Upgrades::MinimalSteps", True) and
-             apt_pkg.config.find_b(
-                 "Unattended-Upgrade::MinimalSteps", True))):
+        if use_minimal_steps(options):
             # try upgrade all "pkgs" in minimal steps
             pkg_install_success = upgrade_in_minimal_steps(
                 cache, [pkg.name for pkg in pkgs_to_upgrade],
@@ -1192,7 +1246,7 @@ def try_to_upgrade(pkg,               # type: apt.Package
     except SystemError as e:
         # can't upgrade
         logging.warning(
-            _("package '%s' upgradable but fails to "
+            _("package %s upgradable but fails to "
                 "be marked for upgrade (%s)"), pkg.name, e)
         rewind_cache(cache, pkgs_to_upgrade)
         pkgs_kept_back.append(pkg.name)
@@ -1232,7 +1286,7 @@ def calculate_upgradable_pkgs(cache,             # type: apt.Cache
 
 def get_dpkg_log_content(logfile_dpkg, install_start_time):
     # type: (str, datetime.datetime) -> str
-    logging.debug("Extracting content from '%s' since '%s'" % (
+    logging.debug("Extracting content from %s since %s" % (
         logfile_dpkg, install_start_time))
     content = []
     found_start = False
@@ -1253,33 +1307,115 @@ def get_dpkg_log_content(logfile_dpkg, install_start_time):
 
 def get_auto_removable(cache):
     # type: (apt.Cache) -> AbstractSet[str]
-    return set([pkg.name for pkg in cache
-                if pkg.is_auto_removable])
+    return {pkg.name for pkg in cache
+            if pkg.is_auto_removable}
 
 
-def do_auto_remove(cache, auto_removable, logfile_dpkg,
-                   verbose=False, dry_run=False):
-    # type: (apt.Cache, Iterable[str], str, bool, bool) -> bool
-    if not auto_removable:
+def is_autoremove_valid(cache, pkgname, auto_removable, blacklisted_pkgs,
+                        whitelisted_pkgs):
+    # type: (apt.Cache, str, AbstractSet[str], List[str], List[str]) -> bool
+    changes = cache.get_changes()
+    if not changes:
+        # package is already removed
         return True
+    pkgnames = {pkg.name for pkg in changes}
+    for pkg in changes:
+        if not is_pkg_change_allowed(pkg, blacklisted_pkgs, whitelisted_pkgs):
+            logging.warning(
+                _("Keeping the following auto-removable package(s) because "
+                  "they include %s which is set to be kept unmodified: %s"),
+                pkg.name, " ".join(sorted(pkgnames)))
+            return False
+    if not pkgnames.issubset(auto_removable):
+        if pkgname != "":
+            logging.warning(
+                _("Keeping auto-removable %s package(s) because it would"
+                  " also remove the following packages which should "
+                  "be kept in this step: %s"), pkgname,
+                " ".join(sorted(pkgnames - auto_removable)))
+        else:
+            logging.warning(
+                _("Keeping %s auto-removable package(s) because it would"
+                  " also remove the following packages which should "
+                  "be kept in this step: %s"), len(auto_removable),
+                " ".join(sorted(pkgnames - auto_removable)))
 
-    for pkgname in auto_removable:
-        if not dry_run:
-            logging.debug("marking %s for remove" % pkgname)
+        cache.clear()
+        return False
+    for packagename in pkgnames:
+        if cache.running_kernel_pkgs_regexp and \
+           cache.running_kernel_pkgs_regexp.match(packagename):
+            logging.warning(
+                _("Keeping the following auto-removable package(s) because "
+                  "they include %s which package is related to the running "
+                  "kernel: %s"), packagename, " ".join(sorted(pkgnames)))
+            cache.clear()
+            return False
+    return True
+
+
+def do_auto_remove(cache,             # type: apt.Cache
+                   auto_removable,    # type: AbstractSet[str]
+                   logfile_dpkg,      # type: str
+                   minimal_steps,     # type: bool
+                   blacklisted_pkgs,  # type: List[str]
+                   whitelisted_pkgs,  # type: List[str]
+                   verbose=False,     # type: bool
+                   dry_run=False      # type: bool
+                   ):
+    # type: (...) -> Tuple[bool, List[str], List[str]]
+    if not auto_removable:
+        return (True, [], [])
+
+    pkgs_removed = []         # type: List[str]
+    pkgs_kept_installed = []  # type: List[str]
+    if minimal_steps:
+        for pkgname in auto_removable:
+            if SIGNAL_STOP_REQUEST:
+                logging.warning("SIGNAL received, stopping")
+                pkgs_kept_installed = list(auto_removable - set(pkgs_removed))
+                return (False, pkgs_removed, pkgs_kept_installed)
+            logging.debug("marking %s for removal" % pkgname)
             cache[pkgname].mark_delete()
-    logging.info(_("Packages that are auto removed: '%s'"),
-                 " ".join(sorted(auto_removable)))
-
-    # do it
-    res, error = cache_commit(cache, logfile_dpkg, verbose)
-    if res:
-        logging.info(_("Packages were successfully auto-removed"))
+            if not is_autoremove_valid(cache, pkgname, auto_removable,
+                                       blacklisted_pkgs, whitelisted_pkgs):
+                # this situation can occur when removing newly unused packages
+                # would also remove old unused packages which are not set
+                # for removal, thus getting there is not handled as an error
+                pkgs_kept_installed.append(pkgname)
+                res = True
+                continue
+            if not dry_run:
+                res, error = cache_commit(cache, logfile_dpkg, verbose)
+                if not res:
+                    break
+                pkgs_removed.append(pkgname)
+            else:
+                res = True
+                cache.clear()
     else:
+        for pkgname in auto_removable:
+            cache[pkgname].mark_delete()
+        if is_autoremove_valid(cache, "", auto_removable, blacklisted_pkgs,
+                               whitelisted_pkgs):
+            # do it in one step
+            if not dry_run:
+                res, error = cache_commit(cache, logfile_dpkg, verbose)
+            else:
+                res = True
+                cache.clear()
+
+    if res:
+        logging.info(_("Packages that were successfully auto-removed: %s"),
+                     " ".join(sorted(pkgs_removed)))
+        logging.info(_("Packages that are kept back: %s"),
+                     " ".join(sorted(pkgs_kept_installed)))
+    if not res:
         logging.error(_("Auto-removing the packages failed!"))
-        logging.error(_("Error message: '%s'"), error)
-        logging.error(_("dpkg returned an error! See '%s' for details"),
+        logging.error(_("Error message: %s"), error)
+        logging.error(_("dpkg returned an error! See %s for details"),
                       logfile_dpkg)
-    return res
+    return (res, pkgs_removed, pkgs_kept_installed)
 
 
 def clean_downloaded_packages(fetcher):
@@ -1313,9 +1449,9 @@ def is_update_day():
         return True
     # today is not a patch day
     logging.info(
-        "Skipping update check: today is '%s,%s,%s' but patch days are '%s'",
+        "Skipping update check: today is %s,%s,%s but patch days are %s",
         today.strftime("%w"), today.strftime("%a"), today.strftime("%A"),
-        patch_days)
+        ", ".join(patch_days))
     return False
 
 
@@ -1359,7 +1495,7 @@ def main(options, rootdir=""):
         sys.exit(1)
 
     # display available origin
-    logging.info(_("Allowed origins are: %s"), allowed_origins)
+    logging.info(_("Allowed origins are: %s"), ", ".join(allowed_origins))
 
     # see debian #776752
     install_start_time = datetime.datetime.now().replace(microsecond=0)
@@ -1407,9 +1543,9 @@ def main(options, rootdir=""):
                                         allowed_origins=allowed_origins)
     except SystemError as error:
         print(_("Apt returned an error, exiting"))
-        print(_("error message: '%s'") % error)
+        print(_("error message: %s") % error)
         logging.error(_("Apt returned an error, exiting"))
-        logging.error(_("error message: '%s'"), error)
+        logging.error(_("error message: %s"), error)
         sys.exit(1)
 
     if cache._depcache.broken_count > 0:
@@ -1463,7 +1599,7 @@ def main(options, rootdir=""):
     try:
         pm.get_archives(fetcher, list, recs)
     except SystemError as e:
-        logging.error(_("GetArchives() failed: '%s'"), e)
+        logging.error(_("GetArchives() failed: %s"), e)
     try:
         res = fetcher.run()
         logging.debug("fetch.run() result: %s", res)
@@ -1473,24 +1609,25 @@ def main(options, rootdir=""):
     if options.download_only:
         return 0
 
+    pkg_conffile_prompt = False
     if dpkg_conffile_prompt():
         # now check the downloaded debs for conffile conflicts and build
         # a blacklist
         for item in fetcher.items:
             logging.debug("%s" % item)
             if item.status == item.STAT_ERROR:
-                print(_("An error occurred: '%s'") % item.error_text)
-                logging.error(_("An error occurred: '%s'"), item.error_text)
+                print(_("An error occurred: %s") % item.error_text)
+                logging.error(_("An error occurred: %s"), item.error_text)
             if not item.complete:
-                print(_("The URI '%s' failed to download, aborting") %
+                print(_("The URI %s failed to download, aborting") %
                       item.desc_uri)
-                logging.error(_("The URI '%s' failed to download, aborting"),
+                logging.error(_("The URI %s failed to download, aborting"),
                               item.desc_uri)
                 sys.exit(1)
             if not os.path.exists(item.destfile):
-                print(_("Download finished, but file '%s' not there?!?") %
+                print(_("Download finished, but file %s not there?!?") %
                       item.destfile)
-                logging.error("Download finished, but file '%s' not "
+                logging.error("Download finished, but file %s not "
                               "there?!?", item.destfile)
                 sys.exit(1)
             if not item.is_trusted:
@@ -1504,15 +1641,16 @@ def main(options, rootdir=""):
                 # the cron mail (only if no summary mail is requested)
                 email = apt_pkg.config.find("Unattended-Upgrade::Mail", "")
                 if not email:
-                    print(_("Package '%s' has conffile prompt and needs "
+                    print(_("Package %s has conffile prompt and needs "
                             "to be upgraded manually") %
                           pkgname_from_deb(item.destfile))
                 # log to the logfile
-                logging.warning(_("Package '%s' has conffile prompt and "
+                logging.warning(_("Package %s has conffile prompt and "
                                   "needs to be upgraded manually"),
                                 pkgname_from_deb(item.destfile))
                 blacklisted_pkgs.append(pkgname_from_deb(item.destfile))
                 pkgs_kept_back.append(pkgname_from_deb(item.destfile))
+                pkg_conffile_prompt = True
 
         # redo the selection about the packages to upgrade based on the new
         # blacklist
@@ -1536,15 +1674,50 @@ def main(options, rootdir=""):
                 else:
                     if not (pkg.name in pkgs_kept_back):
                         pkgs_kept_back.append(pkg.name)
-                    logging.info(_("package '%s' not upgraded"), pkg.name)
+                    logging.info(_("package %s not upgraded"), pkg.name)
                     cache.clear()
                     for pkg2 in pkgs_to_upgrade:
                         pkg2.mark_upgrade(from_user=not pkg2.is_auto_installed)
     else:
         logging.debug("dpkg is configured not to cause conffile prompts")
 
-    # auto-removal
-    previous_autoremovals = get_auto_removable(cache)
+    # get log
+    logfile_dpkg = os.path.join(_get_logdir(), 'unattended-upgrades-dpkg.log')
+    if not os.path.exists(logfile_dpkg):
+        with open(logfile_dpkg, 'w'):
+            pass
+
+    # auto-removals
+    auto_removable = get_auto_removable(cache)
+    kernel_pkgs_remove_success = True  # type: bool
+    kernel_pkgs_removed = []           # type: List[str]
+    kernel_pkgs_kept_installed = []    # type: List[str]
+    if (auto_removable and apt_pkg.config.find_b(
+            "Unattended-Upgrade::Remove-Unused-Kernel-Packages", True)):
+        # remove unused kernels before installing new ones because the newly
+        # installed ones may fill up /boot and break the system right before
+        # removing old ones could take place
+        #
+        # this step may also remove _auto-removable_ reverse dependencies
+        # of kernel packages
+        auto_removable_kernel_pkgs = {
+            p for p in auto_removable
+            if (cache.versioned_kernel_pkgs_regexp and
+                cache.versioned_kernel_pkgs_regexp.match(p) and
+                not cache.running_kernel_pkgs_regexp.match(p))}
+        if auto_removable_kernel_pkgs:
+            logging.info(_("Removing unused kernel packages: %s"),
+                         " ".join(auto_removable_kernel_pkgs))
+            (kernel_pkgs_remove_success,
+             kernel_pkgs_removed,
+             kernel_pkgs_kept_installed) = do_auto_remove(
+                cache, auto_removable_kernel_pkgs,
+                logfile_dpkg, use_minimal_steps(options),
+                blacklisted_pkgs, whitelisted_pkgs,
+                options.verbose or options.debug, options.dry_run)
+            auto_removable = get_auto_removable(cache)
+
+    previous_autoremovals = auto_removable
     if apt_pkg.config.find_b(
             "Unattended-Upgrade::Remove-Unused-Dependencies", False):
         pending_autoremovals = previous_autoremovals
@@ -1587,12 +1760,6 @@ def main(options, rootdir=""):
     pkgs = " ".join([pkg.name for pkg in pkgs_to_upgrade])
     logging.info(_("Packages that will be upgraded: %s"), pkgs)
 
-    # get log
-    logfile_dpkg = os.path.join(_get_logdir(), 'unattended-upgrades-dpkg.log')
-    if not os.path.exists(logfile_dpkg):
-        with open(logfile_dpkg, 'w'):
-            pass
-
     # only perform install step if we actually have packages to install
     pkg_install_success = True
     if len(pkgs_to_upgrade) > 0:
@@ -1603,10 +1770,12 @@ def main(options, rootdir=""):
                                          whitelisted_pkgs,
                                          options,
                                          logfile_dpkg)
+    # Was the overall run succesful: only if everything installed
+    # fine and nothing was held back because of a conffile prompt.
+    successful_run = (kernel_pkgs_remove_success and pkg_install_success and
+                      not pkg_conffile_prompt)
 
     # now check if any auto-removing needs to be done
-    cache = UnattendedUpgradesCache(
-        rootdir=rootdir, allowed_origins=allowed_origins)
     if cache._depcache.broken_count > 0:
         print(_("Cache has broken packages, exiting"))
         logging.error(_("Cache has broken packages, exiting"))
@@ -1614,24 +1783,34 @@ def main(options, rootdir=""):
 
     # the user wants *all* auto-removals to be removed
     # (unless u-u got signalled to stop gracefully quickly)
+    pkgs_removed = []         # type: List[str]
+    pkgs_kept_installed = []  # type: List[str]
     if ((apt_pkg.config.find_b(
             "Unattended-Upgrade::Remove-Unused-Dependencies", False) and
          not SIGNAL_STOP_REQUEST)):
         auto_removals = get_auto_removable(cache)
-        pkg_install_success = pkg_install_success and do_auto_remove(
-            cache, auto_removals, logfile_dpkg,
+        (pkg_remove_success,
+         pkgs_removed,
+         pkgs_kept_installed) = do_auto_remove(
+            cache, auto_removals, logfile_dpkg, use_minimal_steps(options),
+            blacklisted_pkgs, whitelisted_pkgs,
             options.verbose or options.debug,
             options.dry_run)
+        successful_run = successful_run and pkg_remove_success
     # the user wants *only new* auto-removals to be removed
     elif apt_pkg.config.find_b(
             "Unattended-Upgrade::Remove-New-Unused-Dependencies", True):
         # calculate the new auto-removals
         new_pending_autoremovals = get_auto_removable(cache)
         auto_removals = new_pending_autoremovals - previous_autoremovals
-        pkg_install_success = pkg_install_success and do_auto_remove(
-            cache, auto_removals, logfile_dpkg,
+        (pkg_remove_success,
+         pkgs_removed,
+         pkgs_kept_installed) = do_auto_remove(
+            cache, auto_removals, logfile_dpkg, use_minimal_steps(options),
+            blacklisted_pkgs, whitelisted_pkgs,
             options.verbose or options.debug,
             options.dry_run)
+        successful_run = successful_run and pkg_remove_success
 
     logging.debug("InstCount=%i DelCount=%i BrokenCount=%i"
                   % (cache._depcache.inst_count,
@@ -1642,7 +1821,11 @@ def main(options, rootdir=""):
     if not options.dry_run:
         log_content = get_dpkg_log_content(logfile_dpkg, install_start_time)
         send_summary_mail(
-            pkgs, pkg_install_success, pkgs_kept_back, mem_log, log_content)
+            pkgs, successful_run,
+            pkgs_kept_back,
+            kernel_pkgs_removed + pkgs_removed,
+            kernel_pkgs_kept_installed + pkgs_kept_installed,
+            mem_log, log_content)
 
     # clean after success install (if needed)
     keep_key = "Unattended-Upgrade::Keep-Debs-After-Install"
@@ -1659,7 +1842,7 @@ def main(options, rootdir=""):
     # check if the user wants a reboot
     if not options.dry_run:
         reboot_if_requested_and_needed()
-    if pkg_install_success:
+    if successful_run:
         return 0
     else:
         return 1

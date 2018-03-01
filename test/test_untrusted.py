@@ -58,7 +58,7 @@ class TestUntrusted(unittest.TestCase):
             haystack = f.read()
             self.assertTrue(needle in haystack,
                             "Can not find '%s' in '%s'" % (needle, haystack))
-            self.assertTrue("pkg 'test-package' is untrusted" in haystack)
+            self.assertTrue("pkg test-package is untrusted" in haystack)
 
 
 if __name__ == "__main__":
