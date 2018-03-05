@@ -79,7 +79,7 @@ Unattended-Upgrade::Package-Blacklist {
 
 // Remove unused automatically installed kernel-related packages
 // (kernel images, kernel headers and kernel version locked tools).
-//Unattended-Upgrade::Remove-Unused-Kernel-Packages "false"
+//Unattended-Upgrade::Remove-Unused-Kernel-Packages "false";
 
 // Do automatic removal of new unused dependencies after the upgrade
 // (equivalent to apt-get autoremove)
