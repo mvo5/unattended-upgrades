@@ -35,6 +35,7 @@ override_dh_auto_clean:
 	$(PYTHON) setup.py clean -a
 	rm -rf .coverage \
 		test/.coverage \
+		test/.mypy_cache \
 		test/root.*/var/cache/apt/*.bin \
 		test/root.*/var/log \
 		test/root.unused-deps/var/cache/apt/archives/lock \
