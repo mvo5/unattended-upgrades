@@ -21,7 +21,7 @@ unattended-upgrades (0.99) unstable; urgency=medium
 unattended-upgrades (0.95) unstable; urgency=medium
 
   Unattended-upgrades now defaults to installing upgrades in minimal
-  steps to ensure leaving the system in a consisten state when the
+  steps to ensure leaving the system in a consistent state when the
   system starts shutting in the middle of an upgrade.
 
   With the previous default of performing all upgrades in one shot
