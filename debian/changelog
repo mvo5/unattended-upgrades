@@ -1,3 +1,14 @@
+unattended-upgrades (1.0ubuntu2) bionic; urgency=medium
+
+  [ Balint Reczey ]
+  * Rename d/NEWS.Debian to d/NEWS to have it shipped
+  * Fix typo in NEWS file
+
+  [ Simon McVittie ]
+  * d/rules: Exclude mypy cache from source package.
+
+ -- Balint Reczey <rbalint@ubuntu.com>  Mon, 19 Mar 2018 16:42:37 +0000
+
 unattended-upgrades (1.0ubuntu1) bionic; urgency=medium
 
   * Merge from Debian unstable
