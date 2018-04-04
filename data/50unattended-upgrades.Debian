@@ -64,7 +64,7 @@ Unattended-Upgrade::Package-Blacklist {
 // Install all unattended-upgrades when the machine is shutting down
 // instead of doing it in the background while the machine is running
 // This will (obviously) make shutdown slower
-//Unattended-Upgrade::InstallOnShutdown "true";
+//Unattended-Upgrade::InstallOnShutdown "false";
 
 // Send email to this address for problems or packages upgrades
 // If empty or unset then no email is sent, make sure that you
