@@ -149,6 +149,7 @@ class UnattendedUpgradesCache(apt.Cache):
         # type: (apt.progress.base.Progress) -> None
         apt.Cache.open(self, progress)
         # ensure we update the candidate versions
+        self.candidates_to_adjust = self.get_candidates_to_adjust()
         for pkgname, candidate in self.candidates_to_adjust.items():
             self[pkgname].candidate = candidate
 
@@ -156,6 +157,7 @@ class UnattendedUpgradesCache(apt.Cache):
         # type: () -> None
         apt.Cache.clear(self)
         # ensure we update the candidate versions
+        self.candidates_to_adjust = self.get_candidates_to_adjust()
         for pkgname, candidate in self.candidates_to_adjust.items():
             self[pkgname].candidate = candidate
 
