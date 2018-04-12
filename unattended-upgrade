@@ -115,7 +115,7 @@ class UnattendedUpgradesCache(apt.Cache):
 
     def __init__(self, rootdir, allowed_origins):
         # type: (str, List[str]) -> None
-        self.candidates_to_adjust = {}  # type: Dict[str, apt.Version]
+        self.candidates_to_adjust = None  # type: Dict[str, apt.Version]
         self.allowed_origins = allowed_origins
         apt.Cache.__init__(self, rootdir=rootdir)
 
@@ -172,7 +172,12 @@ class UnattendedUpgradesCache(apt.Cache):
             updates pocket with a higher version number
         """
         candidates = {}
-        for pkg in self:
+        if self.candidates_to_adjust is None:
+            pkg_iter = iter(self)
+        else:
+            pkg_iter = iter(
+                [self[name] for name in self.candidates_to_adjust.keys()])
+        for pkg in pkg_iter:
             # important! this avoids downgrades below
             if pkg.is_installed and not pkg.is_upgradable:
                 continue
