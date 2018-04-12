@@ -116,8 +116,8 @@ class UnattendedUpgradesCache(apt.Cache):
     def __init__(self, rootdir, allowed_origins):
         # type: (str, List[str]) -> None
         self.candidates_to_adjust = {}  # type: Dict[str, apt.Version]
-        apt.Cache.__init__(self, rootdir=rootdir)
         self.allowed_origins = allowed_origins
+        apt.Cache.__init__(self, rootdir=rootdir)
 
         # generate versioned_kernel_pkgs_regexp for later use
         apt_versioned_kernel_pkgs = apt_pkg.config.value_list(
