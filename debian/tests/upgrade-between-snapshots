@@ -23,6 +23,9 @@ esac
 dpkg-buildpackage -us -uc 2>&1
 debootstrap --include eatmydata sid $chroot_dir "http://snapshot.debian.org/archive/debian/$start_date/ unstable main"
 mount --bind /dev/pts $chroot_dir/dev/pts
+mount --bind /proc $chroot_dir/proc
+trap "umount $chroot_dir/proc; umount $chroot_dir/dev/pts; rm -rf $chroot_dir" EXIT
+
 sed -i 's/^deb /deb [check-valid-until=no] /' $chroot_dir/etc/apt/sources.list
 echo "deb-src [check-valid-until=no] http://snapshot.debian.org/archive/debian/${start_date}/ sid main" >> $chroot_dir/etc/apt/sources.list
 $chroot_exec apt-get update
@@ -74,6 +77,3 @@ $chroot_exec dpkg -l libpoppler68 | grep '^hi'
 echo "libx265-130 should be still installed thanks to the blacklist"
 $chroot_exec dpkg -l libx265-130 | grep '^ii'
 
-# cleanup
-umount $chroot_dir/dev/pts
-rm -rf $chroot_dir
