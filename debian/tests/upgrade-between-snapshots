@@ -5,7 +5,7 @@ set -e
 chroot_dir=$AUTOPKGTEST_TMP/chroot
 start_date=20171001T000000Z
 end_date=20171210T000000Z
-chroot_exec="chroot $chroot_dir eatmydata"
+chroot_exec="chroot $chroot_dir env http_proxy=$http_proxy eatmydata"
 architecture=$(dpkg --print-architecture)
 
 # run test only on amd64 because it tests only Python code and dependencies
