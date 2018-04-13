@@ -24,6 +24,7 @@ dpkg-buildpackage -us -uc 2>&1
 debootstrap --include eatmydata sid $chroot_dir "http://snapshot.debian.org/archive/debian/$start_date/ unstable main"
 mount --bind /dev/pts $chroot_dir/dev/pts
 sed -i 's/^deb /deb [check-valid-until=no] /' $chroot_dir/etc/apt/sources.list
+echo "deb-src [check-valid-until=no] http://snapshot.debian.org/archive/debian/${start_date}/ sid main" >> $chroot_dir/etc/apt/sources.list
 $chroot_exec apt-get update
 
 # install mailutils for testing u-u email and mark python3.5-minimal
@@ -32,6 +33,11 @@ $chroot_exec apt-get install -y python3.5-minimal mailutils
 
 # add package set with many dependencies
 $chroot_exec apt-get install -y xfce4
+
+# build and install updated python-apt since the one in the snapshot has memory allocation issues
+(cd $chroot_dir/root/ && apt-get source python-apt)
+$chroot_exec apt-get build-dep -y python-apt
+$chroot_exec bash -c "cd /root/python-apt-* && env DEB_BUILD_OPTIONS=nocheck dpkg-buildpackage -us -uc && apt-get install -y ../*.deb"
 
 # install package version just built
 cp ../unattended-upgrades_*.deb $chroot_dir/tmp/
