@@ -37,10 +37,18 @@ $chroot_exec apt-get install -y python3.5-minimal mailutils
 # add package set with many dependencies
 $chroot_exec apt-get install -y xfce4
 
+# save list of manually installed packages
+$chroot_exec apt-mark showmanual > $chroot_dir/tmp/manual
+
 # build and install updated python-apt since the one in the snapshot has memory allocation issues
 (cd $chroot_dir/root/ && apt-get source python-apt)
 $chroot_exec apt-get build-dep -y python-apt
 $chroot_exec bash -c "cd /root/python-apt-* && env DEB_BUILD_OPTIONS=nocheck dpkg-buildpackage -us -uc && apt-get install -y ../*.deb"
+
+# remove packages installed as the side-effect of updating apt and python-apt
+$chroot_exec apt-mark showmanual | comm -1 -3 $chroot_dir/tmp/manual - | $chroot_exec xargs apt-mark auto
+$chroot_exec apt-get -y autoremove
+$chroot_exec apt-get clean
 
 # install package version just built
 cp ../unattended-upgrades_*.deb $chroot_dir/tmp/
