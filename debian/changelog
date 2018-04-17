@@ -1,3 +1,16 @@
+unattended-upgrades (1.1ubuntu1) bionic; urgency=medium
+
+  * Merge from Debian unstable (LP: #1764797)
+    - Remaining changes:
+      - unattended-upgrades: Do not automatically upgrade the development
+        release of Ubuntu unless Unattended-Upgrade::DevRelease is true.
+    - Dropped changes, included in Debian:
+      - Rename d/NEWS.Debian to d/NEWS to have it shipped
+      - Fix typo in NEWS file
+      - d/rules: Exclude mypy cache from source package.
+
+ -- Balint Reczey <rbalint@ubuntu.com>  Tue, 17 Apr 2018 16:53:30 +0200
+
 unattended-upgrades (1.1) unstable; urgency=medium
 
   [ cgail914 ]
