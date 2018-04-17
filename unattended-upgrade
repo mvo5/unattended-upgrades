@@ -117,9 +117,9 @@ class UnattendedUpgradesCache(apt.Cache):
 
     def __init__(self, rootdir, allowed_origins):
         # type: (str, List[str]) -> None
-        self.candidates_to_adjust = {}  # type: Dict[str, apt.Version]
-        apt.Cache.__init__(self, rootdir=rootdir)
+        self._cached_candidate_pkgnames = set()  # type: AbstractSet[str]
         self.allowed_origins = allowed_origins
+        apt.Cache.__init__(self, rootdir=rootdir)
 
         # generate versioned_kernel_pkgs_regexp for later use
         apt_versioned_kernel_pkgs = apt_pkg.config.value_list(
@@ -143,25 +143,25 @@ class UnattendedUpgradesCache(apt.Cache):
             self.running_kernel_pkgs_regexp = None
 
         # ensure we update the candidate versions
-        self.candidates_to_adjust = self.get_candidates_to_adjust()
-        for pkgname, candidate in self.candidates_to_adjust.items():
-            self[pkgname].candidate = candidate
+        self.adjust_candidates()
 
     def open(self, progress=None):
         # type: (apt.progress.base.Progress) -> None
         apt.Cache.open(self, progress)
         # ensure we update the candidate versions
-        for pkgname, candidate in self.candidates_to_adjust.items():
-            self[pkgname].candidate = candidate
+        self.adjust_candidates()
 
     def clear(self):
         # type: () -> None
         apt.Cache.clear(self)
         # ensure we update the candidate versions
-        for pkgname, candidate in self.candidates_to_adjust.items():
+        self.adjust_candidates()
+
+    def adjust_candidates(self):
+        for pkgname, candidate in self._get_candidates_to_adjust():
             self[pkgname].candidate = candidate
 
-    def get_candidates_to_adjust(self):
+    def _get_candidates_to_adjust(self):
         # type: () -> Dict[str, apt.Version]
         """ Get candidate versions needed to be adjusted to match highest
             allowed origin
@@ -172,7 +172,12 @@ class UnattendedUpgradesCache(apt.Cache):
             updates pocket with a higher version number
         """
         candidates = {}
-        for pkg in self:
+        if self._cached_candidate_pkgnames is None:
+            pkg_iter = iter(self.keys())
+        else:
+            pkg_iter = iter(
+                [self[name] for name in self._cached_candidate_pkgnames])
+        for pkg in pkg_iter:
             # important! this avoids downgrades below
             if pkg.is_installed and not pkg.is_upgradable:
                 continue
@@ -197,6 +202,8 @@ class UnattendedUpgradesCache(apt.Cache):
             if new_cand and new_cand != pkg.candidate:
                 logging.debug("adjusting candidate version: %s" % new_cand)
                 candidates[pkg.name] = new_cand
+        self._cached_candidate_pkgnames = set(
+            [name for name in candidates.keys()])
         return candidates
 
 
@@ -1340,7 +1347,6 @@ def is_autoremove_valid(cache, pkgname, auto_removable, blacklisted_pkgs,
                   "be kept in this step: %s"), len(auto_removable),
                 " ".join(sorted(pkgnames - auto_removable)))
 
-        cache.clear()
         return False
     for packagename in pkgnames:
         if cache.running_kernel_pkgs_regexp and \
@@ -1349,7 +1355,6 @@ def is_autoremove_valid(cache, pkgname, auto_removable, blacklisted_pkgs,
                 _("Keeping the following auto-removable package(s) because "
                   "they include %s which package is related to the running "
                   "kernel: %s"), packagename, " ".join(sorted(pkgnames)))
-            cache.clear()
             return False
     return True
 
@@ -1376,6 +1381,8 @@ def do_auto_remove(cache,             # type: apt.Cache
                 pkgs_kept_installed = list(auto_removable - set(pkgs_removed))
                 return (False, pkgs_removed, pkgs_kept_installed)
             logging.debug("marking %s for removal" % pkgname)
+            if pkgname in pkgs_removed:
+                continue
             cache[pkgname].mark_delete()
             if not is_autoremove_valid(cache, pkgname, auto_removable,
                                        blacklisted_pkgs, whitelisted_pkgs):
@@ -1384,12 +1391,15 @@ def do_auto_remove(cache,             # type: apt.Cache
                 # for removal, thus getting there is not handled as an error
                 pkgs_kept_installed.append(pkgname)
                 res = True
+                cache.clear()
                 continue
             if not dry_run:
+                changes = cache.get_changes()
+                pkgnames = {pkg.name for pkg in changes}
                 res, error = cache_commit(cache, logfile_dpkg, verbose)
                 if not res:
                     break
-                pkgs_removed.append(pkgname)
+                pkgs_removed.extend(pkgnames)
             else:
                 res = True
                 cache.clear()

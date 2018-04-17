@@ -37,7 +37,7 @@ Depends: ${shlibs:Depends},
          xz-utils
 Recommends: cron | cron-daemon | anacron
 Suggests: bsd-mailx,
-          mail-transport-agent,
+          default-mta | mail-transport-agent,
           needrestart
 Description: automatic installation of security upgrades
  This package can download and install security upgrades automatically

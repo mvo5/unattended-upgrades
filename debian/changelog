@@ -1,3 +1,49 @@
+unattended-upgrades (1.1) unstable; urgency=medium
+
+  [ cgail914 ]
+  * Update 50unattended-upgrades.Raspbian
+    added a semi-column sign on line 86 to facilitate uncommenting the line
+    for users and not end up with an error message when running
+    unattended-upgrades. And make the whole file consistent.
+
+  [ Tobias Bannert ]
+  * completed german translation
+
+  [ Simon McVittie ]
+  * d/rules: Exclude mypy cache from source package.
+
+  [ Julian Andres Klode ]
+  * Do not reuse old apt.Version objects after reopening cache (LP: #1737441)
+
+  [ Balint Reczey ]
+  * Rename d/NEWS.Debian to d/NEWS to have it shipped
+  * Fix typo in NEWS file
+  * Add missing semicolon to commented-out Remove-Unused-Kernel-Packages option
+  * Set UnattendedUpgradesCache.allowed_origins before calling
+    apt.Cache.__init__()
+  * Find package candidates to adjust sweeping through all packages only once.
+    Later reuse the list candidates and filter out packages installed in the
+    meantime. Thanks to Julian Andres Klode for the original patch
+  * Use updated python-apt in upgrade-between-snapshots test
+  * upgrade-between-snapshots: Mount /proc, too, in the chroot.
+    Also clean up chroot properly on exit.
+  * upgrade-between-snapshots: Use http_proxy environment variable in chroot,
+    too
+  * upgrade-between-snapshots: Remove packages installed as the side-effect of
+    updating apt and python-apt
+  * Ignore errors from compiling backported packages
+  * Make is_autoremove_valid() nondestructive.
+    Also fix autoremoval of packages when one package can't be removed and
+    keeps back other package removals due to missing cache.clear()
+  * Fix tracking removed packages
+  * Suggest default-mta | mail-transport-agent to keep Lintian happy
+
+  [ Michael Vogt ]
+  * unattanded-upgrades: refactor get_candidates_to_adjust() to
+    adjust_candidates()
+
+ -- Balint Reczey <rbalint@ubuntu.com>  Mon, 16 Apr 2018 20:01:08 +0200
+
 unattended-upgrades (1.0ubuntu2) bionic; urgency=medium
 
   [ Balint Reczey ]

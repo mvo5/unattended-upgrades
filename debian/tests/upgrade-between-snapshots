@@ -5,7 +5,7 @@ set -e
 chroot_dir=$AUTOPKGTEST_TMP/chroot
 start_date=20171001T000000Z
 end_date=20171210T000000Z
-chroot_exec="chroot $chroot_dir eatmydata"
+chroot_exec="chroot $chroot_dir env http_proxy=$http_proxy eatmydata"
 architecture=$(dpkg --print-architecture)
 
 # run test only on amd64 because it tests only Python code and dependencies
@@ -23,7 +23,11 @@ esac
 dpkg-buildpackage -us -uc 2>&1
 debootstrap --include eatmydata sid $chroot_dir "http://snapshot.debian.org/archive/debian/$start_date/ unstable main"
 mount --bind /dev/pts $chroot_dir/dev/pts
+mount --bind /proc $chroot_dir/proc
+trap "umount $chroot_dir/proc; umount $chroot_dir/dev/pts; rm -rf $chroot_dir" EXIT
+
 sed -i 's/^deb /deb [check-valid-until=no] /' $chroot_dir/etc/apt/sources.list
+echo "deb-src [check-valid-until=no] http://snapshot.debian.org/archive/debian/${start_date}/ sid main" >> $chroot_dir/etc/apt/sources.list
 $chroot_exec apt-get update
 
 # install mailutils for testing u-u email and mark python3.5-minimal
@@ -32,6 +36,19 @@ $chroot_exec apt-get install -y python3.5-minimal mailutils
 
 # add package set with many dependencies
 $chroot_exec apt-get install -y xfce4
+
+# save list of manually installed packages
+$chroot_exec apt-mark showmanual > $chroot_dir/tmp/manual
+
+# build and install updated python-apt since the one in the snapshot has memory allocation issues
+(cd $chroot_dir/root/ && apt-get source python-apt 2>&1)
+$chroot_exec apt-get build-dep -y python-apt
+$chroot_exec bash -c "cd /root/python-apt-* && env DEB_BUILD_OPTIONS=nocheck dpkg-buildpackage -us -uc && apt-get install -y ../*.deb" 2>&1
+
+# remove packages installed as the side-effect of updating apt and python-apt
+$chroot_exec apt-mark showmanual | comm -1 -3 $chroot_dir/tmp/manual - | $chroot_exec xargs apt-mark auto
+$chroot_exec apt-get -y autoremove
+$chroot_exec apt-get clean
 
 # install package version just built
 cp ../unattended-upgrades_*.deb $chroot_dir/tmp/
@@ -68,6 +85,3 @@ $chroot_exec dpkg -l libpoppler68 | grep '^hi'
 echo "libx265-130 should be still installed thanks to the blacklist"
 $chroot_exec dpkg -l libx265-130 | grep '^ii'
 
-# cleanup
-umount $chroot_dir/dev/pts
-rm -rf $chroot_dir
