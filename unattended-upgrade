@@ -1345,7 +1345,6 @@ def is_autoremove_valid(cache, pkgname, auto_removable, blacklisted_pkgs,
                   "be kept in this step: %s"), len(auto_removable),
                 " ".join(sorted(pkgnames - auto_removable)))
 
-        cache.clear()
         return False
     for packagename in pkgnames:
         if cache.running_kernel_pkgs_regexp and \
@@ -1354,7 +1353,6 @@ def is_autoremove_valid(cache, pkgname, auto_removable, blacklisted_pkgs,
                 _("Keeping the following auto-removable package(s) because "
                   "they include %s which package is related to the running "
                   "kernel: %s"), packagename, " ".join(sorted(pkgnames)))
-            cache.clear()
             return False
     return True
 
@@ -1381,6 +1379,8 @@ def do_auto_remove(cache,             # type: apt.Cache
                 pkgs_kept_installed = list(auto_removable - set(pkgs_removed))
                 return (False, pkgs_removed, pkgs_kept_installed)
             logging.debug("marking %s for removal" % pkgname)
+            if pkgname in pkgs_removed:
+                continue
             cache[pkgname].mark_delete()
             if not is_autoremove_valid(cache, pkgname, auto_removable,
                                        blacklisted_pkgs, whitelisted_pkgs):
@@ -1389,12 +1389,15 @@ def do_auto_remove(cache,             # type: apt.Cache
                 # for removal, thus getting there is not handled as an error
                 pkgs_kept_installed.append(pkgname)
                 res = True
+                cache.clear()
                 continue
             if not dry_run:
+                changes = cache.get_changes()
+                pkgnames = {pkg.name for pkg in changes}
                 res, error = cache_commit(cache, logfile_dpkg, verbose)
                 if not res:
                     break
-                pkgs_removed.append(pkgname)
+                pkgs_removed.extend(pkgnames)
             else:
                 res = True
                 cache.clear()
