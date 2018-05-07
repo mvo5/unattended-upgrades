@@ -562,7 +562,7 @@ def upgrade_in_minimal_steps(cache,            # type: apt.Cache
             pkg.mark_install()
         else:
             continue
-        upgrade_set_sizes[pkgname] = len(cache.get_changes())
+        upgrade_set_sizes[pkgname] = cache.install_count
     cache.clear()
 
     # to upgrade contains the package names
