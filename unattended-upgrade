@@ -1206,7 +1206,14 @@ def reboot_if_requested_and_needed():
     when = apt_pkg.config.find(
         "Unattended-Upgrade::Automatic-Reboot-Time", "now")
     logging.warning("Found %s, rebooting" % REBOOT_REQUIRED_FILE)
-    subprocess.call(["/sbin/shutdown", "-r", when])
+    cmd = ["/sbin/shutdown", "-r", when]
+    try:
+        proc = subprocess.run(cmd, stderr=PIPE)
+    except Exception as e:
+        logging.error("Failed to issue shutdown, %s", e)
+    else:
+        shut_msg = proc.stderr
+        logging.warning(shut_msg.strip())
 
 
 def write_stamp_file():
