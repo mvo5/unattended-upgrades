@@ -350,7 +350,7 @@ class Unlocked:
     def __exit__(self, exc_type, exc_value, exc_tb):
         # type: (object, object, object) -> None
         try:
-            apt_pkg.pkgsystem_unlock()
+            apt_pkg.pkgsystem_lock()
         except Exception:
             pass
 
