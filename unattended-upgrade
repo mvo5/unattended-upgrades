@@ -117,7 +117,7 @@ class UnattendedUpgradesCache(apt.Cache):
 
     def __init__(self, rootdir, allowed_origins):
         # type: (str, List[str]) -> None
-        self._cached_candidate_pkgnames = set()  # type: AbstractSet[str]
+        self._cached_candidate_pkgnames = None  # type: AbstractSet[str]
         self.allowed_origins = allowed_origins
         apt.Cache.__init__(self, rootdir=rootdir)
 
@@ -177,7 +177,8 @@ class UnattendedUpgradesCache(apt.Cache):
         else:
             pkg_iter = iter(
                 [self[name] for name in self._cached_candidate_pkgnames])
-        for pkg in pkg_iter:
+        for pkgname in pkg_iter:
+            pkg = self[pkgname]
             # important! this avoids downgrades below
             if pkg.is_installed and not pkg.is_upgradable:
                 continue
