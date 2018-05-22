@@ -811,7 +811,7 @@ def conffile_prompt(destFile, prefix=""):
         print(_("error message: %s") % e)
         logging.error(_("Apt returned an error, exiting"))
         logging.error(_("error message: %s"), e)
-        sys.exit(1)
+        raise
     except LookupError as e:
         logging.debug("No conffiles in deb %s (%s)" % (destFile, e))
 
@@ -1499,8 +1499,38 @@ def main(options, rootdir=""):
     if rootdir:
         _setup_alternative_rootdir(rootdir)
 
+    # see debian #776752
+    install_start_time = datetime.datetime.now().replace(microsecond=0)
+
     # setup logging
     mem_log = _setup_logging(options)
+    # get log
+    logfile_dpkg = os.path.join(_get_logdir(), 'unattended-upgrades-dpkg.log')
+    if not os.path.exists(logfile_dpkg):
+        with open(logfile_dpkg, 'w'):
+            pass
+
+    ret = 1
+    try:
+        ret = main_inner(options, rootdir, mem_log, logfile_dpkg,
+                         install_start_time)
+    except Exception as e:
+        logger = logging.getLogger()
+        logger.exception(_("An error occurred: %s"), e)
+        # Re-raise exceptions for apport
+        raise
+    finally:
+        if not ret == 0:
+            log_content = get_dpkg_log_content(logfile_dpkg,
+                                               install_start_time)
+            send_summary_mail("<unknown>", False, [],
+                              [], [],
+                              mem_log, log_content)
+    return ret
+
+
+def main_inner(options, rootdir, mem_log, logfile_dpkg, install_start_time):
+    # type: (Options, str, StringIO, str, datetime.datetime) -> int
 
     # check if today is a patch day
     if not is_update_day():
@@ -1525,13 +1555,10 @@ def main(options, rootdir=""):
     shutdown_lock = apt_pkg.get_lock(LOCK_FILE)
     if shutdown_lock < 0:
         logging.error("Lock file is already taken, exiting")
-        sys.exit(1)
+        return 1
 
     # display available origin
     logging.info(_("Allowed origins are: %s"), ", ".join(allowed_origins))
-
-    # see debian #776752
-    install_start_time = datetime.datetime.now().replace(microsecond=0)
 
     # check and get lock
     try:
@@ -1540,7 +1567,7 @@ def main(options, rootdir=""):
         logging.error(_("Lock could not be acquired (another package "
                         "manager running?)"))
         print(_("Cache lock can not be acquired, exiting"))
-        sys.exit(1)
+        return 1
 
     # check if the journal is dirty and if so, take emergceny action
     # the alternative is to leave the system potentially unsecure until
@@ -1573,12 +1600,12 @@ def main(options, rootdir=""):
         print(_("error message: %s") % error)
         logging.error(_("Apt returned an error, exiting"))
         logging.error(_("error message: %s"), error)
-        sys.exit(1)
+        return 1
 
     if cache._depcache.broken_count > 0:
         print(_("Cache has broken packages, exiting"))
         logging.error(_("Cache has broken packages, exiting"))
-        sys.exit(1)
+        return 1
 
     # FIXME: make this into a ContextManager
     # be nice when calculating the upgrade as its pretty CPU intensive
@@ -1649,13 +1676,13 @@ def main(options, rootdir=""):
                       item.desc_uri)
                 logging.error(_("The URI %s failed to download, aborting"),
                               item.desc_uri)
-                sys.exit(1)
+                return 1
             if not os.path.exists(item.destfile):
                 print(_("Download finished, but file %s not there?!?") %
                       item.destfile)
                 logging.error("Download finished, but file %s not "
                               "there?!?", item.destfile)
-                sys.exit(1)
+                return 1
             if not item.is_trusted:
                 blacklisted_pkgs.append(pkgname_from_deb(item.destfile))
             if conffile_prompt(item.destfile):
@@ -1706,12 +1733,6 @@ def main(options, rootdir=""):
                         pkg2.mark_upgrade(from_user=not pkg2.is_auto_installed)
     else:
         logging.debug("dpkg is configured not to cause conffile prompts")
-
-    # get log
-    logfile_dpkg = os.path.join(_get_logdir(), 'unattended-upgrades-dpkg.log')
-    if not os.path.exists(logfile_dpkg):
-        with open(logfile_dpkg, 'w'):
-            pass
 
     # auto-removals
     auto_removable = get_auto_removable(cache)
@@ -1805,7 +1826,7 @@ def main(options, rootdir=""):
     if cache._depcache.broken_count > 0:
         print(_("Cache has broken packages, exiting"))
         logging.error(_("Cache has broken packages, exiting"))
-        sys.exit(1)
+        return 1
 
     # the user wants *all* auto-removals to be removed
     # (unless u-u got signalled to stop gracefully quickly)
