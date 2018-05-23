@@ -29,7 +29,6 @@ override_dh_auto_clean:
 	set -e; for f in unattended-upgrade unattended-upgrade-shutdown; do \
 		ln -nsf $$f $$f.py; \
 		py3compile $$f.py; \
-	        pycompile $$f.py; \
 		rm -f $$f.py; \
 	done
 	$(PYTHON) setup.py clean -a

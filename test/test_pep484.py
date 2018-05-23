@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/usr/bin/python3
 
 import os
 import subprocess
@@ -22,7 +22,8 @@ class PackagePep484TestCase(unittest.TestCase):
         # --ignore-missing-imports
         self.assertEqual(
             subprocess.call(
-                ["mypy", "--ignore-missing-imports", top_src_dir]), 0)
+                ["mypy", "--ignore-missing-imports",
+                 "--no-strict-optional", top_src_dir]), 0)
 
 
 if __name__ == "__main__":

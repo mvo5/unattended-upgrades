@@ -115,7 +115,7 @@ class UnattendedUpgradesCache(apt.Cache):
 
     def __init__(self, rootdir, allowed_origins):
         # type: (str, List[str]) -> None
-        self._cached_candidate_pkgnames = set()  # type: AbstractSet[str]
+        self._cached_candidate_pkgnames = None  # type: AbstractSet[str]
         self.allowed_origins = allowed_origins
         apt.Cache.__init__(self, rootdir=rootdir)
 
@@ -175,7 +175,8 @@ class UnattendedUpgradesCache(apt.Cache):
         else:
             pkg_iter = iter(
                 [self[name] for name in self._cached_candidate_pkgnames])
-        for pkg in pkg_iter:
+        for pkgname in pkg_iter:
+            pkg = self[pkgname]
             # important! this avoids downgrades below
             if pkg.is_installed and not pkg.is_upgradable:
                 continue
@@ -496,24 +497,20 @@ def cache_commit(cache,           # type: apt.Cache
     # set debconf to NON_INTERACTIVE, redirect output
     os.putenv("DEBIAN_FRONTEND", "noninteractive")
 
-    # only act if there is anything to do (important to avoid writing
-    # empty log stanzas)
-    if len(cache.get_changes()) == 0:
-        return True, None
-
     error = None
     res = False
     if iprogress is None:
         iprogress = LogInstallProgress(logfile_dpkg, verbose)
 
-    with Unlocked():
-        try:
+    try:
+        with Unlocked():
             res = cache.commit(install_progress=iprogress)
-            cache.open()
-        except SystemError as e:
-            error = e
-            if verbose:
-                logging.exception("Exception happened during upgrade.")
+        cache.open()
+    except SystemError as e:
+        error = e
+        if verbose:
+            logging.exception("Exception happened during upgrade.")
+
     return res, error
 
 
@@ -566,7 +563,7 @@ def upgrade_in_minimal_steps(cache,            # type: apt.Cache
             pkg.mark_install()
         else:
             continue
-        upgrade_set_sizes[pkgname] = len(cache.get_changes())
+        upgrade_set_sizes[pkgname] = cache.install_count
     cache.clear()
 
     # to upgrade contains the package names
@@ -693,7 +690,8 @@ def check_changes_for_sanity(cache, allowed_origins, blacklist, whitelist,
     # If there are no packages to be installed they were kept back
     if cache.install_count == 0:
         return False
-    for pkg in cache.get_changes():
+    changes = cache.get_changes()
+    for pkg in changes:
         if pkg.marked_delete:
             logging.debug("pkg %s now marked delete" % pkg.name)
             return False
@@ -718,7 +716,7 @@ def check_changes_for_sanity(cache, allowed_origins, blacklist, whitelist,
                               "upgrade unattended")
                 return False
     # check that the package we want to upgrade is in the change set
-    if desired_pkg and desired_pkg not in cache.get_changes():
+    if desired_pkg and desired_pkg not in changes:
         return False
     return True
 
