@@ -1,3 +1,25 @@
+unattended-upgrades (1.1ubuntu1.18.04.1) bionic; urgency=medium
+
+  [ Michael Vogt ]
+  * unattended-upgrades: fix Unlocked context manager. (LP: #1602536)
+    The Unlocked context manager did correctly unlock but did not
+    reacquire the lock which means that in minimal-upgrade step
+    mode it is possible to run apt code without a lock. If something
+    else (like landscape, apt, synaptic, packagekit) locks the cache
+    in the meantime this will work and u-u will get dpkg errors
+    because dpkg will not be able to perform its operations. It is
+    less of an issue in non-minimal mode, but even then the auto-remove
+    step may fail in this way.
+
+  [ Balint Reczey ]
+  * Fix adjusting candidates (LP: #1775292)
+  * Relock apt lock before reopening the cache (LP: #1602536)
+  * Fix crashing while adjusting candidates and save candidates to adjust only
+    in first sweep run, not emptying the set later
+    (Closes: #901258) (LP: #1775307)
+
+ -- Balint Reczey <rbalint@ubuntu.com>  Wed, 06 Jun 2018 16:30:55 -0700
+
 unattended-upgrades (1.1ubuntu1) bionic; urgency=medium
 
   * Merge from Debian unstable (LP: #1764797)
