@@ -173,8 +173,7 @@ class UnattendedUpgradesCache(apt.Cache):
         if self._cached_candidate_pkgnames is None:
             pkg_iter = iter(self.keys())
         else:
-            pkg_iter = iter(
-                [self[name] for name in self._cached_candidate_pkgnames])
+            pkg_iter = iter(self._cached_candidate_pkgnames)
         for pkgname in pkg_iter:
             pkg = self[pkgname]
             # important! this avoids downgrades below
