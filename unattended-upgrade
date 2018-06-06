@@ -144,7 +144,7 @@ class UnattendedUpgradesCache(apt.Cache):
         self.adjust_candidates()
 
     def open(self, progress=None):
-        # type: (apt.progress.base.Progress) -> None
+        # type: (apt.progress.base.OpProgress) -> None
         apt.Cache.open(self, progress)
         # ensure we update the candidate versions
         self.adjust_candidates()
@@ -160,7 +160,7 @@ class UnattendedUpgradesCache(apt.Cache):
             self[pkgname].candidate = candidate
 
     def _get_candidates_to_adjust(self):
-        # type: () -> Dict[str, apt.Version]
+        # type: () -> Dict[str, apt.package.Version]
         """ Get candidate versions needed to be adjusted to match highest
             allowed origin
 
@@ -1316,7 +1316,7 @@ def get_auto_removable(cache):
 
 def is_autoremove_valid(cache, pkgname, auto_removable, blacklisted_pkgs,
                         whitelisted_pkgs):
-    # type: (apt.Cache, str, AbstractSet[str], List[str], List[str]) -> bool
+    # type: (UnattendedUpgradesCache, str, AbstractSet[str], List[str], List[str]) -> bool  # nopep8
     changes = cache.get_changes()
     if not changes:
         # package is already removed
@@ -1355,7 +1355,7 @@ def is_autoremove_valid(cache, pkgname, auto_removable, blacklisted_pkgs,
     return True
 
 
-def do_auto_remove(cache,             # type: apt.Cache
+def do_auto_remove(cache,             # type: UnattendedUpgradesCache
                    auto_removable,    # type: AbstractSet[str]
                    logfile_dpkg,      # type: str
                    minimal_steps,     # type: bool
