@@ -158,7 +158,7 @@ class UnattendedUpgradesCache(apt.Cache):
         self.adjust_candidates()
 
     def adjust_candidates(self):
-        for pkgname, candidate in self._get_candidates_to_adjust():
+        for pkgname, candidate in self._get_candidates_to_adjust().items():
             self[pkgname].candidate = candidate
 
     def _get_candidates_to_adjust(self):
