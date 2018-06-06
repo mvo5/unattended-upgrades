@@ -1143,20 +1143,23 @@ def _setup_logging(options):
     if syslogEnable:
         syslogFacility = apt_pkg.config.find(
             "Unattended-Upgrade::SyslogFacility",
-            "daemon")
-        syslogHandler = logging.handlers.SysLogHandler(
-            address='/dev/log',
-            facility=syslogFacility)
-        syslogHandler.setFormatter(
-            logging.Formatter("unattended-upgrade: %(message)s"))
-        known = syslogHandler.facility_names.keys()  # type: ignore
-        if syslogFacility.lower() in known:
+            "daemon").lower()
+
+        try:
+            syslogFacilityId = logging.handlers.SysLogHandler.facility_names[syslogFacility]  # type: ignore # nopep8
+        except KeyError:
+            logging.warning("Syslog facility %s was not found"
+                            % syslogFacility)
+        else:
+            syslogHandler = logging.handlers.SysLogHandler(
+                address='/dev/log',
+                facility=syslogFacilityId)
+            syslogHandler.setFormatter(
+                logging.Formatter("unattended-upgrade: %(message)s"))
+
             logger.addHandler(syslogHandler)
             logging.info("Enabled logging to syslog via %s facility "
                          % syslogFacility)
-        else:
-            logging.warning("Syslog facility %s was not found"
-                            % syslogFacility)
     return mem_log
 
 
