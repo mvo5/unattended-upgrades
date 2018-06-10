@@ -88,6 +88,7 @@ Auto-Installed: 1
         apt_conf = os.path.join(self.rootdir, "etc", "apt", "apt.conf")
         with open(apt_conf, "w") as fp:
             fp.write("""
+Unattended-Upgrade::OnlyOnACPower "false";
 Unattended-Upgrade::Keep-Debs-After-Install "true";
 Unattended-Upgrade::Allowed-Origins {
     "Ubuntu:lucid-security";
@@ -115,6 +116,7 @@ Unattended-Upgrade::Remove-Unused-Dependencies "true";
         apt_conf = os.path.join(self.rootdir, "etc", "apt", "apt.conf")
         with open(apt_conf, "w") as fp:
             fp.write("""
+Unattended-Upgrade::OnlyOnACPower "false";
 Unattended-Upgrade::Keep-Debs-After-Install "true";
 Unattended-Upgrade::Allowed-Origins {
     "Ubuntu:lucid-security";
