@@ -26,6 +26,9 @@ class TestRemoveUnused(unittest.TestCase):
 
     def setUp(self):
         self.rootdir = os.path.abspath("./root.unused-deps")
+        # fake on_ac_power
+        os.environ["PATH"] = (os.path.join(self.rootdir, "usr", "bin") + ":" +
+                              os.environ["PATH"])
         dpkg_status = os.path.abspath(
             os.path.join(self.rootdir, "var", "lib", "dpkg", "status"))
         # fake dpkg status
@@ -88,7 +91,6 @@ Auto-Installed: 1
         apt_conf = os.path.join(self.rootdir, "etc", "apt", "apt.conf")
         with open(apt_conf, "w") as fp:
             fp.write("""
-Unattended-Upgrade::OnlyOnACPower "false";
 Unattended-Upgrade::Keep-Debs-After-Install "true";
 Unattended-Upgrade::Allowed-Origins {
     "Ubuntu:lucid-security";
@@ -115,7 +117,6 @@ Unattended-Upgrade::Remove-Unused-Dependencies "true";
         apt_conf = os.path.join(self.rootdir, "etc", "apt", "apt.conf")
         with open(apt_conf, "w") as fp:
             fp.write("""
-Unattended-Upgrade::OnlyOnACPower "false";
 Unattended-Upgrade::Keep-Debs-After-Install "true";
 Unattended-Upgrade::Allowed-Origins {
     "Ubuntu:lucid-security";
