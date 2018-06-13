@@ -1509,6 +1509,15 @@ def main(options, rootdir=""):
         logging.error("Lock file is already taken, exiting")
         sys.exit(1)
 
+    # check and get system lock (/var/lib/dpkg/lock)
+    try:
+        apt_pkg.pkgsystem_lock()
+    except SystemError as e:
+        logging.error(_("Lock could not be acquired (another package "
+                        "manager running?)"))
+        print(_("Cache lock can not be acquired, exiting"))
+        return 1
+
     # display available origin
     logging.info(_("Allowed origins are: %s"), ", ".join(allowed_origins))
 
@@ -1521,36 +1530,26 @@ def main(options, rootdir=""):
     if (is_dpkg_journal_dirty() and
         apt_pkg.config.find_b(
             "Unattended-Upgrade::AutoFixInterruptedDpkg", True)):
-        # ensure the dpkg database is not already locked (LP: #754330)
-        admindir = os.path.dirname(apt_pkg.config.find("Dir::State::Status"))
-        lockfd = apt_pkg.get_lock(os.path.join(admindir, "lock"), False)
-        if lockfd > 0:
-            logging.warning(
-                _("Unclean dpkg state detected, trying to correct"))
-            print(_("Unclean dpkg state detected, trying to correct"))
-            env = copy.copy(os.environ)
-            env["DEBIAN_FRONTEND"] = "noninteractive"
-            try:
-                os.close(lockfd)
+        logging.warning(
+            _("Unclean dpkg state detected, trying to correct"))
+        print(_("Unclean dpkg state detected, trying to correct"))
+        env = copy.copy(os.environ)
+        env["DEBIAN_FRONTEND"] = "noninteractive"
+        try:
+            with Unlocked():
                 output = subprocess.check_output(
                     ["dpkg", "--force-confold", "--configure", "-a"],
                     env=env,
                     universal_newlines=True)
-            except subprocess.CalledProcessError as e:
-                output = e.output
+        except subprocess.CalledProcessError as e:
+            output = e.output
             logging.warning(_("dpkg --configure -a output:\n%s"), output)
-        else:
-            logging.debug("Unclean dpkg state, but locked, another package "
-                          "manager working?")
-
-    # check and get lock
-    try:
-        apt_pkg.pkgsystem_lock()
-    except SystemError as e:
-        logging.error(_("Lock could not be acquired (another package "
-                        "manager running?)"))
-        print(_("Cache lock can not be acquired, exiting"))
-        sys.exit(1)
+        except SystemError as error:
+            print(_("Apt returned an error, exiting"))
+            print(_("error message: %s") % error)
+            logging.error(_("Apt returned an error, exiting"))
+            logging.error(_("error message: %s"), error)
+            return 1
 
     # get a cache
     try:
