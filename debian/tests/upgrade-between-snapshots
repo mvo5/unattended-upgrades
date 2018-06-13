@@ -70,6 +70,9 @@ $chroot_exec apt-get clean
 # install Debian's configuration file to make this test work as expected even on other distributions
 cp data/50unattended-upgrades.Debian $chroot_dir/etc/apt/apt.conf.d/50unattended-upgrades
 
+# let the test pass on battery power, too
+sed -i 's|// Unattended-Upgrade::OnlyOnACPower "true";|Unattended-Upgrade::OnlyOnACPower "false";|' $chroot_dir/etc/apt/apt.conf.d/50unattended-upgrades
+
 # enable a few features to test
 sed -i 's|//Unattended-Upgrade::Mail |Unattended-Upgrade::Mail |' $chroot_dir/etc/apt/apt.conf.d/50unattended-upgrades
 sed -i "s/$start_date/$end_date/" $chroot_dir/etc/apt/sources.list

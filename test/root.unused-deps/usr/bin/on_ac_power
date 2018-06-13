@@ -1,0 +1,3 @@
+#!/bin/sh
+# fake being on ac power
+exit 0

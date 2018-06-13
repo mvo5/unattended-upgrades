@@ -376,6 +376,22 @@ def signal_handler(signal, frame):
     SIGNAL_STOP_REQUEST = True
 
 
+def should_stop():
+    # type: () -> bool
+    """
+    Return True if u-u needs to stop due to signal received or due to the
+    system started to run on battery.
+    """
+    if SIGNAL_STOP_REQUEST:
+        logging.warning("SIGNAL received, stopping")
+        return True
+    if apt_pkg.config.find_b("Unattended-Upgrade::OnlyOnACPower", True) and \
+       subprocess.call("on_ac_power") == 1:
+        logging.warning("System is on battery power, stopping")
+        return True
+    return False
+
+
 def substitute(line):
     # type: (str) -> str
     """ substitude known mappings and return a new string
@@ -574,8 +590,7 @@ def upgrade_in_minimal_steps(cache,            # type: apt.Cache
         if pkgname not in to_upgrade:
             # pkg is upgraded in a previous set
             continue
-        if SIGNAL_STOP_REQUEST:
-            logging.warning("SIGNAL received, stopping")
+        if should_stop():
             return False
         pkg = cache[pkgname]
         if pkg.is_upgradable:
@@ -1372,8 +1387,7 @@ def do_auto_remove(cache,             # type: apt.Cache
     pkgs_kept_installed = []  # type: List[str]
     if minimal_steps:
         for pkgname in auto_removable:
-            if SIGNAL_STOP_REQUEST:
-                logging.warning("SIGNAL received, stopping")
+            if should_stop():
                 pkgs_kept_installed = list(auto_removable - set(pkgs_removed))
                 return (False, pkgs_removed, pkgs_kept_installed)
             logging.debug("marking %s for removal" % pkgname)
@@ -1594,8 +1608,7 @@ def main(options, rootdir=""):
     # don't start downloading during shutdown
     # TODO: download files one by one and check for stop request after each of
     # them
-    if SIGNAL_STOP_REQUEST:
-        logging.warning("SIGNAL received, stopping")
+    if should_stop():
         return 1
     try:
         pm.get_archives(fetcher, list, recs)

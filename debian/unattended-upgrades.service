@@ -1,7 +1,6 @@
 [Unit]
 Description=Unattended Upgrades Shutdown
 After=network.target local-fs.target
-ConditionACPower=true
 RequiresMountsFor=/var/log /var/run /var/lib /boot
 Documentation=man:unattended-upgrade(8)
 
