@@ -336,22 +336,16 @@ class LogInstallProgress(apt.progress.base.InstallProgress):
 
 class Unlocked:
     """
-    Context manager for unlocking the apt lock while cache.commit() is run
+    Context manager for unlocking the apt lock for cache.commit() or dpkg call
     """
 
     def __enter__(self):
         # type: () -> None
-        try:
-            apt_pkg.pkgsystem_unlock()
-        except Exception:
-            pass
+        apt_pkg.pkgsystem_unlock()
 
     def __exit__(self, exc_type, exc_value, exc_tb):
         # type: (object, object, object) -> None
-        try:
-            apt_pkg.pkgsystem_lock()
-        except Exception:
-            pass
+        apt_pkg.pkgsystem_lock()
 
 
 def is_dpkg_journal_dirty():
