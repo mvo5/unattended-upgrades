@@ -28,6 +28,7 @@ import errno
 import email.charset
 import fcntl
 import fnmatch
+import functools
 import gettext
 import grp
 import io
@@ -114,7 +115,7 @@ class UnknownMatcherError(ValueError):
 class UnattendedUpgradesCache(apt.Cache):
 
     def __init__(self, rootdir, allowed_origins):
-        # type: (str, List[str]) -> None
+        # type: (str, AbstractSet[str]) -> None
         self._cached_candidate_pkgnames = None  # type: AbstractSet[str]
         self.allowed_origins = allowed_origins
         apt.Cache.__init__(self, rootdir=rootdir)
@@ -170,7 +171,7 @@ class UnattendedUpgradesCache(apt.Cache):
             if (hasattr(ver, "policy_priority") and ver.policy_priority < 100):
                 logging.debug("ignoring ver %s with priority < 0" % ver)
                 continue
-            if is_allowed_origin(ver, self.allowed_origins):
+            if is_in_allowed_origin(ver, self.allowed_origins):
                 # leave as soon as we have the highest new candidate
                 new_cand = ver
                 break
@@ -194,7 +195,7 @@ class UnattendedUpgradesCache(apt.Cache):
                     continue
                 # check if the candidate is already pointing to a allowed
                 # origin and if so, do not mess with it
-                if is_allowed_origin(pkg.candidate, self.allowed_origins):
+                if is_in_allowed_origin(pkg.candidate, self.allowed_origins):
                     continue
                 # check if we have a version in a allowed origin that is
                 # not the candidate
@@ -446,7 +447,7 @@ def get_allowed_origins_legacy():
 
 
 def get_allowed_origins():
-    # type: () -> List[str]
+    # type: () -> AbstractSet[str]
     """ return a list of allowed origins from apt.conf
 
     This will take substitutions (like distro_id) into account.
@@ -459,7 +460,7 @@ def get_allowed_origins():
     except ValueError:
         logging.error(_("Unable to parse %s." % key))
         raise
-    return allowed_origins
+    return frozenset(allowed_origins)
 
 
 def match_whitelist_string(whitelist, origin):
@@ -646,14 +647,22 @@ def upgrade_in_minimal_steps(cache,            # type: apt.Cache
     return True
 
 
-def is_allowed_origin(ver, allowed_origins):
-    # type: (apt.package.Version, List[str]) -> bool
+@functools.lru_cache()
+def is_allowed_origin(origin, allowed_origins):
+    # type: (apt.package.Origin, AbstractSet[str]) -> bool
+    for allowed in allowed_origins:
+        if match_whitelist_string(allowed, origin):
+            return True
+    return False
+
+
+def is_in_allowed_origin(ver, allowed_origins):
+    # type: (apt.package.Version, AbstractSet[str]) -> bool
     if not ver:
         return False
     for origin in ver.origins:
-        for allowed in allowed_origins:
-            if match_whitelist_string(allowed, origin):
-                return True
+        if is_allowed_origin(origin, allowed_origins):
+            return True
     return False
 
 
@@ -702,9 +711,13 @@ def is_pkg_change_allowed(pkg, blacklist, whitelist):
     return True
 
 
-def check_changes_for_sanity(cache, allowed_origins, blacklist, whitelist,
-                             desired_pkg=None):
-    # type: (apt.Cache, List[str], List[str], List[str], apt.Package) -> bool
+def check_changes_for_sanity(cache,            # apt.Cache
+                             allowed_origins,  # AbstractSet[str]
+                             blacklist,        # List[str]
+                             whitelist,        # List[str]
+                             desired_pkg=None  # apt.Package
+                             ):
+    # type: (...) -> bool
     if cache._depcache.broken_count != 0:
         return False
     # If there are no packages to be installed they were kept back
@@ -721,7 +734,7 @@ def check_changes_for_sanity(cache, allowed_origins, blacklist, whitelist,
             if not any([o.trusted for o in pkg.candidate.origins]):
                 logging.debug("pkg %s is untrusted" % pkg.name)
                 return False
-            if not is_allowed_origin(pkg.candidate, allowed_origins):
+            if not is_in_allowed_origin(pkg.candidate, allowed_origins):
                 logging.debug("pkg %s not in allowed origin" % pkg.name)
                 return False
             if not is_pkg_change_allowed(pkg, blacklist, whitelist):
@@ -1242,7 +1255,7 @@ def try_to_upgrade(pkg,               # type: apt.Package
                    pkgs_to_upgrade,   # type: List[apt.Package]
                    pkgs_kept_back,    # type: List[str]
                    cache,             # type: apt.Cache
-                   allowed_origins,   # type: List[str]
+                   allowed_origins,   # type: AbstractSet[str]
                    blacklisted_pkgs,  # type: List[str]
                    whitelisted_pkgs,  # type: List[str]
                    ):
@@ -1277,7 +1290,7 @@ def try_to_upgrade(pkg,               # type: apt.Package
 
 def calculate_upgradable_pkgs(cache,             # type: apt.Cache
                               options,           # type: Options
-                              allowed_origins,   # type: List[str]
+                              allowed_origins,   # type: AbstractSet[str]
                               blacklisted_pkgs,  # type: List[str]
                               whitelisted_pkgs,  # type: List[str]
                               ):
@@ -1293,7 +1306,7 @@ def calculate_upgradable_pkgs(cache,             # type: apt.Cache
 
         if (pkg.is_upgradable and
                 is_pkgname_in_whitelist(pkg.name, whitelisted_pkgs) and
-                is_allowed_origin(pkg.candidate, allowed_origins)):
+                is_in_allowed_origin(pkg.candidate, allowed_origins)):
 
             if not is_pkgname_in_blacklist(pkg.name, blacklisted_pkgs):
                 try_to_upgrade(pkg,
