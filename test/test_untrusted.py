@@ -43,6 +43,7 @@ class TestUntrusted(unittest.TestCase):
             fp.write("""Unattended-Upgrade::Allowed-Origins {
 "Ubuntu:lucid-security";
 };
+Unattended-Upgrade::OnlyOnACPower "false";
 """)
         # ensure there is no conffile_prompt check
         apt.apt_pkg.config.set("DPkg::Options::", "--force-confold")

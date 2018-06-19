@@ -33,6 +33,7 @@ class TestUntrusted(unittest.TestCase):
         apt_conf = os.path.join(self.rootdir, "etc", "apt", "apt.conf")
         with open(apt_conf, "w") as fp:
             fp.write("""Unattended-Upgrade::DevRelease "false";
+Unattended-Upgrade::OnlyOnACPower "false";
 """)
 
         # run it
