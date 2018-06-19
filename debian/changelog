@@ -1,3 +1,22 @@
+unattended-upgrades (1.3) unstable; urgency=medium
+
+  [ Balint Reczey ]
+  * Fix crashing while adjusting candidates and save candidates to adjust only
+    in first sweep run, not emptying the set later
+    (LP: #1775307) (Closes: #901258)
+  * Don't start or gracefully stop upgrade on battery (LP: #1773033)
+  * Add test for skipping upgrade on battery
+
+  [ Ivan Kurnosov ]
+  * Fixed is_pkgname_in_blacklist() to be side-effect free.
+    Otherwise is_pkgname_in_blacklist() mutates the pkgs_kept_back list and
+    unattended-upgrades treats the package as a blacklisted candidate
+
+  [ Frans Spiesschaert ]
+  * Dutch translation update (Closes: #896123)
+
+ -- Balint Reczey <rbalint@ubuntu.com>  Tue, 19 Jun 2018 13:10:12 +0200
+
 unattended-upgrades (1.2) unstable; urgency=medium
 
   [ Michael Vogt ]
