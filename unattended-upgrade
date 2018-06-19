@@ -155,55 +155,61 @@ class UnattendedUpgradesCache(apt.Cache):
         # ensure we update the candidate versions
         self.adjust_candidates()
 
-    def adjust_candidates(self):
-        for pkgname, candidate in self._get_candidates_to_adjust().items():
-            self[pkgname].candidate = candidate
+    def adjust_candidate(self, pkg):
+        # type: (apt.Package) -> bool
+        """ Adjust origin and return True if adjustment took place
 
-    def _get_candidates_to_adjust(self):
-        # type: () -> Dict[str, apt.Version]
-        """ Get candidate versions needed to be adjusted to match highest
-            allowed origin
-
-            This lets adjusting the origin even if the candidate has a higher
-            version. This is needed when e.g. a package is available in
+            This is needed when e.g. a package is available in
             the security pocket but there is also a package in the
             updates pocket with a higher version number
         """
-        candidates = {}
+        new_cand = None
+        for ver in pkg.versions:
+            # ignore versions that the user marked with priority < 100
+            # (and ensure we have a python-apt that supports this)
+            if (hasattr(ver, "policy_priority") and ver.policy_priority < 100):
+                logging.debug("ignoring ver %s with priority < 0" % ver)
+                continue
+            if is_allowed_origin(ver, self.allowed_origins):
+                # leave as soon as we have the highest new candidate
+                new_cand = ver
+                break
+        if new_cand and new_cand != pkg.candidate:
+            logging.debug("adjusting candidate version: %s" % new_cand)
+            pkg.candidate = new_cand
+            return True
+        return False
+
+    def adjust_candidates(self):
+        # tyoe: () -> None
+        """ Adjust all package candidates when needed saving cached package
+            names to self._cached_candidate_pkgnames
+        """
         if self._cached_candidate_pkgnames is None:
-            pkg_iter = iter(self.keys())
-        else:
-            pkg_iter = iter(
-                [self[name] for name in self._cached_candidate_pkgnames])
-        for pkgname in pkg_iter:
-            pkg = self[pkgname]
-            # important! this avoids downgrades below
-            if pkg.is_installed and not pkg.is_upgradable:
-                continue
-            # check if the candidate is already pointing to a allowed
-            # origin and if so, do not mess with it
-            if is_allowed_origin(pkg.candidate, self.allowed_origins):
-                continue
-            # check if we have a version in a allowed origin that is
-            # not the candidate
-            new_cand = None
-            for ver in pkg.versions:
-                # ignore versions that the user marked with priority < 100
-                # (and ensure we have a python-apt that supports this)
-                if (hasattr(ver, "policy_priority") and
-                        ver.policy_priority < 100):
-                    logging.debug("ignoring ver %s with priority < 0" % ver)
+            # first run, collect package names
+            self._cached_candidate_pkgnames = set()
+            for pkg in self:
+                # important! this avoids downgrades below
+                if pkg.is_installed and not pkg.is_upgradable:
                     continue
-                if is_allowed_origin(ver, self.allowed_origins):
-                    # leave as soon as we have the highest new candidate
-                    new_cand = ver
-                    break
-            if new_cand and new_cand != pkg.candidate:
-                logging.debug("adjusting candidate version: %s" % new_cand)
-                candidates[pkg.name] = new_cand
-        self._cached_candidate_pkgnames = set(
-            [name for name in candidates.keys()])
-        return candidates
+                # check if the candidate is already pointing to a allowed
+                # origin and if so, do not mess with it
+                if is_allowed_origin(pkg.candidate, self.allowed_origins):
+                    continue
+                # check if we have a version in a allowed origin that is
+                # not the candidate
+                if self.adjust_candidate(pkg):
+                    # ... and save it for next runs
+                    self._cached_candidate_pkgnames.add(pkg.name)
+        else:
+            # packages to be adjusted are already collected
+            for pkgname in self._cached_candidate_pkgnames:
+                pkg = self[pkgname]
+                # important! this avoids downgrades and also skips packages
+                # installed since previous adjustment runs
+                if pkg.is_installed and not pkg.is_upgradable:
+                    continue
+                self.adjust_candidate(pkg)
 
 
 class LogInstallProgress(apt.progress.base.InstallProgress):
