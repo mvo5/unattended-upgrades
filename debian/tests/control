@@ -2,6 +2,10 @@ Tests: run-tests test-systemd.py
 Depends: @, @builddeps@
 Restrictions: needs-root, isolation-container, needs-reboot
 
+Tests: upgrade-all-security
+Depends: @, @builddeps@, debootstrap, distro-info
+Restrictions: needs-root, build-needed
+
 Tests: upgrade-between-snapshots
 Depends: @, @builddeps@, debootstrap
 Restrictions: needs-root, build-needed
