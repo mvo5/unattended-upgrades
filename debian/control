@@ -16,7 +16,7 @@ Build-Depends-Indep: python3-dev,
                      python3-apt,
                      python3-mock,
                      lsb-release
-Standards-Version: 3.9.3
+Standards-Version: 4.1.4
 Vcs-Git: https://github.com/mvo5/unattended-upgrades.git
 
 Package: unattended-upgrades
