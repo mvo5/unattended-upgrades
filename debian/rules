@@ -22,7 +22,7 @@ override_dh_auto_install:
 override_dh_installinit:
 	# We do not want to run the init script in the postinst/prerm, its
 	# really only useful on shutdown, see Debian bug #645919.
-	dh_installinit -r
+	dh_installinit -r --no-start
 
 override_dh_auto_clean:
 	# Sanity-check before upload.
