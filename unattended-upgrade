@@ -523,7 +523,6 @@ def cache_commit(cache,           # type: apt.Cache
         error = e
         if verbose:
             logging.exception("Exception happened during upgrade.")
-
     return res, error
 
 
@@ -1421,6 +1420,8 @@ def do_auto_remove(cache,             # type: apt.Cache
                 res, error = cache_commit(cache, logfile_dpkg, verbose)
             else:
                 res = True
+                cache.clear()
+        else:
                 cache.clear()
 
     if res:
