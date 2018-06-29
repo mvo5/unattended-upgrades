@@ -38,6 +38,7 @@ import re
 import os
 import select
 import signal
+import socket
 import string
 import subprocess
 import sys
@@ -909,7 +910,7 @@ def rewind_cache(cache, pkgs_to_upgrade):
 
 def host():
     # type: () -> str
-    return os.uname()[1]
+    return socket.getfqdn()
 
 
 # *sigh* textwrap is nice, but it breaks "linux-image" into two
