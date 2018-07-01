@@ -61,6 +61,7 @@ run_u_u() {
 
     # let the test pass on battery power, too
     echo 'Unattended-Upgrade::OnlyOnACPower "false";' > $chroot_dir/etc/apt/apt.conf.d/51unattended-upgrades-acpower
+    echo 'Unattended-Upgrade::Skip-Updates-On-Metered-Connections "false";' > $chroot_dir/etc/apt/apt.conf.d/51unattended-upgrades-metered
 
     # enable a few features to test
     echo 'Unattended-Upgrade::Mail "root";' > $chroot_dir/etc/apt/apt.conf.d/51unattended-upgrades-mail

@@ -85,3 +85,7 @@ Unattended-Upgrade::DevRelease "false";
 // Download and install upgrades only on AC power
 // (i.e. skip or gracefully stop updates on battery)
 // Unattended-Upgrade::OnlyOnACPower "true";
+
+// Download and install upgrades only on non-metered connection
+// (i.e. skip or gracefully stop updates on a metered connection)
+// Unattended-Upgrade::Skip-Updates-On-Metered-Connections "true";

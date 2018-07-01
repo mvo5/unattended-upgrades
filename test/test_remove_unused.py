@@ -94,6 +94,7 @@ Unattended-Upgrade::Allowed-Origins {
     "Ubuntu:lucid-security";
 };
 Unattended-Upgrade::Remove-Unused-Dependencies "true";
+Unattended-Upgrade::Skip-Updates-On-Metered-Connections "false";
 """)
         options = MockOptions()
         unattended_upgrade.DISTRO_DESC = "Ubuntu 10.04"
@@ -122,6 +123,7 @@ Unattended-Upgrade::Allowed-Origins {
     "Ubuntu:lucid-security";
 };
 Unattended-Upgrade::Remove-New-Unused-Dependencies "true";
+Unattended-Upgrade::Skip-Updates-On-Metered-Connections "false";
 """)
         options = MockOptions()
         unattended_upgrade.DISTRO_DESC = "Ubuntu 10.04"
