@@ -29,6 +29,7 @@ import email.charset
 import fcntl
 import fnmatch
 import gettext
+from gi.repository.Gio import NetworkMonitor
 import grp
 import io
 import locale
@@ -426,6 +427,11 @@ def should_stop():
        subprocess.call("on_ac_power") == 1:
         logging.warning("System is on battery power, stopping")
         return True
+    if apt_pkg.config.find_b(
+            "Unattended-Upgrade::Skip-Updates-On-Metered-Connections", True):
+        if NetworkMonitor.get_network_metered(NetworkMonitor.get_default()):
+            logging.warning(_("System is on metered connection, stopping"))
+            return True
     return False
 
 

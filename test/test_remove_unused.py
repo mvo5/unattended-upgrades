@@ -96,6 +96,7 @@ Unattended-Upgrade::Allowed-Origins {
     "Ubuntu:lucid-security";
 };
 Unattended-Upgrade::Remove-Unused-Dependencies "true";
+Unattended-Upgrade::Skip-Updates-On-Metered-Connections "false";
 """)
         options = MockOptions()
         unattended_upgrade.LOCK_FILE = "./u-u.lock"
@@ -122,6 +123,7 @@ Unattended-Upgrade::Allowed-Origins {
     "Ubuntu:lucid-security";
 };
 Unattended-Upgrade::Remove-New-Unused-Dependencies "true";
+Unattended-Upgrade::Skip-Updates-On-Metered-Connections "false";
 """)
         options = MockOptions()
         unattended_upgrade.LOCK_FILE = "./u-u.lock"
