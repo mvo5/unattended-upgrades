@@ -988,9 +988,15 @@ def _send_mail_using_sendmail(from_address, to_address, subject, body):
     return ret
 
 
-def send_summary_mail(pkgs, res, pkgs_kept_back, pkgs_removed,
-                      pkgs_kept_installed, mem_log, dpkg_log_content):
-    # type: (str, bool, List[str], List[str], List[str], StringIO, str) -> None
+def send_summary_mail(pkgs,                 # type: List[str]
+                      res,                  # type: bool
+                      pkgs_kept_back,       # type: List[str]
+                      pkgs_removed,         # type: List[str]
+                      pkgs_kept_installed,  # type: List[str]
+                      mem_log,              # type: StringIO
+                      dpkg_log_content,     # type: str
+                      ):
+    # type: (...) -> None
     """ send mail (if configured in Unattended-Upgrade::Mail) """
     to_email = apt_pkg.config.find("Unattended-Upgrade::Mail", "")
     if not to_email:
@@ -1025,7 +1031,7 @@ def send_summary_mail(pkgs, res, pkgs_kept_back, pkgs_removed,
         body += _("Packages that were upgraded:\n")
     else:
         body += _("Packages that attempted to upgrade:\n")
-    body += " " + wrap(pkgs, 70, " ")
+    body += " " + wrap(" ".join(pkgs), 70, " ")
     body += "\n"
     if pkgs_kept_back:
         body += _("Packages with upgradable origin but kept back:\n")
@@ -1523,7 +1529,7 @@ def main(options, rootdir=""):
         if not ret == 0:
             log_content = get_dpkg_log_content(logfile_dpkg,
                                                install_start_time)
-            send_summary_mail("<unknown>", False, [],
+            send_summary_mail(["<unknown>"], False, [],
                               [], [],
                               mem_log, log_content)
     return ret
@@ -1628,8 +1634,9 @@ def main_inner(options, rootdir, mem_log, logfile_dpkg, install_start_time):
     pkgs_to_upgrade, pkgs_kept_back = calculate_upgradable_pkgs(
         cache, options, allowed_origins, blacklisted_pkgs, whitelisted_pkgs)
     pkgs_to_upgrade.sort(key=lambda p: p.name)
-    pkgs = "\n".join([pkg.name for pkg in pkgs_to_upgrade])
-    logging.debug("pkgs that look like they should be upgraded: %s" % pkgs)
+    pkgs = [pkg.name for pkg in pkgs_to_upgrade]
+    logging.debug("pkgs that look like they should be upgraded: %s"
+                  % "\n".join(pkgs))
 
     # FIXME: make this into a ContextManager
     # stop being nice
@@ -1804,8 +1811,8 @@ def main_inner(options, rootdir, mem_log, logfile_dpkg, install_start_time):
         apt_pkg.config.set("Debug::pkgDPkgPM", "1")
 
     # do the install based on the new list of pkgs
-    pkgs = " ".join([pkg.name for pkg in pkgs_to_upgrade])
-    logging.info(_("Packages that will be upgraded: %s"), pkgs)
+    pkgs = [pkg.name for pkg in pkgs_to_upgrade]
+    logging.info(_("Packages that will be upgraded: %s"), " ".join(pkgs))
 
     # only perform install step if we actually have packages to install
     pkg_install_success = True

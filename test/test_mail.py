@@ -97,7 +97,7 @@ class CommonTestsForMailxAndSendmail(object):
 
     def _return_mock_data(self, successful=True):
         """ return input tuple for send_summary_mail """
-        pkgs = "\n".join(["2vcard"])
+        pkgs = ["2vcard"]
         res = successful
         pkgs_kept_back = ["linux-image"]
         pkgs_removed = ["telnet"]
@@ -189,7 +189,7 @@ Debian-Security']
         # are still mentioned in the mail message.
         pkgs, res, pkgs_kept_back, pkgs_removed, pkgs_kept_installed, \
             mem_log, logf_dpkg = self._return_mock_data(successful=True)
-        pkgs = ""
+        pkgs = []
         send_summary_mail(pkgs, res, pkgs_kept_back, pkgs_removed,
                           pkgs_kept_installed, mem_log, logf_dpkg)
         self.assertTrue(
