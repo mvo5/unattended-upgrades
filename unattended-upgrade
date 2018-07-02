@@ -367,6 +367,30 @@ class Unlocked:
             apt_pkg.pkgsystem_lock()
 
 
+class UnattendedUpgradesResult:
+    """
+    Represent the (potentially partial) results of an unattended-upgrades
+    run
+    """
+    def __init__(self,
+                 success,                 # type: bool
+                 result_str="",           # type: str
+                 pkgs=[],                 # type: List[str]
+                 pkgs_kept_back=[],       # type: List[str]
+                 pkgs_removed=[],         # type: List[str]
+                 pkgs_kept_installed=[],  # type: List[str]
+                 update_stamp=False       # type: bool
+                 ):
+        # type: (...) -> None
+        self.success = success
+        self.result_str = result_str
+        self.pkgs = pkgs
+        self.pkgs_kept_back = pkgs_kept_back
+        self.pkgs_removed = pkgs_removed
+        self.pkgs_kept_installed = pkgs_kept_installed
+        self.update_stamp = update_stamp
+
+
 def is_dpkg_journal_dirty():
     # type: () -> bool
     """
@@ -990,6 +1014,7 @@ def _send_mail_using_sendmail(from_address, to_address, subject, body):
 
 def send_summary_mail(pkgs,                 # type: List[str]
                       res,                  # type: bool
+                      result_str,           # type: str
                       pkgs_kept_back,       # type: List[str]
                       pkgs_removed,         # type: List[str]
                       pkgs_kept_installed,  # type: List[str]
@@ -1022,8 +1047,9 @@ def send_summary_mail(pkgs,                 # type: List[str]
         "{hold_flag}{reboot_flag} unattended-upgrades result for "
         "{machine}: {result}").format(
             hold_flag=hold_flag_str, reboot_flag=reboot_flag_str,
-            machine=host(), result=res).strip()
-    body = _("Unattended upgrade returned: %s\n\n") % res
+            machine=host(), result="SUCCESS" if res else "FAILURE").strip()
+    body = wrap(_("Unattended upgrade result: %s") % result_str, 70, " ")
+    body += "\n\n"
     if os.path.isfile(REBOOT_REQUIRED_FILE):
         body += _(
             "Warning: A reboot is required to complete this upgrade.\n\n")
@@ -1516,31 +1542,59 @@ def main(options, rootdir=""):
         with open(logfile_dpkg, 'w'):
             pass
 
-    ret = 1
+    # lock for the shutdown check
+    shutdown_lock = apt_pkg.get_lock(LOCK_FILE)
+    if shutdown_lock < 0:
+        logging.error("Lock file is already taken, exiting")
+        return 1
+
     try:
-        ret = main_inner(options, rootdir, mem_log, logfile_dpkg,
+        res = main_inner(options, rootdir, mem_log, logfile_dpkg,
                          install_start_time)
+        if res.result_str and not options.dry_run:
+            # there is some meaningful result which is worth an email
+            log_content = get_dpkg_log_content(logfile_dpkg,
+                                               install_start_time)
+            send_summary_mail(res.pkgs, res.success, res.result_str,
+                              res.pkgs_kept_back, res.pkgs_removed,
+                              res.pkgs_kept_installed, mem_log,
+                              log_content)
+        if res.update_stamp:
+            # write timestamp file
+            write_stamp_file()
+            if not options.dry_run:
+                # check if the user wants a reboot
+                reboot_if_requested_and_needed()
+        os.close(shutdown_lock)
+        if res.success:
+            return 0
+        else:
+            return 1
+
     except Exception as e:
         logger = logging.getLogger()
         logger.exception(_("An error occurred: %s"), e)
-        # Re-raise exceptions for apport
-        raise
-    finally:
-        if not ret == 0:
-            log_content = get_dpkg_log_content(logfile_dpkg,
-                                               install_start_time)
-            send_summary_mail(["<unknown>"], False, [],
+        log_content = get_dpkg_log_content(logfile_dpkg,
+                                           install_start_time)
+        if not options.dry_run:
+            send_summary_mail(["<unknown>"], False, _("An error occurred"), [],
                               [], [],
                               mem_log, log_content)
-    return ret
+        # Re-raise exceptions for apport
+        raise
 
 
-def main_inner(options, rootdir, mem_log, logfile_dpkg, install_start_time):
-    # type: (Options, str, StringIO, str, datetime.datetime) -> int
+def main_inner(options,             # type: Options
+               rootdir,             # type: str
+               mem_log,             # type: StringIO
+               logfile_dpkg,        # type: str
+               install_start_time,  # type: datetime.datetime
+               ):
+    # type: (...) -> UnattendedUpgradesResult
 
     # check if today is a patch day
     if not is_update_day():
-        return 0
+        return UnattendedUpgradesResult(True)
 
     # format (origin, archive), e.g. ("Ubuntu","dapper-security")
     allowed_origins = get_allowed_origins()
@@ -1557,12 +1611,6 @@ def main_inner(options, rootdir, mem_log, logfile_dpkg, install_start_time):
 
     logging.info(_("Starting unattended upgrades script"))
 
-    # lock for the shutdown check
-    shutdown_lock = apt_pkg.get_lock(LOCK_FILE)
-    if shutdown_lock < 0:
-        logging.error("Lock file is already taken, exiting")
-        return 1
-
     # display available origin
     logging.info(_("Allowed origins are: %s"), ", ".join(allowed_origins))
 
@@ -1573,7 +1621,8 @@ def main_inner(options, rootdir, mem_log, logfile_dpkg, install_start_time):
         logging.error(_("Lock could not be acquired (another package "
                         "manager running?)"))
         print(_("Cache lock can not be acquired, exiting"))
-        return 1
+        return UnattendedUpgradesResult(
+            False, _("Lock could not be acquired"))
 
     # check if the journal is dirty and if so, take emergceny action
     # the alternative is to leave the system potentially unsecure until
@@ -1606,12 +1655,14 @@ def main_inner(options, rootdir, mem_log, logfile_dpkg, install_start_time):
         print(_("error message: %s") % error)
         logging.error(_("Apt returned an error, exiting"))
         logging.error(_("error message: %s"), error)
-        return 1
+        return UnattendedUpgradesResult(
+            False, _("Apt returned an error, exiting"))
 
     if cache._depcache.broken_count > 0:
         print(_("Cache has broken packages, exiting"))
         logging.error(_("Cache has broken packages, exiting"))
-        return 1
+        return UnattendedUpgradesResult(
+            False, _("Cache has broken packages, exiting"))
 
     # FIXME: make this into a ContextManager
     # be nice when calculating the upgrade as its pretty CPU intensive
@@ -1655,7 +1706,7 @@ def main_inner(options, rootdir, mem_log, logfile_dpkg, install_start_time):
     # TODO: download files one by one and check for stop request after each of
     # them
     if should_stop():
-        return 1
+        return UnattendedUpgradesResult(False, _("Upgrade was interrupted"))
     try:
         pm.get_archives(fetcher, list, recs)
     except SystemError as e:
@@ -1667,7 +1718,7 @@ def main_inner(options, rootdir, mem_log, logfile_dpkg, install_start_time):
         logging.error("fetch.run() result: %s", e)
 
     if options.download_only:
-        return 0
+        return UnattendedUpgradesResult(True)
 
     pkg_conffile_prompt = False
     if dpkg_conffile_prompt():
@@ -1683,13 +1734,17 @@ def main_inner(options, rootdir, mem_log, logfile_dpkg, install_start_time):
                       item.desc_uri)
                 logging.error(_("The URI %s failed to download, aborting"),
                               item.desc_uri)
-                return 1
+                return UnattendedUpgradesResult(
+                    False, (_("The URI %s failed to download, aborting") %
+                            item.desc_uri))
             if not os.path.exists(item.destfile):
                 print(_("Download finished, but file %s not there?!?") %
                       item.destfile)
                 logging.error("Download finished, but file %s not "
                               "there?!?", item.destfile)
-                return 1
+                return UnattendedUpgradesResult(
+                    False, (_("Download finished, but file %s not there?!?") %
+                            item.destfile))
             if not item.is_trusted:
                 blacklisted_pkgs.append(pkgname_from_deb(item.destfile))
             if conffile_prompt(item.destfile):
@@ -1784,15 +1839,13 @@ def main_inner(options, rootdir, mem_log, logfile_dpkg, install_start_time):
             len(pkgs_kept_back) == 0):
         logging.info(_("No packages found that can be upgraded unattended "
                        "and no pending auto-removals"))
-        # FIXME: DRY violation, write_stamp_file() is used below as well
-        write_stamp_file()
-        # check if we couldn't reboot on previous run because
-        # a user was logged-in at this time
-        os.close(shutdown_lock)
-        # never reboot during a dry run
-        if not options.dry_run:
-            reboot_if_requested_and_needed()
-        return 0
+        return UnattendedUpgradesResult(
+            kernel_pkgs_remove_success,
+            _("No packages found that can be upgraded unattended and no "
+              "pending auto-removals"),
+            pkgs_removed=kernel_pkgs_removed,
+            pkgs_kept_installed=kernel_pkgs_kept_installed,
+            update_stamp=True)
 
     # check if its configured for install on shutdown, if so, the
     # environment UNATTENDED_UPGRADES_FORCE_INSTALL_ON_SHUTDOWN will
@@ -1802,8 +1855,7 @@ def main_inner(options, rootdir, mem_log, logfile_dpkg, install_start_time):
                 "Unattended-Upgrade::InstallOnShutdown", False)):
         logger = logging.getLogger()
         logger.debug("Configured to install on shutdown, so exiting now")
-        os.close(shutdown_lock)
-        return 0
+        return UnattendedUpgradesResult(True)
 
     # check if we are in dry-run mode
     if options.dry_run:
@@ -1833,7 +1885,8 @@ def main_inner(options, rootdir, mem_log, logfile_dpkg, install_start_time):
     if cache._depcache.broken_count > 0:
         print(_("Cache has broken packages, exiting"))
         logging.error(_("Cache has broken packages, exiting"))
-        return 1
+        return UnattendedUpgradesResult(
+            False, _("Cache has broken packages, exiting"), pkgs=pkgs)
 
     # the user wants *all* auto-removals to be removed
     # (unless u-u got signalled to stop gracefully quickly)
@@ -1871,16 +1924,6 @@ def main_inner(options, rootdir, mem_log, logfile_dpkg, install_start_time):
                      cache._depcache.del_count,
                      cache._depcache.broken_count))
 
-    # send a mail (if needed)
-    if not options.dry_run:
-        log_content = get_dpkg_log_content(logfile_dpkg, install_start_time)
-        send_summary_mail(
-            pkgs, successful_run,
-            pkgs_kept_back,
-            kernel_pkgs_removed + pkgs_removed,
-            kernel_pkgs_kept_installed + pkgs_kept_installed,
-            mem_log, log_content)
-
     # clean after success install (if needed)
     keep_key = "Unattended-Upgrade::Keep-Debs-After-Install"
     if (not apt_pkg.config.find_b(keep_key, False) and
@@ -1888,18 +1931,12 @@ def main_inner(options, rootdir, mem_log, logfile_dpkg, install_start_time):
             pkg_install_success):
         clean_downloaded_packages(fetcher)
 
-    # FIXME: DRY violation, write_stamp_file() is used above as well
-    # write timestamp file
-    write_stamp_file()
-
-    os.close(shutdown_lock)
-    # check if the user wants a reboot
-    if not options.dry_run:
-        reboot_if_requested_and_needed()
-    if successful_run:
-        return 0
-    else:
-        return 1
+    return UnattendedUpgradesResult(
+        successful_run, _("All upgrades installed"), pkgs,
+        pkgs_kept_back,
+        kernel_pkgs_removed + pkgs_removed,
+        kernel_pkgs_kept_installed + pkgs_kept_installed,
+        update_stamp=True)
 
 
 class Options:
