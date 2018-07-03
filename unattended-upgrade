@@ -168,9 +168,12 @@ class UnattendedUpgradesCache(apt.Cache):
         for ver in pkg.versions:
             # ignore versions that the user marked with priority < 100
             # (and ensure we have a python-apt that supports this)
-            if (hasattr(ver, "policy_priority") and ver.policy_priority < 100):
-                logging.debug("ignoring ver %s with priority < 0" % ver)
-                continue
+            try:
+                if ver.policy_priority < 100:
+                    logging.debug("ignoring ver %s with priority < 0" % ver)
+                    continue
+            except AttributeError:
+                pass
             if is_allowed_origin(ver, self.allowed_origins):
                 # leave as soon as we have the highest new candidate
                 new_cand = ver
