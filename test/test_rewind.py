@@ -28,7 +28,8 @@ class TestRewindCache(unittest.TestCase):
         dpkg_status = os.path.abspath(
             os.path.join(rootdir, "var", "lib", "dpkg", "status"))
         apt.apt_pkg.config.set("Dir::State::status", dpkg_status)
-        self.allowed_origins = ["origin=Ubuntu,archive=lucid-security"]
+        self.allowed_origins = frozenset(
+            ["origin=Ubuntu,archive=lucid-security"])
         self.cache = unattended_upgrade.UnattendedUpgradesCache(
             rootdir=rootdir, allowed_origins=self.allowed_origins)
 
