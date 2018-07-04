@@ -1549,8 +1549,8 @@ def main(options, rootdir=""):
         return 1
 
     try:
-        res = main_inner(options, rootdir, mem_log, logfile_dpkg,
-                         install_start_time)
+        res = run(options, rootdir, mem_log, logfile_dpkg,
+                  install_start_time)
         if res.result_str and not options.dry_run:
             # there is some meaningful result which is worth an email
             log_content = get_dpkg_log_content(logfile_dpkg,
@@ -1584,12 +1584,12 @@ def main(options, rootdir=""):
         raise
 
 
-def main_inner(options,             # type: Options
-               rootdir,             # type: str
-               mem_log,             # type: StringIO
-               logfile_dpkg,        # type: str
-               install_start_time,  # type: datetime.datetime
-               ):
+def run(options,             # type: Options
+        rootdir,             # type: str
+        mem_log,             # type: StringIO
+        logfile_dpkg,        # type: str
+        install_start_time,  # type: datetime.datetime
+        ):
     # type: (...) -> UnattendedUpgradesResult
 
     # check if today is a patch day

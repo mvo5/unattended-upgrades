@@ -225,10 +225,10 @@ Debian-Security']
         self.assertTrue(
             "From: rootolv" in mail_txt, "missing From: in %s" % mail_txt)
 
-    @patch("unattended_upgrade.main_inner")
-    def test_exception(self, mock_main_inner):
+    @patch("unattended_upgrade.run")
+    def test_exception(self, mock_run):
         exception_string = "Test exception for email"
-        mock_main_inner.side_effect = Exception(exception_string)
+        mock_run.side_effect = Exception(exception_string)
         # run it
         options = MockOptions()
         unattended_upgrade.LOCK_FILE = "./u-u.lock"
