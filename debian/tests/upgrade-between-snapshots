@@ -12,49 +12,49 @@ distro=sid
 check_arch
 
 dpkg-buildpackage -us -uc 2>&1
-do_debootstrap $distro $chroot_dir "http://snapshot.debian.org/archive/debian/$start_date/ unstable main"
+do_debootstrap "$distro" "$chroot_dir" "http://snapshot.debian.org/archive/debian/$start_date/ unstable main"
 
-sed -i 's/^deb /deb [check-valid-until=no] /' $chroot_dir/etc/apt/sources.list
-echo "deb-src [check-valid-until=no] http://snapshot.debian.org/archive/debian/${start_date}/ $distro main" >> $chroot_dir/etc/apt/sources.list
-chroot_exec $chroot_dir apt-get update
+sed -i 's/^deb /deb [check-valid-until=no] /' "$chroot_dir/etc/apt/sources.list"
+echo "deb-src [check-valid-until=no] http://snapshot.debian.org/archive/debian/${start_date}/ $distro main" >> "$chroot_dir/etc/apt/sources.list"
+chroot_exec "$chroot_dir" apt-get update
 
 # install mailutils for testing u-u email and mark python3.5-minimal
 # because otherwise u-u autoremoves it while running python3.5 code
-chroot_exec $chroot_dir apt-get install -y python3.5-minimal mailutils
+chroot_exec "$chroot_dir" apt-get install -y python3.5-minimal mailutils
 
 # add package set with many dependencies
-chroot_exec $chroot_dir apt-get install -y xfce4
+chroot_exec "$chroot_dir" apt-get install -y xfce4
 
 # build and install updated python-apt since the one in the snapshot has memory allocation issues
-rebuild_python_apt $chroot_dir
+rebuild_python_apt "$chroot_dir"
 
 # install package version just built
-cp ../unattended-upgrades_*.deb $chroot_dir/tmp/
-chroot_exec $chroot_dir bash -c 'apt install -y /tmp/unattended-upgrades_*deb' 2>&1
+cp ../unattended-upgrades_*.deb "$chroot_dir/tmp/"
+chroot_exec "$chroot_dir" bash -c 'apt install -y /tmp/unattended-upgrades_*deb' 2>&1
 
 # save list of manually installed packages
-chroot_exec $chroot_dir apt-mark showmanual > $chroot_dir/tmp/manual
+chroot_exec "$chroot_dir" apt-mark showmanual > "$chroot_dir/tmp/manual"
 
 # hold a package to test if autoremoval honors that
-chroot_exec $chroot_dir apt-mark hold libpoppler68
+chroot_exec "$chroot_dir" apt-mark hold libpoppler68
 
 # also blacklist a package
 echo 'Unattended-Upgrade::Package-Blacklist {"libx265-13.*"};' > \
-     $chroot_dir/etc/apt/apt.conf.d/51unattended-upgrades-blacklist
+     "$chroot_dir/etc/apt/apt.conf.d/51unattended-upgrades-blacklist"
 
 # clean up to need less space for the test
-chroot_exec $chroot_dir apt-get clean
+chroot_exec "$chroot_dir" apt-get clean
 
 # install Debian's configuration file to make this test work as expected even on other distributions
-cp data/50unattended-upgrades.Debian $chroot_dir/etc/apt/apt.conf.d/50unattended-upgrades
+cp data/50unattended-upgrades.Debian "$chroot_dir/etc/apt/apt.conf.d/50unattended-upgrades"
 
 # use new snapshot
-sed -i "s/$start_date/$end_date/" $chroot_dir/etc/apt/sources.list
+sed -i "s/$start_date/$end_date/" "$chroot_dir/etc/apt/sources.list"
 
-run_u_u $chroot_dir
+run_u_u "$chroot_dir"
 
 echo "libpoppler68 should be still installed and held:"
-chroot_exec $chroot_dir dpkg -l libpoppler68 | grep '^hi'
+chroot_exec "$chroot_dir" dpkg -l libpoppler68 | grep '^hi'
 
 echo "libx265-130 should be still installed thanks to the blacklist"
-chroot_exec $chroot_dir dpkg -l libx265-130 | grep '^ii'
+chroot_exec "$chroot_dir" dpkg -l libx265-130 | grep '^ii'
