@@ -1602,6 +1602,10 @@ def run(options,             # type: Options
     if not is_update_day():
         return UnattendedUpgradesResult(True)
 
+    # check if u-u should be stopped already
+    if should_stop():
+        return UnattendedUpgradesResult(False)
+
     # format (origin, archive), e.g. ("Ubuntu","dapper-security")
     allowed_origins = get_allowed_origins()
 
