@@ -1,3 +1,42 @@
+unattended-upgrades (1.4) unstable; urgency=medium
+
+  * Skip starting init.d script in debhelper-generated postinst part
+    (LP: #1778800)
+  * Use "deb-systemd-invoke start" instead of "systemctl start" in postinst.
+    It is used only in a workaround applied for a Debian bug and for upgrading
+    from pre-bionic versions.
+  * Clear cache when autoremoval is invalid for a package set marked for
+    removal (LP: #1779157)
+  * Clear cache after failed commits to return from a possibly invalid state
+  * Unlock for dpkg operations with apt_pkg.pkgsystem_unlock_inner() when it
+    is available, also stop running when reacquiring the lock fails.
+    Thanks to to Julian Andres Klode for original partial patch
+  * Use fully qualified domain name in email subject.
+  * Send email about all failures and crashes (Closes: #898607)
+  * Add short textual summary of the results in the summary email
+  * Recommend overriding configuration in a separate file.
+    This can be better than changing /etc/apt/apt.conf.d/50unattended-upgrades
+    because package updates don't conflict with local changes this way.
+  * Adjust candidates only for packages to be possibly installed
+    (Closes: #892028, #899366) (LP: #1396787)
+  * Add Unattended-Upgrade::OnlyOnACPower config file example for all
+    distributions
+  * debian/control: Drop redundant Testsuite: autopkgtest field to keep Lintian
+    happy
+  * Bump Standards-Version to 4.1.4
+  * Add debian/tests/upgrade-all-security to install all current security
+    updates. On development releases this tests latest stable, on stable
+    releases it tests the release itself.
+  * Skip updates on metered connections (Closes: #855570)
+  * Quote shell variables in autopkgtest
+  * Stop u-u early when it should stop later anyway
+  * Measure time for --dry-run and after all updates are installed in
+    autopkgtests
+  * Filter out packages cheaper when they are not from allowed origins
+  * Collect autoremovable packages, too, when looking for upgradable ones
+
+ -- Balint Reczey <rbalint@ubuntu.com>  Thu, 05 Jul 2018 23:36:00 +0200
+
 unattended-upgrades (1.3) unstable; urgency=medium
 
   [ Balint Reczey ]
