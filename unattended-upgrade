@@ -1277,6 +1277,15 @@ def try_to_upgrade(pkg,               # type: apt.Package
                    ):
     # type: (...) -> None
     try:
+        try:
+            # try to adjust pkg itself first, if that throws an exception it
+            # can't be upgraded on its own
+            cache.adjust_candidate(pkg)
+            if not pkg.is_upgradable:
+                return
+        except NoAllowedOriginError:
+            return
+        cache._cached_candidate_pkgnames.add(pkg.name)
         cache.mark_upgrade_adjusted(pkg, from_user=not pkg.is_auto_installed)
         if check_changes_for_sanity(cache, allowed_origins,
                                     blacklisted_pkgs, whitelisted_pkgs,
