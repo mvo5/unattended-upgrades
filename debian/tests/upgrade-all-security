@@ -1,0 +1,61 @@
+#!/bin/sh
+
+# Test for installing all security updates on a the current release in a chroot.
+# On development releases the latest stable release is tested since there are no
+# security updates to test with.
+
+set -e
+
+chroot_dir=$AUTOPKGTEST_TMP/chroot
+
+distro="$(lsb_release -c -s)"
+# fall back to latest release on any development release
+if [ "$distro" = sid ] || lsb_release -d -s | grep -q 'development branch'; then
+    distro="$(distro-info -s)"
+fi
+
+. debian/tests/common-functions
+
+check_arch
+
+env DEB_BUILD_OPTIONS=nocheck dpkg-buildpackage -us -uc 2>&1
+do_debootstrap "$distro" "$chroot_dir"
+
+if [ "$(dpkg-vendor --query Vendor)" = "Ubuntu" ]; then
+    sed -i "s/main/main universe/" "$chroot_dir/etc/apt/sources.list"
+fi
+sed "s/^deb /deb-src /" < "$chroot_dir/etc/apt/sources.list" > "$chroot_dir/etc/apt/sources.list.d/src.list"
+
+chroot_exec "$chroot_dir" apt-get update
+
+# install mailutils for testing u-u emai
+chroot_exec "$chroot_dir" apt-get install -y mailutils exim4-daemon-light
+
+# add package set with many dependencies
+chroot_exec "$chroot_dir" apt-get install -y xfce4 apparmor
+
+# build and install updated python-apt since the one in the snapshot has memory allocation issues
+rebuild_python_apt "$chroot_dir"
+
+# install package version just built
+cp ../unattended-upgrades_*.deb "$chroot_dir/tmp/"
+chroot_exec "$chroot_dir" bash -c 'apt install -y /tmp/unattended-upgrades_*deb' 2>&1
+
+sed "s/$distro/$distro-updates/" < "$chroot_dir/etc/apt/sources.list" > "$chroot_dir/etc/apt/sources.list.d/updates.list"
+sed "s/$distro/$distro-security/" < "$chroot_dir/etc/apt/sources.list" > "$chroot_dir/etc/apt/sources.list.d/security.list"
+
+chroot_exec "$chroot_dir" apt-get update
+
+# save list of manually installed packages
+chroot_exec "$chroot_dir" apt-mark showmanual > "$chroot_dir/tmp/manual"
+
+# clean up to need less space for the test
+chroot_exec "$chroot_dir" apt-get clean
+
+run_u_u "$chroot_dir"
+
+echo "Checking if there is anything left not upgraded:"
+chroot_exec "$chroot_dir" apt-get upgrade --with-new-pkgs -s | tee "$chroot_dir/tmp/updates-left"
+
+! grep "/$distro-security " "$chroot_dir/tmp/updates-left" || (echo "Security upgrades are held back! Exiting..." && exit 1)
+
