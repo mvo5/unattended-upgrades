@@ -113,6 +113,10 @@ class UnknownMatcherError(ValueError):
     pass
 
 
+class NoAllowedOriginError(ValueError):
+    pass
+
+
 class UnattendedUpgradesCache(apt.Cache):
 
     def __init__(self, rootdir, allowed_origins):
@@ -142,21 +146,6 @@ class UnattendedUpgradesCache(apt.Cache):
             self.versioned_kernel_pkgs_regexp = None
             self.running_kernel_pkgs_regexp = None
 
-        # ensure we update the candidate versions
-        self.adjust_candidates()
-
-    def open(self, progress=None):
-        # type: (apt.progress.base.Progress) -> None
-        apt.Cache.open(self, progress)
-        # ensure we update the candidate versions
-        self.adjust_candidates()
-
-    def clear(self):
-        # type: () -> None
-        apt.Cache.clear(self)
-        # ensure we update the candidate versions
-        self.adjust_candidates()
-
     def adjust_candidate(self, pkg):
         # type: (apt.Package) -> bool
         """ Adjust origin and return True if adjustment took place
@@ -165,53 +154,57 @@ class UnattendedUpgradesCache(apt.Cache):
             the security pocket but there is also a package in the
             updates pocket with a higher version number
         """
-        new_cand = None
-        for ver in pkg.versions:
-            # ignore versions that the user marked with priority < 100
-            # (and ensure we have a python-apt that supports this)
-            if (hasattr(ver, "policy_priority") and ver.policy_priority < 100):
-                logging.debug("ignoring ver %s with priority < 0" % ver)
-                continue
-            if is_allowed_origin(ver, self.allowed_origins):
-                # leave as soon as we have the highest new candidate
-                new_cand = ver
-                break
-        if new_cand and new_cand != pkg.candidate:
-            logging.debug("adjusting candidate version: %s" % new_cand)
-            pkg.candidate = new_cand
-            return True
-        return False
+        try:
+            new_cand = ver_in_allowed_origin(pkg, self.allowed_origins)
+            if new_cand != pkg.candidate:
+                logging.debug("adjusting candidate version: %s" % new_cand)
+                pkg.candidate = new_cand
+                return True
+            else:
+                return False
+        except NoAllowedOriginError:
+            return False
 
-    def adjust_candidates(self):
-        # tyoe: () -> None
-        """ Adjust all package candidates when needed saving cached package
-            names to self._cached_candidate_pkgnames
+    def call_adjusted(self, function, pkg, **kwargs):
+        """Call function, but with adjusting
+           packages in changes to come from allowed origins
+
+           Note that as a side effect more package's candidate can be
+           adjusted than only the one's in the final changes set.
         """
-        if self._cached_candidate_pkgnames is None:
-            # first run, collect package names
-            self._cached_candidate_pkgnames = set()
-            for pkg in self:
-                # important! this avoids downgrades below
-                if pkg.is_installed and not pkg.is_upgradable:
-                    continue
-                # check if the candidate is already pointing to a allowed
-                # origin and if so, do not mess with it
-                if is_allowed_origin(pkg.candidate, self.allowed_origins):
-                    continue
-                # check if we have a version in a allowed origin that is
-                # not the candidate
-                if self.adjust_candidate(pkg):
-                    # ... and save it for next runs
-                    self._cached_candidate_pkgnames.add(pkg.name)
+        pkgs_to_adjust = []  # List[str]
+        pkgs_with_no_allowed_origin = []
+        if function == apt.package.Package.mark_upgrade \
+           and not pkg.is_upgradable:
+            raise NoAllowedOriginError
+        function(pkg, **kwargs)
+        changes = self.get_changes()
+        for marked_pkg in changes:
+            if not is_allowed_origin(marked_pkg.candidate,
+                                     self.allowed_origins):
+                try:
+                    ver_in_allowed_origin(marked_pkg,
+                                          self.allowed_origins)
+                    # important! this avoids downgrades below
+                    if pkg.is_installed and not pkg.is_upgradable:
+                        continue
+                    pkgs_to_adjust.append(marked_pkg)
+                except NoAllowedOriginError:
+                    pkgs_with_no_allowed_origin.append(marked_pkg)
+
+        if pkgs_to_adjust:
+            for pkg_to_adjust in pkgs_to_adjust:
+                self.adjust_candidate(pkg_to_adjust)
+            self.call_adjusted(function, pkg, **kwargs)
         else:
-            # packages to be adjusted are already collected
-            for pkgname in self._cached_candidate_pkgnames:
-                pkg = self[pkgname]
-                # important! this avoids downgrades and also skips packages
-                # installed since previous adjustment runs
-                if pkg.is_installed and not pkg.is_upgradable:
-                    continue
-                self.adjust_candidate(pkg)
+            if pkgs_with_no_allowed_origin:
+                raise NoAllowedOriginError
+
+    def mark_upgrade_adjusted(self, pkg, **kwargs):
+        self.call_adjusted(apt.package.Package.mark_upgrade, pkg, **kwargs)
+
+    def mark_install_adjusted(self, pkg, **kwargs):
+        self.call_adjusted(apt.package.Package.mark_install, pkg, **kwargs)
 
 
 class LogInstallProgress(apt.progress.base.InstallProgress):
@@ -640,9 +633,10 @@ def upgrade_in_minimal_steps(cache,            # type: apt.Cache
             return False
         pkg = cache[pkgname]
         if pkg.is_upgradable:
-            pkg.mark_upgrade(from_user=not pkg.is_auto_installed)
+            cache.mark_upgrade_adjusted(pkg,
+                                        from_user=not pkg.is_auto_installed)
         elif not pkg.is_installed:
-            pkg.mark_install(from_user=False)
+            cache.mark_install_adjusted(pkg, from_user=False)
         else:
             continue
         # double check that we are not running into side effects like
@@ -695,6 +689,23 @@ def is_allowed_origin(ver, allowed_origins):
             if match_whitelist_string(allowed, origin):
                 return True
     return False
+
+
+def ver_in_allowed_origin(pkg, allowed_origins):
+    # type: (apt.Package, List[str]) -> apt.package.Version
+    for ver in pkg.versions:
+        # ignore versions that the user marked with priority < 100
+        # (and ensure we have a python-apt that supports this)
+        try:
+            if ver.policy_priority < 100:
+                logging.debug("ignoring ver %s with priority < 0" % ver)
+                continue
+        except AttributeError:
+            pass
+        if is_allowed_origin(ver, allowed_origins):
+            # leave as soon as we have the highest new candidate
+            return ver
+    raise NoAllowedOriginError()
 
 
 def is_pkgname_in_blacklist(pkgname, blacklist):
@@ -1296,7 +1307,7 @@ def try_to_upgrade(pkg,               # type: apt.Package
                    ):
     # type: (...) -> None
     try:
-        pkg.mark_upgrade(from_user=not pkg.is_auto_installed)
+        cache.mark_upgrade_adjusted(pkg, from_user=not pkg.is_auto_installed)
         if check_changes_for_sanity(cache, allowed_origins,
                                     blacklisted_pkgs, whitelisted_pkgs,
                                     pkg):
@@ -1314,7 +1325,7 @@ def try_to_upgrade(pkg,               # type: apt.Package
             logging.debug("sanity check failed")
             rewind_cache(cache, pkgs_to_upgrade)
             pkgs_kept_back.append(pkg.name)
-    except SystemError as e:
+    except (SystemError, NoAllowedOriginError) as e:
         # can't upgrade
         logging.warning(
             _("package %s upgradable but fails to "
@@ -1340,8 +1351,11 @@ def calculate_upgradable_pkgs(cache,             # type: apt.Cache
                 pkg.name, getattr(pkg.candidate, "origins", [])))
 
         if (pkg.is_upgradable and
-                is_pkgname_in_whitelist(pkg.name, whitelisted_pkgs) and
-                is_allowed_origin(pkg.candidate, allowed_origins)):
+                is_pkgname_in_whitelist(pkg.name, whitelisted_pkgs)):
+            try:
+                ver_in_allowed_origin(pkg, allowed_origins)
+            except NoAllowedOriginError:
+                continue
 
             if not is_pkgname_in_blacklist(pkg.name, blacklisted_pkgs):
                 try_to_upgrade(pkg,
@@ -1790,7 +1804,8 @@ def run(options,             # type: Options
             for pkg in old_pkgs_to_upgrade:
                 logging.debug("Checking the black and whitelist: %s" %
                               (pkg.name))
-                pkg.mark_upgrade(from_user=not pkg.is_auto_installed)
+                cache.mark_upgrade_adjusted(
+                    pkg, from_user=not pkg.is_auto_installed)
                 if check_changes_for_sanity(cache,
                                             allowed_origins,
                                             blacklisted_pkgs,
@@ -1802,7 +1817,9 @@ def run(options,             # type: Options
                     logging.info(_("package %s not upgraded"), pkg.name)
                     cache.clear()
                     for pkg2 in pkgs_to_upgrade:
-                        pkg2.mark_upgrade(from_user=not pkg2.is_auto_installed)
+                        cache.call_adjusted(
+                            apt.package.Package.mark_upgrade, pkg2,
+                            from_user=not pkg2.is_auto_installed)
     else:
         logging.debug("dpkg is configured not to cause conffile prompts")
 
