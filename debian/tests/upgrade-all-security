@@ -42,7 +42,14 @@ cp ../unattended-upgrades_*.deb "$chroot_dir/tmp/"
 chroot_exec "$chroot_dir" bash -c 'apt install -y /tmp/unattended-upgrades_*deb' 2>&1
 
 sed "s/$distro/$distro-updates/" < "$chroot_dir/etc/apt/sources.list" > "$chroot_dir/etc/apt/sources.list.d/updates.list"
-sed "s/$distro/$distro-security/" < "$chroot_dir/etc/apt/sources.list" > "$chroot_dir/etc/apt/sources.list.d/security.list"
+case "$(dpkg-vendor --query Vendor)" in
+    "Ubuntu")
+        sed "s/$distro/$distro-security/" < "$chroot_dir/etc/apt/sources.list" > "$chroot_dir/etc/apt/sources.list.d/security.list"
+        ;;
+    "Debian")
+        echo "deb http://security.debian.org/ $distro/updates main" > "$chroot_dir/etc/apt/sources.list.d/security.list"
+        ;;
+esac
 
 chroot_exec "$chroot_dir" apt-get update
 
