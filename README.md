@@ -32,8 +32,16 @@ applied.
 This can be changed either with the
 "Unattended-Upgrade::Allowed-Origins" or the 
 "Unattended-Upgrade::Origins-Pattern" apt configuration lists, which
-can be configured in /etc/apt/apt.conf.d/50unattended-upgrades.
+are listed in /etc/apt/apt.conf.d/50unattended-upgrades.
 Also in this file are a range of other options that can be configured.
+
+To override the configuration it is recommended to create an other APT
+configuration file fragment which overrides the shipped default
+value because updates to to shipped configuration file may conflict
+with the local changes blocking updating unattended-upgrades itself.
+The new file should sort later than 50unattended-upgrades to be
+parsed later than the one shipping the default values, it can
+be e.g. 52unattended-upgrades-local.
 
 Allowed-Origins is a simple list of patterns of the form
 "origin:archive".
