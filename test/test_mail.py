@@ -4,6 +4,8 @@ from __future__ import unicode_literals
 
 from email.parser import Parser
 from io import StringIO
+import logging
+from mock import patch
 import os
 import shutil
 import sys
@@ -24,11 +26,21 @@ from unattended_upgrade import (
 )
 
 
+class MockOptions(object):
+    debug = False
+    verbose = False
+    download_only = False
+    dry_run = False
+    apt_debug = False
+    minimal_upgrade_steps = True
+
+
 class ExtractDpkgLogTestCase(unittest.TestCase):
 
     def setUp(self):
         self.tmpdir = tempfile.mkdtemp()
         self.addCleanup(shutil.rmtree, self.tmpdir)
+        self.addCleanup(logging.shutdown)
 
     def test_get_dpkg_log_content(self):
         logfile_dpkg = os.path.join(self.tmpdir, "apt-term.log")
@@ -71,7 +83,8 @@ class CommonTestsForMailxAndSendmail(object):
     def common_setup(self):
         self.tmpdir = tempfile.mkdtemp()
         self.addCleanup(shutil.rmtree, self.tmpdir)
-
+        self.addCleanup(logging.shutdown)
+        logging.root.handlers = []
         # monkey patch to make it testable
         unattended_upgrade.REBOOT_REQUIRED_FILE = os.path.join(
             self.tmpdir, "reboot-required")
@@ -80,11 +93,13 @@ class CommonTestsForMailxAndSendmail(object):
         # setup mail
         apt_pkg.config.set("Unattended-Upgrade::Mail", "root")
         apt_pkg.config.set("Unattended-Upgrade::MailOnlyOnError", "false")
+        apt_pkg.config.set("Unattended-Upgrade::LogDir", self.tmpdir)
 
     def _return_mock_data(self, successful=True):
         """ return input tuple for send_summary_mail """
-        pkgs = "\n".join(["2vcard"])
+        pkgs = ["2vcard"]
         res = successful
+        result_str = "Result String"
         pkgs_kept_back = ["linux-image"]
         pkgs_removed = ["telnet"]
         pkgs_kept_installed = ["hello"]
@@ -99,8 +114,8 @@ Debian-Security']
         random logfile_dpkg text
         Log ended: 2013-01-01  12:30:00
         """)
-        return (pkgs, res, pkgs_kept_back, pkgs_removed, pkgs_kept_installed,
-                mem_log, dpkg_log_content)
+        return (pkgs, res, result_str, pkgs_kept_back, pkgs_removed,
+                pkgs_kept_installed, mem_log, dpkg_log_content)
 
     def _verify_common_mail_content(self, mail_txt):
         for expected_string in self.EXPECTED_MAIL_CONTENT_STRINGS:
@@ -151,7 +166,7 @@ Debian-Security']
         with open(os.path.join(self.tmpdir, "mail.txt"), "rb") as fp:
             mail_txt = fp.read().decode("utf-8")
         self._verify_common_mail_content(mail_txt)
-        self.assertTrue("Unattended upgrade returned: False" in mail_txt)
+        self.assertTrue("Unattended upgrade result: Result String" in mail_txt)
         self.assertTrue(
             os.path.exists(os.path.join(self.tmpdir, "mail.txt")))
         self.assertTrue(
@@ -173,10 +188,11 @@ Debian-Security']
     def test_summary_mail_blacklisted_only(self):
         # Test that when only blacklisted packages are available, they
         # are still mentioned in the mail message.
-        pkgs, res, pkgs_kept_back, pkgs_removed, pkgs_kept_installed, \
-            mem_log, logf_dpkg = self._return_mock_data(successful=True)
-        pkgs = ""
-        send_summary_mail(pkgs, res, pkgs_kept_back, pkgs_removed,
+        pkgs, res, result_str, pkgs_kept_back, pkgs_removed, \
+            pkgs_kept_installed, mem_log, logf_dpkg = self._return_mock_data(
+                successful=True)
+        pkgs = []
+        send_summary_mail(pkgs, res, result_str, pkgs_kept_back, pkgs_removed,
                           pkgs_kept_installed, mem_log, logf_dpkg)
         self.assertTrue(
             os.path.exists(os.path.join(self.tmpdir, "mail.txt")))
@@ -208,6 +224,24 @@ Debian-Security']
             mail_txt = fp.read().decode("utf-8")
         self.assertTrue(
             "From: rootolv" in mail_txt, "missing From: in %s" % mail_txt)
+
+    @patch("unattended_upgrade.run")
+    def test_exception(self, mock_run):
+        exception_string = "Test exception for email"
+        mock_run.side_effect = Exception(exception_string)
+        # run it
+        options = MockOptions()
+        unattended_upgrade.LOCK_FILE = "./u-u.lock"
+        exception_raised = False
+        try:
+            unattended_upgrade.main(options)
+        except Exception as e:
+            self.assertEqual(str(e), exception_string)
+            exception_raised = True
+        self.assertTrue(exception_raised)
+        with open(os.path.join(self.tmpdir, "mail.txt"), "rb") as fp:
+            mail_txt = fp.read().decode("utf-8")
+        self.assertTrue(exception_string in mail_txt)
 
 
 class MailxTestCase(CommonTestsForMailxAndSendmail, unittest.TestCase):

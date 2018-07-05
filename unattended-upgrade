@@ -367,6 +367,30 @@ class Unlocked:
             apt_pkg.pkgsystem_lock()
 
 
+class UnattendedUpgradesResult:
+    """
+    Represent the (potentially partial) results of an unattended-upgrades
+    run
+    """
+    def __init__(self,
+                 success,                 # type: bool
+                 result_str="",           # type: str
+                 pkgs=[],                 # type: List[str]
+                 pkgs_kept_back=[],       # type: List[str]
+                 pkgs_removed=[],         # type: List[str]
+                 pkgs_kept_installed=[],  # type: List[str]
+                 update_stamp=False       # type: bool
+                 ):
+        # type: (...) -> None
+        self.success = success
+        self.result_str = result_str
+        self.pkgs = pkgs
+        self.pkgs_kept_back = pkgs_kept_back
+        self.pkgs_removed = pkgs_removed
+        self.pkgs_kept_installed = pkgs_kept_installed
+        self.update_stamp = update_stamp
+
+
 def is_dpkg_journal_dirty():
     # type: () -> bool
     """
@@ -811,7 +835,7 @@ def conffile_prompt(destFile, prefix=""):
         print(_("error message: %s") % e)
         logging.error(_("Apt returned an error, exiting"))
         logging.error(_("error message: %s"), e)
-        sys.exit(1)
+        raise
     except LookupError as e:
         logging.debug("No conffiles in deb %s (%s)" % (destFile, e))
 
@@ -988,9 +1012,16 @@ def _send_mail_using_sendmail(from_address, to_address, subject, body):
     return ret
 
 
-def send_summary_mail(pkgs, res, pkgs_kept_back, pkgs_removed,
-                      pkgs_kept_installed, mem_log, dpkg_log_content):
-    # type: (str, bool, List[str], List[str], List[str], StringIO, str) -> None
+def send_summary_mail(pkgs,                 # type: List[str]
+                      res,                  # type: bool
+                      result_str,           # type: str
+                      pkgs_kept_back,       # type: List[str]
+                      pkgs_removed,         # type: List[str]
+                      pkgs_kept_installed,  # type: List[str]
+                      mem_log,              # type: StringIO
+                      dpkg_log_content,     # type: str
+                      ):
+    # type: (...) -> None
     """ send mail (if configured in Unattended-Upgrade::Mail) """
     to_email = apt_pkg.config.find("Unattended-Upgrade::Mail", "")
     if not to_email:
@@ -1016,8 +1047,9 @@ def send_summary_mail(pkgs, res, pkgs_kept_back, pkgs_removed,
         "{hold_flag}{reboot_flag} unattended-upgrades result for "
         "{machine}: {result}").format(
             hold_flag=hold_flag_str, reboot_flag=reboot_flag_str,
-            machine=host(), result=res).strip()
-    body = _("Unattended upgrade returned: %s\n\n") % res
+            machine=host(), result="SUCCESS" if res else "FAILURE").strip()
+    body = wrap(_("Unattended upgrade result: %s") % result_str, 70, " ")
+    body += "\n\n"
     if os.path.isfile(REBOOT_REQUIRED_FILE):
         body += _(
             "Warning: A reboot is required to complete this upgrade.\n\n")
@@ -1025,7 +1057,7 @@ def send_summary_mail(pkgs, res, pkgs_kept_back, pkgs_removed,
         body += _("Packages that were upgraded:\n")
     else:
         body += _("Packages that attempted to upgrade:\n")
-    body += " " + wrap(pkgs, 70, " ")
+    body += " " + wrap(" ".join(pkgs), 70, " ")
     body += "\n"
     if pkgs_kept_back:
         body += _("Packages with upgradable origin but kept back:\n")
@@ -1499,12 +1531,70 @@ def main(options, rootdir=""):
     if rootdir:
         _setup_alternative_rootdir(rootdir)
 
+    # see debian #776752
+    install_start_time = datetime.datetime.now().replace(microsecond=0)
+
     # setup logging
     mem_log = _setup_logging(options)
+    # get log
+    logfile_dpkg = os.path.join(_get_logdir(), 'unattended-upgrades-dpkg.log')
+    if not os.path.exists(logfile_dpkg):
+        with open(logfile_dpkg, 'w'):
+            pass
+
+    # lock for the shutdown check
+    shutdown_lock = apt_pkg.get_lock(LOCK_FILE)
+    if shutdown_lock < 0:
+        logging.error("Lock file is already taken, exiting")
+        return 1
+
+    try:
+        res = run(options, rootdir, mem_log, logfile_dpkg,
+                  install_start_time)
+        if res.result_str and not options.dry_run:
+            # there is some meaningful result which is worth an email
+            log_content = get_dpkg_log_content(logfile_dpkg,
+                                               install_start_time)
+            send_summary_mail(res.pkgs, res.success, res.result_str,
+                              res.pkgs_kept_back, res.pkgs_removed,
+                              res.pkgs_kept_installed, mem_log,
+                              log_content)
+        if res.update_stamp:
+            # write timestamp file
+            write_stamp_file()
+            if not options.dry_run:
+                # check if the user wants a reboot
+                reboot_if_requested_and_needed()
+        os.close(shutdown_lock)
+        if res.success:
+            return 0
+        else:
+            return 1
+
+    except Exception as e:
+        logger = logging.getLogger()
+        logger.exception(_("An error occurred: %s"), e)
+        log_content = get_dpkg_log_content(logfile_dpkg,
+                                           install_start_time)
+        if not options.dry_run:
+            send_summary_mail(["<unknown>"], False, _("An error occurred"), [],
+                              [], [],
+                              mem_log, log_content)
+        # Re-raise exceptions for apport
+        raise
+
+
+def run(options,             # type: Options
+        rootdir,             # type: str
+        mem_log,             # type: StringIO
+        logfile_dpkg,        # type: str
+        install_start_time,  # type: datetime.datetime
+        ):
+    # type: (...) -> UnattendedUpgradesResult
 
     # check if today is a patch day
     if not is_update_day():
-        return 0
+        return UnattendedUpgradesResult(True)
 
     # format (origin, archive), e.g. ("Ubuntu","dapper-security")
     allowed_origins = get_allowed_origins()
@@ -1521,17 +1611,8 @@ def main(options, rootdir=""):
 
     logging.info(_("Starting unattended upgrades script"))
 
-    # lock for the shutdown check
-    shutdown_lock = apt_pkg.get_lock(LOCK_FILE)
-    if shutdown_lock < 0:
-        logging.error("Lock file is already taken, exiting")
-        sys.exit(1)
-
     # display available origin
     logging.info(_("Allowed origins are: %s"), ", ".join(allowed_origins))
-
-    # see debian #776752
-    install_start_time = datetime.datetime.now().replace(microsecond=0)
 
     # check and get lock
     try:
@@ -1540,7 +1621,8 @@ def main(options, rootdir=""):
         logging.error(_("Lock could not be acquired (another package "
                         "manager running?)"))
         print(_("Cache lock can not be acquired, exiting"))
-        sys.exit(1)
+        return UnattendedUpgradesResult(
+            False, _("Lock could not be acquired"))
 
     # check if the journal is dirty and if so, take emergceny action
     # the alternative is to leave the system potentially unsecure until
@@ -1573,12 +1655,14 @@ def main(options, rootdir=""):
         print(_("error message: %s") % error)
         logging.error(_("Apt returned an error, exiting"))
         logging.error(_("error message: %s"), error)
-        sys.exit(1)
+        return UnattendedUpgradesResult(
+            False, _("Apt returned an error, exiting"))
 
     if cache._depcache.broken_count > 0:
         print(_("Cache has broken packages, exiting"))
         logging.error(_("Cache has broken packages, exiting"))
-        sys.exit(1)
+        return UnattendedUpgradesResult(
+            False, _("Cache has broken packages, exiting"))
 
     # FIXME: make this into a ContextManager
     # be nice when calculating the upgrade as its pretty CPU intensive
@@ -1601,8 +1685,9 @@ def main(options, rootdir=""):
     pkgs_to_upgrade, pkgs_kept_back = calculate_upgradable_pkgs(
         cache, options, allowed_origins, blacklisted_pkgs, whitelisted_pkgs)
     pkgs_to_upgrade.sort(key=lambda p: p.name)
-    pkgs = "\n".join([pkg.name for pkg in pkgs_to_upgrade])
-    logging.debug("pkgs that look like they should be upgraded: %s" % pkgs)
+    pkgs = [pkg.name for pkg in pkgs_to_upgrade]
+    logging.debug("pkgs that look like they should be upgraded: %s"
+                  % "\n".join(pkgs))
 
     # FIXME: make this into a ContextManager
     # stop being nice
@@ -1621,7 +1706,7 @@ def main(options, rootdir=""):
     # TODO: download files one by one and check for stop request after each of
     # them
     if should_stop():
-        return 1
+        return UnattendedUpgradesResult(False, _("Upgrade was interrupted"))
     try:
         pm.get_archives(fetcher, list, recs)
     except SystemError as e:
@@ -1633,7 +1718,7 @@ def main(options, rootdir=""):
         logging.error("fetch.run() result: %s", e)
 
     if options.download_only:
-        return 0
+        return UnattendedUpgradesResult(True)
 
     pkg_conffile_prompt = False
     if dpkg_conffile_prompt():
@@ -1649,13 +1734,17 @@ def main(options, rootdir=""):
                       item.desc_uri)
                 logging.error(_("The URI %s failed to download, aborting"),
                               item.desc_uri)
-                sys.exit(1)
+                return UnattendedUpgradesResult(
+                    False, (_("The URI %s failed to download, aborting") %
+                            item.desc_uri))
             if not os.path.exists(item.destfile):
                 print(_("Download finished, but file %s not there?!?") %
                       item.destfile)
                 logging.error("Download finished, but file %s not "
                               "there?!?", item.destfile)
-                sys.exit(1)
+                return UnattendedUpgradesResult(
+                    False, (_("Download finished, but file %s not there?!?") %
+                            item.destfile))
             if not item.is_trusted:
                 blacklisted_pkgs.append(pkgname_from_deb(item.destfile))
             if conffile_prompt(item.destfile):
@@ -1707,12 +1796,6 @@ def main(options, rootdir=""):
     else:
         logging.debug("dpkg is configured not to cause conffile prompts")
 
-    # get log
-    logfile_dpkg = os.path.join(_get_logdir(), 'unattended-upgrades-dpkg.log')
-    if not os.path.exists(logfile_dpkg):
-        with open(logfile_dpkg, 'w'):
-            pass
-
     # auto-removals
     auto_removable = get_auto_removable(cache)
     kernel_pkgs_remove_success = True  # type: bool
@@ -1756,15 +1839,13 @@ def main(options, rootdir=""):
             len(pkgs_kept_back) == 0):
         logging.info(_("No packages found that can be upgraded unattended "
                        "and no pending auto-removals"))
-        # FIXME: DRY violation, write_stamp_file() is used below as well
-        write_stamp_file()
-        # check if we couldn't reboot on previous run because
-        # a user was logged-in at this time
-        os.close(shutdown_lock)
-        # never reboot during a dry run
-        if not options.dry_run:
-            reboot_if_requested_and_needed()
-        return 0
+        return UnattendedUpgradesResult(
+            kernel_pkgs_remove_success,
+            _("No packages found that can be upgraded unattended and no "
+              "pending auto-removals"),
+            pkgs_removed=kernel_pkgs_removed,
+            pkgs_kept_installed=kernel_pkgs_kept_installed,
+            update_stamp=True)
 
     # check if its configured for install on shutdown, if so, the
     # environment UNATTENDED_UPGRADES_FORCE_INSTALL_ON_SHUTDOWN will
@@ -1774,8 +1855,7 @@ def main(options, rootdir=""):
                 "Unattended-Upgrade::InstallOnShutdown", False)):
         logger = logging.getLogger()
         logger.debug("Configured to install on shutdown, so exiting now")
-        os.close(shutdown_lock)
-        return 0
+        return UnattendedUpgradesResult(True)
 
     # check if we are in dry-run mode
     if options.dry_run:
@@ -1783,8 +1863,8 @@ def main(options, rootdir=""):
         apt_pkg.config.set("Debug::pkgDPkgPM", "1")
 
     # do the install based on the new list of pkgs
-    pkgs = " ".join([pkg.name for pkg in pkgs_to_upgrade])
-    logging.info(_("Packages that will be upgraded: %s"), pkgs)
+    pkgs = [pkg.name for pkg in pkgs_to_upgrade]
+    logging.info(_("Packages that will be upgraded: %s"), " ".join(pkgs))
 
     # only perform install step if we actually have packages to install
     pkg_install_success = True
@@ -1805,7 +1885,8 @@ def main(options, rootdir=""):
     if cache._depcache.broken_count > 0:
         print(_("Cache has broken packages, exiting"))
         logging.error(_("Cache has broken packages, exiting"))
-        sys.exit(1)
+        return UnattendedUpgradesResult(
+            False, _("Cache has broken packages, exiting"), pkgs=pkgs)
 
     # the user wants *all* auto-removals to be removed
     # (unless u-u got signalled to stop gracefully quickly)
@@ -1843,16 +1924,6 @@ def main(options, rootdir=""):
                      cache._depcache.del_count,
                      cache._depcache.broken_count))
 
-    # send a mail (if needed)
-    if not options.dry_run:
-        log_content = get_dpkg_log_content(logfile_dpkg, install_start_time)
-        send_summary_mail(
-            pkgs, successful_run,
-            pkgs_kept_back,
-            kernel_pkgs_removed + pkgs_removed,
-            kernel_pkgs_kept_installed + pkgs_kept_installed,
-            mem_log, log_content)
-
     # clean after success install (if needed)
     keep_key = "Unattended-Upgrade::Keep-Debs-After-Install"
     if (not apt_pkg.config.find_b(keep_key, False) and
@@ -1860,18 +1931,12 @@ def main(options, rootdir=""):
             pkg_install_success):
         clean_downloaded_packages(fetcher)
 
-    # FIXME: DRY violation, write_stamp_file() is used above as well
-    # write timestamp file
-    write_stamp_file()
-
-    os.close(shutdown_lock)
-    # check if the user wants a reboot
-    if not options.dry_run:
-        reboot_if_requested_and_needed()
-    if successful_run:
-        return 0
-    else:
-        return 1
+    return UnattendedUpgradesResult(
+        successful_run, _("All upgrades installed"), pkgs,
+        pkgs_kept_back,
+        kernel_pkgs_removed + pkgs_removed,
+        kernel_pkgs_kept_installed + pkgs_kept_installed,
+        update_stamp=True)
 
 
 class Options:
