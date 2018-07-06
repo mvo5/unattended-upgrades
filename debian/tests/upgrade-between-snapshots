@@ -26,9 +26,6 @@ chroot_exec "$chroot_dir" apt-get install -y python3.5-minimal mailutils 2>&1
 # apt prints "W: APT had planned for dpkg to do more than it reported back" to stderr LP: #1647638
 chroot_exec "$chroot_dir" apt-get install -y xfce4 2>&1
 
-# build and install updated python-apt since the one in the snapshot has memory allocation issues
-rebuild_python_apt "$chroot_dir"
-
 # install package version just built
 cp ../unattended-upgrades_*.deb "$chroot_dir/tmp/"
 chroot_exec "$chroot_dir" bash -c 'apt install -y /tmp/unattended-upgrades_*deb' 2>&1
