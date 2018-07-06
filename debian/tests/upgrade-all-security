@@ -29,10 +29,11 @@ sed "s/^deb /deb-src /" < "$chroot_dir/etc/apt/sources.list" > "$chroot_dir/etc/
 chroot_exec "$chroot_dir" apt-get update
 
 # install mailutils for testing u-u emai
-chroot_exec "$chroot_dir" apt-get install -y mailutils exim4-daemon-light
+chroot_exec "$chroot_dir" apt-get install -y mailutils exim4-daemon-light 2>&1
 
 # add package set with many dependencies
-chroot_exec "$chroot_dir" apt-get install -y xfce4 apparmor
+# apt prints "W: APT had planned for dpkg to do more than it reported back" to stderr LP: #1647638
+chroot_exec "$chroot_dir" apt-get install -y xfce4 apparmor 2>&1
 
 # build and install updated python-apt since the one in the snapshot has memory allocation issues
 rebuild_python_apt "$chroot_dir"
