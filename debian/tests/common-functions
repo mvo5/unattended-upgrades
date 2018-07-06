@@ -37,24 +37,6 @@ do_debootstrap() {
     trap "umount \"$chroot_dir/proc\"; umount \"$chroot_dir/dev/pts\"; rm -rf \"$chroot_dir\"" EXIT
 }
 
-rebuild_python_apt() {
-    local chroot_dir
-    chroot_dir="$1"
-
-    # save list of manually installed packages
-    chroot_exec "$chroot_dir" apt-mark showmanual > "$chroot_dir/tmp/manual"
-
-    (cd "$chroot_dir"/root/ && apt-get source python-apt 2>&1)
-    chroot_exec "$chroot_dir" apt-get build-dep -y python-apt
-    chroot_exec "$chroot_dir" bash -c "cd /root/python-apt-* && env DEB_BUILD_OPTIONS=nocheck dpkg-buildpackage -us -uc && apt-get install -y ../*.deb" 2>&1
-
-    # remove packages installed as the side-effect of updating apt and python-apt
-    chroot_exec "$chroot_dir" apt-mark showmanual | comm -1 -3 "$chroot_dir/tmp/manual" - | chroot_exec "$chroot_dir" xargs apt-mark auto
-    chroot_exec "$chroot_dir" apt-get -y autoremove
-    chroot_exec "$chroot_dir" apt-get clean
-    rm "$chroot_dir"/tmp/manual
-}
-
 run_u_u() {
     local chroot_dir
     chroot_dir="$1"
