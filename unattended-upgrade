@@ -121,7 +121,8 @@ class UnattendedUpgradesCache(apt.Cache):
 
     def __init__(self, rootdir, allowed_origins):
         # type: (str, List[str]) -> None
-        self._cached_candidate_pkgnames = None  # type: AbstractSet[str]
+        self._cached_candidate_pkgnames = set()  # type: AbstractSet[str]
+        self.initial_autoremovable_pkgs = set()  # type: AbstractSet[str]
         self.allowed_origins = allowed_origins
         apt.Cache.__init__(self, rootdir=rootdir)
 
@@ -172,8 +173,13 @@ class UnattendedUpgradesCache(apt.Cache):
            Note that as a side effect more package's candidate can be
            adjusted than only the one's in the final changes set.
         """
-        pkgs_to_adjust = []  # List[str]
+        new_pkgs_to_adjust = []  # List[str]
         pkgs_with_no_allowed_origin = []
+
+        # adjust candidates in advance if needed
+        for pkg_name in self._cached_candidate_pkgnames:
+            self.adjust_candidate(self[pkg_name])
+
         if function == apt.package.Package.mark_upgrade \
            and not pkg.is_upgradable:
             raise NoAllowedOriginError
@@ -188,13 +194,14 @@ class UnattendedUpgradesCache(apt.Cache):
                     # important! this avoids downgrades below
                     if pkg.is_installed and not pkg.is_upgradable:
                         continue
-                    pkgs_to_adjust.append(marked_pkg)
+                    new_pkgs_to_adjust.append(marked_pkg)
                 except NoAllowedOriginError:
                     pkgs_with_no_allowed_origin.append(marked_pkg)
 
-        if pkgs_to_adjust:
-            for pkg_to_adjust in pkgs_to_adjust:
+        if new_pkgs_to_adjust:
+            for pkg_to_adjust in new_pkgs_to_adjust:
                 self.adjust_candidate(pkg_to_adjust)
+                self._cached_candidate_pkgnames.add(pkg_to_adjust.name)
             self.call_adjusted(function, pkg, **kwargs)
         else:
             if pkgs_with_no_allowed_origin:
@@ -1307,6 +1314,15 @@ def try_to_upgrade(pkg,               # type: apt.Package
                    ):
     # type: (...) -> None
     try:
+        try:
+            # try to adjust pkg itself first, if that throws an exception it
+            # can't be upgraded on its own
+            cache.adjust_candidate(pkg)
+            if not pkg.is_upgradable:
+                return
+        except NoAllowedOriginError:
+            return
+        cache._cached_candidate_pkgnames.add(pkg.name)
         cache.mark_upgrade_adjusted(pkg, from_user=not pkg.is_auto_installed)
         if check_changes_for_sanity(cache, allowed_origins,
                                     blacklisted_pkgs, whitelisted_pkgs,
@@ -1346,6 +1362,10 @@ def calculate_upgradable_pkgs(cache,             # type: apt.Cache
 
     # now do the actual upgrade
     for pkg in cache:
+        # cache already autoremovable packages to avoid the first filtering
+        # for them
+        if pkg.is_auto_removable:
+            cache.initial_autoremovable_pkgs.add(pkg.name)
         if options.debug and pkg.is_upgradable:
             logging.debug("Checking: %s (%s)" % (
                 pkg.name, getattr(pkg.candidate, "origins", [])))
@@ -1824,7 +1844,7 @@ def run(options,             # type: Options
         logging.debug("dpkg is configured not to cause conffile prompts")
 
     # auto-removals
-    auto_removable = get_auto_removable(cache)
+    auto_removable = cache.initial_autoremovable_pkgs
     kernel_pkgs_remove_success = True  # type: bool
     kernel_pkgs_removed = []           # type: List[str]
     kernel_pkgs_kept_installed = []    # type: List[str]
