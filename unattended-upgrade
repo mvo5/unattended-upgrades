@@ -123,6 +123,7 @@ class UnattendedUpgradesCache(apt.Cache):
     def __init__(self, rootdir, allowed_origins):
         # type: (str, List[str]) -> None
         self._cached_candidate_pkgnames = set()  # type: AbstractSet[str]
+        self.initial_autoremovable_pkgs = set()  # type: AbstractSet[str]
         self.allowed_origins = allowed_origins
         apt.Cache.__init__(self, rootdir=rootdir)
 
@@ -1325,6 +1326,10 @@ def calculate_upgradable_pkgs(cache,             # type: apt.Cache
 
     # now do the actual upgrade
     for pkg in cache:
+        # cache already autoremovable packages to avoid the first filtering
+        # for them
+        if pkg.is_auto_removable:
+            cache.initial_autoremovable_pkgs.add(pkg.name)
         if options.debug and pkg.is_upgradable:
             logging.debug("Checking: %s (%s)" % (
                 pkg.name, getattr(pkg.candidate, "origins", [])))
@@ -1759,7 +1764,7 @@ def main(options, rootdir=""):
             pass
 
     # auto-removals
-    auto_removable = get_auto_removable(cache)
+    auto_removable = cache.initial_autoremovable_pkgs
     kernel_pkgs_remove_success = True  # type: bool
     kernel_pkgs_removed = []           # type: List[str]
     kernel_pkgs_kept_installed = []    # type: List[str]
