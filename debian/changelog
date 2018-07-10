@@ -1,3 +1,29 @@
+unattended-upgrades (1.1ubuntu1.18.04.2) bionic; urgency=medium
+
+  [ Balint Reczey ]
+  * Clear cache when autoremoval is invalid for a package set marked for
+    removal and clear cache after failed commits to return from a possibly
+    invalid state (LP: #1779157)
+  * Don't start or gracefully stop upgrade on battery (LP: #1773033)
+  * Skip updates on metered connections (Closes: #855570) (LP: #1781183)
+  * Add debian/tests/upgrade-all-security to install all current security updates.
+    On development releases this tests latest stable, on stable releases it tests
+    the release itself.
+  * Speed up unattended-upgrade (Closes: #892028, #899366) (LP: #1396787)
+    - Adjust candidates only for packages to be possibly installed
+    - Filter out packages cheaper when they are not from allowed origins
+    - Collect autoremovable packages, too, when looking for upgradable ones
+    - Measure time of running with --dry-run in autopkgtests
+  * Skip starting init.d script in debhelper-generated postinst part
+    (LP: #1778800)
+
+  [ Ivan Kurnosov ]
+  * Fixed is_pkgname_in_blacklist to be side-effect free. (LP: #1781176)
+    Otherwise 'is_pkgname_in_blacklist' mutates the 'pkgs_kept_back' and
+    'unattended-upgrades' treats the package as a blacklisted candidate
+
+ -- Balint Reczey <rbalint@ubuntu.com>  Thu, 12 Jul 2018 13:52:24 +0200
+
 unattended-upgrades (1.1ubuntu1.18.04.1) bionic; urgency=medium
 
   [ Michael Vogt ]
