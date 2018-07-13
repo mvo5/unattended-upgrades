@@ -1,7 +1,14 @@
+unattended-upgrades (1.1ubuntu1.18.04.4) bionic; urgency=medium
+
+  * Redirect stderr output in upgrade-between-snapshots, too, otherwise it
+    breaks the test sometimes (LP: #1781446)
+
+ -- Balint Reczey <rbalint@ubuntu.com>  Fri, 13 Jul 2018 10:36:23 +0200
+
 unattended-upgrades (1.1ubuntu1.18.04.3) bionic; urgency=medium
 
-  * Redirect stderr output in upgrade-all-security, otherwise it breaks the test
-    (LP: #1781446)
+  * Redirect stderr output in upgrade-all-security, otherwise it breaks the
+    test (LP: #1781446)
 
  -- Balint Reczey <rbalint@ubuntu.com>  Thu, 12 Jul 2018 23:57:28 +0200
 
