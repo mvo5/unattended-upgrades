@@ -1,3 +1,10 @@
+unattended-upgrades (1.1ubuntu1.18.04.5) bionic; urgency=medium
+
+  * Stop updating the system when reacquiring the dpkg system lock fails.
+    (LP: #1260041)
+
+ -- Balint Reczey <rbalint@ubuntu.com>  Wed, 18 Jul 2018 13:22:36 +0200
+
 unattended-upgrades (1.1ubuntu1.18.04.4) bionic; urgency=medium
 
   * Redirect stderr output in upgrade-between-snapshots, too, otherwise it
