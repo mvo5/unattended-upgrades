@@ -357,10 +357,7 @@ class Unlocked:
 
     def __exit__(self, exc_type, exc_value, exc_tb):
         # type: (object, object, object) -> None
-        try:
-            apt_pkg.pkgsystem_lock()
-        except Exception:
-            pass
+        apt_pkg.pkgsystem_lock()
 
 
 def is_dpkg_journal_dirty():
@@ -541,10 +538,11 @@ def cache_commit(cache,           # type: apt.Cache
         with Unlocked():
             res = cache.commit(install_progress=iprogress)
         cache.open()
-    except SystemError as e:
+    except Exception as e:
         error = e
         if verbose:
             logging.exception("Exception happened during upgrade.")
+            res = False
         cache.clear()
     return res, error
 
