@@ -553,8 +553,6 @@ def cache_commit(cache,           # type: apt.Cache
                  ):
     # type: (...) -> Tuple[bool, Exception]
     """Commit the changes from the given cache to the system"""
-    # set debconf to NON_INTERACTIVE, redirect output
-    os.putenv("DEBIAN_FRONTEND", "noninteractive")
 
     error = None
     res = False
@@ -1126,8 +1124,7 @@ def do_install(cache,             # type: apt.Cache
                logfile_dpkg,      # type: str
                ):
     # type: (...) -> bool
-    # set debconf to NON_INTERACTIVE, redirect output
-    os.putenv("DEBIAN_FRONTEND", "noninteractive")
+
     setup_apt_listchanges()
 
     logging.info(_("Writing dpkg log to %s"), logfile_dpkg)
@@ -1675,7 +1672,6 @@ def run(options,             # type: Options
             _("Unclean dpkg state detected, trying to correct"))
         print(_("Unclean dpkg state detected, trying to correct"))
         env = copy.copy(os.environ)
-        env["DEBIAN_FRONTEND"] = "noninteractive"
         env["DPKG_FRONTEND_LOCKED"] = "1"
         try:
             with Unlocked():
@@ -1998,6 +1994,9 @@ if __name__ == "__main__":
     localesDir = "/usr/share/locale"
     gettext.bindtextdomain(localesApp, localesDir)
     gettext.textdomain(localesApp)
+
+    # set debconf to NON_INTERACTIVE
+    os.environ["DEBIAN_FRONTEND"] = "noninteractive"
 
     # this ensures the commandline is logged in /var/log/apt/history.log
     apt_pkg.config.set("Commandline::AsString", " ".join(sys.argv))
