@@ -99,6 +99,11 @@ run_u_u() {
     local chroot_dir
     chroot_dir="$1"
 
+    uu_prefix=""
+    if chroot_exec "$chroot_dir" which valgrind > /dev/null; then
+        uu_prefix="$uu_prefix env PYTHONMALLOC=malloc valgrind"
+    fi
+
     # let the test pass on battery power, too
     echo 'Unattended-Upgrade::OnlyOnACPower "false";' > "$chroot_dir/etc/apt/apt.conf.d/51unattended-upgrades-acpower"
     echo 'Unattended-Upgrade::Skip-Updates-On-Metered-Connections "false";' > "$chroot_dir/etc/apt/apt.conf.d/51unattended-upgrades-metered"
@@ -112,8 +117,8 @@ run_u_u() {
     chroot_exec "$chroot_dir" apt-get update
     chroot_exec "$chroot_dir" unattended-upgrade --download-only
     chroot_exec "$chroot_dir" time unattended-upgrade --verbose --dry-run 2>&1
-    chroot_exec "$chroot_dir" unattended-upgrade --verbose --debug
-    chroot_exec "$chroot_dir" time unattended-upgrade --verbose 2>&1
+    chroot_exec "$chroot_dir" $uu_prefix python3 /usr/bin/unattended-upgrade --verbose --debug
+    chroot_exec "$chroot_dir" time python3 /usr/bin/unattended-upgrade --verbose 2>&1
     echo "new packages marked as manually installed (should be none): "
     chroot_exec "$chroot_dir" apt-mark showmanual | diff "$chroot_dir/tmp/manual" -
     chroot_exec "$chroot_dir" perl -MMIME::QuotedPrint -pe '$_=MIME::QuotedPrint::decode($_);' /var/mail/mail
