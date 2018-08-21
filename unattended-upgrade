@@ -158,7 +158,10 @@ class UnattendedUpgradesCache(apt.Cache):
         """
         try:
             new_cand = ver_in_allowed_origin(pkg, self.allowed_origins)
-            if new_cand != pkg.candidate:
+            # Only adjust to lower versions to avoid flipping back and forth
+            # and to avoid picking a newer version, not selected by apt.
+            # This helps avoiding upgrades to experimental's packages.
+            if new_cand.version < pkg.candidate.version:
                 logging.debug("adjusting candidate version: %s" % new_cand)
                 pkg.candidate = new_cand
                 return True
@@ -200,10 +203,13 @@ class UnattendedUpgradesCache(apt.Cache):
                     pkgs_with_no_allowed_origin.append(marked_pkg)
 
         if new_pkgs_to_adjust:
+            new_pkg_adjusted = False
             for pkg_to_adjust in new_pkgs_to_adjust:
-                self.adjust_candidate(pkg_to_adjust)
-                self._cached_candidate_pkgnames.add(pkg_to_adjust.name)
-            self.call_adjusted(function, pkg, **kwargs)
+                if self.adjust_candidate(pkg_to_adjust):
+                    self._cached_candidate_pkgnames.add(pkg_to_adjust.name)
+                    new_pkg_adjusted = True
+            if new_pkg_adjusted:
+                self.call_adjusted(function, pkg, **kwargs)
         else:
             if pkgs_with_no_allowed_origin:
                 raise NoAllowedOriginError
