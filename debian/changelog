@@ -1,3 +1,32 @@
+unattended-upgrades (1.5) unstable; urgency=medium
+
+  * Redirect stderr output in upgrade-all-security and upgrade-between-snapshots
+    otherwise it breaks the test (LP: #1781446)
+  * Skip rebuilding python-apt in upgrade autopkgtests.
+    Python-apt has a new build dependency making the rebuilding as is failing
+    and the reference handling issue is worked around in unattended-upgrades
+    already. (LP: #1781586)
+  * Install release's latest python-apt in upgrade-all-security
+  * Don't check blacklist too early and report updates from not allowed origins as kept back.
+    This fixes #116 again that was fixed but regressed with 18d23402aae24febb6bda539ac7c410fd86ae80d
+    (LP: #1781176)
+  * Run unattended-upgrades.service before shutdown.target as a oneshot service.
+    Performing upgrades in service's ExecStop did not work when the upgrades
+    involved restarting services because systemd blocked other stop/start actions
+    making maintainer scripts time out and be killed leaving a broken system
+    behind. (LP: #1778219)
+  * Use os.environ[] to set debconf to NON_INTERACTIVE instead of os.putenv()
+    os.putenv() does not change os.environ but os.environ can be used in python-apt
+    to set environment for subprocesses in which case os.putenv()'s effect is
+    ignored.
+  * Use valgrind in upgrade autopkgtest when it is installed in the autopkgtest environment
+  * Stop trying when no adjustment could be made and adjust package candidates only to lower versions
+    (LP: #1785093)
+  * List Unattended-Upgrade::Remove-New-Unused-Dependencies option the config file.
+    Also fix description of Unattended-Upgrade::Remove-Unused-Dependencies.
+
+ -- Balint Reczey <rbalint@ubuntu.com>  Thu, 23 Aug 2018 09:40:13 +0200
+
 unattended-upgrades (1.4) unstable; urgency=medium
 
   * Skip starting init.d script in debhelper-generated postinst part
