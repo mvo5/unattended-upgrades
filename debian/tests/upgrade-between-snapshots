@@ -20,13 +20,11 @@ chroot_exec "$chroot_dir" apt-get update
 
 # install mailutils for testing u-u email and mark python3.5-minimal
 # because otherwise u-u autoremoves it while running python3.5 code
-chroot_exec "$chroot_dir" apt-get install -y python3.5-minimal mailutils
+chroot_exec "$chroot_dir" apt-get install -y python3.5-minimal mailutils 2>&1
 
 # add package set with many dependencies
-chroot_exec "$chroot_dir" apt-get install -y xfce4
-
-# build and install updated python-apt since the one in the snapshot has memory allocation issues
-rebuild_python_apt "$chroot_dir"
+# apt prints "W: APT had planned for dpkg to do more than it reported back" to stderr LP: #1647638
+chroot_exec "$chroot_dir" apt-get install -y xfce4 2>&1
 
 # install package version just built
 cp ../unattended-upgrades_*.deb "$chroot_dir/tmp/"
