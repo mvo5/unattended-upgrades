@@ -3,21 +3,22 @@
 # This file is distributed under the same license as the unattended-upgrades package.
 # FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
 # Frans Spiesschaert <Frans.Spiesschaert@yucom.be>, 2016, 2017, 2018.
+# Maarten <Maarten@posteo.de>, 2018.
 #
 msgid ""
 msgstr ""
-"Project-Id-Version: unattended-upgrades_1.0\n"
+"Project-Id-Version: unattended-upgrades_1.2\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2018-02-23 13:17+0700\n"
-"PO-Revision-Date: 2018-04-05 20:05+0200\n"
-"Last-Translator: Frans Spiesschaert <Frans.Spiesschaert@yucom.be>\n"
+"POT-Creation-Date: 2015-07-02 12:27+0200\n"
+"PO-Revision-Date: 2018-07-06 21:45+0100\n"
+"Last-Translator: Maarten <Maarten@posteo.de>\n"
 "Language-Team: Debian Dutch l10n Team <debian-l10n-dutch@lists.debian.org>\n"
 "Language: nl\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
-"X-Generator: Gtranslator 2.91.7\n"
+"X-Generator: Poedit 1.6.10\n"
 
 #: ../unattended-upgrade:219
 #, python-format
@@ -32,43 +33,37 @@ msgstr "Kan %s niet ontleden."
 #: ../unattended-upgrade:517 ../unattended-upgrade:619
 #: ../unattended-upgrade-shutdown:193
 msgid "All upgrades installed"
-msgstr "Alle opwaarderingen geïnstalleerd"
+msgstr "Alle opwaarderingen zijn geïnstalleerd."
 
 #: ../unattended-upgrade:519 ../unattended-upgrade:611
 msgid "Installing the upgrades failed!"
-msgstr "Installeren van opwaarderingen is mislukt!"
+msgstr "De installatie van de opgewaardeerde pakketten is mislukt!"
 
 #: ../unattended-upgrade:520 ../unattended-upgrade:612
 #: ../unattended-upgrade:776 ../unattended-upgrade:778
 #: ../unattended-upgrade:1539 ../unattended-upgrade:1541
 #, python-format
-#| msgid "error message: '%s'"
 msgid "error message: %s"
-msgstr "foutmelding: %s"
+msgstr "Foutmelding: %s"
 
 #: ../unattended-upgrade:521 ../unattended-upgrade:613
 #, python-format
-#| msgid "dpkg returned a error! See '%s' for details"
 msgid "dpkg returned a error! See %s for details"
-msgstr "dpkg signaleerde een fout! Zie %s voor details"
+msgstr "Dpkg signaleerde een fout! Zie %s voor details."
 
 #: ../unattended-upgrade:775 ../unattended-upgrade:777
 #: ../unattended-upgrade:1538 ../unattended-upgrade:1540
 #: ../unattended-upgrade-shutdown:139
-#| msgid "dpkg returned an error! See '%s' for details"
 msgid "Apt returned an error, exiting"
-msgstr "Apt gaf een foutmelding; er wordt afgesloten"
+msgstr "Apt gaf een foutmelding; er wordt afgesloten."
 
 #: ../unattended-upgrade:964
-#| msgid ""
-#| "No '/usr/bin/mail' or '/usr/sbin/sendmail',can not send mail. You "
-#| "probably want to install the 'mailx' package."
 msgid ""
 "No /usr/bin/mail or /usr/sbin/sendmail,can not send mail. You probably want "
 "to install the mailx package."
 msgstr ""
-"Geen /usr/bin/mail of /usr/sbin/sendmail; kan geen e-mail versturen. U kunt "
-"best het pakket mailx installeren."
+"/usr/bin/mail en /usr/sbin/sendmail bestaan niet, waardoor e-mail niet "
+"verzonden kan worden. U kunt het beste het pakket mailx installeren."
 
 #: ../unattended-upgrade:975
 msgid "[reboot required]"
@@ -76,13 +71,10 @@ msgstr "[herstart is vereist]"
 
 #: ../unattended-upgrade:977
 msgid "[package on hold]"
-msgstr "[pakket is te handhaven]"
+msgstr "[pakket is vastgezet]"
 
 #: ../unattended-upgrade:981
 #, python-brace-format
-#| msgid ""
-#| "{hold_flag}{reboot_flag} unattended-upgrades result for '{machine}': "
-#| "{result}"
 msgid ""
 "{hold_flag}{reboot_flag} unattended-upgrades result for {machine}: {result}"
 msgstr ""
@@ -103,7 +95,8 @@ msgid ""
 "Warning: A reboot is required to complete this upgrade.\n"
 "\n"
 msgstr ""
-"Aandacht: een herstart is noodzakelijk om deze opwaardering af te ronden.\n"
+"Waarschuwing: een herstart is noodzakelijk om deze opwaardering af te "
+"ronden.\n"
 "\n"
 
 #: ../unattended-upgrade:990
@@ -117,16 +110,14 @@ msgstr "Pakketten waarvoor een opwaardering geprobeerd werd:\n"
 #: ../unattended-upgrade:996
 msgid "Packages with upgradable origin but kept back:\n"
 msgstr ""
-"Pakketten die volgens de pakketbron opgewaardeerd kunnen worden, maar "
+"Pakketten die volgens de pakketbron opgewaardeerd konden worden, maar "
 "gehandhaafd werden:\n"
 
 #: ../unattended-upgrade:1001
-#| msgid "Packages that are auto removed: '%s'"
 msgid "Packages that were auto-removed:\n"
 msgstr "Pakketten die automatisch verwijderd werden:\n"
 
 #: ../unattended-upgrade:1006
-#| msgid "Packages that are auto removed: '%s'"
 msgid "Packages that were kept from being auto-removed:\n"
 msgstr "Pakketten waarvoor de automatische verwijdering tegengehouden werd:\n"
 
@@ -140,26 +131,22 @@ msgstr "Log van unattended-upgrades:\n"
 
 #: ../unattended-upgrade:1042
 #, python-format
-#| msgid "Writing dpkg log to '%s'"
 msgid "Writing dpkg log to %s"
-msgstr "Log van dpkg wordt opgeschreven in %s"
+msgstr "Log van dpkg wordt weggeschreven naar %s"
 
 #: ../unattended-upgrade:1193
 #, python-format
 msgid "Found %s, but not rebooting because %s is logged in."
 msgid_plural "Found %s, but not rebooting because %s are logged in."
-msgstr[0] ""
-"%s gevonden, maar er wordt niet herstart omdat %s gebruiker ingelogd is."
-msgstr[1] ""
-"%s gevonden, maar er wordt niet herstart omdat %s gebruikers ingelogd zijn."
+msgstr[0] "%s gevonden, maar er wordt niet herstart omdat %s ingelogd is."
+msgstr[1] "%s gevonden, maar er wordt niet herstart omdat %s ingelogd zijn."
 
 #: ../unattended-upgrade:1247
 #, python-format
-#| msgid "package '%s' upgradable but fails to be marked for upgrade (%s)"
 msgid "package %s upgradable but fails to be marked for upgrade (%s)"
 msgstr ""
-"pakket %s kan opgewaardeerd worden, maar het lukt niet om het als op te "
-"waarderen te markeren (%s)"
+"pakket %s kan opgewaardeerd worden, maar het lukt niet om het te markeren "
+"voor opwaardering (%s)"
 
 #: ../unattended-upgrade:1323
 #, python-format
@@ -167,8 +154,8 @@ msgid ""
 "Keeping the following auto-removable package(s) because they include %s "
 "which is set to be kept unmodified: %s"
 msgstr ""
-"Volgend automatisch verwijderbaar pakket(ten) wordt behouden omdat het %s "
-"bevat en dat is ingesteld als ongewijzigd te behouden: %s"
+"De volgende automatisch verwijderbare pakketten worden behouden omdat zij %s "
+"bevatten waarvoor ingesteld is dat dat ongewijzigd moet blijven: %s"
 
 #: ../unattended-upgrade:1330
 #, python-format
@@ -176,9 +163,9 @@ msgid ""
 "Keeping auto-removable %s package(s) because it would also remove the "
 "following packages which should be kept in this step: %s"
 msgstr ""
-"Automatisch verwijderbaar pakket(ten) %s wordt behouden omdat dit ook de "
-"volgende pakketten zou verwijderen die in deze fase behouden zouden moeten "
-"worden: %s"
+"Automatisch verwijderbaar pakket(ten) %s wordt behouden omdat verwijdering "
+"ook de volgende pakketten zou verwijderen die in deze stap behouden zouden "
+"moeten worden: %s"
 
 #: ../unattended-upgrade:1336
 #, python-format
@@ -186,9 +173,9 @@ msgid ""
 "Keeping %s auto-removable package(s) because it would also remove the "
 "following packages which should be kept in this step: %s"
 msgstr ""
-"%s automatisch verwijderbare pakket(ten) worden behouden omdat dit ook de "
-"volgende pakketten zou verwijderen die in deze fase behouden zouden moeten "
-"worden: %s"
+"%s automatisch verwijderbare pakket(ten) worden behouden omdat verwijdering "
+"ook de volgende pakketten zou verwijderen die in deze stap behouden zouden "
+"moeten worden: %s"
 
 #: ../unattended-upgrade:1347
 #, python-format
@@ -197,19 +184,17 @@ msgid ""
 "which package is related to the running kernel: %s"
 msgstr ""
 "Het volgende automatisch verwijderbare pakket(ten) wordt behouden omdat het "
-"%s bevat, wat een pakket is dat verband houdt met de actieve kernel: %s"
+"%s bevat, welk pakket verband houdt met de actieve kernel: %s"
 
 #: ../unattended-upgrade:1407
 #, python-format
-#| msgid "Packages were successfully auto-removed"
 msgid "Packages that were successfully auto-removed: %s"
 msgstr "Pakketten die met succes automatisch verwijderd werden: %s"
 
 #: ../unattended-upgrade:1409
 #, python-format
-#| msgid "Packages that are auto removed: '%s'"
 msgid "Packages that are kept back: %s"
-msgstr "Pakketten die gehandhaafd werden: %s"
+msgstr "Pakketten die vastgehouden werden: %s"
 
 #: ../unattended-upgrade:1412
 msgid "Auto-removing the packages failed!"
@@ -217,15 +202,13 @@ msgstr "Het automatisch verwijderen van de pakketten mislukte!"
 
 #: ../unattended-upgrade:1413
 #, python-format
-#| msgid "Error message: '%s'"
 msgid "Error message: %s"
 msgstr "Foutmelding: %s"
 
 #: ../unattended-upgrade:1414
 #, python-format
-#| msgid "dpkg returned an error! See '%s' for details"
 msgid "dpkg returned an error! See %s for details"
-msgstr "dpkg gaf een foutmelding! Zie %s voor details"
+msgstr "Dpkg gaf een foutmelding! Zie %s voor details."
 
 #: ../unattended-upgrade:1474
 #, python-format
@@ -239,7 +222,7 @@ msgstr "Pakketten die bij aanvang op de witte lijst staan: %s"
 
 #: ../unattended-upgrade:1482
 msgid "Starting unattended upgrades script"
-msgstr "Script voor opwaarderingen zonder toezicht wordt gestart"
+msgstr "Script voor opwaarderingen zonder toezicht wordt gestart."
 
 #: ../unattended-upgrade:1491
 #, python-format
@@ -249,8 +232,8 @@ msgstr "Toegelaten pakketbronnen zijn: %s"
 #: ../unattended-upgrade:1507 ../unattended-upgrade:1508
 msgid "Unclean dpkg state detected, trying to correct"
 msgstr ""
-"dpkg in een onzuivere toestand aangetroffen; een correctiepoging wordt "
-"ondernomen"
+"Dpkg werd in een onzuivere toestand aangetroffen; een poging tot herstel "
+"wordt ondernomen."
 
 #: ../unattended-upgrade:1519
 #, python-format
@@ -258,60 +241,55 @@ msgid ""
 "dpkg --configure -a output:\n"
 "%s"
 msgstr ""
-"uitvoer van 'dpkg --configure -a':\n"
+"Uitvoer van 'dpkg --configure -a':\n"
 "%s"
 
 #: ../unattended-upgrade:1528
 msgid "Lock could not be acquired (another package manager running?)"
 msgstr ""
-"Kon geen vergrendeling doorvoeren (is een ander programma voor pakketbeheer "
-"actief?)"
+"Vergrendeling kon niet worden doorgevoerd. Is een ander programma voor "
+"pakketbeheer actief?"
 
 #: ../unattended-upgrade:1530
 msgid "Cache lock can not be acquired, exiting"
-msgstr "Kan de cache niet vergrendelen; er wordt afgesloten"
+msgstr ""
+"Vergrendeling van de cache kan niet worden doorgevoerd; er wordt afgesloten."
 
 #: ../unattended-upgrade:1545 ../unattended-upgrade:1546
 #: ../unattended-upgrade:1773 ../unattended-upgrade:1774
 msgid "Cache has broken packages, exiting"
-msgstr "De cache bevat defecte pakketten; er wordt afgesloten"
+msgstr "De cache bevat defecte pakketten; er wordt afgesloten."
 
 #: ../unattended-upgrade:1595
 #, python-format
-#| msgid "GetArchives() failed: '%s'"
 msgid "GetArchives() failed: %s"
 msgstr "GetArchives() mislukte: %s"
 
 #: ../unattended-upgrade:1612 ../unattended-upgrade:1613
 #, python-format
-#| msgid "An error occurred: '%s'"
 msgid "An error occurred: %s"
 msgstr "Er deed zich een fout voor: %s"
 
 #: ../unattended-upgrade:1615 ../unattended-upgrade:1617
 #, python-format
-#| msgid "The URI '%s' failed to download, aborting"
 msgid "The URI %s failed to download, aborting"
-msgstr "URI %s downloaden mislukte; er wordt afgebroken"
+msgstr "Het downloaden van URI %s mislukte; er wordt afgebroken."
 
 #: ../unattended-upgrade:1621
 #, python-format
-#| msgid "Download finished, but file '%s' not there?!?"
 msgid "Download finished, but file %s not there?!?"
-msgstr "Downloaden beëindigd, maar is bestand %s daar niet?!?"
+msgstr "Download eindigde, maar het bestand %s werd daarna niet aangetroffen!"
 
 #: ../unattended-upgrade:1637 ../unattended-upgrade:1641
 #, python-format
-#| msgid "Package '%s' has conffile prompt and needs to be upgraded manually"
 msgid "Package %s has conffile prompt and needs to be upgraded manually"
 msgstr ""
-"Pakket %s heeft een configuratievraag en moet handmatig opgewaardeerd worden"
+"Pakket %s heeft een configuratievraag en moet handmatig opgewaardeerd worden."
 
 #: ../unattended-upgrade:1670
 #, python-format
-#| msgid "package '%s' not upgraded"
 msgid "package %s not upgraded"
-msgstr "pakket %s niet opgewaardeerd"
+msgstr "pakket %s werd niet opgewaardeerd"
 
 #: ../unattended-upgrade:1702
 #, python-format
@@ -323,8 +301,9 @@ msgid ""
 "No packages found that can be upgraded unattended and no pending auto-"
 "removals"
 msgstr ""
-"Geen pakketten gevonden die zonder toezicht opgewaardeerd kunnen worden en "
-"geen aanhangige automatische verwijderingen"
+"Er werden geen pakketten gevonden die zonder toezicht opgewaardeerd kunnen "
+"worden. Tevens zijn er geen pakketten die nog automatisch verwijderd moeten "
+"worden."
 
 #: ../unattended-upgrade:1754
 #, python-format
@@ -333,70 +312,63 @@ msgstr "Pakketten die opgewaardeerd zullen worden: %s"
 
 #: ../unattended-upgrade:1867
 msgid "print debug messages"
-msgstr "druk debugmeldingen af"
+msgstr "geef de debugmeldingen weer"
 
 #: ../unattended-upgrade:1870
 msgid "make apt/libapt print verbose debug messages"
-msgstr "laat apt/libapt uitvoerige debugmeldingen afdrukken"
+msgstr "laat apt/libapt uitvoerige debugmeldingen geven"
 
 #: ../unattended-upgrade:1873
 msgid "print info messages"
-msgstr "druk informatieve berichten af"
+msgstr "geef informatieve berichten weer"
 
 #: ../unattended-upgrade:1876
 msgid "Simulation, download but do not install"
-msgstr "Simulatie, download maar installeer niet"
+msgstr "Simulatie, download maar installeer niet."
 
 #: ../unattended-upgrade:1879
 msgid "Only download, do not even try to install."
-msgstr "Download, maar doe zelfs geen poging om te installeren."
+msgstr "Download, maar doe zelfs geen poging te installeren."
 
 #: ../unattended-upgrade:1882
 msgid "Upgrade in minimal steps (and allow interrupting with SIGTERM"
 msgstr ""
-"Opwaardering in zo weinig mogelijk stappen (en laat onderbreking door "
-"SIGTERM toe"
+"Waardeer in zo weinig mogelijk stappen op en sta daarbij het onderbreken met "
+"SIGTERM toe."
 
 #: ../unattended-upgrade:1891
 msgid "You need to be root to run this application"
 msgstr ""
-"U dient systeembeheerder (root) te zijn om deze toepassing uit te voeren"
+"U dient de systeembeheerder 'root' te zijn om deze toepassing uit te voeren."
 
 #: ../unattended-upgrade-shutdown:76
-#| msgid "Unattended-upgrade in progress during shutdown, sleeping for 5s"
 msgid ""
 "Unattended-upgrade in progress during shutdown, please don't turn off the "
 "computer"
 msgstr ""
-"Unattended-upgrade is bezig bij het afsluiten van de computer; zet de "
-"computer niet uit"
+"Unattended-upgrades is actief bij het afsluiten van de computer; zet de "
+"computer niet uit."
 
 #: ../unattended-upgrade-shutdown:140
 #, python-format
 msgid "error message: '%s'"
-msgstr "foutmelding: '%s'"
+msgstr "Foutmelding: '%s'"
 
 #: ../unattended-upgrade-shutdown:150
 msgid "Running unattended-upgrades in shutdown mode"
-msgstr "Unattended-upgrades wordt in afsluitmodus uitgevoerd"
+msgstr "Unattended-upgrades wordt in afsluitmodus uitgevoerd."
 
+# Hulpbronnen:
+# - https://en.wikipedia.org/wiki/File_locking#Lock_files
 #: ../unattended-upgrade-shutdown:176
 #, python-format
 msgid "Giving up on lockfile after %s delay"
-msgstr ""
-"Vergrendelingsbestand wordt gelaten voor wat het is na wachttijd van %s"
+msgstr "Vergrendelingsbestand wordt verwijderd na een oponthoud van %s."
 
 #: ../unattended-upgrade-shutdown:189
 msgid ""
 "Unattended-upgrades stopped. There may be upgrades left to be installed in "
 "the next run."
 msgstr ""
-"Unattended-upgrades is gestopt. Mogelijk zijn er nog opwaarderingen die in "
-"de volgende doorloop geïnstalleerd moeten worden."
-
-#~| msgid "Packages that will be upgraded: %s"
-#~ msgid "Some packages can not be upgraded: %s"
-#~ msgstr "Sommige pakketten kunnen niet opgewaardeerd worden: %s"
-
-#~ msgid "unattended-upgrades result for '%s': '%s'"
-#~ msgstr "resultaat van unattended-upgrades voor '%s': '%s'"
+"Unattended-upgrades is gestopt. Mogelijk zijn er nog opwaarderingen die "
+"doorgevoerd zullen moeten worden bij de volgende uitvoering."
