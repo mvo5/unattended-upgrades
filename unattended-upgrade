@@ -1139,7 +1139,7 @@ def do_install(cache,             # type: apt.Cache
     if marked_delete:
         raise AssertionError(
             "Internal error. The following packages are marked for "
-            "removal:%s" % "".join([pkg.name for pkg in marked_delete]))
+            "removal:%s" % " ".join([pkg.name for pkg in marked_delete]))
 
     pkg_install_success = False
     try:
