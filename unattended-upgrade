@@ -189,6 +189,8 @@ class UnattendedUpgradesCache(apt.Cache):
         function(pkg, **kwargs)
         changes = self.get_changes()
         for marked_pkg in changes:
+            if marked_pkg.name in self._cached_candidate_pkgnames:
+                continue
             if not is_allowed_origin(marked_pkg.candidate,
                                      self.allowed_origins):
                 try:
