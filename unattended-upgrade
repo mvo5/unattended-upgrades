@@ -1089,22 +1089,19 @@ def send_summary_mail(pkgs,                 # type: List[str]
         else:
             body += _("Packages that attempted to upgrade:\n")
         body += " " + wrap(" ".join(pkgs), 70, " ")
-        body += "\n"
+        body += "\n\n"
     if pkgs_kept_back:
         body += _("Packages with upgradable origin but kept back:\n")
         body += " " + wrap(" ".join(pkgs_kept_back), 70, " ")
-        body += "\n"
-    body += "\n"
+        body += "\n\n"
     if pkgs_removed:
         body += _("Packages that were auto-removed:\n")
         body += " " + wrap(" ".join(pkgs_removed), 70, " ")
-        body += "\n"
-    body += "\n"
+        body += "\n\n"
     if pkgs_kept_installed:
         body += _("Packages that were kept from being auto-removed:\n")
         body += " " + wrap(" ".join(pkgs_kept_installed), 70, " ")
-        body += "\n"
-    body += "\n"
+        body += "\n\n"
     if dpkg_log_content:
         body += _("Package installation log:") + "\n"
         body += dpkg_log_content
