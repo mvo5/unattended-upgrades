@@ -1083,12 +1083,13 @@ def send_summary_mail(pkgs,                 # type: List[str]
     if os.path.isfile(REBOOT_REQUIRED_FILE):
         body += _(
             "Warning: A reboot is required to complete this upgrade.\n\n")
-    if res:
-        body += _("Packages that were upgraded:\n")
-    else:
-        body += _("Packages that attempted to upgrade:\n")
-    body += " " + wrap(" ".join(pkgs), 70, " ")
-    body += "\n"
+    if pkgs:
+        if res:
+            body += _("Packages that were upgraded:\n")
+        else:
+            body += _("Packages that attempted to upgrade:\n")
+        body += " " + wrap(" ".join(pkgs), 70, " ")
+        body += "\n"
     if pkgs_kept_back:
         body += _("Packages with upgradable origin but kept back:\n")
         body += " " + wrap(" ".join(pkgs_kept_back), 70, " ")
