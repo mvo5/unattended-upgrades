@@ -1208,12 +1208,11 @@ def reboot_if_requested_and_needed():
     logging.warning("Found %s, rebooting" % REBOOT_REQUIRED_FILE)
     cmd = ["/sbin/shutdown", "-r", when]
     try:
-        proc = subprocess.run(cmd, stderr=PIPE)
+        shutdown_msg = subprocess.check_output(cmd, stderr=subprocess.STDOUT)
+        if shutdown_msg.strip():
+            logging.warning("Shutdown msg: %s", shutdown_msg.strip())
     except Exception as e:
-        logging.error("Failed to issue shutdown, %s", e)
-    else:
-        shut_msg = proc.stderr
-        logging.warning(shut_msg.strip())
+        logging.error("Failed to issue shutdown: %s", e)
 
 
 def write_stamp_file():
