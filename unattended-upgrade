@@ -45,7 +45,7 @@ import subprocess
 import sys
 
 try:
-    from typing import AbstractSet, Dict, Iterable, List, Tuple
+    from typing import AbstractSet, cast, Dict, Iterable, List, Tuple
     AbstractSet  # pyflakes
     Dict  # pyflakes
     Iterable  # pyflakes
@@ -1295,7 +1295,13 @@ def reboot_if_requested_and_needed():
     when = apt_pkg.config.find(
         "Unattended-Upgrade::Automatic-Reboot-Time", "now")
     logging.warning("Found %s, rebooting" % REBOOT_REQUIRED_FILE)
-    subprocess.call(["/sbin/shutdown", "-r", when])
+    cmd = ["/sbin/shutdown", "-r", when]
+    try:
+        shutdown_msg = subprocess.check_output(cmd, stderr=subprocess.STDOUT)
+        if shutdown_msg.strip():
+            logging.warning("Shutdown msg: %s", shutdown_msg.strip())
+    except Exception as e:
+        logging.error("Failed to issue shutdown: %s", e)
 
 
 def write_stamp_file():
@@ -2032,7 +2038,7 @@ if __name__ == "__main__":
                       action="store_true",
                       help=SUPPRESS_HELP,
                       default=False)
-    (options, args) = parser.parse_args()  # type: ignore
+    options = cast(Options, (parser.parse_args())[0])
 
     if os.getuid() != 0:
         print(_("You need to be root to run this application"))
