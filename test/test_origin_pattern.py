@@ -70,7 +70,7 @@ class TestOriginPatern(unittest.TestCase):
         # with escaping
         origin = self._get_mock_origin("Google, Inc.", archive="stable")
         # good
-        s = "o=Google\, Inc.,a=stable"
+        s = "o=Google\\, Inc.,a=stable"
         self.assertTrue(match_whitelist_string(s, origin))
 
     def test_match_whitelist_from_conffile(self):
@@ -82,7 +82,7 @@ class TestOriginPatern(unittest.TestCase):
         #print allowed_origins
         self.assertTrue("o=aOrigin,a=aArchive" in allowed_origins)
         self.assertTrue("s=aSite,l=aLabel" in allowed_origins)
-        self.assertTrue("o=Google\, Inc.,suite=stable" in allowed_origins)
+        self.assertTrue("o=Google\\, Inc.,suite=stable" in allowed_origins)
 
     def test_macro(self):
         codename = get_distro_codename()
@@ -96,8 +96,8 @@ class TestOriginPatern(unittest.TestCase):
             apt_pkg.config, "./data/50unattended-upgrades.compat")
         allowed_origins = unattended_upgrade.get_allowed_origins()
         #print allowed_origins
-        self.assertTrue("o=Google\, Inc.,a=stable" in allowed_origins)
-        self.assertTrue("o=MoreCorp\, eink,a=stable" in allowed_origins)
+        self.assertTrue("o=Google\\, Inc.,a=stable" in allowed_origins)
+        self.assertTrue("o=MoreCorp\\, eink,a=stable" in allowed_origins)
         # test whitelist
         pkg = self._get_mock_package()
         self.assertTrue(is_allowed_origin(pkg.candidate, allowed_origins))
@@ -203,10 +203,10 @@ class TestOriginPatern(unittest.TestCase):
         for cfg, (distro_id, distro_codename) in (
                 # ":" as separator
                 ("Ubuntu:lucid-security", ("Ubuntu", "lucid-security")),
-                ("http\://foo.bar:stable", ("http://foo.bar", "stable")),
+                ("http\\://foo.bar:stable", ("http://foo.bar", "stable")),
                 # space as separator
                 ("Ubuntu lucid-security", ("Ubuntu", "lucid-security")),
-                ("http\://baz.mee stable", ("http://baz.mee", "stable"))):
+                ("http\\://baz.mee stable", ("http://baz.mee", "stable"))):
             apt_pkg.config.clear("Unattended-Upgrade::Allowed-Origins")
             apt_pkg.config.set("Unattended-Upgrade::Allowed-Origins::", cfg)
             li = unattended_upgrade.get_allowed_origins_legacy()
