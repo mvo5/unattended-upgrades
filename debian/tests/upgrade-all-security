@@ -28,8 +28,8 @@ sed "s/^deb /deb-src /" < "$chroot_dir/etc/apt/sources.list" > "$chroot_dir/etc/
 
 chroot_exec "$chroot_dir" apt-get update
 
-# install mailutils for testing u-u emai
-chroot_exec "$chroot_dir" apt-get install -y mailutils exim4-daemon-light 2>&1
+# install mailutils for testing u-u emai and apt-list
+chroot_exec "$chroot_dir" apt-get install -y mailutils exim4-daemon-light apt-listchanges 2>&1
 
 # install valgrind when it is installed on the test system, too
 if which valgrind > /dev/null; then

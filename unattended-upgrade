@@ -189,6 +189,8 @@ class UnattendedUpgradesCache(apt.Cache):
         function(pkg, **kwargs)
         changes = self.get_changes()
         for marked_pkg in changes:
+            if marked_pkg.name in self._cached_candidate_pkgnames:
+                continue
             if not is_allowed_origin(marked_pkg.candidate,
                                      self.allowed_origins):
                 try:
@@ -571,7 +573,7 @@ def cache_commit(cache,           # type: apt.Cache
         else:
             with Unlocked():
                 res = cache.commit(install_progress=iprogress)
-                cache.open()
+        cache.open()
     except SystemError as e:
         error = e
         if verbose:
@@ -1081,27 +1083,25 @@ def send_summary_mail(pkgs,                 # type: List[str]
     if os.path.isfile(REBOOT_REQUIRED_FILE):
         body += _(
             "Warning: A reboot is required to complete this upgrade.\n\n")
-    if res:
-        body += _("Packages that were upgraded:\n")
-    else:
-        body += _("Packages that attempted to upgrade:\n")
-    body += " " + wrap(" ".join(pkgs), 70, " ")
-    body += "\n"
+    if pkgs:
+        if res:
+            body += _("Packages that were upgraded:\n")
+        else:
+            body += _("Packages that attempted to upgrade:\n")
+        body += " " + wrap(" ".join(pkgs), 70, " ")
+        body += "\n\n"
     if pkgs_kept_back:
         body += _("Packages with upgradable origin but kept back:\n")
         body += " " + wrap(" ".join(pkgs_kept_back), 70, " ")
-        body += "\n"
-    body += "\n"
+        body += "\n\n"
     if pkgs_removed:
         body += _("Packages that were auto-removed:\n")
         body += " " + wrap(" ".join(pkgs_removed), 70, " ")
-        body += "\n"
-    body += "\n"
+        body += "\n\n"
     if pkgs_kept_installed:
         body += _("Packages that were kept from being auto-removed:\n")
         body += " " + wrap(" ".join(pkgs_kept_installed), 70, " ")
-        body += "\n"
-    body += "\n"
+        body += "\n\n"
     if dpkg_log_content:
         body += _("Package installation log:") + "\n"
         body += dpkg_log_content
@@ -1139,7 +1139,7 @@ def do_install(cache,             # type: apt.Cache
     if marked_delete:
         raise AssertionError(
             "Internal error. The following packages are marked for "
-            "removal:%s" % "".join([pkg.name for pkg in marked_delete]))
+            "removal:%s" % " ".join([pkg.name for pkg in marked_delete]))
 
     pkg_install_success = False
     try:
@@ -1413,6 +1413,9 @@ def get_dpkg_log_content(logfile_dpkg, install_start_time):
                 if stanza_start >= install_start_time:
                     found_start = True
             if found_start:
+                # skip progress indicator until #860931 is fixed in apt + dpkg
+                if re.match("^\(Reading database \.\.\. ()|([0-9]+%)$", line):
+                    continue
                 content.append(line)
     return "".join(content)
 

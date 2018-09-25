@@ -30,7 +30,12 @@ do_debootstrap() {
     chroot_dir="$2"
     mirror="$3"
 
-    debootstrap --include eatmydata,time "$@"
+    ret=0
+    for i in $(seq 5); do
+        debootstrap --include eatmydata,time "$@" 2>&1 && break || ret=$?
+        sleep 120
+    done
+    [ $ret = 0 ] || exit $ret
 
     mount --bind /dev/pts "$chroot_dir/dev/pts"
     mount --bind /proc "$chroot_dir/proc"
