@@ -265,6 +265,15 @@ Supported Options Reference
  ```
  The default is an empty list which means updates are applied every day.
 
+* `Unattended-Upgrade::Special-Conditions-Script` - path to a script on which to make execution dependent
+
+ Allows the definition of arbitrary conditions for update execution.
+ If set, the given script is executed. If it returns 0, unattended-upgrades proceeds, otherwise it stops. 
+
+ Example - apply updates only with Ethernet and AC Power connected
+ ```
+ Unattended-Upgrade::Special-Conditions-Script "/home/me/scripts/check-eth-and-ac-connected.sh";
+ ```
 
 * `Unattended-Upgrade::SyslogEnable` - boolean (default:False)
 
