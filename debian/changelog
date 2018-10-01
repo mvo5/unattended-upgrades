@@ -28,6 +28,7 @@ unattended-upgrades (1.6) unstable; urgency=medium
   * Fix PEP 8 warnings.
     Also ignore "W503 line break before binary operator" because it will
     become the best practice.
+  * debian/tests/test-systemd.py: Fix test after changing config file defaults
 
  -- Balint Reczey <rbalint@ubuntu.com>  Mon, 01 Oct 2018 19:00:44 +0200
 
