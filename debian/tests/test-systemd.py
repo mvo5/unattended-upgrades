@@ -26,7 +26,7 @@ def enable_install_on_shutdown():
     '''
     apt_conf_file = '/etc/apt/apt.conf.d/50unattended-upgrades'
     param = 'Unattended-Upgrade::InstallOnShutdown'
-    sed_cmd = 's/\/\/%s/%s/' % (param, param)
+    sed_cmd = 's/\\/\\/%s/%s/' % (param, param)
 
     try:
         subprocess.check_output(['/bin/sed', '-i', sed_cmd, apt_conf_file])

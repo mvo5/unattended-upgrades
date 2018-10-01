@@ -26,8 +26,8 @@ class OnBattery(unittest.TestCase):
     def setUp(self):
         self.rootdir = os.path.abspath("./root.on-battery")
         # fake on_ac_power
-        os.environ["PATH"] = (os.path.join(self.rootdir, "usr", "bin") + ":" +
-                              os.environ["PATH"])
+        os.environ["PATH"] = (os.path.join(self.rootdir, "usr", "bin") + ":"
+                              + os.environ["PATH"])
         dpkg_status = os.path.abspath(
             os.path.join(self.rootdir, "var", "lib", "dpkg", "status"))
         apt.apt_pkg.config.set("Dir::State::status", dpkg_status)

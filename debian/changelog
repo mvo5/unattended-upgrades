@@ -1,3 +1,36 @@
+unattended-upgrades (1.6) unstable; urgency=medium
+
+  [ Dravon5X ]
+  * Commented options should reflect default values
+
+  [ Alexandros Afentoulis ]
+  * Add logging for scheduled host reboot.
+
+  [ Michael Vogt ]
+  * unattended-uprades: use subprocess.check_output() to gather reboot data
+
+  [ Maarten ]
+  * Dutch translation update
+
+  [ Balint Reczey ]
+  * Reopen Cache after commit() even when frontend locking is supported.
+    This fixes build and operation with latest python-apt. (LP: #1789637)
+    (Closes: #909327)
+  * Use cast to silence mypy 6.30
+  * Fix assertion error formatting
+  * Skip already adjusted packages from being checked for readjusting.
+    This makes it clearer that the recursion ends and can also be a bit quicker.
+  * Skip printing 'Packages that were upgraded:' when no package was upgraded
+  * Filter out progress indicator from dpkg log
+  * Retry debootstrap in autopkgtest to decrease flakyness (Closes: #898216)
+  * Test apt-listchanges interaction in upgrade-all-security
+  * Include fewer newlines in the report
+  * Fix PEP 8 warnings.
+    Also ignore "W503 line break before binary operator" because it will
+    become the best practice.
+
+ -- Balint Reczey <rbalint@ubuntu.com>  Mon, 01 Oct 2018 19:00:44 +0200
+
 unattended-upgrades (1.5) unstable; urgency=medium
 
   * Redirect stderr output in upgrade-all-security and upgrade-between-snapshots
