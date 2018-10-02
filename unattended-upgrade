@@ -1484,8 +1484,9 @@ def do_auto_remove(cache,             # type: apt.Cache
                    dry_run=False      # type: bool
                    ):
     # type: (...) -> Tuple[bool, List[str], List[str]]
+    res = True
     if not auto_removable:
-        return (True, [], [])
+        return (res, [], [])
 
     pkgs_removed = []         # type: List[str]
     pkgs_kept_installed = []  # type: List[str]
@@ -1504,7 +1505,6 @@ def do_auto_remove(cache,             # type: apt.Cache
                 # would also remove old unused packages which are not set
                 # for removal, thus getting there is not handled as an error
                 pkgs_kept_installed.append(pkgname)
-                res = True
                 cache.clear()
                 continue
             if not dry_run:
@@ -1515,7 +1515,6 @@ def do_auto_remove(cache,             # type: apt.Cache
                     break
                 pkgs_removed.extend(pkgnames)
             else:
-                res = True
                 cache.clear()
     else:
         for pkgname in auto_removable:
@@ -1526,7 +1525,6 @@ def do_auto_remove(cache,             # type: apt.Cache
             if not dry_run:
                 res, error = cache_commit(cache, logfile_dpkg, verbose)
             else:
-                res = True
                 cache.clear()
         else:
                 cache.clear()
