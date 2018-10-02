@@ -1,3 +1,20 @@
+unattended-upgrades (1.1ubuntu1.18.04.6) bionic; urgency=medium
+
+  * Unlock for dpkg operations with apt_pkg.pkgsystem_unlock_inner() when it is
+    available. Also stop running when reacquiring the lock fails.
+    Thanks to Julian Andres Klode for original partial patch (LP: #1789637)
+  * Skip rebuilding python-apt in upgrade autopkgtests.
+    Python-apt has a new build dependency making the rebuilding as is failing
+    and the reference handling issue is worked around in unattended-upgrades
+    already. (LP: #1781586)
+  * Stop trying when no adjustment could be made and adjust package candidates
+    only to lower versions (LP: #1785093)
+  * Skip already adjusted packages from being checked for readjusting.
+    This makes it clearer that the recursion ends and can also be a bit quicker.
+    (LP: #1785093)
+
+ -- Balint Reczey <rbalint@ubuntu.com>  Tue, 02 Oct 2018 19:18:02 +0200
+
 unattended-upgrades (1.1ubuntu1.18.04.5) bionic; urgency=medium
 
   * Stop updating the system when reacquiring the dpkg system lock fails.
