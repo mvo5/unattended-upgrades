@@ -33,6 +33,8 @@ do_debootstrap() {
     ret=0
     for i in $(seq 5); do
         debootstrap --include eatmydata,time "$@" 2>&1 && break || ret=$?
+        # clean up incompletely debootstrapped chroot
+        rm -rf "$chroot_dir"
         sleep 120
     done
     [ $ret = 0 ] || exit $ret
