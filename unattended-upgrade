@@ -1403,23 +1403,28 @@ def get_dpkg_log_content(logfile_dpkg, install_start_time):
         logfile_dpkg, install_start_time))
     content = []
     found_start = False
-    with io.open(logfile_dpkg, encoding='utf-8', errors='replace') as fp:
-        # read until we find the last "Log started: "
-        for line in fp.readlines():
-            # scan for the first entry we need (minimal-step mode
-            # creates a new stanza for each individual install)
-            if not found_start and line.startswith("Log started: "):
-                stanza_start = LoggingDateTime.from_string(
-                    line[len("Log started: "):-1])
-                if stanza_start >= install_start_time:
-                    found_start = True
-            if found_start:
-                # skip progress indicator until #860931 is fixed in apt + dpkg
-                if re.match("^\\(Reading database \\.\\.\\. ()xs|([0-9]+%)$",
+    try:
+        with io.open(logfile_dpkg, encoding='utf-8', errors='replace') as fp:
+            # read until we find the last "Log started: "
+            for line in fp.readlines():
+                # scan for the first entry we need (minimal-step mode
+                # creates a new stanza for each individual install)
+                if not found_start and line.startswith("Log started: "):
+                    stanza_start = LoggingDateTime.from_string(
+                        line[len("Log started: "):-1])
+                    if stanza_start >= install_start_time:
+                        found_start = True
+                if found_start:
+                    # skip progress indicator until #860931 is fixed in apt
+                    # and dpkg
+                    if re.match(
+                            "^\\(Reading database \\.\\.\\. ()xs|([0-9]+%)$",
                             line):
-                    continue
-                content.append(line)
-    return "".join(content)
+                        continue
+                    content.append(line)
+        return "".join(content)
+    except FileNotFoundError:
+        return ""
 
 
 def get_auto_removable(cache):
@@ -1479,8 +1484,9 @@ def do_auto_remove(cache,             # type: apt.Cache
                    dry_run=False      # type: bool
                    ):
     # type: (...) -> Tuple[bool, List[str], List[str]]
+    res = True
     if not auto_removable:
-        return (True, [], [])
+        return (res, [], [])
 
     pkgs_removed = []         # type: List[str]
     pkgs_kept_installed = []  # type: List[str]
@@ -1499,7 +1505,6 @@ def do_auto_remove(cache,             # type: apt.Cache
                 # would also remove old unused packages which are not set
                 # for removal, thus getting there is not handled as an error
                 pkgs_kept_installed.append(pkgname)
-                res = True
                 cache.clear()
                 continue
             if not dry_run:
@@ -1510,7 +1515,6 @@ def do_auto_remove(cache,             # type: apt.Cache
                     break
                 pkgs_removed.extend(pkgnames)
             else:
-                res = True
                 cache.clear()
     else:
         for pkgname in auto_removable:
@@ -1521,7 +1525,6 @@ def do_auto_remove(cache,             # type: apt.Cache
             if not dry_run:
                 res, error = cache_commit(cache, logfile_dpkg, verbose)
             else:
-                res = True
                 cache.clear()
         else:
                 cache.clear()

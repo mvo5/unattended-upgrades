@@ -89,7 +89,11 @@ def signal_stop_unattended_upgrade():
     if os.path.exists(pidfile):
         pid = int(open(pidfile).read())
         logging.debug("found running unattended-upgrades pid %s" % pid)
-        os.kill(pid, signal.SIGTERM)
+        try:
+            os.kill(pid, signal.SIGTERM)
+        except ProcessLookupError:
+            logging.debug("sending SIGTERM failed because unattended-upgrades "
+                          "already stopped")
 
 
 if __name__ == "__main__":

@@ -17,8 +17,16 @@ class PackagePep8TestCase(unittest.TestCase):
             os.path.join(top_src_dir, "unattended-upgrade"),
             os.path.join(top_src_dir, "unattended-upgrade-shutdown"),
         ]
-        self.assertEqual(subprocess.call(
-            ["pep8", "--repeat", "--ignore=%s" % IGNORE] + targets), 0)
+        try:
+            self.assertEqual(subprocess.call(["pycodestyle",
+                                              "--repeat",
+                                              "--ignore=%s"
+                                              % IGNORE]
+                                             + targets),
+                             0)
+        except FileNotFoundError:
+            self.assertEqual(subprocess.call(
+                ["pep8", "--repeat", "--ignore=%s" % IGNORE] + targets), 0)
 
 
 if __name__ == "__main__":
