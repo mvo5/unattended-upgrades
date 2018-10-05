@@ -806,6 +806,14 @@ def check_changes_for_sanity(cache, allowed_origins, blacklist, whitelist,
     return True
 
 
+def is_deb(file):
+    # type: (str) -> bool
+    if re.match("^.*\\.deb$", file):
+        return True
+    else:
+        return False
+
+
 def pkgname_from_deb(debfile):
     # type: (str) -> str
     # FIXME: add error checking here
@@ -1805,6 +1813,9 @@ def run(options,             # type: Options
                             item.destfile))
             if not item.is_trusted:
                 blacklisted_pkgs.append(pkgname_from_deb(item.destfile))
+            if not is_deb(item.destfile):
+                logging.debug("%s is not a .deb file" % item)
+                continue
             if conffile_prompt(item.destfile):
                 # skip package (means to re-run the whole marking again
                 # and making sure that the package will not be pulled in by
