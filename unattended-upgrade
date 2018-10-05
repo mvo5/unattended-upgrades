@@ -1083,7 +1083,8 @@ def send_summary_mail(pkgs,                 # type: List[str]
     body += "\n\n"
     if os.path.isfile(REBOOT_REQUIRED_FILE):
         body += _(
-            "Warning: A reboot is required to complete this upgrade.\n\n")
+            "Warning: A reboot is required to complete this upgrade, "
+            "or a previous one.\n\n")
     if pkgs:
         if res:
             body += _("Packages that were upgraded:\n")
