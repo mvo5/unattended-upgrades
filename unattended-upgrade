@@ -434,10 +434,16 @@ def should_stop():
     if SIGNAL_STOP_REQUEST:
         logging.warning("SIGNAL received, stopping")
         return True
-    if apt_pkg.config.find_b("Unattended-Upgrade::OnlyOnACPower", True) and \
-       subprocess.call("on_ac_power") == 1:
-        logging.warning("System is on battery power, stopping")
-        return True
+    try:
+        if apt_pkg.config.find_b("Unattended-Upgrade::OnlyOnACPower", True) \
+           and subprocess.call("on_ac_power") == 1:
+            logging.warning("System is on battery power, stopping")
+            return True
+    except FileNotFoundError:
+        logging.info(
+            _("Checking if system is running on battery is skipped. Please "
+              "install powermgmt-base package to check power status and skip "
+              "installing updates when the system is running on battery."))
     if apt_pkg.config.find_b(
             "Unattended-Upgrade::Skip-Updates-On-Metered-Connections", True):
         try:
