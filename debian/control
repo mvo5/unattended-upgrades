@@ -35,7 +35,7 @@ Depends: ${shlibs:Depends},
          lsb-release,
          lsb-base,
          xz-utils
-Recommends: cron | cron-daemon | anacron
+Recommends: systemd-sysv | cron | cron-daemon | anacron
 Suggests: bsd-mailx,
           default-mta | mail-transport-agent,
           needrestart
