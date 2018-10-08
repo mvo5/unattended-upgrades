@@ -94,6 +94,9 @@ LOCK_FILE = "/var/run/unattended-upgrades.lock"
 # set from the sigint signal handler
 SIGNAL_STOP_REQUEST = False
 
+# messages to be logged only once
+logged_msgs = set()  # type: AbstractSet[str]
+
 
 class LoggingDateTime:
     """The date/time representation for the dpkg log file timestamps"""
@@ -425,6 +428,14 @@ def signal_handler(signal, frame):
     SIGNAL_STOP_REQUEST = True
 
 
+def log_once(msg):
+    #type: (str) -> None
+    global logged_msgs
+    if msg not in logged_msgs:
+        logging.info(msg)
+        logged_msgs.add(msg)  # type: ignore
+
+
 def should_stop():
     # type: () -> bool
     """
@@ -440,7 +451,7 @@ def should_stop():
             logging.warning("System is on battery power, stopping")
             return True
     except FileNotFoundError:
-        logging.info(
+        log_once(
             _("Checking if system is running on battery is skipped. Please "
               "install powermgmt-base package to check power status and skip "
               "installing updates when the system is running on battery."))
@@ -452,10 +463,9 @@ def should_stop():
                 logging.warning(_("System is on metered connection, stopping"))
                 return True
         except NameError:
-                logging.info(
-                    _("Checking if connection is metered is skipped. Please "
-                      "install python3-gi package to detect metered "
-                      "connections and skip downloading updates."))
+            log_once(_("Checking if connection is metered is skipped. Please "
+                       "install python3-gi package to detect metered "
+                       "connections and skip downloading updates."))
     return False
 
 
