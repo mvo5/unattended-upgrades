@@ -29,7 +29,10 @@ import email.charset
 import fcntl
 import fnmatch
 import gettext
-from gi.repository.Gio import NetworkMonitor
+try:
+    from gi.repository.Gio import NetworkMonitor
+except ImportError:
+    pass
 import grp
 import io
 import locale
@@ -437,9 +440,16 @@ def should_stop():
         return True
     if apt_pkg.config.find_b(
             "Unattended-Upgrade::Skip-Updates-On-Metered-Connections", True):
-        if NetworkMonitor.get_network_metered(NetworkMonitor.get_default()):
-            logging.warning(_("System is on metered connection, stopping"))
-            return True
+        try:
+            if NetworkMonitor.get_network_metered(
+                    NetworkMonitor.get_default()):
+                logging.warning(_("System is on metered connection, stopping"))
+                return True
+        except NameError:
+                logging.info(
+                    _("Checking if connection is metered is skipped. Please "
+                      "install python3-gi package to detect metered "
+                      "connections and skip downloading updates."))
     return False
 
 
