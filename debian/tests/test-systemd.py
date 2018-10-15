@@ -7,13 +7,16 @@ import subprocess
 
 def test_systemd_service():
     '''
-    Verify that the unattended-upgrades.service unit is not started.
-    The unit starts only for exit.target.
+    Verify that the unattended-upgrades.service unit is started
+    correctly. The unit must be started in order for the ExecStop=
+    to work correctly
     '''
     Service = 'unattended-upgrades.service'
-    if 0 == subprocess.call(
-            ['systemctl', '--quiet', 'is-active', Service]):
-        out = subprocess.getoutput('systemctl status ' + Service)
+    try:
+        subprocess.check_output(['systemctl', '--quiet', 'is-active', Service])
+    except subprocess.CalledProcessError:
+        out = subprocess.getoutput(
+            'systemctl status unattended-upgrades.service')
         print('test_systemd_service() FAILED\n%s' % out)
         return False
     return True
