@@ -5,9 +5,8 @@ RequiresMountsFor=/var/log /var/run /var/lib /boot
 Documentation=man:unattended-upgrade(8)
 
 [Service]
-Type=oneshot
-RemainAfterExit=yes
-ExecStop=/usr/share/unattended-upgrades/unattended-upgrade-shutdown
+ExecStart=/usr/share/unattended-upgrades/unattended-upgrade-shutdown --wait-for-signal
+KillMode=process
 TimeoutStopSec=1800
 
 [Install]

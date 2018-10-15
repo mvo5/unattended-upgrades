@@ -25,6 +25,7 @@
 #
 
 import copy
+import dbus
 import signal
 import sys
 import time
@@ -34,8 +35,16 @@ import gettext
 import subprocess
 import os.path
 
+# for dbus signal handling
+try:
+    from dbus.mainloop.glib import DBusGMainLoop
+    from gi.repository import GLib
+except ImportError:
+    pass
+
 from optparse import OptionParser
 from gettext import gettext as _
+from threading import Event
 
 try:
     import apt_pkg
@@ -92,12 +101,231 @@ def signal_stop_unattended_upgrade():
         os.kill(pid, signal.SIGTERM)
 
 
-if __name__ == "__main__":
+def get_logind_proxy():
+    """ Get logind dbus proxy object """
+    bus = dbus.SystemBus()
+    return bus.get_object(
+        'org.freedesktop.login1', '/org/freedesktop/login1')
+
+
+def get_inhibit_shutdown_lock(logind_proxy):
+    """ Take delay inhibitor lock """
+    try:
+        logind_manager = dbus.Interface(
+            logind_proxy, dbus_interface='org.freedesktop.login1.Manager')
+        return logind_manager.Inhibit(
+            "shutdown", "Unattended Upgrades Shutdown",
+            _("Stop ongoing upgrades or perform upgrades before shutdown"),
+            "delay")
+    except Exception:
+        logging.warning("Could not get delay inhibitor lock")
+
+
+def get_inhibit_max_delay(logind_proxy):
+    try:
+        getter_interface = dbus.Interface(
+            logind_proxy, dbus_interface='org.freedesktop.DBus.Properties')
+        return (getter_interface.Get(
+            "org.freedesktop.login1.Manager", "InhibitDelayMaxUSec")
+                / (1000 * 1000))
+    except Exception:
+        return 3
+
+
+def is_preparing_for_shutdown(logind_proxy):
+    getter_interface = dbus.Interface(
+        logind_proxy, dbus_interface='org.freedesktop.DBus.Properties')
+    return getter_interface.Get(
+        "org.freedesktop.login1.Manager", "PreparingForShutdown")
+
+
+def exit_log_result(success):
+    if success:
+        log_msg(_("All upgrades installed"), logging.INFO)
+        sys.exit(0)
+    else:
+        log_msg(_("Unattended-upgrades stopped. There may be upgrades"
+                  " left to be installed in the next run."), logging.INFO)
+        sys.exit(1)
+
+
+class UnattendedUpgradesShutdown():
+
+    def __init__(self, options):
+        # type: (Options) -> None
+        self.options = options
+        self.max_delay = options.delay * 60
+        self.iter_timer_set = False
+        self.apt_pkg_reinit_done = None
+        self.on_shutdown_mode = None
+        self.on_shutdown_mode_uu_proc = None
+        self.start_time = None
+        self.lock_was_taken = False
+        self.signal_sent = False
+        self.stop_signal_received = Event()
+        try:
+            hasattr(GLib, "MainLoop")
+            DBusGMainLoop(set_as_default=True)
+        except NameError:
+            pass
+        self.logind_proxy = get_logind_proxy()
+        self.wait_period = min(3, get_inhibit_max_delay(self.logind_proxy) / 3)
+        self.inhibit_lock = get_inhibit_shutdown_lock(self.logind_proxy)
+
+    def start_iterations(self):
+        if not self.iter_timer_set:
+            try:
+                GLib.timeout_add(self.wait_period * 1000, self.iter)
+                # schedule first iteration immediately
+                GLib.timeout_add(0, lambda: self.iter() and False)
+            except NameError:
+                pass
+
+    def run(self):
+        """ delay shutdown and wait for PrepareForShutdown or other signals"""
+
+        # set signal handlers
+        def signal_handler(signum, frame):
+            # type: (object) -> None
+            logging.warning(
+                "SIGTERM or SIGHUP received, stopping unattended-upgrades"
+                "only if it is running")
+            self.stop_signal_received.set()
+            self.start_iterations()
+
+        # wait for signals
+        try:
+            hasattr(GLib, "MainLoop")
+            for sig in (signal.SIGTERM, signal.SIGHUP):
+                GLib.unix_signal_add(GLib.PRIORITY_DEFAULT, sig,
+                                     signal_handler, None, None)
+            if self.options.wait_for_signal:
+                def prepare_for_shutdown_handler(active):
+                    """ Handle PrepareForShutdown() """
+                    if not active:
+                        logging.warning("PrepareForShutdown(false) received, "
+                                        "this should not happen")
+                    # PrepareForShutdown arrived, starting final iterations
+                    self.start_iterations()
+                self.logind_proxy.connect_to_signal(
+                    "PrepareForShutdown", prepare_for_shutdown_handler)
+                logging.debug("Waiting for signal to start operation ")
+            else:
+                # starting final iterations immediately
+                logging.debug("Skip waiting for signals, starting operation "
+                              "now")
+                self.start_iterations()
+            GLib.MainLoop().run()
+
+        except NameError:
+            logging.warning(
+                _("Unable to monitor PrepareForShutdown() signal, polling "
+                  "instead."))
+            logging.warning(
+                _("To enable monitoring the PrepareForShutdown() signal "
+                  "instead of polling please install the python3-gi package"))
+
+            signal.signal(signal.SIGTERM, signal_handler)
+            signal.signal(signal.SIGHUP, signal_handler)
+
+            # poll for PrepareForShutdown then run final iterations
+            if self.options.wait_for_signal:
+                logging.debug("Waiting for signal to start operation ")
+                while (not self.stop_signal_received.is_set()
+                       and not is_preparing_for_shutdown(self.logind_proxy)):
+                    self.stop_signal_received.wait(self.wait_period)
+            else:
+                logging.debug("Skip waiting for signals, starting operation "
+                              "now")
+            while not self.iter():
+                # TODO iter on sigterm and sighup, too
+                time.sleep(self.wait_period)
+
+    def try_iter_on_shutdown(self):
+        # check if we need to run unattended-upgrades on shutdown and if
+        # so, run it
+        try:
+            if self.apt_pkg_reinit_done is None:
+                logging.debug("Initializing apt_pkg configuration")
+                apt_pkg.init_config()
+                self.apt_pkg_reinit_done = True
+        except apt_pkg.Error as error:
+            # apt may be in a transient state due to unattended-upgrades
+            # running, thus assuming non shutdown mode is reasonable
+            logging.error(_("Apt returned an error thus shutdown mode is "
+                            "disabled"))
+            logging.error(_("error message: '%s'"), error)
+            self.apt_pkg_reinit_done = False
+
+        if self.on_shutdown_mode is None:
+            self.on_shutdown_mode = (
+                not self.options.stop_only
+                and not self.stop_signal_received.is_set()
+                and self.apt_pkg_reinit_done
+                and apt_pkg.config.find_b(
+                    "Unattended-Upgrade::InstallOnShutdown", False))
+            if self.on_shutdown_mode:
+                env = copy.copy(os.environ)
+                env["UNATTENDED_UPGRADES_FORCE_INSTALL_ON_SHUTDOWN"] = "1"
+                logging.debug("starting unattended-upgrades in shutdown mode")
+                self.on_shutdown_mode_uu_proc = subprocess.Popen(
+                    ["unattended-upgrade"], env=env)
+                log_msg(_("Running unattended-upgrades in shutdown mode"))
+                # run u-u, but switch to stopping when receiving stop signal
+                # because it means shutdown progressed despite holding the lock
+
+        if self.on_shutdown_mode:
+            log_progress()
+            if self.on_shutdown_mode_uu_proc.poll() is not None:
+                # unattended-upgrades stopped on its own
+                exit_log_result(True)
+            else:
+                return True
+        return False
+
+    def iter(self):
+        if self.start_time is None:
+            self.start_time = time.time()
+            logging.debug("Starting countdown of %s minutes",
+                          self.max_delay / 60)
+        else:
+            if (time.time() - self.start_time) > self.max_delay:
+                logging.warning(_(
+                    "Giving up on lockfile after %s minutes of delay"),
+                                self.max_delay / 60)
+                sys.exit(1)
+
+        if not self.stop_signal_received.is_set():
+            if self.try_iter_on_shutdown():
+                return True
+
+        # run monitoring and keep "UI" updated
+        res = apt_pkg.get_lock(self.options.lock_file)
+        logging.debug("get_lock returned %i" % res)
+        # exit here if there is no lock
+        if res > 0:
+            logging.debug("lock not taken")
+            if self.lock_was_taken:
+                exit_log_result(self.signal_sent)
+            else:
+                sys.exit(0)
+        self.lock_was_taken = True
+        signal_stop_unattended_upgrade()
+        self.signal_sent = True
+        # show log
+        log_progress()
+        return True
+
+
+def main():
+
     # setup gettext
     localesApp = "unattended-upgrades"
     localesDir = "/usr/share/locale"
     gettext.bindtextdomain(localesApp, localesDir)
     gettext.textdomain(localesApp)
+
+    apt_pkg.init_config()
 
     parser = OptionParser()
     parser.add_option("", "--debug",
@@ -113,6 +341,10 @@ if __name__ == "__main__":
                       help="only stop running unattended-upgrades, don't "
                       "start it even when "
                       "Unattended-Upgrade::InstallOnShutdown is true")
+    parser.add_option("", "--wait-for-signal",
+                      action="store_true", dest="wait_for_signal",
+                      default=False,
+                      help="wait for TERM signal before starting operation")
     (options, args) = parser.parse_args()
 
     # setup logging
@@ -131,64 +363,8 @@ if __name__ == "__main__":
                         level=level,
                         format="%(asctime)s %(levelname)s - %(message)s")
 
-    # check if we need to run unattended-upgrades on shutdown and if so,
-    # run it
-    try:
-        apt_pkg.init_config()
-    except apt_pkg.Error as error:
-        logging.error(_("Apt returned an error, exiting"))
-        logging.error(_("error message: '%s'"), error)
-        sys.exit(1)
+    UnattendedUpgradesShutdown(options).run()
 
-    on_shutdown_mode = not options.stop_only and apt_pkg.config.find_b(
-        "Unattended-Upgrade::InstallOnShutdown", False)
-    if on_shutdown_mode:
-        env = copy.copy(os.environ)
-        env["UNATTENDED_UPGRADES_FORCE_INSTALL_ON_SHUTDOWN"] = "1"
-        logging.debug("starting unattended-upgrades in shutdown mode")
-        p = subprocess.Popen(["unattended-upgrade"], env=env)
-        log_msg(_("Running unattended-upgrades in shutdown mode"))
-        while True:
-            log_progress()
-            if p.poll() is not None:
-                break
-            time.sleep(5)
 
-    # run the monitoring loop and keep the "UI" updated
-    start_time = time.time()
-    lock_was_taken = False
-    signal_sent = False
-    while True:
-        res = apt_pkg.get_lock(options.lock_file)
-        logging.debug("get_lock returned %i" % res)
-        # exit here if there is no lock
-        if res > 0:
-            logging.debug("lock not taken")
-            break
-        lock_was_taken = True
-        if not on_shutdown_mode:
-            signal_stop_unattended_upgrade()
-            signal_sent = True
-        # show log
-        log_progress()
-        time.sleep(5)
-        if (time.time() - start_time) > options.delay * 60:
-            logging.warning(_("Giving up on lockfile after %s delay"),
-                            options.delay)
-            if on_shutdown_mode:
-                # unattended-upgrade did not finish in time, but stopping
-                # it gracefully is better than waiting for it to be killed
-                signal_stop_unattended_upgrade()
-                signal_sent = True
-            sys.exit(1)
-
-    # add finished info to the log/terminal to help tracking down
-    # LP: #434835
-    if lock_was_taken:
-        if signal_sent:
-            log_msg(_("Unattended-upgrades stopped. There may be upgrades"
-                      " left to be installed in the next run."), logging.INFO)
-        else:
-            # re-use existing string
-            log_msg(_("All upgrades installed"), logging.INFO)
-    sys.exit(0)
+if __name__ == "__main__":
+    main()
