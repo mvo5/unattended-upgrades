@@ -25,6 +25,10 @@ if [ -d /var/log/unattended-upgrades ]; then
   chmod 0750 /var/log/unattended-upgrades
 fi
 
+uu_running() {
+    python3 -c 'import apt; import apt_pkg; import sys; sys.exit(1 if apt_pkg.get_lock("/var/run/unattended-upgrades.lock") >= 0 else 0)'
+}
+
 case "$1" in
     configure)
 	# *sigh* typo in filename in version 0.51ubuntu1
@@ -113,8 +117,12 @@ case "$1" in
 	       && [ -d /run/systemd/system ]; then
                 # workaround systemd bug with enable --now which
                 # fails to start the unit
-		systemctl enable unattended-upgrades || true
-		deb-systemd-invoke start unattended-upgrades.service || true
+		systemctl enable unattended-upgrades >&2 || true
+		if uu_running; then
+			echo "Skipping starting unattended-upgrades.service because unattended-upgrades is running" >&2
+		else
+			deb-systemd-invoke start unattended-upgrades.service >&2 || true
+		fi
 	fi
     ;;
 esac
