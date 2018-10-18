@@ -132,13 +132,6 @@ def get_inhibit_max_delay(logind_proxy):
         return 3
 
 
-def is_preparing_for_shutdown(logind_proxy):
-    getter_interface = dbus.Interface(
-        logind_proxy, dbus_interface='org.freedesktop.DBus.Properties')
-    return getter_interface.Get(
-        "org.freedesktop.login1.Manager", "PreparingForShutdown")
-
-
 def exit_log_result(success):
     if success:
         log_msg(_("All upgrades installed"), logging.INFO)
@@ -171,6 +164,16 @@ class UnattendedUpgradesShutdown():
         self.logind_proxy = get_logind_proxy()
         self.wait_period = min(3, get_inhibit_max_delay(self.logind_proxy) / 3)
         self.inhibit_lock = get_inhibit_shutdown_lock(self.logind_proxy)
+        self.preparing_for_shutdown = False
+
+    def is_preparing_for_shutdown(self):
+        if not self.shutdown_pending:
+            getter_interface = dbus.Interface(
+                self.logind_proxy,
+                dbus_interface='org.freedesktop.DBus.Properties')
+            self.shutdown_pending = getter_interface.Get(
+                "org.freedesktop.login1.Manager", "PreparingForShutdown")
+        return self.shutdown_pending
 
     def start_iterations(self):
         if not self.iter_timer_set:
@@ -232,7 +235,7 @@ class UnattendedUpgradesShutdown():
             if self.options.wait_for_signal:
                 logging.debug("Waiting for signal to start operation ")
                 while (not self.stop_signal_received.is_set()
-                       and not is_preparing_for_shutdown(self.logind_proxy)):
+                       and not self.is_preparing_for_shutdown()):
                     self.stop_signal_received.wait(self.wait_period)
             else:
                 logging.debug("Skip waiting for signals, starting operation "
