@@ -834,7 +834,7 @@ def check_changes_for_sanity(cache, allowed_origins, blacklist, whitelist,
 
 def is_deb(file):
     # type: (str) -> bool
-    if re.match("^.*\\.deb$", file):
+    if file.endswith(".deb"):
         return True
     else:
         return False
