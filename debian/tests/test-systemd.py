@@ -64,8 +64,13 @@ if __name__ == '__main__':
 
         if enable_install_on_shutdown():
             print('Rebooting to test InstallOnShutdown...')
-            subprocess.check_call(['/tmp/autopkgtest-reboot',
+            subprocess.check_call(['/tmp/autopkgtest-reboot-prepare',
                                    'InstallOnShutdown'])
+            subprocess.check_call(['dbus-send', '--system', '--print-reply',
+                                   '--dest=org.freedesktop.login1',
+                                   '/org/freedesktop/login1',
+                                   'org.freedesktop.login1.Manager.Reboot',
+                                   'boolean:false'])
         else:
             sys.exit(1)
 
