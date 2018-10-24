@@ -24,6 +24,8 @@ case "$1" in
 		ucf --purge /etc/apt/apt.conf.d/20auto-upgrades
 		ucf --purge /etc/apt/apt.conf.d/50unattended-upgrades
 	fi
+	rm -f /etc/apt/apt.conf.d/20auto-upgrades.ucf-*
+	rm -f /etc/apt/apt.conf.d/50unattended-upgrades.ucf-*
 	rm -f /etc/apt/apt.conf.d/20auto-upgrades
 	rm -f /etc/apt/apt.conf.d/50unattended-upgrades
     ;;
