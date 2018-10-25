@@ -45,6 +45,7 @@ class OnBattery(unittest.TestCase):
 
         # run it
         options = MockOptions()
+        unattended_upgrade.DISTRO_DESC = "Ubuntu 10.04"
         unattended_upgrade.LOCK_FILE = "./u-u.lock"
         ret = unattended_upgrade.main(options, rootdir=self.rootdir)
         self.assertTrue(ret == 1)

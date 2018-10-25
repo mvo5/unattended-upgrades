@@ -83,6 +83,8 @@ USERS = "/usr/bin/users"
 # no py3 lsb_release in debian :/
 DISTRO_CODENAME = subprocess.check_output(
     ["lsb_release", "-c", "-s"], universal_newlines=True).strip()  # type: str
+DISTRO_DESC = subprocess.check_output(
+    ["lsb_release", "-d", "-s"], universal_newlines=True).strip()  # type: str
 DISTRO_ID = subprocess.check_output(
     ["lsb_release", "-i", "-s"], universal_newlines=True).strip()  # type: str
 
@@ -1689,6 +1691,11 @@ def run(options,             # type: Options
     if should_stop():
         return UnattendedUpgradesResult(False)
 
+    # check to see if want to auto-upgrade the devel release
+    if "(development branch)" in DISTRO_DESC and not\
+            apt_pkg.config.find_b("Unattended-Upgrade::DevRelease", False):
+        logging.info(_("Not running on the development release."))
+        return UnattendedUpgradesResult(True)
     # format (origin, archive), e.g. ("Ubuntu","dapper-security")
     allowed_origins = get_allowed_origins()
 

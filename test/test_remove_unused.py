@@ -99,6 +99,7 @@ Unattended-Upgrade::Remove-Unused-Dependencies "true";
 Unattended-Upgrade::Skip-Updates-On-Metered-Connections "false";
 """)
         options = MockOptions()
+        unattended_upgrade.DISTRO_DESC = "Ubuntu 10.04"
         unattended_upgrade.LOCK_FILE = "./u-u.lock"
         unattended_upgrade.main(
             options, rootdir="./root.unused-deps")
@@ -126,6 +127,7 @@ Unattended-Upgrade::Remove-New-Unused-Dependencies "true";
 Unattended-Upgrade::Skip-Updates-On-Metered-Connections "false";
 """)
         options = MockOptions()
+        unattended_upgrade.DISTRO_DESC = "Ubuntu 10.04"
         unattended_upgrade.LOCK_FILE = "./u-u.lock"
         unattended_upgrade.main(
             options, rootdir="./root.unused-deps")
