@@ -19,6 +19,7 @@ if __name__ == "__main__":
                 ["data/20auto-upgrades",
                  "data/20auto-upgrades-disabled",
                  "data/50unattended-upgrades",
+                 "data/50unattended-upgrades.md5sum",
                  "unattended-upgrade-shutdown"]),
             ('../usr/share/man/man8/',
                 ["man/unattended-upgrade.8"]),

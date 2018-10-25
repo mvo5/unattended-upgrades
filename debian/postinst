@@ -50,12 +50,9 @@ case "$1" in
         fi
 
 	CONFIG="/etc/apt/apt.conf.d/50unattended-upgrades"
-	NEWFILE="$CONFIG.ucftmp"
-	TEMPLATE="/usr/share/unattended-upgrades/50unattended-upgrades"
-	cp -a -f "$TEMPLATE" "$NEWFILE"
+	NEWFILE="/usr/share/unattended-upgrades/50unattended-upgrades"
 	ucf --three-way --debconf-ok "$NEWFILE" "$CONFIG"
 	ucfr unattended-upgrades "$CONFIG"
-	rm -f "$NEWFILE"
 
         # Recover from incorrect init.d script header in versions < 0.64
         if dpkg --compare-versions "$2" lt "0.64" \
