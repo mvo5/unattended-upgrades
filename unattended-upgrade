@@ -1712,9 +1712,9 @@ def run(options,             # type: Options
         except Exception as e:
             logging.warning("Could not figure out development release: %s" % e)
         else:
-            if ((devel.series == DISTRO_CODENAME and
-                 devel.release is not None and
-                 devel.release - date.today() >= DEVEL_UNTIL_RELEASE)):
+            if ((devel.series == DISTRO_CODENAME
+                 and devel.release is not None
+                 and devel.release - date.today() >= DEVEL_UNTIL_RELEASE)):
                 syslog.syslog((_("Not running on this development "
                                  "release before %s") %
                               (devel.release - DEVEL_UNTIL_RELEASE)))
