@@ -1,3 +1,61 @@
+unattended-upgrades (1.7) UNRELEASED; urgency=medium
+
+  [ Nils Toedtmann ]
+  * Clarify 'A reboot is required' warning, that the requirement might stem from a previous run
+
+  [ Balint Reczey ]
+  * Build depend on and run pycodestyle, the replacement of pep8
+  * autopkgtest: Clean up after failed debootstrap to retry cleanly
+  * Handle when unattended-upgrades stopped without
+    unattended-upgrade-shutdown sending SIGTERM
+    (LP: #1795657)
+  * Don't crash on missing dpkg log file (LP: #1795692)
+  * do_auto_remove() is successful unless a commit() operation fails
+    (LP: #1795696)
+  * Check only dowloaded .deb files for conffile prompts (LP: #1796100)
+  * Recommend systemd-sysv as the first alternative of cron.
+    Unattended-upgrades is started via systemd timers or by the .service file
+    on the default Debian and Ubuntu installations without cron's involvement.
+    Systems without systemd-sysv can still install unattended-upgrades and run
+    it via cron.
+  * Only suggest python3-gi and skip check for metered connection when it is
+    missing (Closes: #909543)
+  * Only suggest powermgmt-base amd skip checking power status when it is not
+    present
+  * Show message about missing optional dependencies only once
+  * Add configuration file option to enable verbose and debug logging.
+    Thanks to Paul Wise
+  * Revert to running unattended-upgrades.service in multi-user.target
+  * Trigger unattended-upgrade-shutdown actions with PrepareForShutdown()
+    Performing upgrades in service's ExecStop did not work when the upgrades
+    involved restarting services because systemd blocked other stop/start
+    actions making maintainer scripts time out and be killed leaving a broken
+    system behind.
+    Running unattended-upgrades.service before shutdown.target as a oneshot
+    service made it run after unmounting filesystems and scheduling services
+    properly on shutdown is a complex problem and adding more services to the
+    mix make it even more fragile.
+    The solution of monitoring PrepareForShutdown() signal from DBus
+    allows Unattended Upgrade to run _before_ the jobs related to shutdown are
+    queued thus package upgrades can safely restart services without
+    risking causing deadlocks or breaking part of the shutdown actions.
+    Also ask running unattended-upgrades to stop when shutdown starts even in
+    InstallOnShutdown mode and refactor most of unattended-upgrade-shutdown to
+    UnattendedUpgradesShutdown class. (LP: #1778219)
+  * Handle reverting to WantedBy=multi-user.target when upgrading from 1.5 or
+    1.6
+  * debian/postinst: Redirect stdout from systemctl and deb-systemd-invoke to
+    stderr and skip running systemctl start unattended-upgrades.service when
+    unattended-upgrades is already running to avoid deadlock.
+  * Increase logind's InhibitDelayMaxSec to 30s.
+    This allows more time for unattended-upgrades to shut down gracefully
+    or even install a few packages in InstallOnShutdown mode, but is still a
+    big step back from the 30 minutes allowed for InstallOnShutdown previously.
+    Users enabling InstallOnShutdown node are advised to increase
+    InhibitDelayMaxSec even further possibly to 30 minutes.
+
+ -- Balint Reczey <rbalint@ubuntu.com>  Thu, 18 Oct 2018 00:58:48 +0200
+
 unattended-upgrades (1.6) unstable; urgency=medium
 
   [ Dravon5X ]

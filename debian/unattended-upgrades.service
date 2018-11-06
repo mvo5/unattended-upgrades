@@ -1,16 +1,13 @@
 [Unit]
 Description=Unattended Upgrades Shutdown
-DefaultDependencies=no
-Before=shutdown.target
 After=network.target local-fs.target
 RequiresMountsFor=/var/log /var/run /var/lib /boot
 Documentation=man:unattended-upgrade(8)
 
 [Service]
-Type=oneshot
-ExecStart=/usr/share/unattended-upgrades/unattended-upgrade-shutdown
+ExecStart=/usr/share/unattended-upgrades/unattended-upgrade-shutdown --wait-for-signal
 KillMode=process
 TimeoutStopSec=1800
 
 [Install]
-WantedBy=shutdown.target
+WantedBy=multi-user.target

@@ -2100,13 +2100,17 @@ if __name__ == "__main__":
     # init the options
     parser = OptionParser()
     parser.add_option("-d", "--debug",
-                      action="store_true", default=False,
+                      action="store_true",
+                      default=apt_pkg.config.find_b(
+                          "Unattended-Upgrade::Debug", False),
                       help=_("print debug messages"))
     parser.add_option("", "--apt-debug",
                       action="store_true", default=False,
                       help=_("make apt/libapt print verbose debug messages"))
     parser.add_option("-v", "--verbose",
-                      action="store_true", default=False,
+                      action="store_true",
+                      default=apt_pkg.config.find_b(
+                          "Unattended-Upgrade::Verbose", False),
                       help=_("print info messages"))
     parser.add_option("", "--dry-run",
                       action="store_true", default=False,
