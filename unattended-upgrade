@@ -29,7 +29,10 @@ import email.charset
 import fcntl
 import fnmatch
 import gettext
-from gi.repository.Gio import NetworkMonitor
+try:
+    from gi.repository.Gio import NetworkMonitor
+except ImportError:
+    pass
 import grp
 import io
 import locale
@@ -90,6 +93,9 @@ LOCK_FILE = "/var/run/unattended-upgrades.lock"
 
 # set from the sigint signal handler
 SIGNAL_STOP_REQUEST = False
+
+# messages to be logged only once
+logged_msgs = set()  # type: AbstractSet[str]
 
 
 class LoggingDateTime:
@@ -422,6 +428,14 @@ def signal_handler(signal, frame):
     SIGNAL_STOP_REQUEST = True
 
 
+def log_once(msg):
+    #type: (str) -> None
+    global logged_msgs
+    if msg not in logged_msgs:
+        logging.info(msg)
+        logged_msgs.add(msg)  # type: ignore
+
+
 def should_stop():
     # type: () -> bool
     """
@@ -431,15 +445,27 @@ def should_stop():
     if SIGNAL_STOP_REQUEST:
         logging.warning("SIGNAL received, stopping")
         return True
-    if apt_pkg.config.find_b("Unattended-Upgrade::OnlyOnACPower", True) and \
-       subprocess.call("on_ac_power") == 1:
-        logging.warning("System is on battery power, stopping")
-        return True
+    try:
+        if apt_pkg.config.find_b("Unattended-Upgrade::OnlyOnACPower", True) \
+           and subprocess.call("on_ac_power") == 1:
+            logging.warning("System is on battery power, stopping")
+            return True
+    except FileNotFoundError:
+        log_once(
+            _("Checking if system is running on battery is skipped. Please "
+              "install powermgmt-base package to check power status and skip "
+              "installing updates when the system is running on battery."))
     if apt_pkg.config.find_b(
             "Unattended-Upgrade::Skip-Updates-On-Metered-Connections", True):
-        if NetworkMonitor.get_network_metered(NetworkMonitor.get_default()):
-            logging.warning(_("System is on metered connection, stopping"))
-            return True
+        try:
+            if NetworkMonitor.get_network_metered(
+                    NetworkMonitor.get_default()):
+                logging.warning(_("System is on metered connection, stopping"))
+                return True
+        except NameError:
+            log_once(_("Checking if connection is metered is skipped. Please "
+                       "install python3-gi package to detect metered "
+                       "connections and skip downloading updates."))
     return False
 
 
@@ -804,6 +830,14 @@ def check_changes_for_sanity(cache, allowed_origins, blacklist, whitelist,
     if desired_pkg and desired_pkg not in changes:
         return False
     return True
+
+
+def is_deb(file):
+    # type: (str) -> bool
+    if file.endswith(".deb"):
+        return True
+    else:
+        return False
 
 
 def pkgname_from_deb(debfile):
@@ -1805,6 +1839,9 @@ def run(options,             # type: Options
                             item.destfile))
             if not item.is_trusted:
                 blacklisted_pkgs.append(pkgname_from_deb(item.destfile))
+            if not is_deb(item.destfile):
+                logging.debug("%s is not a .deb file" % item)
+                continue
             if conffile_prompt(item.destfile):
                 # skip package (means to re-run the whole marking again
                 # and making sure that the package will not be pulled in by
