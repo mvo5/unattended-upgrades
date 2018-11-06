@@ -17,6 +17,7 @@ set -e
 # for details, see http://www.debian.org/doc/debian-policy/ or
 # the debian-policy package
 
+dpkg-maintscript-helper rm_conffile /etc/apt/apt.conf.d/50unattended-upgrades 0.86.4~ -- "$@"
 
 case "$1" in
     purge)
@@ -28,6 +29,7 @@ case "$1" in
 	rm -f /etc/apt/apt.conf.d/50unattended-upgrades.ucf-*
 	rm -f /etc/apt/apt.conf.d/20auto-upgrades
 	rm -f /etc/apt/apt.conf.d/50unattended-upgrades
+	dpkg-maintscript-helper rm_conffile /etc/apt/apt.conf.d/50unattended-upgrades -- "$@"
     ;;
     
     remove|upgrade|failed-upgrade|abort-install|abort-upgrade|disappear)
