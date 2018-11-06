@@ -1,14 +1,14 @@
-unattended-upgrades (1.7) UNRELEASED; urgency=medium
+unattended-upgrades (1.7) unstable; urgency=medium
 
   [ Nils Toedtmann ]
-  * Clarify 'A reboot is required' warning, that the requirement might stem from a previous run
+  * Clarify 'A reboot is required' warning, that the requirement might stem
+    from a previous run
 
   [ Balint Reczey ]
   * Build depend on and run pycodestyle, the replacement of pep8
   * autopkgtest: Clean up after failed debootstrap to retry cleanly
   * Handle when unattended-upgrades stopped without
-    unattended-upgrade-shutdown sending SIGTERM
-    (LP: #1795657)
+    unattended-upgrade-shutdown sending SIGTERM (LP: #1795657)
   * Don't crash on missing dpkg log file (LP: #1795692)
   * do_auto_remove() is successful unless a commit() operation fails
     (LP: #1795696)
@@ -52,7 +52,17 @@ unattended-upgrades (1.7) UNRELEASED; urgency=medium
     or even install a few packages in InstallOnShutdown mode, but is still a
     big step back from the 30 minutes allowed for InstallOnShutdown previously.
     Users enabling InstallOnShutdown node are advised to increase
-    InhibitDelayMaxSec even further possibly to 30 minutes.
+    InhibitDelayMaxSec even further, possibly to 30 minutes.
+
+  [ Brian Murray ]
+  * unattended-upgrades: Do not automatically upgrade the development release
+    of Ubuntu unless Unattended-Upgrade::DevRelease is true. (LP: #1649709)
+
+  [ Julian Andres Klode ]
+  * Do not run on development releases until 21 days before release.
+    This works for Ubuntu, and is only enabled there. Also explicitly
+    log those messages to syslog, so a user can easily find them and
+    then dig for more information in the u-u log.
 
  -- Balint Reczey <rbalint@ubuntu.com>  Thu, 18 Oct 2018 00:58:48 +0200
 
