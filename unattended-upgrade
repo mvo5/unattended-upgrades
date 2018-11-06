@@ -46,6 +46,7 @@ import socket
 import string
 import subprocess
 import sys
+import syslog
 
 try:
     from typing import AbstractSet, cast, Dict, Iterable, List, Tuple
@@ -83,8 +84,14 @@ USERS = "/usr/bin/users"
 # no py3 lsb_release in debian :/
 DISTRO_CODENAME = subprocess.check_output(
     ["lsb_release", "-c", "-s"], universal_newlines=True).strip()  # type: str
+DISTRO_DESC = subprocess.check_output(
+    ["lsb_release", "-d", "-s"], universal_newlines=True).strip()  # type: str
 DISTRO_ID = subprocess.check_output(
     ["lsb_release", "-i", "-s"], universal_newlines=True).strip()  # type: str
+
+# Number of days before release of devel where we enable unattended
+# upgrades.
+DEVEL_UNTIL_RELEASE = datetime.timedelta(days=21)
 
 # progress information is written here
 PROGRESS_LOG = "/var/run/unattended-upgrades.progress"
@@ -1689,6 +1696,37 @@ def run(options,             # type: Options
     if should_stop():
         return UnattendedUpgradesResult(False)
 
+    # check to see if want to auto-upgrade the devel release
+    if apt_pkg.config.find("Unattended-Upgrade::DevRelease") == "auto":
+        try:
+            import distro_info
+            if DISTRO_ID.lower() == 'ubuntu':
+                devel = (distro_info.UbuntuDistroInfo() .
+                         devel(result="object"))
+            elif DISTRO_ID.lower() == 'debian':
+                devel = (distro_info.DebianDistroInfo() .
+                         devel(result="object"))
+            else:
+                devel = (distro_info.DistroInfo(DISTRO_ID) .
+                         devel(result="object"))
+        except Exception as e:
+            logging.warning("Could not figure out development release: %s" % e)
+        else:
+            if ((devel.series == DISTRO_CODENAME
+                 and devel.release is not None
+                 and devel.release - date.today() >= DEVEL_UNTIL_RELEASE)):
+                syslog.syslog((_("Not running on this development "
+                                 "release before %s") %
+                              (devel.release - DEVEL_UNTIL_RELEASE)))
+                logging.warning(_("Not running on this development "
+                                  "release before %s") %
+                                (devel.release - DEVEL_UNTIL_RELEASE))
+                return UnattendedUpgradesResult(True)
+    elif "(development branch)" in DISTRO_DESC and not\
+            apt_pkg.config.find_b("Unattended-Upgrade::DevRelease", True):
+        syslog.syslog(_("Not running on the development release."))
+        logging.info(_("Not running on the development release."))
+        return UnattendedUpgradesResult(True)
     # format (origin, archive), e.g. ("Ubuntu","dapper-security")
     allowed_origins = get_allowed_origins()
 

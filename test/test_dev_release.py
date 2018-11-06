@@ -3,8 +3,6 @@
 import os
 import unittest
 
-import apt_pkg
-apt_pkg.config.set("Dir", "./aptroot")
 import apt
 
 import unattended_upgrade
@@ -15,21 +13,15 @@ apt.apt_pkg.config.set("APT::Architecture", "amd64")
 class MockOptions(object):
     debug = True
     verbose = False
-    download_only = False
     dry_run = True
     apt_debug = False
-    minimal_upgrade_steps = True
+    minimal_upgrade_steps = False
 
 
 class TestUntrusted(unittest.TestCase):
 
     def setUp(self):
         self.rootdir = os.path.abspath("./root.untrusted")
-        dpkg_status = os.path.abspath(
-            os.path.join(self.rootdir, "var", "lib", "dpkg", "status"))
-        apt.apt_pkg.config.set("Dir::State::status", dpkg_status)
-        apt.apt_pkg.config.clear("DPkg::Pre-Invoke")
-        apt.apt_pkg.config.clear("DPkg::Post-Invoke")
         self.log = os.path.join(
             self.rootdir, "var", "log", "unattended-upgrades",
             "unattended-upgrades.log")
@@ -37,22 +29,22 @@ class TestUntrusted(unittest.TestCase):
     def tearDown(self):
         os.remove(self.log)
 
-    def test_untrusted_check_without_conffile_check(self):
-        # ensure there is no conffile_prompt check
-        apt.apt_pkg.config.set("DPkg::Options::", "--force-confold")
+    def test_do_not_run_on_devrelease(self):
+        apt_conf = os.path.join(self.rootdir, "etc", "apt", "apt.conf")
+        with open(apt_conf, "w") as fp:
+            fp.write("""Unattended-Upgrade::DevRelease "false";
+""")
 
         # run it
         options = MockOptions()
-        unattended_upgrade.DISTRO_DESC = "Ubuntu 10.04"
-        unattended_upgrade.LOCK_FILE = "./u-u.lock"
+        unattended_upgrade.DISTRO_DESC = "Artful Aardvark (development branch)"
         unattended_upgrade.main(options, rootdir=self.rootdir)
         # read the log to see what happend
         with open(self.log) as f:
-            needle = "DEBUG InstCount=0 DelCount=0 BrokenCount=0"
+            needle = "Not running on the development release."
             haystack = f.read()
             self.assertTrue(needle in haystack,
                             "Can not find '%s' in '%s'" % (needle, haystack))
-            self.assertTrue("pkg test-package is untrusted" in haystack)
 
 
 if __name__ == "__main__":
