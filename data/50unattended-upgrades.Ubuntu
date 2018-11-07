@@ -40,9 +40,15 @@ Unattended-Upgrade::DevRelease "auto";
 // is running is possible (with a small delay)
 //Unattended-Upgrade::MinimalSteps "false";
 
-// Install all unattended-upgrades when the machine is shutting down
-// instead of doing it in the background while the machine is running
-// This will (obviously) make shutdown slower
+// Install all updates when the machine is shutting down
+// instead of doing it in the background while the machine is running.
+// This will (obviously) make shutdown slower.
+// Unattended-upgrades increases logind's InhibitDelayMaxSec to 30s.
+// This allows more time for unattended-upgrades to shut down gracefully
+// or even install a few packages in InstallOnShutdown mode, but is still a
+// big step back from the 30 minutes allowed for InstallOnShutdown previously.
+// Users enabling InstallOnShutdown mode are advised to increase
+// InhibitDelayMaxSec even further, possibly to 30 minutes.
 //Unattended-Upgrade::InstallOnShutdown "false";
 
 // Send email to this address for problems or packages upgrades
