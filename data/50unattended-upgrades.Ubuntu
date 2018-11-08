@@ -4,7 +4,7 @@
 // from non-security sources (e.g. chromium). By allowing the release
 // pocket these get automatically pulled in.
 Unattended-Upgrade::Allowed-Origins {
-        "${distro_id}:${distro_codename}";
+	"${distro_id}:${distro_codename}";
 	"${distro_id}:${distro_codename}-security";
 	// Extended Security Maintenance; doesn't necessarily exist for
 	// every release and this system may not have it installed, but if
