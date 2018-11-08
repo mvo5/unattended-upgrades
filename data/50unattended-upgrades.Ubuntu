@@ -1,10 +1,6 @@
 // Automatically upgrade packages from these (origin:archive) pairs
-//
-// Note that in Ubuntu security updates may pull in new dependencies
-// from non-security sources (e.g. chromium). By allowing the release
-// pocket these get automatically pulled in.
 Unattended-Upgrade::Allowed-Origins {
-        "${distro_id}:${distro_codename}";
+	"${distro_id}:${distro_codename}";
 	"${distro_id}:${distro_codename}-security";
 	// Extended Security Maintenance; doesn't necessarily exist for
 	// every release and this system may not have it installed, but if
@@ -24,10 +20,6 @@ Unattended-Upgrade::Package-Blacklist {
 //	"libc6-i686";
 };
 
-// This option will controls whether the development release of Ubuntu will be
-// upgraded automatically.
-Unattended-Upgrade::DevRelease "false";
-
 // This option allows you to control if on a unclean dpkg exit
 // unattended-upgrades will automatically run 
 //   dpkg --force-confold --configure -a
@@ -35,12 +27,12 @@ Unattended-Upgrade::DevRelease "false";
 //Unattended-Upgrade::AutoFixInterruptedDpkg "false";
 
 // Split the upgrade into the smallest possible chunks so that
-// they can be interrupted with SIGTERM. This makes the upgrade
+// they can be interrupted with SIGUSR1. This makes the upgrade
 // a bit slower but it has the benefit that shutdown while a upgrade
 // is running is possible (with a small delay)
-//Unattended-Upgrade::MinimalSteps "false";
+//Unattended-Upgrade::MinimalSteps "true";
 
-// Install all unattended-upgrades when the machine is shutting down
+// Install all unattended-upgrades when the machine is shuting down
 // instead of doing it in the background while the machine is running
 // This will (obviously) make shutdown slower
 //Unattended-Upgrade::InstallOnShutdown "true";
@@ -54,10 +46,6 @@ Unattended-Upgrade::DevRelease "false";
 // Set this value to "true" to get emails only on errors. Default
 // is to always send a mail if Unattended-Upgrade::Mail is set
 //Unattended-Upgrade::MailOnlyOnError "true";
-
-// Remove unused automatically installed kernel-related packages
-// (kernel images, kernel headers and kernel version locked tools).
-//Unattended-Upgrade::Remove-Unused-Kernel-Packages "false";
 
 // Do automatic removal of new unused dependencies after the upgrade
 // (equivalent to apt-get autoremove)
@@ -75,17 +63,3 @@ Unattended-Upgrade::DevRelease "false";
 // Use apt bandwidth limit feature, this example limits the download
 // speed to 70kb/sec
 //Acquire::http::Dl-Limit "70";
-
-// Enable logging to syslog. Default is False
-// Unattended-Upgrade::SyslogEnable "false";
-
-// Specify syslog facility. Default is daemon
-// Unattended-Upgrade::SyslogFacility "daemon";
-
-// Download and install upgrades only on AC power
-// (i.e. skip or gracefully stop updates on battery)
-// Unattended-Upgrade::OnlyOnACPower "true";
-
-// Download and install upgrades only on non-metered connection
-// (i.e. skip or gracefully stop updates on a metered connection)
-// Unattended-Upgrade::Skip-Updates-On-Metered-Connections "true";
