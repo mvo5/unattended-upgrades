@@ -1,3 +1,33 @@
+unattended-upgrades (1.1ubuntu1.18.04.7) bionic; urgency=medium
+
+  * Trigger unattended-upgrade-shutdown actions with PrepareForShutdown()
+    Performing upgrades in service's ExecStop did not work when the upgrades
+    involved restarting services because systemd blocked other stop/start actions
+    making maintainer scripts time out and be killed leaving a broken system
+    behind.
+    Running unattended-upgrades.service before shutdown.target as a oneshot
+    service made it run after unmounting filesystems and scheduling services
+    properly on shutdown is a complex problem and adding more services to the
+    mix make it even more fragile.
+    The solution of monitoring PrepareForShutdown() signal from DBus
+    allows Unattended Upgrade to run _before_ the jobs related to shutdown are
+    queued thus package upgrades can safely restart services without
+    risking causing deadlocks or breaking part of the shutdown actions.
+    Also ask running unattended-upgrades to stop when shutdown starts even in
+    InstallOnShutdown mode and refactor most of unattended-upgrade-shutdown to
+    UnattendedUpgradesShutdown class. (LP: #1778219)
+  * Increase logind's InhibitDelayMaxSec to 30s. (LP: #1778219)
+    This allows more time for unattended-upgrades to shut down gracefully
+    or even install a few packages in InstallOnShutdown mode, but is still a
+    big step back from the 30 minutes allowed for InstallOnShutdown previously.
+    Users enabling InstallOnShutdown node are advised to increase InhibitDelayMaxSec
+    even further possibly to 30 minutes.
+    - Add NEWS entry about increasing InhibitDelayMaxSec and InstallOnShutdown changes
+  * Ignore "W503 line break before binary operator"
+    because it will become the best practice and breaks the build
+
+ -- Balint Reczey <rbalint@ubuntu.com>  Thu, 08 Nov 2018 18:24:21 +0100
+
 unattended-upgrades (1.1ubuntu1.18.04.6) bionic; urgency=medium
 
   * Unlock for dpkg operations with apt_pkg.pkgsystem_unlock_inner() when it is
