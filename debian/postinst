@@ -71,7 +71,9 @@ case "$1" in
                ([ "$(lsb_release -i -s)" = "Ubuntu" ] \
                     && ( dpkg --compare-versions "$2" lt "0.93.1ubuntu3" \
                              || (dpkg --compare-versions "$2" ge "1.5ubuntu1~" \
-                                     && dpkg --compare-versions "$2" lt "1.5ubuntu3~" ) ) ); then
+                                     && dpkg --compare-versions "$2" lt "1.5ubuntu4~" ) \
+                             || (dpkg --compare-versions "$2" ge "1.7~" \
+                                     && dpkg --compare-versions "$2" lt "1.7ubuntu1~" ) ) ); then
             if [ -f /etc/rc0.d/K[0-9][0-9]unattended-upgrades ] \
             && [ -f /etc/rc6.d/K[0-9][0-9]unattended-upgrades ] ; then
             	update-rc.d -f unattended-upgrades remove
@@ -79,7 +81,9 @@ case "$1" in
 	    # If running systemd, explicitely disable the service otherwise
 	    # the shutdown.target symlink will remain (See Debian Bug #797108)
 	    if [ -d /run/systemd/system ]; then
-	        if deb-systemd-helper --quiet was-enabled unattended-upgrades.service; then
+	        if deb-systemd-helper --quiet was-enabled unattended-upgrades.service \
+                        || (dpkg --compare-versions "$2" ge "1.7~" \
+                                && dpkg --compare-versions "$2" lt "1.7ubuntu1~"); then
 	            deb-systemd-helper disable unattended-upgrades.service >/dev/null || true
 	        fi
 	    fi
@@ -112,8 +116,10 @@ case "$1" in
                                    && dpkg --compare-versions "$2" lt "1.7~" ) ) ) || \
                  ([ "$(lsb_release -i -s)" = "Ubuntu" ] \
                       && ( dpkg --compare-versions "$2" lt "0.93.1ubuntu3" \
-                               ||  (dpkg --compare-versions "$2" ge "1.5ubuntu1~" \
-                                        && dpkg --compare-versions "$2" lt "1.5ubuntu3~" ) ) ) ) \
+                               || (dpkg --compare-versions "$2" ge "1.5ubuntu1~" \
+                                       && dpkg --compare-versions "$2" lt "1.5ubuntu4~" ) \
+                               || (dpkg --compare-versions "$2" ge "1.7~" \
+                                       && dpkg --compare-versions "$2" lt "1.7ubuntu1~" ) ) ) ) \
 	       && [ -d /run/systemd/system ]; then
                 # workaround systemd bug with enable --now which
                 # fails to start the unit
