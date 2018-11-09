@@ -1,3 +1,27 @@
+unattended-upgrades (1.8) unstable; urgency=medium
+
+  When InstallOnShutdown was configured unattended-upgrades in
+  versions before 1.7 installed updates _after_ the shutdown transaction
+  is started by systemd making maintainer scripts restarting services
+  fail or wait in a deadlock until being killed by shutdown's timeout
+  leaving a broken installation behind.
+
+  Starting with version 1.7 configuring InstallOnShutdown makes
+  unattended-upgrades start package installations _before_ the shutdown
+  transaction is started, when PrepareForShutdown() signal is received
+  via DBus.
+
+  Unattended-upgrades 1.7 also increases logind's InhibitDelayMaxSec to
+  30 seconds. This allows more time for unattended-upgrades to shut down
+  gracefully or even install a few packages in InstallOnShutdown mode,
+  but is still a big step back from the 30 minutes allowed for
+  InstallOnShutdown previously.
+
+  Users enabling InstallOnShutdown mode are advised to increase
+  InhibitDelayMaxSec even further, possibly to 30 minutes.
+
+ -- Balint Reczey <rbalint@ubuntu.com>  Fri, 09 Nov 2018 18:09:22 +0100
+
 unattended-upgrades (0.99) unstable; urgency=medium
 
   Unattended-upgrades in previous versions defaulted to install
