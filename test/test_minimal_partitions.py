@@ -42,6 +42,8 @@ class TestMinimalPartitions(unittest.TestCase):
         apt_pkg.config.clear("Dpkg::Post-Invoke")
         apt_pkg.config.clear("Dpkg::Pre-Install-Pkgs")
         self.cache = apt.Cache()
+        self.cache.strict_whitelist = False
+        self.cache.whitelist = []
         # for the log
         self.tempdir = tempfile.mkdtemp()
         self.addCleanup(lambda: shutil.rmtree(self.tempdir))

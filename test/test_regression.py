@@ -29,7 +29,7 @@ class MockCache:
     def get_changes(self):
         return []
 
-    def mark_upgrade_adjusted(self, pkg, **kwargs):
+    def mark_pkgs_to_upgrade(self):
         return
 
 
