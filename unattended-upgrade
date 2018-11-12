@@ -651,25 +651,9 @@ def upgrade_in_minimal_steps(cache,            # type: apt.Cache
     # double check any changes we do
     allowed_origins = get_allowed_origins()
 
-    # pre-calculate set sizes to process sets which are expected to be smaller
-    # earlier
-    upgrade_set_sizes = {}
-    # calculate upgrade sets
-    for pkgname in pkgs_to_upgrade:
-        cache.clear()
-        pkg = cache[pkgname]
-        if pkg.is_upgradable:
-            pkg.mark_upgrade()
-        elif not pkg.is_installed:
-            pkg.mark_install()
-        else:
-            continue
-        upgrade_set_sizes[pkgname] = cache.install_count
-    cache.clear()
-
     # to upgrade contains the package names
     to_upgrade = set(pkgs_to_upgrade)
-    for pkgname in sorted(upgrade_set_sizes, key=upgrade_set_sizes.get):
+    for pkgname in upgrade_order(to_upgrade, cache):
         # upgrade packages and dependencies in increasing expected size of
         # package sets to upgrade/install together
         if pkgname not in to_upgrade:
@@ -798,6 +782,38 @@ def is_pkg_change_allowed(pkg, blacklist, whitelist):
         logging.debug("pkg %s is on hold" % pkg.name)
         return False
     return True
+
+
+def transitive_dependencies(pkg, cache, acc=set()):
+    # type (apt.Package, apt.Cache, AbstractSet[str]) -> bool
+    """ All (transitive) dependencies of the package
+    """
+    # Note that alternative (|) dependencies are collected, too
+    valid_types = {'Depends', 'PreDepends', 'Recommends'}
+    for dep in pkg.candidate.dependencies:
+        for base_dep in dep:
+            if base_dep.name not in acc and base_dep.rawtype in valid_types:
+                acc.add(base_dep.name)
+                try:
+                    transitive_dependencies(cache[base_dep.name], cache, acc)
+                except KeyError:
+                    pass
+    return acc
+
+
+def upgrade_order(to_upgrade, cache):
+    # type: (AbstractSet[str], apt.Cache) -> List[str]
+    """  Sort pkg names by the expected number of other packages to be upgraded
+         with it. The calculation is not 100% accurate, it is an approximation.
+    """
+
+    upgrade_set_sizes = {}
+    # calculate upgrade sets
+    for pkgname in to_upgrade:
+        pkg = cache[pkgname]
+        upgrade_set_sizes[pkgname] = \
+            len(transitive_dependencies(pkg, cache).intersection(to_upgrade))
+    return sorted(upgrade_set_sizes, key=upgrade_set_sizes.get)
 
 
 def check_changes_for_sanity(cache, allowed_origins, blacklist, whitelist,
