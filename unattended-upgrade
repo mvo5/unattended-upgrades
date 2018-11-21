@@ -274,7 +274,7 @@ class LogInstallProgress(apt.progress.base.InstallProgress):
             for fdname in os.listdir(proc_fd):
                 try:
                     fd = int(fdname)
-                except Exception as e:
+                except Exception:
                     print("ERROR: can not get fd for %s" % fdname)
                 if fd in required_fds:
                     continue
@@ -1764,7 +1764,7 @@ def run(options,             # type: Options
     # check and get lock
     try:
         apt_pkg.pkgsystem_lock()
-    except SystemError as e:
+    except SystemError:
         logging.error(_("Lock could not be acquired (another package "
                         "manager running?)"))
         print(_("Cache lock can not be acquired, exiting"))

@@ -55,45 +55,52 @@ Unattended-Upgrade::Package-Blacklist {
 // unattended-upgrades will automatically run 
 //   dpkg --force-confold --configure -a
 // The default is true, to ensure updates keep getting installed
-//Unattended-Upgrade::AutoFixInterruptedDpkg "false";
+//Unattended-Upgrade::AutoFixInterruptedDpkg "true";
 
 // Split the upgrade into the smallest possible chunks so that
 // they can be interrupted with SIGTERM. This makes the upgrade
 // a bit slower but it has the benefit that shutdown while a upgrade
 // is running is possible (with a small delay)
-//Unattended-Upgrade::MinimalSteps "false";
+//Unattended-Upgrade::MinimalSteps "true";
 
-// Install all unattended-upgrades when the machine is shutting down
-// instead of doing it in the background while the machine is running
-// This will (obviously) make shutdown slower
+// Install all updates when the machine is shutting down
+// instead of doing it in the background while the machine is running.
+// This will (obviously) make shutdown slower.
+// Unattended-upgrades increases logind's InhibitDelayMaxSec to 30s.
+// This allows more time for unattended-upgrades to shut down gracefully
+// or even install a few packages in InstallOnShutdown mode, but is still a
+// big step back from the 30 minutes allowed for InstallOnShutdown previously.
+// Users enabling InstallOnShutdown mode are advised to increase
+// InhibitDelayMaxSec even further, possibly to 30 minutes.
 //Unattended-Upgrade::InstallOnShutdown "false";
 
 // Send email to this address for problems or packages upgrades
 // If empty or unset then no email is sent, make sure that you
 // have a working mail setup on your system. A package that provides
 // 'mailx' must be installed. E.g. "user@example.com"
-//Unattended-Upgrade::Mail "root";
+//Unattended-Upgrade::Mail "";
 
 // Set this value to "true" to get emails only on errors. Default
 // is to always send a mail if Unattended-Upgrade::Mail is set
-//Unattended-Upgrade::MailOnlyOnError "true";
+//Unattended-Upgrade::MailOnlyOnError "false";
 
 // Remove unused automatically installed kernel-related packages
 // (kernel images, kernel headers and kernel version locked tools).
-//Unattended-Upgrade::Remove-Unused-Kernel-Packages "false";
+//Unattended-Upgrade::Remove-Unused-Kernel-Packages "true";
 
 // Do automatic removal of newly unused dependencies after the upgrade
-//Unattended-Upgrade::Remove-New-Unused-Dependencies "false";
+//Unattended-Upgrade::Remove-New-Unused-Dependencies "true";
 
 // Do automatic removal of unused packages after the upgrade
 // (equivalent to apt-get autoremove)
-//Unattended-Upgrade::Remove-Unused-Dependencies "true";
+//Unattended-Upgrade::Remove-Unused-Dependencies "false";
 
 // Automatically reboot *WITHOUT CONFIRMATION* if
 //  the file /var/run/reboot-required is found after the upgrade 
 //Unattended-Upgrade::Automatic-Reboot "false";
 
-// Automatically reboot even if there are users currently logged in.
+// Automatically reboot even if there are users currently logged in
+// when Unattended-Upgrade::Automatic-Reboot is set to true
 //Unattended-Upgrade::Automatic-Reboot-WithUsers "true";
 
 // If automatic reboot is enabled and needed, reboot at the specific
