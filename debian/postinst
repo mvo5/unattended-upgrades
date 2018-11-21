@@ -19,6 +19,14 @@ set -e
 # the debian-policy package
 
 
+rm_known () {
+    if [ -e "$1" ]; then
+        if egrep -q "^$(md5sum $1 | cut -d' ' -f1)" "$2"; then
+           rm "$1"
+        fi
+    fi
+}
+
 # ensure the right permissions for the logdir (#757438)
 if [ -d /var/log/unattended-upgrades ]; then
   chown root:adm /var/log/unattended-upgrades || true
@@ -50,12 +58,18 @@ case "$1" in
         fi
 
 	CONFIG="/etc/apt/apt.conf.d/50unattended-upgrades"
-	NEWFILE="$CONFIG.ucftmp"
-	TEMPLATE="/usr/share/unattended-upgrades/50unattended-upgrades"
-	cp -a -f "$TEMPLATE" "$NEWFILE"
+	NEWFILE="/usr/share/unattended-upgrades/50unattended-upgrades"
+	dpkg-maintscript-helper rm_conffile $CONFIG 0.86.4~ -- "$@"
+	# also fix conffile which was not properly migrated to ucf earlier
+        if dpkg --compare-versions "$2" lt "1.8~" \
+	        && [ -e $CONFIG.ucftmp ]; then
+	    dpkg-maintscript-helper rm_conffile $CONFIG -- "$@"
+	    mv $CONFIG.ucftmp $CONFIG
+	    rm_known "$CONFIG.dpkg-bak" "$NEWFILE.md5sum"
+	    rm_known "$CONFIG.ucf-old" "$NEWFILE.md5sum"
+	fi
 	ucf --three-way --debconf-ok "$NEWFILE" "$CONFIG"
 	ucfr unattended-upgrades "$CONFIG"
-	rm -f "$NEWFILE"
 
         # Recover from incorrect init.d script header in versions < 0.64
         if dpkg --compare-versions "$2" lt "0.64" \

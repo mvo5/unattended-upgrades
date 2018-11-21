@@ -1,0 +1,10 @@
+The historical configuration file md5sums for /usr/share/unattended-upgrades/50unattended-upgrades
+are collected from the Ubuntu USD repository data:
+
+ git clone git+ssh://git.launchpad.net/~usd-import-team/ubuntu/+source/unattended-upgrades
+ cd unattended-upgrades/
+ (for i in $(git log --format=%h --all -- data/); do \
+        git checkout $i; md5sum data/50unattended-upgrades* | cut -f1 -d' '; done) \
+      | awk -v BINMODE=rw '!($0 in a){a[$0];print}' > md5sums
+
+ -- Balint Reczey <rbalint@ubuntu.com>, Tue,  6 Nov 2018 22:03:26 +0100
