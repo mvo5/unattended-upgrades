@@ -1,3 +1,33 @@
+unattended-upgrades (1.8) unstable; urgency=medium
+
+  * Add note about increasing InhibitDelayMaxSec for InstallOnShutdown to
+    50unattended-upgrades.
+  * Ship historical md5sums of /etc/apt/apt.conf.d/50unattended-upgrades for ucf
+  * Remove .ucf-* configuration file copies on purge
+  * Add NEWS entry about increasing InhibitDelayMaxSec and InstallOnShutdown
+    changes
+  * Revert to WantedBy=multi-user.target from 1.5ubuntu3 and 1.7, too, on
+    Ubuntu. 1.5ubuntu4 is the first fixed version on and 1.7 did not upgrade
+    properly from 1.5ubuntu3.
+  * List commented-out default values in 50unattended-upgrades config file.
+    Always list the default value commented out unless the explanation clearly
+    states the default value.
+  * Transition obsolete 50unattended-upgrades conffile to ucf prior upgrades did
+    not do that (Closes: #808336)
+  * Speed up ordering of packages in which minimal upgrade steps are performed.
+  * Stop using ActionGroups, they interfere with apt.Cache.clear() causing all
+    autoremovable packages to be handled as newly autoremovable ones and be
+    removed by default. Dropping ActionGroup usage does not slow down the
+    most frequent case of not having anything to upgrade and when ther are
+    packages to upgrade the gain is small compared to the actual package
+    installation.
+    Also collect autoremovable packages before adjusting candidates because that
+    also changed .is_auto_removable attribute of some of them. (LP: #1803749)
+    (Closes: #910874)
+  * Fix pyflakes
+
+ -- Balint Reczey <rbalint@ubuntu.com>  Wed, 21 Nov 2018 17:02:49 +0100
+
 unattended-upgrades (1.7) unstable; urgency=medium
 
   [ Nils Toedtmann ]
