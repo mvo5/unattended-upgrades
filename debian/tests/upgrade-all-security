@@ -61,6 +61,8 @@ chroot_exec "$chroot_dir" apt-get clean
 run_u_u "$chroot_dir"
 
 echo "Checking if there is anything left not upgraded:"
+disable_release_updates "$chroot_dir"
+chroot_exec "$chroot_dir" apt-get update
 chroot_exec "$chroot_dir" apt-get upgrade --with-new-pkgs -s | tee "$chroot_dir/tmp/updates-left"
 
 ! grep "/$distro-security " "$chroot_dir/tmp/updates-left" || (echo "Security upgrades are held back! Exiting..." && exit 1)
