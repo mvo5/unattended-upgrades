@@ -2,9 +2,9 @@ unattended-upgrades (1.1ubuntu1.18.04.7) bionic; urgency=medium
 
   * Trigger unattended-upgrade-shutdown actions with PrepareForShutdown()
     Performing upgrades in service's ExecStop did not work when the upgrades
-    involved restarting services because systemd blocked other stop/start actions
-    making maintainer scripts time out and be killed leaving a broken system
-    behind.
+    involved restarting services because systemd blocked other stop/start
+    actions making maintainer scripts time out and be killed leaving a broken
+    system behind.
     Running unattended-upgrades.service before shutdown.target as a oneshot
     service made it run after unmounting filesystems and scheduling services
     properly on shutdown is a complex problem and adding more services to the
@@ -20,13 +20,25 @@ unattended-upgrades (1.1ubuntu1.18.04.7) bionic; urgency=medium
     This allows more time for unattended-upgrades to shut down gracefully
     or even install a few packages in InstallOnShutdown mode, but is still a
     big step back from the 30 minutes allowed for InstallOnShutdown previously.
-    Users enabling InstallOnShutdown node are advised to increase InhibitDelayMaxSec
-    even further possibly to 30 minutes.
-    - Add NEWS entry about increasing InhibitDelayMaxSec and InstallOnShutdown changes
+    Users enabling InstallOnShutdown node are advised to increase
+    InhibitDelayMaxSec even further possibly to 30 minutes.
+    - Add NEWS entry about increasing InhibitDelayMaxSec and InstallOnShutdown
+      changes
   * Ignore "W503 line break before binary operator"
     because it will become the best practice and breaks the build
+  * Stop using ActionGroups, they interfere with apt.Cache.clear()
+    causing all autoremovable packages to be handled as newly autoremovable
+    ones and be removed by default. Dropping ActionGroup usage does not slow
+    down the most frequent case of not having anything to upgrade and when
+    there are packages to upgrade the gain is small compared to the actual
+    package installation.
+    Also collect autoremovable packages before adjusting candidates because that
+    also changed .is_auto_removable attribute of some of them. (LP: #1803749)
+    (Closes: #910874)
 
- -- Balint Reczey <rbalint@ubuntu.com>  Thu, 08 Nov 2018 18:24:21 +0100
+ -- Balint Reczey <rbalint@ubuntu.com>  Mon, 26 Nov 2018 13:37:49 +0100
+
+ -- Balint Reczey <rbalint@ubuntu.com>  Mon, 26 Nov 2018 13:37:47 +0100
 
 unattended-upgrades (1.1ubuntu1.18.04.6) bionic; urgency=medium
 
