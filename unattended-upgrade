@@ -1512,6 +1512,10 @@ def calculate_upgradable_pkgs(cache,             # type: apt.Cache
                            allowed_origins,
                            blacklisted_pkgs,
                            whitelisted_pkgs)
+
+    if cache.get_changes():
+        cache.clear()
+
     return pkgs_to_upgrade, pkgs_kept_back
 
 
