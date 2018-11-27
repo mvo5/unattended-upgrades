@@ -1,8 +1,9 @@
 #!/usr/bin/python3
-# Copyright (c) 2009 Canonical Ltd
+# Copyright (c) 2009-2018 Canonical Ltd
 #
 # AUTHOR:
 # Michael Vogt <mvo@ubuntu.com>
+# Balint Reczey <rbalint@ubuntu.com>
 #
 # unattended-upgrade-shutdown - helper that checks if a
 # unattended-upgrade is in progress and waits until it exists
