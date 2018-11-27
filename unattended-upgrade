@@ -75,6 +75,8 @@ import apt
 import apt_inst
 import apt_pkg
 
+import distro_info
+
 
 # the reboot required flag file used by packages
 REBOOT_REQUIRED_FILE = "/var/run/reboot-required"
@@ -1710,7 +1712,6 @@ def run(options,             # type: Options
     # check to see if want to auto-upgrade the devel release
     if apt_pkg.config.find("Unattended-Upgrade::DevRelease") == "auto":
         try:
-            import distro_info
             if DISTRO_ID.lower() == 'ubuntu':
                 devel = (distro_info.UbuntuDistroInfo() .
                          devel(result="object"))
@@ -1725,13 +1726,15 @@ def run(options,             # type: Options
         else:
             if ((devel.series == DISTRO_CODENAME
                  and devel.release is not None
-                 and devel.release - date.today() >= DEVEL_UNTIL_RELEASE)):
+                 and devel.release - date.today() > DEVEL_UNTIL_RELEASE)):
                 syslog.syslog((_("Not running on this development "
                                  "release before %s") %
-                              (devel.release - DEVEL_UNTIL_RELEASE)))
+                              (devel.release - DEVEL_UNTIL_RELEASE
+                               - datetime.timedelta(days=1))))
                 logging.warning(_("Not running on this development "
                                   "release before %s") %
-                                (devel.release - DEVEL_UNTIL_RELEASE))
+                                (devel.release - DEVEL_UNTIL_RELEASE
+                                 - datetime.timedelta(days=1)))
                 return UnattendedUpgradesResult(True)
     elif "(development branch)" in DISTRO_DESC and not\
             apt_pkg.config.find_b("Unattended-Upgrade::DevRelease", True):
