@@ -5,7 +5,7 @@ unattended-upgrades (1.1ubuntu1.18.04.7~16.04.0) xenial; urgency=medium
   * Revert configuration example changes to avoid triggering a debconf question
   * debian/postinst: Update recovery to be triggered on Xenial's package versions
 
- -- Balint Reczey <rbalint@ubuntu.com>  Tue, 13 Nov 2018 23:38:46 +0100
+ -- Balint Reczey <rbalint@ubuntu.com>  Tue, 27 Nov 2018 17:20:46 +0100
 
 unattended-upgrades (1.1ubuntu1.18.04.7) bionic; urgency=medium
 
