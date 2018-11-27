@@ -48,8 +48,7 @@ class TestRegression(unittest.TestCase):
         options.minimal_upgrade_steps = False
         apt_pkg.config.set("Unattended-Upgrade::MinimalSteps", "False")
         do_install(cache=MockCache(), pkgs_to_upgrade=[pkg],
-                   blacklisted_pkgs=[],
-                   whitelisted_pkgs=[], options=options,
+                   blacklist=[], whitelist=[], options=options,
                    logfile_dpkg=logfile_dpkg)
         # if there is no exception here, we are good
         os.dup2(old_stderr, 2)

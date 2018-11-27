@@ -35,11 +35,10 @@ class TestRewindCache(unittest.TestCase):
     def test_rewind_cache(self):
         """ Test that rewinding the cache works correctly, debian #743594 """
         options = MockOptions()
-        blacklisted_pkgs = []
-        whitelisted_pkgs = []
+        blacklist = []
+        whitelist = []
         to_upgrade, kept_back = unattended_upgrade.calculate_upgradable_pkgs(
-            self.cache, options, self.allowed_origins, blacklisted_pkgs,
-            whitelisted_pkgs)
+            self.cache, options, self.allowed_origins, blacklist, whitelist)
         self.assertEqual(to_upgrade, [self.cache["test-package"]])
         self.assertEqual(kept_back, ["z-package"])
 
