@@ -18,6 +18,7 @@ class MockOptions(object):
     dry_run = True
     apt_debug = False
     minimal_upgrade_steps = False
+    download_only = False
 
 
 class MockDistroAuto(object):
