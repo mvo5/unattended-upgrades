@@ -629,16 +629,6 @@ def upgrade_normal(cache, logfile_dpkg, verbose):
     return res
 
 
-def use_minimal_steps(options):
-    # type: (Options) -> bool
-    # COMPAT with the mispelling
-    return (options.minimal_upgrade_steps
-            or (apt_pkg.config.find_b("Unattended-Upgrades::MinimalSteps",
-                                      True)
-                and apt_pkg.config.find_b("Unattended-Upgrade::MinimalSteps",
-                                          True)))
-
-
 def upgrade_in_minimal_steps(cache,            # type: apt.Cache
                              pkgs_to_upgrade,  # type: List[str]
                              blacklist,        # type: List[str]
@@ -1203,7 +1193,7 @@ def do_install(cache,             # type: apt.Cache
 
     pkg_install_success = False
     try:
-        if use_minimal_steps(options):
+        if options.minimal_upgrade_steps:
             # try upgrade all "pkgs" in minimal steps
             pkg_install_success = upgrade_in_minimal_steps(
                 cache, [pkg.name for pkg in pkgs_to_upgrade],
@@ -1975,7 +1965,7 @@ def run(options,             # type: Options
              kernel_pkgs_removed,
              kernel_pkgs_kept_installed) = do_auto_remove(
                 cache, auto_removable_kernel_pkgs,
-                logfile_dpkg, use_minimal_steps(options),
+                logfile_dpkg, options.minimal_upgrade_steps,
                 blacklisted_pkgs, whitelisted_pkgs,
                 options.verbose or options.debug, options.dry_run)
             auto_removable = get_auto_removable(cache)
@@ -2053,7 +2043,7 @@ def run(options,             # type: Options
         (pkg_remove_success,
          pkgs_removed,
          pkgs_kept_installed) = do_auto_remove(
-            cache, auto_removals, logfile_dpkg, use_minimal_steps(options),
+            cache, auto_removals, logfile_dpkg, options.minimal_upgrade_steps,
             blacklisted_pkgs, whitelisted_pkgs,
             options.verbose or options.debug,
             options.dry_run)
@@ -2067,7 +2057,7 @@ def run(options,             # type: Options
         (pkg_remove_success,
          pkgs_removed,
          pkgs_kept_installed) = do_auto_remove(
-            cache, auto_removals, logfile_dpkg, use_minimal_steps(options),
+            cache, auto_removals, logfile_dpkg, options.minimal_upgrade_steps,
             blacklisted_pkgs, whitelisted_pkgs,
             options.verbose or options.debug,
             options.dry_run)
@@ -2115,6 +2105,11 @@ if __name__ == "__main__":
     # this ensures the commandline is logged in /var/log/apt/history.log
     apt_pkg.config.set("Commandline::AsString", " ".join(sys.argv))
 
+    # COMPAT with the mispelling
+    minimal_steps_default = (
+        apt_pkg.config.find_b("Unattended-Upgrades::MinimalSteps", True)
+        and apt_pkg.config.find_b("Unattended-Upgrade::MinimalSteps", True))
+
     # init the options
     parser = OptionParser()
     parser.add_option("-d", "--debug",
@@ -2137,13 +2132,18 @@ if __name__ == "__main__":
                       action="store_true", default=False,
                       help=_("Only download, do not even try to install."))
     parser.add_option("", "--minimal-upgrade-steps",
-                      action="store_true", default=False,
+                      action="store_true", default=minimal_steps_default,
+                      help=_("Upgrade in minimal steps (and allow "
+                             "interrupting with SIGTERM) (default)"))
+    parser.add_option("", "--no-minimal-upgrade-steps",
+                      action="store_false", default=minimal_steps_default,
+                      dest="minimal_upgrade_steps",
                       help=_("Upgrade in minimal steps (and allow "
                              "interrupting with SIGTERM"))
     parser.add_option("", "--minimal_upgrade_steps",
                       action="store_true",
                       help=SUPPRESS_HELP,
-                      default=False)
+                      default=minimal_steps_default)
     options = cast(Options, (parser.parse_args())[0])
 
     if os.getuid() != 0:
