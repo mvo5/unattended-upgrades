@@ -1925,7 +1925,8 @@ def run(options,             # type: Options
         logging.debug("whitelist: %s" % whitelisted_pkgs)
         # find out about the packages that are upgradable (in a allowed_origin)
         if len(blacklisted_pkgs) > 0 or len(whitelisted_pkgs) > 0:
-            cache.clear()
+            if cache.get_changes():
+                cache.clear()
             old_pkgs_to_upgrade = pkgs_to_upgrade[:]
             pkgs_to_upgrade = []
             for pkg in old_pkgs_to_upgrade:
