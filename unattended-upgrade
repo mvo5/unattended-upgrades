@@ -1883,7 +1883,9 @@ def run(options,             # type: Options
                 return UnattendedUpgradesResult(
                     False, (_("Download finished, but file %s not there?!?") %
                             item.destfile))
-            if not item.is_trusted:
+            if not item.is_trusted and not apt_pkg.config.find_b(
+                    "APT::Get::AllowUnauthenticated", False):
+                logging.debug("%s is blacklisted because it is not trusted")
                 blacklisted_pkgs.append(pkgname_from_deb(item.destfile))
             if not is_deb(item.destfile):
                 logging.debug("%s is not a .deb file" % item)
