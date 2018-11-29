@@ -142,8 +142,7 @@ Unattended-Upgrade::OnlyOnAcPower "false";
         # read the log to see what happend
         with open(self.log) as f:
             # Check that we could have run
-            needle = ("Lock could not be acquired "
-                      "(another package manager running?)")
+            needle = "Running on the development release"
             haystack = f.read()
             self.assertTrue(needle in haystack,
                             "Can not find '%s' in '%s'" % (needle, haystack))
@@ -162,8 +161,7 @@ Unattended-Upgrade::OnlyOnAcPower "false";
         # read the log to see what happend
         with open(self.log) as f:
             # Check that we could have run
-            needle = ("Lock could not be acquired "
-                      "(another package manager running?)")
+            needle = "Running on the development release"
             haystack = f.read()
             self.assertTrue(needle in haystack,
                             "Can not find '%s' in '%s'" % (needle, haystack))
