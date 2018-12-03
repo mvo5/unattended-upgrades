@@ -141,6 +141,9 @@ class UnattendedUpgradesCache(apt.Cache):
         self.allowed_origins = allowed_origins
         apt.Cache.__init__(self, rootdir=rootdir)
 
+        # pre-heat lazy-loaded modules to avoid crash on python upgrade
+        datetime.datetime.strptime("", "")
+
         # generate versioned_kernel_pkgs_regexp for later use
         apt_versioned_kernel_pkgs = apt_pkg.config.value_list(
             "APT::VersionedKernelPackages")
