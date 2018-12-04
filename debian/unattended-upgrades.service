@@ -1,6 +1,6 @@
 [Unit]
 Description=Unattended Upgrades Shutdown
-After=network.target local-fs.target
+After=network.target local-fs.target systemd-logind.service
 RequiresMountsFor=/var/log /var/run /var/lib /boot
 Documentation=man:unattended-upgrade(8)
 
