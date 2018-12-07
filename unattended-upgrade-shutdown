@@ -101,37 +101,6 @@ def signal_stop_unattended_upgrade():
         os.kill(pid, signal.SIGTERM)
 
 
-def get_logind_proxy():
-    """ Get logind dbus proxy object """
-    bus = dbus.SystemBus()
-    return bus.get_object(
-        'org.freedesktop.login1', '/org/freedesktop/login1')
-
-
-def get_inhibit_shutdown_lock(logind_proxy):
-    """ Take delay inhibitor lock """
-    try:
-        logind_manager = dbus.Interface(
-            logind_proxy, dbus_interface='org.freedesktop.login1.Manager')
-        return logind_manager.Inhibit(
-            "shutdown", "Unattended Upgrades Shutdown",
-            _("Stop ongoing upgrades or perform upgrades before shutdown"),
-            "delay")
-    except Exception:
-        logging.warning("Could not get delay inhibitor lock")
-
-
-def get_inhibit_max_delay(logind_proxy):
-    try:
-        getter_interface = dbus.Interface(
-            logind_proxy, dbus_interface='org.freedesktop.DBus.Properties')
-        return (getter_interface.Get(
-            "org.freedesktop.login1.Manager", "InhibitDelayMaxUSec")
-                / (1000 * 1000))
-    except Exception:
-        return 3
-
-
 def exit_log_result(success):
     if success:
         log_msg(_("All upgrades installed"), logging.INFO)
@@ -150,6 +119,7 @@ class UnattendedUpgradesShutdown():
         self.max_delay = options.delay * 60
         self.iter_timer_set = False
         self.apt_pkg_reinit_done = None
+        self.shutdown_pending = False
         self.on_shutdown_mode = None
         self.on_shutdown_mode_uu_proc = None
         self.start_time = None
@@ -161,18 +131,60 @@ class UnattendedUpgradesShutdown():
             DBusGMainLoop(set_as_default=True)
         except NameError:
             pass
-        self.logind_proxy = get_logind_proxy()
-        self.wait_period = min(3, get_inhibit_max_delay(self.logind_proxy) / 3)
-        self.inhibit_lock = get_inhibit_shutdown_lock(self.logind_proxy)
+        try:
+            self.inhibit_lock = self.get_inhibit_shutdown_lock()
+        except dbus.exceptions.DBusException:
+            logging.warning("Could not get delay inhibitor lock")
+            self.inhibit_lock = None
+        self.logind_proxy = None
+        self.wait_period = min(3, self.get_inhibit_max_delay() / 3)
         self.preparing_for_shutdown = False
+
+    def get_logind_proxy(self):
+        """ Get logind dbus proxy object """
+        if not self.logind_proxy:
+            bus = dbus.SystemBus()
+            if self.inhibit_lock is None:
+                # try to get inhibit_lock or throw exception quickly when
+                # logind is down
+                self.inhibit_lock = self.get_inhibit_shutdown_lock()
+            self.logind_proxy = bus.get_object(
+                'org.freedesktop.login1', '/org/freedesktop/login1')
+        return self.logind_proxy
+
+    def get_inhibit_shutdown_lock(self):
+        """ Take delay inhibitor lock """
+        bus = dbus.SystemBus()
+        return bus.call_blocking(
+            'org.freedesktop.login1', '/org/freedesktop/login1',
+            'org.freedesktop.login1.Manager', 'Inhibit', 'ssss',
+            ('shutdown', 'Unattended Upgrades Shutdown',
+             _('Stop ongoing upgrades or perform upgrades before shutdown'),
+             'delay'), timeout=2.0)
+
+    def get_inhibit_max_delay(self):
+        try:
+            logind_proxy = self.get_logind_proxy()
+            getter_interface = dbus.Interface(
+                logind_proxy,
+                dbus_interface='org.freedesktop.DBus.Properties')
+            return (getter_interface.Get(
+                "org.freedesktop.login1.Manager", "InhibitDelayMaxUSec")
+                    / (1000 * 1000))
+        except dbus.exceptions.DBusException:
+            return 3
 
     def is_preparing_for_shutdown(self):
         if not self.shutdown_pending:
-            getter_interface = dbus.Interface(
-                self.logind_proxy,
-                dbus_interface='org.freedesktop.DBus.Properties')
-            self.shutdown_pending = getter_interface.Get(
-                "org.freedesktop.login1.Manager", "PreparingForShutdown")
+            try:
+                logind_proxy = self.get_logind_proxy()
+                getter_interface = dbus.Interface(
+                    logind_proxy,
+                    dbus_interface='org.freedesktop.DBus.Properties')
+                self.shutdown_pending = getter_interface.Get(
+                    "org.freedesktop.login1.Manager", "PreparingForShutdown")
+            except dbus.exceptions.DBusException:
+                return False
         return self.shutdown_pending
 
     def start_iterations(self):
@@ -183,6 +195,30 @@ class UnattendedUpgradesShutdown():
                 GLib.timeout_add(0, lambda: self.iter() and False)
             except NameError:
                 pass
+
+    def run_polling(self, signal_handler):
+        logging.warning(
+            _("Unable to monitor PrepareForShutdown() signal, polling "
+              "instead."))
+        logging.warning(
+            _("To enable monitoring the PrepareForShutdown() signal "
+              "instead of polling please install the python3-gi package"))
+
+        signal.signal(signal.SIGTERM, signal_handler)
+        signal.signal(signal.SIGHUP, signal_handler)
+
+        # poll for PrepareForShutdown then run final iterations
+        if self.options.wait_for_signal:
+            logging.debug("Waiting for signal to start operation ")
+            while (not self.stop_signal_received.is_set()
+                   and not self.is_preparing_for_shutdown()):
+                self.stop_signal_received.wait(self.wait_period)
+        else:
+            logging.debug("Skip waiting for signals, starting operation "
+                          "now")
+        while not self.iter():
+            # TODO iter on sigterm and sighup, too
+            time.sleep(self.wait_period)
 
     def run(self):
         """ delay shutdown and wait for PrepareForShutdown or other signals"""
@@ -196,53 +232,43 @@ class UnattendedUpgradesShutdown():
             self.stop_signal_received.set()
             self.start_iterations()
 
-        # wait for signals
+        # fall back to polling without GLib
         try:
             hasattr(GLib, "MainLoop")
-            for sig in (signal.SIGTERM, signal.SIGHUP):
-                GLib.unix_signal_add(GLib.PRIORITY_DEFAULT, sig,
-                                     signal_handler, None, None)
-            if self.options.wait_for_signal:
-                def prepare_for_shutdown_handler(active):
-                    """ Handle PrepareForShutdown() """
-                    if not active:
-                        logging.warning("PrepareForShutdown(false) received, "
-                                        "this should not happen")
-                    # PrepareForShutdown arrived, starting final iterations
-                    self.start_iterations()
-                self.logind_proxy.connect_to_signal(
-                    "PrepareForShutdown", prepare_for_shutdown_handler)
-                logging.debug("Waiting for signal to start operation ")
-            else:
-                # starting final iterations immediately
-                logging.debug("Skip waiting for signals, starting operation "
-                              "now")
-                self.start_iterations()
-            GLib.MainLoop().run()
-
         except NameError:
-            logging.warning(
-                _("Unable to monitor PrepareForShutdown() signal, polling "
-                  "instead."))
-            logging.warning(
-                _("To enable monitoring the PrepareForShutdown() signal "
-                  "instead of polling please install the python3-gi package"))
+            self.run_polling(signal_handler)
+            return
 
-            signal.signal(signal.SIGTERM, signal_handler)
-            signal.signal(signal.SIGHUP, signal_handler)
+        for sig in (signal.SIGTERM, signal.SIGHUP):
+            GLib.unix_signal_add(GLib.PRIORITY_DEFAULT, sig,
+                                 signal_handler, None, None)
+        if self.options.wait_for_signal:
+            def prepare_for_shutdown_handler(active):
+                """ Handle PrepareForShutdown() """
+                if not active:
+                    logging.warning("PrepareForShutdown(false) received, "
+                                    "this should not happen")
+                # PrepareForShutdown arrived, starting final iterations
+                self.start_iterations()
+            try:
+                self.get_logind_proxy().connect_to_signal(
+                    "PrepareForShutdown", prepare_for_shutdown_handler)
+            except dbus.exceptions.DBusException:
+                logging.warning(
+                    _("Unable to monitor PrepareForShutdown() signal, polling "
+                      "instead."))
+                logging.warning(
+                    _("Maybe systemd-logind service is not running."))
+                self.run_polling(signal_handler)
+                return
 
-            # poll for PrepareForShutdown then run final iterations
-            if self.options.wait_for_signal:
-                logging.debug("Waiting for signal to start operation ")
-                while (not self.stop_signal_received.is_set()
-                       and not self.is_preparing_for_shutdown()):
-                    self.stop_signal_received.wait(self.wait_period)
-            else:
-                logging.debug("Skip waiting for signals, starting operation "
-                              "now")
-            while not self.iter():
-                # TODO iter on sigterm and sighup, too
-                time.sleep(self.wait_period)
+            logging.debug("Waiting for signal to start operation ")
+        else:
+            # starting final iterations immediately
+            logging.debug("Skip waiting for signals, starting operation "
+                          "now")
+            self.start_iterations()
+        GLib.MainLoop().run()
 
     def try_iter_on_shutdown(self):
         # check if we need to run unattended-upgrades on shutdown and if
