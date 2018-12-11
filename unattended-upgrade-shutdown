@@ -232,7 +232,7 @@ class UnattendedUpgradesShutdown():
         def signal_handler(signum, frame):
             # type: (object) -> None
             logging.warning(
-                "SIGTERM or SIGHUP received, stopping unattended-upgrades"
+                "SIGTERM or SIGHUP received, stopping unattended-upgrades "
                 "only if it is running")
             self.stop_signal_received.set()
             self.start_iterations()
