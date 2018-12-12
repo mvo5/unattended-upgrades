@@ -1,3 +1,47 @@
+unattended-upgrades (1.9) UNRELEASED; urgency=medium
+
+  [ Julian Andres Klode ]
+  * test_dev_release: Fix and enable test.
+  * Depend on python3-distro-info.
+    This is needed to make sure DEVEL_UNTIL_RELEASE actually works. We need
+    to fix up travis in addition to control, as it only knows about trusty
+    build dependencies.
+  * Import distro_info globally, and fix calculation of days.
+    The check was off by one: If you were 21 days away from the release,
+    it would not switch on, but tell you that it would not upgrade before
+    today.
+  * test_dev_release: Test Unattended-Upgrade::DevRelease=auto.
+
+  [ David Lang and Balint Reczey]
+  * Allow installing untrusted packages when APT::Get::AllowUnauthenticated
+    is set (Closes: #775469) (LP: #1167053)
+
+  [ Hans van Kranenburg and Balint Reczey]
+  * Clarify highly misleading Package-Blacklist option documentation
+    (Closes: #753892)
+
+  [ Balint Reczey ]
+  * test/test_dev_release.py: Fix missing mock attributes
+  * Leave the cache clean when returning from calculate_upgradable_pkgs()
+    When collecting upgradable packages the upgradable ones stayed in the
+    cache and they were upgraded together even when unattended-upgrades
+    was configured to perform upgrades in minimal steps.
+    Thanks to Paul Wise
+  * debian/tests/upgrade-all-security: Check if all security-updates are
+    applied and if old-autoremovable packages are kept
+  * Clear cache only when needed when checking black- and whitelists
+  * Add --no-minimal-upgrade-steps option
+  * Stop using untrusted package names as blacklists (LP: #1805447)
+  * Update copyright info
+  * Load modules lazily loaded by datetime.datetime.strptime() when u-u starts
+    When Python is upgraded to a new major version the the version running
+    unattended-upgrades can be removed as being newly unused causing a crash.
+  * Start service after systemd-logind.service to be able to take inhibition lock
+    and handle gracefully when logind is down (LP: #1806487)
+  * List packages making reboot required in /var/run/reboot-required.pkgs
+
+ -- Balint Reczey <rbalint@ubuntu.com>  Mon, 10 Dec 2018 18:11:27 +0100
+
 unattended-upgrades (1.8) unstable; urgency=medium
 
   * Add note about increasing InhibitDelayMaxSec for InstallOnShutdown to

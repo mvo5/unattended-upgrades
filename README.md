@@ -135,7 +135,7 @@ Supported Options Reference
  Example:
  ```
  Unattended-Upgrade::Package-Blacklist {
-     "libstdc\+\+6";
+     "libstdc\+\+6$";
  };
  ```
 

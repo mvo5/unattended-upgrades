@@ -6,5 +6,8 @@ case "$DPKG_MAINTSCRIPT_PACKAGE::$DPKG_MAINTSCRIPT_NAME" in
 esac
 
 if [ -d /var/run ]; then
-   touch /var/run/reboot-required
+    touch /var/run/reboot-required
+    if ! grep -q "^$DPKG_MAINTSCRIPT_PACKAGE$" /var/run/reboot-required.pkgs; then
+        echo "$DPKG_MAINTSCRIPT_PACKAGE" >> /var/run/reboot-required.pkgs
+    fi
 fi

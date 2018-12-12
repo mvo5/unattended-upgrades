@@ -38,7 +38,8 @@ fi
 
 # add package set with many dependencies
 # apt prints "W: APT had planned for dpkg to do more than it reported back" to stderr LP: #1647638
-chroot_exec "$chroot_dir" apt-get install -y xfce4 apparmor 2>&1
+chroot_exec "$chroot_dir" apt-get install -y xfce4 apparmor hello 2>&1
+chroot_exec "$chroot_dir" apt-mark auto hello
 
 # build and install updated python-apt since the one in the snapshot has memory allocation issues
 upgrade_python_apt "$chroot_dir" "$distro"
@@ -61,7 +62,11 @@ chroot_exec "$chroot_dir" apt-get clean
 run_u_u "$chroot_dir"
 
 echo "Checking if there is anything left not upgraded:"
+disable_release_updates "$chroot_dir"
+chroot_exec "$chroot_dir" apt-get update
 chroot_exec "$chroot_dir" apt-get upgrade --with-new-pkgs -s | tee "$chroot_dir/tmp/updates-left"
 
 ! grep "/$distro-security " "$chroot_dir/tmp/updates-left" || (echo "Security upgrades are held back! Exiting..." && exit 1)
 
+echo "Checking if originally auto-removable packages are kept:"
+chroot_exec "$chroot_dir" dpkg -l hello | grep 'ii  hello'

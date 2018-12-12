@@ -41,12 +41,26 @@ Unattended-Upgrade::Origins-Pattern {
 //      "o=Debian Backports,a=${distro_codename}-backports,l=Debian Backports";
 };
 
-// List of packages to not update (regexp are supported)
+// Python regular expressions, matching packages to exclude from upgrading
 Unattended-Upgrade::Package-Blacklist {
-//     "vim";
-//     "libc6";
-//     "libc6-dev";
-//     "libc6-i686";
+    // The following matches all packages starting with linux-
+//  "linux-";
+
+    // Use $ to explicitely define the end of a package name. Without
+    // the $, "libc6" would match all of them.
+//  "libc6$";
+//  "libc6-dev$";
+//  "libc6-i686$";
+
+    // Special characters need escaping
+//  "libstdc\+\+6$";
+
+    // The following matches packages like xen-system-amd64, xen-utils-4.1,
+    // xenstore-utils and libxenstore3.0
+    "(lib)?xen(store)?";
+
+    // For more information about Python regular expressions, see
+    // https://docs.python.org/3/howto/regex.html
 };
 
 // This option allows you to control if on a unclean dpkg exit
