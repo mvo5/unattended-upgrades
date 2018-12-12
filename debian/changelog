@@ -1,4 +1,4 @@
-unattended-upgrades (1.9) UNRELEASED; urgency=medium
+unattended-upgrades (1.9) unstable; urgency=medium
 
   [ Julian Andres Klode ]
   * test_dev_release: Fix and enable test.
@@ -40,7 +40,7 @@ unattended-upgrades (1.9) UNRELEASED; urgency=medium
     and handle gracefully when logind is down (LP: #1806487)
   * List packages making reboot required in /var/run/reboot-required.pkgs
 
- -- Balint Reczey <rbalint@ubuntu.com>  Mon, 10 Dec 2018 18:11:27 +0100
+ -- Balint Reczey <rbalint@ubuntu.com>  Wed, 12 Dec 2018 13:41:49 +0100
 
 unattended-upgrades (1.8) unstable; urgency=medium
 
