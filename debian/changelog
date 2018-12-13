@@ -1,3 +1,11 @@
+unattended-upgrades (1.1ubuntu1.18.04.8) bionic; urgency=medium
+
+  * Start service after systemd-logind.service to be able to take inhibition
+    lock (LP: #1806487)
+  * Handle gracefully when logind is down (LP: #1806487)
+
+ -- Balint Reczey <rbalint@ubuntu.com>  Thu, 13 Dec 2018 14:42:44 +0100
+
 unattended-upgrades (1.1ubuntu1.18.04.7) bionic; urgency=medium
 
   * Trigger unattended-upgrade-shutdown actions with PrepareForShutdown()
