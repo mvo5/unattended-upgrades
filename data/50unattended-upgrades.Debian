@@ -57,7 +57,7 @@ Unattended-Upgrade::Package-Blacklist {
 
     // The following matches packages like xen-system-amd64, xen-utils-4.1,
     // xenstore-utils and libxenstore3.0
-    "(lib)?xen(store)?";
+//  "(lib)?xen(store)?";
 
     // For more information about Python regular expressions, see
     // https://docs.python.org/3/howto/regex.html
