@@ -1,8 +1,6 @@
 # Adapted from work of Abhishek Bathia
 
-import os, re, pdb, platform
-from pprint import pprint
-
+import os, re, platform
 
 ## Get the repos
 PATH = '/var/lib/apt/lists/'
