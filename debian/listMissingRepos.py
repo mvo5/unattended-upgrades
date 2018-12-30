@@ -94,4 +94,5 @@ with open('/etc/apt/apt.conf.d/50unattended-upgrades', 'r') as f:
 ## Report repositories that can be added to /etc/apt/apt.conf.d/50unattended-upgrades
 for repoFound in repos_to_add:
     if repoFound not in repos_already_present:
-         print repoFound
+         print(repoFound)
+ 
