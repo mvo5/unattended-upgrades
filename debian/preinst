@@ -9,6 +9,13 @@ set -e
 
 CONFIG="/etc/apt/apt.conf.d/50unattended-upgrades"
 
+# Retrieves (mostly user-defined) repositories in /apt/lists 
+# and configures for automatic updates.
+missingSources=$(python listMissingRepos.py)
+for source in $missingSources; do
+    sed -i "/Unattended-Upgrade::Allowed-Origins {/a \\\t$source" $CONFIG
+done
+
 dpkg-maintscript-helper rm_conffile $CONFIG 0.86.4~ -- "$@"
 # if the transition to ucf was not handled properly, do it now
 case "$1" in
