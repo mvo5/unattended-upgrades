@@ -30,7 +30,7 @@ for release_file in release_files:
     suite_string = re.findall(SUITE_PATTERN, read_data)
     try:
         repo = "\"%s:%s\";" % (origin_string[0].replace(',', r'\,'),
-                    suite_string[0].replace(',', r'\,'))
+                               suite_string[0].replace(',', r'\,'))
         if re.match(regex_url, origin_string[0]):
             skipped_release_files.append(release_file)
         else:
