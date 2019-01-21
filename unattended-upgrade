@@ -1470,7 +1470,7 @@ def get_dpkg_log_content(logfile_dpkg, install_start_time):
                     # skip progress indicator until #860931 is fixed in apt
                     # and dpkg
                     if re.match(
-                            "^\\(Reading database \\.\\.\\. ()xs|([0-9]+%)$",
+                            "^\\(Reading database \\.\\.\\. ()|([0-9]+%)$",
                             line):
                         continue
                     content.append(line)
