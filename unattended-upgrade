@@ -1204,6 +1204,7 @@ def do_install(cache,             # type: apt.Cache
                 blacklist, whitelist, logfile_dpkg,
                 options.verbose or options.debug)
         else:
+            mark_pkgs_to_upgrade(cache, pkgs_to_upgrade)
             pkg_install_success = upgrade_normal(
                 cache, logfile_dpkg, options.verbose or options.debug)
     except Exception as e:
@@ -1689,6 +1690,16 @@ def main(options, rootdir=""):
         raise
 
 
+def mark_pkgs_to_upgrade(cache, pkgs_to_upgrade):
+    # type (apt.Cache, List[apt.Package]) -> None
+    for pkg in pkgs_to_upgrade:
+        if pkg.is_upgradable:
+            cache.mark_upgrade_adjusted(pkg,
+                                        from_user=not pkg.is_auto_installed)
+        elif not pkg.is_installed:
+            cache.mark_install_adjusted(pkg, from_user=False)
+
+
 def run(options,             # type: Options
         rootdir,             # type: str
         mem_log,             # type: StringIO
@@ -1834,12 +1845,7 @@ def run(options,             # type: Options
     os.nice(old_priority - os.nice(0))
 
     # download what looks good
-    for pkg in pkgs_to_upgrade:
-        if pkg.is_upgradable:
-            cache.mark_upgrade_adjusted(pkg,
-                                        from_user=not pkg.is_auto_installed)
-        elif not pkg.is_installed:
-            cache.mark_install_adjusted(pkg, from_user=False)
+    mark_pkgs_to_upgrade(cache, pkgs_to_upgrade)
 
     if options.debug:
         fetcher = apt_pkg.Acquire(apt.progress.text.AcquireProgress())
