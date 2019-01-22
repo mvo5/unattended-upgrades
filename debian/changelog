@@ -1,3 +1,21 @@
+unattended-upgrades (1.10) UNRELEASED; urgency=medium
+
+  * autopkgtest: Check if upgrading in minimal steps is the default
+  * Comment out example blacklist item that slipped in to the default config
+  * Don't print error on empty /var/run/reboot-required.pkgs
+  * Fix filtering out dpkg progress indicator (LP: #1599646) (Closes: #919407)
+  * Clear cache after checking upgrades against the blacklist again.
+    This fixes the issue when the dirty cache caused all packages to be
+    upgraded in the first "minimal" step.
+    Thanks to Paul Wise
+  * Populate cache for the fetcher after calculate_upgradable_pkgs() left it
+    clean. Otherwise the packages are downloaded later skipping the conffile
+    tests and possibly failing in a package installation step due to changed
+    config files. (Closes: #918323)
+  * Fix non-minimal upgrades
+
+ -- Balint Reczey <rbalint@ubuntu.com>  Wed, 23 Jan 2019 15:44:14 +0700
+
 unattended-upgrades (1.9) unstable; urgency=medium
 
   [ Julian Andres Klode ]
