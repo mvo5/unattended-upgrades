@@ -1946,6 +1946,9 @@ def run(options,             # type: Options
                         cache.call_adjusted(
                             apt.package.Package.mark_upgrade, pkg2,
                             from_user=not pkg2.is_auto_installed)
+            if cache.get_changes():
+                cache.clear()
+
     else:
         logging.debug("dpkg is configured not to cause conffile prompts")
 
