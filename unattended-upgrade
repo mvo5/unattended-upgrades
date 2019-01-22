@@ -1870,6 +1870,9 @@ def main(options, rootdir="/"):
     if options.download_only:
         return 0
 
+    if cache.get_changes():
+        cache.clear()
+
     pkg_conffile_prompt = False
     if dpkg_conffile_prompt():
         # now check the downloaded debs for conffile conflicts and build
@@ -1922,7 +1925,6 @@ def main(options, rootdir="/"):
         logging.debug("whitelist: %s" % whitelisted_pkgs)
         # find out about the packages that are upgradable (in a allowed_origin)
         if len(blacklisted_pkgs) > 0 or len(whitelisted_pkgs) > 0:
-            cache.clear()
             old_pkgs_to_upgrade = pkgs_to_upgrade[:]
             pkgs_to_upgrade = []
             for pkg in old_pkgs_to_upgrade:
