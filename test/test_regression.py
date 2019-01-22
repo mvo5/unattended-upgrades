@@ -24,6 +24,9 @@ class MockCache:
     def get_changes(self):
         return []
 
+    def mark_upgrade_adjusted(self, pkg, **kwargs):
+        return
+
 
 class TestRegression(unittest.TestCase):
 
