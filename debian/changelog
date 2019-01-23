@@ -36,8 +36,8 @@ unattended-upgrades (1.9) unstable; urgency=medium
   * Load modules lazily loaded by datetime.datetime.strptime() when u-u starts
     When Python is upgraded to a new major version the the version running
     unattended-upgrades can be removed as being newly unused causing a crash.
-  * Start service after systemd-logind.service to be able to take inhibition lock
-    and handle gracefully when logind is down (LP: #1806487)
+  * Start service after systemd-logind.service to be able to take inhibition
+    lock and handle gracefully when logind is down (LP: #1806487)
   * List packages making reboot required in /var/run/reboot-required.pkgs
 
  -- Balint Reczey <rbalint@ubuntu.com>  Wed, 12 Dec 2018 13:41:49 +0100
