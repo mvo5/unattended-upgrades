@@ -52,7 +52,7 @@ unattended-upgrades (1.9) unstable; urgency=medium
   * Stop using untrusted package names as blacklists (LP: #1805447)
   * Update copyright info
   * Load modules lazily loaded by datetime.datetime.strptime() when u-u starts
-    When Python is upgraded to a new major version the the version running
+    When Python is upgraded to a new major version the version running
     unattended-upgrades can be removed as being newly unused causing a crash.
   * Start service after systemd-logind.service to be able to take inhibition
     lock and handle gracefully when logind is down (LP: #1806487)
