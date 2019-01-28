@@ -1,4 +1,4 @@
-unattended-upgrades (1.10) UNRELEASED; urgency=medium
+unattended-upgrades (1.10) unstable; urgency=medium
 
   * autopkgtest: Check if upgrading in minimal steps is the default
   * Comment out example blacklist item that slipped in to the default config
@@ -14,7 +14,7 @@ unattended-upgrades (1.10) UNRELEASED; urgency=medium
     config files. (Closes: #918323)
   * Fix non-minimal upgrades
 
- -- Balint Reczey <rbalint@ubuntu.com>  Wed, 23 Jan 2019 15:44:14 +0700
+ -- Balint Reczey <rbalint@ubuntu.com>  Mon, 28 Jan 2019 21:35:26 +0700
 
 unattended-upgrades (1.9) unstable; urgency=medium
 
