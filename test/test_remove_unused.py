@@ -41,6 +41,16 @@ Status: install ok installed
 Architecture: all
 Version: 1.0
 
+Package: any-old-unused-modules
+Status: install ok installed
+Architecture: all
+Version: 1.0
+
+Package: linux-image-4.05.0-1021-kvm
+Status: install ok installed
+Architecture: all
+Version: 1.0
+
 Package: z-package
 Status: install ok installed
 Architecture: all
@@ -68,6 +78,14 @@ Architecture: all
 Auto-Installed: 1
 
 Package: test-package-dependency
+Architecture: all
+Auto-Installed: 1
+
+Package: any-old-unused-modules
+Architecture: all
+Auto-Installed: 1
+
+Package: linux-image-4.05.0-1021-kvm
 Architecture: all
 Auto-Installed: 1
 """)
@@ -104,7 +122,8 @@ Unattended-Upgrade::Skip-Updates-On-Metered-Connections "false";
         with open(self.log) as f:
             # both the new and the old unused dependency are removed
             needle = "Packages that were successfully auto-removed: "\
-                     "old-unused-dependency test-package-dependency"
+                     "any-old-unused-modules linux-image-4.05.0-1021-kvm "\
+                     "old-unused-dependency test-package-dependency\n"
             haystack = f.read()
             self.assertTrue(needle in haystack,
                             "Can not find '%s' in '%s'" % (needle, haystack))
@@ -132,11 +151,21 @@ Unattended-Upgrade::Skip-Updates-On-Metered-Connections "false";
             options, rootdir="./root.unused-deps")
         with open(self.log) as f:
             # ensure its only exactly one package that is removed
+            needle_kernel_bad = "Removing unused kernel packages: "\
+                                "any-old-unused-modules\n"
+            needle_kernel_good = "Removing unused kernel packages: "\
+                                 "linux-image-4.05.0-1021-kvm\n"
             needle = "Packages that were successfully auto-removed: "\
-                     "test-package-dependency"
+                     "test-package-dependency\n"
             haystack = f.read()
             self.assertTrue(needle in haystack,
                             "Can not find '%s' in '%s'" % (needle, haystack))
+            self.assertTrue(needle_kernel_good in haystack,
+                            "Can not find '%s' in '%s'" % (needle_kernel_good,
+                                                           haystack))
+            self.assertFalse(needle_kernel_bad in haystack,
+                             "Found '%s' in '%s'" % (needle_kernel_bad,
+                                                     haystack))
 
 
 if __name__ == "__main__":
