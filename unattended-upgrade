@@ -1579,7 +1579,7 @@ def do_auto_remove(cache,             # type: apt.Cache
             else:
                 cache.clear()
         else:
-                cache.clear()
+            cache.clear()
 
     if res:
         logging.info(_("Packages that were successfully auto-removed: %s"),
@@ -1587,6 +1587,7 @@ def do_auto_remove(cache,             # type: apt.Cache
         logging.info(_("Packages that are kept back: %s"),
                      " ".join(sorted(pkgs_kept_installed)))
     if not res:
+        cache.clear()
         logging.error(_("Auto-removing the packages failed!"))
         logging.error(_("Error message: %s"), error)
         logging.error(_("dpkg returned an error! See %s for details"),
