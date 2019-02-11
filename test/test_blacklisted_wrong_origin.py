@@ -22,12 +22,16 @@ class TestBlacklistedWrongOrigin(unittest.TestCase):
         pkg.name = "postgresql"
         pkg.is_upgradable = True
         pkg.candidate = Mock()
+        pkg.candidate.policy_priority = 500
         pkg.candidate.origins = [origin]
+        pkg.versions = [pkg.candidate]
 
+        cache = Mock()
+        cache.__iter__ = Mock(return_value=iter([pkg]))
         options = Mock()
 
         pkgs_to_upgrade, pkgs_kept_back = \
-            calculate_upgradable_pkgs([pkg],
+            calculate_upgradable_pkgs(cache,
                                       options,
                                       ["o=allowed-origin"],
                                       ["postgresql"],
