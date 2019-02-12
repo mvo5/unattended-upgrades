@@ -46,8 +46,6 @@ unattended-upgrades (1.1ubuntu1.18.04.7) bionic; urgency=medium
 
  -- Balint Reczey <rbalint@ubuntu.com>  Mon, 26 Nov 2018 13:37:49 +0100
 
- -- Balint Reczey <rbalint@ubuntu.com>  Mon, 26 Nov 2018 13:37:47 +0100
-
 unattended-upgrades (1.1ubuntu1.18.04.6) bionic; urgency=medium
 
   * Unlock for dpkg operations with apt_pkg.pkgsystem_unlock_inner() when it is
