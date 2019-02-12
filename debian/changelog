@@ -1,3 +1,14 @@
+unattended-upgrades (1.11) UNRELEASED; urgency=medium
+
+  * Use defaults in unattended-upgrades.service when the APT configuration is
+    broken. (LP: #1815189)
+  * test/test_blacklisted_wrong_origin.py: Fix and enable test
+  * Clear cache when autoremoval fails (LP: #1779157)
+  * Find autoremovable kernel packages using the patterns in APT's way
+    (LP: #1815494)
+
+ -- Balint Reczey <rbalint@ubuntu.com>  Tue, 12 Feb 2019 13:06:22 +0700
+
 unattended-upgrades (1.10) unstable; urgency=medium
 
   * autopkgtest: Check if upgrading in minimal steps is the default
