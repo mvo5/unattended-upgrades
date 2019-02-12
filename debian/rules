@@ -36,6 +36,7 @@ override_dh_auto_clean:
 		test/.coverage \
 		test/.mypy_cache \
 		test/root.*/var/cache/apt/*.bin \
+		test/root.*/var/lib/dpkg/lock-frontend \
 		test/root.*/var/log \
 		test/root.unused-deps/var/cache/apt/archives/lock \
 		test/root.unused-deps/var/lib/apt/extended_states \
