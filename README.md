@@ -15,10 +15,10 @@ before the install and holds back any package that requires them.
 Table of Contents
 -----------------
 
-- Setup
-- Debugging
-- Manual Setup
-- Supported Options Reference
+- [Setup](#setup)
+- [Debugging](#debugging)
+- [Manual Setup](#manual-setup)
+- [Supported Options Reference](#supported-options-references)
   - [Unattended-Upgrade::Allowed-Origins](#unattended-upgrade-allowed-origins)
   - [Unattended-Upgrade::Package-Blacklist](#unattended-upgrade-package-blacklist)
   - [Unattended-Upgrade::Package-Whitelist](#unattended-upgrade-package-whitelist)
