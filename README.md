@@ -18,7 +18,7 @@ Table of Contents
 - [Setup](#setup)
 - [Debugging](#debugging)
 - [Manual Setup](#manual-setup)
-- [Supported Options Reference](#supported-options-references)
+- [Supported Options Reference](#supported-options-reference)
   - [Unattended-Upgrade::Allowed-Origins](#unattended-upgrade-allowed-origins)
   - [Unattended-Upgrade::Package-Blacklist](#unattended-upgrade-package-blacklist)
   - [Unattended-Upgrade::Package-Whitelist](#unattended-upgrade-package-whitelist)
