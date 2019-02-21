@@ -1,3 +1,15 @@
+unattended-upgrades (1.1ubuntu1.18.04.9) bionic; urgency=medium
+
+  * debian/changlog: Drop extra trailer after old entry
+  * Don't check blacklist too early and report updates from not allowed origins
+    as kept back. (LP: #1781176)
+  * test/test_blacklisted_wrong_origin.py: Fix and enable test
+  * Clear cache when autoremoval fails (LP: #1779157)
+  * Find autoremovable kernel packages using the patterns in APT's way
+    (LP: #1815494)
+
+ -- Balint Reczey <rbalint@ubuntu.com>  Thu, 21 Feb 2019 14:58:38 +0100
+
 unattended-upgrades (1.1ubuntu1.18.04.8) bionic; urgency=medium
 
   * Start service after systemd-logind.service to be able to take inhibition
