@@ -359,7 +359,17 @@ def main():
     gettext.bindtextdomain(localesApp, localesDir)
     gettext.textdomain(localesApp)
 
-    apt_pkg.init_config()
+    # use a normal logfile instead of syslog too as on shutdown its too
+    # easy to get syslog killed
+    logdir = "/var/log/unattended-upgrades/"
+    try:
+        apt_pkg.init_config()
+        logdir = apt_pkg.config.find_dir(
+            "Unattended-Upgrade::LogDir", logdir)
+    except apt_pkg.Error as error:
+        logging.error(_("Apt returned an error when loading configuration, "
+                        "using default values"))
+        logging.error(_("error message: '%s'"), error)
 
     parser = OptionParser()
     parser.add_option("", "--debug",
@@ -388,10 +398,6 @@ def main():
     if options.debug:
         level = logging.DEBUG
 
-    # use a normal logfile instead of syslog too as on shutdown its too
-    # easy to get syslog killed
-    logdir = apt_pkg.config.find_dir(
-        "Unattended-Upgrade::LogDir", "/var/log/unattended-upgrades/")
     if not os.path.exists(logdir):
         os.makedirs(logdir)
     logfile = os.path.join(logdir, "unattended-upgrades-shutdown.log")
