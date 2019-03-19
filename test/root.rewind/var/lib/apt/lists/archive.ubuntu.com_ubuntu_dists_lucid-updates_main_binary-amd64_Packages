@@ -2,3 +2,9 @@ Package: forbidden-dependency
 Architecture: all
 Version: 2.0
 Description-en: forbidden dependency package
+
+Package: test-package
+Architecture: all
+Version: 12.0
+Depends: forbidden-dependency
+Description-en: test package

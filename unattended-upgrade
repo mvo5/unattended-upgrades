@@ -160,7 +160,7 @@ class UnattendedUpgradesCache(apt.Cache):
             # Only adjust to lower versions to avoid flipping back and forth
             # and to avoid picking a newer version, not selected by apt.
             # This helps avoiding upgrades to experimental's packages.
-            if new_cand.version < pkg.candidate.version:
+            if new_cand < pkg.candidate:
                 logging.debug("adjusting candidate version: %s" % new_cand)
                 pkg.candidate = new_cand
                 return True
