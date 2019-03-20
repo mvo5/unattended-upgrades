@@ -1119,6 +1119,9 @@ def send_summary_mail(pkgs,                 # type: List[str]
     if (res and apt_pkg.config.find_b(
             "Unattended-Upgrade::MailOnlyOnError", False)):
         return
+    # if the run was successful but nothing had to be done skip sending email
+    if (res and not pkgs and not pkgs_kept_back and not pkgs_removed):
+        return
     # Check if reboot-required flag is present
     reboot_flag_str = _(
         "[reboot required]") if os.path.isfile(REBOOT_REQUIRED_FILE) else ""
