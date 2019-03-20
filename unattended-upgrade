@@ -169,6 +169,30 @@ class UnattendedUpgradesCache(apt.Cache):
         except NoAllowedOriginError:
             return False
 
+    def adjust_candidate_for_all_packages(self):
+        """ Adjust origin of all the upgradable/installable packages
+        """
+        for pkg in self:
+            if pkg.is_upgradable or not pkg.is_installed:
+                self.adjust_candidate(pkg)
+
+    def call_checked(self, function, pkg, **kwargs):
+        """ Call function and check if package is in the wanted state
+        """
+        try:
+            function(pkg, **kwargs)
+        except SystemError as e:
+            logging.warning(
+                _("package %s upgradable but fails to "
+                  "be marked for upgrade (%s)"), pkg.name, e)
+            self.clear()
+            return False
+
+        return (((function == apt.package.Package.mark_upgrade)
+                 and pkg.marked_upgrade)
+                or ((function == apt.package.Package.mark_install)
+                    and pkg.marked_install))
+
     def call_adjusted(self, function, pkg, **kwargs):
         """Call function, but with adjusting
            packages in changes to come from allowed origins
@@ -186,9 +210,44 @@ class UnattendedUpgradesCache(apt.Cache):
         if function == apt.package.Package.mark_upgrade \
            and not pkg.is_upgradable:
             raise NoAllowedOriginError
-        function(pkg, **kwargs)
-        changes = self.get_changes()
-        for marked_pkg in changes:
+        marking_succeeded = self.call_checked(function, pkg, **kwargs)
+        if not marking_succeeded:
+            # The package could not have been marked to install/upgrade
+            # with the current candidate adjustments.
+            # Try marking it without the adjustments then adjust
+            # all packages to be installed/upgraded. This will work where
+            # package dependencies are similar for the adjusted and not
+            # adjusted case, just with different versions.
+            logging.debug("falling back to marking %s, then adjusting changes"
+                          % pkg.name)
+            for pkg2 in ([self[pkg_name] for pkg_name
+                          in self._cached_candidate_pkgnames]):
+                pkg2.candidate = pkg2.versions[0]
+
+            marking_succeeded = self.call_checked(function, pkg, **kwargs)
+            if marking_succeeded:
+                changes = self.get_changes()
+                for pkg2 in changes:
+                    self.adjust_candidate(pkg2)
+                if all({ver_in_allowed_origin(pkg2, self.allowed_origins)
+                        for pkg2 in changes}):
+                    pass
+                else:
+                    # could not adjust all packages in changes to allowed
+                    # candidates
+                    self.clear()
+
+        if not marking_succeeded:
+            # The package could not have been marked to install/upgrade
+            # with the current candidate adjustments.
+            # As a last resort u-u marks _all_ upgradable or
+            # not installed packages' candidates to come from
+            # allowed origins and try marking the package again.
+            logging.debug("falling back to adjusting all packages")
+            self.adjust_candidate_for_all_packages()
+            marking_succeeded = self.call_checked(function, pkg, **kwargs)
+
+        for marked_pkg in self.get_changes():
             if marked_pkg.name in self._cached_candidate_pkgnames:
                 continue
             if not is_allowed_origin(marked_pkg.candidate,
@@ -1319,7 +1378,9 @@ def try_to_upgrade(pkg,               # type: apt.Package
                     pkgs_kept_back.remove(pkgname)
                     pkgs_to_upgrade.append(cache[pkgname])
         else:
-            logging.debug("sanity check failed")
+            logging.debug("sanity check failed for: %s"
+                          % str({str(p.candidate)
+                                 for p in cache.get_changes()}))
             rewind_cache(cache, pkgs_to_upgrade)
             pkgs_kept_back.append(pkg.name)
     except (SystemError, NoAllowedOriginError) as e:

@@ -40,7 +40,9 @@ class TestRewindCache(unittest.TestCase):
         to_upgrade, kept_back = unattended_upgrade.calculate_upgradable_pkgs(
             self.cache, options, self.allowed_origins, blacklisted_pkgs,
             whitelisted_pkgs)
-        self.assertEqual(to_upgrade, [self.cache["test-package"]])
+        self.assertEqual(to_upgrade, [self.cache[p] for p
+                                      in ["test-package", "test2-package",
+                                          "test3-package"]])
         self.assertEqual(kept_back, ["z-package"])
 
 
