@@ -56,4 +56,12 @@ run_u_u() {
     echo "new packages marked as manually installed (should be none): "
     chroot_exec "$chroot_dir" apt-mark showmanual | diff "$chroot_dir/tmp/manual" -
     chroot_exec "$chroot_dir" perl -MMIME::QuotedPrint -pe '$_=MIME::QuotedPrint::decode($_);' /var/mail/mail
+
+    printf  "Checking that no email is sent when nothing had to be done..."
+    if ! chroot_exec "$chroot_dir" perl -MMIME::QuotedPrint -pe '$_=MIME::QuotedPrint::decode($_);' /var/mail/mail | grep -q "unattended and no pending auto-removals"; then
+        echo "OK"
+    else
+        echo "FAILED, see last email above"
+    fi
+
 }
