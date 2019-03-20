@@ -132,5 +132,20 @@ run_u_u() {
     chroot_exec "$chroot_dir" apt-mark showmanual | diff "$chroot_dir/tmp/manual" -
     chroot_exec "$chroot_dir" perl -MMIME::QuotedPrint -pe '$_=MIME::QuotedPrint::decode($_);' /var/mail/mail
 
+    printf  "Checking that no email is sent when nothing had to be done..."
+    if ! chroot_exec "$chroot_dir" perl -MMIME::QuotedPrint -pe '$_=MIME::QuotedPrint::decode($_);' /var/mail/mail | grep -q "unattended and no pending auto-removals"; then
+        echo "OK"
+    else
+        echo "FAILED, see last email above"
+    fi
+
+    printf  "Checking that no packages can be upgraded or auto-removed..."
+    if tail -n 1 "$chroot_dir/var/log/unattended-upgrades/unattended-upgrades.log" | grep -q "No packages found that can be upgraded unattended and no pending auto-removals"; then
+        echo "OK."
+    else
+        echo "Failed:"
+        cat "$chroot_dir/var/log/unattended-upgrades/unattended-upgrades.log"
+    fi
+
     rm "$chroot_dir/etc/apt/apt.conf.d/51unattended-upgrades-dpkg-frontend-check"
 }
