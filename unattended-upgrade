@@ -893,6 +893,8 @@ def check_changes_for_sanity(cache, allowed_origins, blacklist, whitelist,
                 logging.debug("pkg %s not in allowed origin" % pkg.name)
                 return False
             if not is_pkg_change_allowed(pkg, blacklist, whitelist):
+                logging.debug("pkg %s is blacklisted or not whitelisted"
+                              % pkg.name)
                 return False
             # check if the package is unsafe to upgrade unattended
             ignore_require_restart = apt_pkg.config.find_b(
@@ -905,6 +907,8 @@ def check_changes_for_sanity(cache, allowed_origins, blacklist, whitelist,
                 return False
     # check that the package we want to upgrade is in the change set
     if desired_pkg and desired_pkg not in changes:
+        logging.debug("pkg %s to be marked for upgrade/install is not marked "
+                      "accordingly" % pkg.name)
         return False
     return True
 
