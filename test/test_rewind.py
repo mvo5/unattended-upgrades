@@ -43,7 +43,7 @@ class TestRewindCache(unittest.TestCase):
         self.assertEqual(to_upgrade, [self.cache[p] for p
                                       in ["test-package", "test2-package",
                                           "test3-package"]])
-        self.assertEqual(kept_back, ["z-package"])
+        self.assertEqual(kept_back["Ubuntu lucid-security"], {"z-package"})
         unattended_upgrade.rewind_cache(self.cache, to_upgrade)
         self.assertEqual(self.cache['test-package'].candidate.version, "2.0")
 

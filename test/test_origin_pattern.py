@@ -9,7 +9,7 @@ apt_pkg.config.set("Dir", "./aptroot")
 import unattended_upgrade
 from unattended_upgrade import (
     check_changes_for_sanity,
-    is_allowed_origin,
+    is_in_allowed_origin,
     get_distro_codename,
     match_whitelist_string,
     UnknownMatcherError,
@@ -100,7 +100,7 @@ class TestOriginPatern(unittest.TestCase):
         self.assertTrue("o=MoreCorp\, eink,a=stable" in allowed_origins)
         # test whitelist
         pkg = self._get_mock_package()
-        self.assertTrue(is_allowed_origin(pkg.candidate, allowed_origins))
+        self.assertTrue(is_in_allowed_origin(pkg.candidate, allowed_origins))
 
     def test_escaped_colon(self):
         apt_pkg.config.clear("Unattended-Upgrade")
