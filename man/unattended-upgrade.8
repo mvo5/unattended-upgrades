@@ -1,8 +1,9 @@
+
 .\"                                      Hey, EMACS: -*- nroff -*-
 .\" First parameter, NAME, should be all caps
 .\" Second parameter, SECTION, should be 1-8, maybe w/ subsection
 .\" other parameters are allowed: see man(7), man(1)
-.TH unattended-upgrade 8 "May 4, 2009"
+.TH unattended-upgrade 8 "March 1, 2019"
 .\" Please adjust this date whenever revising the manpage.
 .\"
 .\" Some roff macros, for reference:
@@ -24,8 +25,10 @@ unattended-upgrade \- automatic installation of security (and other) upgrades
 This program can download and install security upgrades automatically
 and unattended, taking care to only install packages from the
 configured APT source, and checking for dpkg prompts about
-configuration file changes. All output is logged to
-/var/log/unattended-upgrades/*.log.
+configuration file changes. All operations are logged to
+/var/log/unattended-upgrades/unattended-upgrades.log
+and the package manager (dpkg) output is logged to
+/var/log/unattended-upgrades/unattended-upgrades-dpkg.log
 .sp
 This script is the backend for the APT::Periodic::Unattended-Upgrade
 option and designed to be run from cron (e.g. via /etc/cron.daily/apt).
@@ -38,8 +41,21 @@ help output
 \fB-d\fR, \fB\-\-debug\fR
 extra debug output into /var/log/unattended-upgrades.log
 .TP
+\fB--apt-debug\fR
+detailed APT/LibAPT output for debugging
+.TP
+\fB-v\fR, \fB\-\-verbose\fR
+show verbose output
+.TP
 \fB--dry-run\fR
 Just simulate installing updates, do not actually do it
+.TP
+\fB--minimal-upgrade-steps\fR
+perform upgrade in minimal steps (cancel with SIGINT). This is the default now.
+.TP
+\fB--no-minimal-upgrade-steps\fR
+do not perform upgrade in minimal steps
+
 .SH CONFIGURATION
 The configuration is done via the apt configuration mechanism. The
 default configuration file can be found at
