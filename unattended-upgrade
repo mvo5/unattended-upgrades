@@ -73,6 +73,8 @@ from subprocess import (
     Popen,
     PIPE,
 )
+from textwrap import wrap
+
 import apt
 import apt_inst
 import apt_pkg
@@ -1134,16 +1136,10 @@ def host():
     return socket.getfqdn()
 
 
-# *sigh* textwrap is nice, but it breaks "linux-image" into two
-# seperate lines
-def wrap(t, width=70, subsequent_indent=""):
-    # type: (str, int, str) -> str
-    out = ""
-    for s in t.split():
-        if (len(out) - out.rfind("\n")) + len(s) > width:
-            out += "\n" + subsequent_indent
-        out += s + " "
-    return out
+def wrap_indent(t, subsequent_indent=" "):
+    # type: (str, str) -> str
+    return "\n".join(wrap(t, break_on_hyphens=False,
+                          subsequent_indent=subsequent_indent))
 
 
 def setup_apt_listchanges(conf="/etc/apt/listchanges.conf"):
@@ -1239,7 +1235,7 @@ def send_summary_mail(pkgs,                 # type: List[str]
         "{machine}: {result}").format(
             hold_flag=hold_flag_str, reboot_flag=reboot_flag_str,
             machine=host(), result="SUCCESS" if res else "FAILURE").strip()
-    body = wrap(_("Unattended upgrade result: %s") % result_str, 70, " ")
+    body = wrap_indent(_("Unattended upgrade result: %s") % result_str)
     body += "\n\n"
     if os.path.isfile(REBOOT_REQUIRED_FILE):
         body += _(
@@ -1250,21 +1246,22 @@ def send_summary_mail(pkgs,                 # type: List[str]
             body += _("Packages that were upgraded:\n")
         else:
             body += _("Packages that attempted to upgrade:\n")
-        body += " " + wrap(" ".join(pkgs), 70, " ")
+        body += " " + wrap_indent(" ".join(pkgs))
         body += "\n\n"
     if pkgs_kept_back:
         body += _("Packages with upgradable origin but kept back:\n")
         for origin, origin_pkgs in pkgs_kept_back.items():
             body += " " + origin + ":\n"
-            body += "  " + wrap(" ".join(origin_pkgs), 70, "  ") + "\n"
+            body += "  " + wrap_indent(" ".join(origin_pkgs),
+                                       subsequent_indent="  ") + "\n"
         body += "\n"
     if pkgs_removed:
         body += _("Packages that were auto-removed:\n")
-        body += " " + wrap(" ".join(pkgs_removed), 70, " ")
+        body += " " + wrap_indent(" ".join(pkgs_removed))
         body += "\n\n"
     if pkgs_kept_installed:
         body += _("Packages that were kept from being auto-removed:\n")
-        body += " " + wrap(" ".join(pkgs_kept_installed), 70, " ")
+        body += " " + wrap_indent(" ".join(pkgs_kept_installed))
         body += "\n\n"
     if dpkg_log_content:
         body += _("Package installation log:") + "\n"
