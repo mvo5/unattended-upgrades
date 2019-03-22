@@ -1,3 +1,21 @@
+unattended-upgrades (1.12) UNRELEASED; urgency=medium
+
+  [ Brannon Dorsey ]
+  * Remove double "format" in 50unattended-upgrades configuration files
+
+  [ Balint Reczey ]
+  * Compare apt.package.Version objects and not the versions' string
+    representation. This prevented adjusting candidates when the strings sorted
+    differently (LP: #1820888)
+  * Enable test_clean and test_patch_days tests
+  * Fall back to adjusting more packages' candidates
+    when a package from an allowed origin can't be marked to install/upgrade.
+    (LP: #1821101)
+  * Skip sending email when no package had to be installed, upgraded or removed
+    (LP: #1821103) (Closes: #924554)
+
+ -- Balint Reczey <rbalint@ubuntu.com>  Thu, 21 Mar 2019 00:05:10 +0100
+
 unattended-upgrades (1.11) unstable; urgency=medium
 
   * Use defaults in unattended-upgrades.service when the APT configuration is

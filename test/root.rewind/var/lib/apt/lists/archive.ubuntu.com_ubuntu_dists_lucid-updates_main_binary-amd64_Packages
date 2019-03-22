@@ -2,3 +2,36 @@ Package: forbidden-dependency
 Architecture: all
 Version: 2.0
 Description-en: forbidden dependency package
+
+Package: test-package
+Architecture: all
+Version: 12.0
+Depends: forbidden-dependency
+Description-en: test package
+
+Package: test2-package
+Architecture: all
+Version: 3.0
+Depends: test2-package-dependency (= 3.0)
+Description-en: test package set with strong versioned dependency
+
+Package: test2-package-dependency
+Architecture: all
+Version: 3.0
+Description-en: test2-package's versioned dep
+
+Package: test3-package
+Architecture: all
+Version: 3.0
+Depends: test3-new-package-dependency (= 3.0)
+Description-en: test package set with strong versioned dependency
+
+Package: test3-new-package-dependency
+Architecture: all
+Version: 3.0
+Description-en: test3-package's versioned dep
+
+Package: test3-old-package-dependency
+Architecture: all
+Version: 3.0
+Description-en: test3-package's versioned dep
