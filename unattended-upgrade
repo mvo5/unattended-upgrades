@@ -239,8 +239,8 @@ class UnattendedUpgradesCache(apt.Cache):
             # all packages to be installed/upgraded. This will work where
             # package dependencies are similar for the adjusted and not
             # adjusted case, just with different versions.
-            logging.debug("falling back to marking %s, then adjusting changes"
-                          % pkg.name)
+            logging.debug("falling back to marking %s without adjustments, "
+                          "then adjusting changes" % pkg.name)
             for pkg2 in ([self[pkg_name] for pkg_name
                           in self._cached_candidate_pkgnames]):
                 pkg2.candidate = pkg2.versions[0]
