@@ -1,3 +1,17 @@
+unattended-upgrades (1.1ubuntu1.18.04.10) bionic; urgency=medium
+
+  * do_auto_remove() is successful unless a commit() operation fails
+    (LP: #1795696)
+  * Compare apt.package.Version objects and not the versions' string
+    representation. (LP: #1820888)
+    This prevented adjusting candidates when the strings sorted differently.
+    Also extend tests to catch issue.
+  * Fall back to adjusting more packages' candidates
+    when a package from an allowed origin can't be marked to install/upgrade.
+    (LP: #1821101)
+
+ -- Balint Reczey <rbalint@ubuntu.com>  Mon, 25 Mar 2019 18:17:56 +0100
+
 unattended-upgrades (1.1ubuntu1.18.04.9) bionic; urgency=medium
 
   * debian/changlog: Drop extra trailer after old entry
