@@ -1211,7 +1211,7 @@ def send_summary_mail(pkgs,                 # type: List[str]
     if not to_email:
         return
     if not os.path.exists(MAIL_BINARY) and not os.path.exists(SENDMAIL_BINARY):
-        logging.error(_("No /usr/bin/mail or /usr/sbin/sendmail,"
+        logging.error(_("No /usr/bin/mail or /usr/sbin/sendmail, "
                         "can not send mail. "
                         "You probably want to install the mailx package."))
         return
