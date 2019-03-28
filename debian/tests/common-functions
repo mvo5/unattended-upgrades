@@ -44,44 +44,42 @@ do_debootstrap() {
     trap "umount \"$chroot_dir/proc\"; umount \"$chroot_dir/dev/pts\"; rm -rf \"$chroot_dir\"" EXIT
 }
 
-enable_security_updates() {
-    local chroot_dir distro
+# pocket can be "proposed", "updates" or "security", not the actual distro-specific pocket name
+enable_pocket() {
+    local chroot_dir pocket distro mirror_dir_postfix real_pocket
     chroot_dir="$1"
-    distro="$2"
-
+    pocket="$2"
+    distro=$(awk '{ print $3; exit}' "$chroot_dir/etc/apt/sources.list")
     case "$(dpkg-vendor --query Vendor)" in
         "Ubuntu")
-            sed "s/$distro/$distro-security/" < "$chroot_dir/etc/apt/sources.list" \
-                > "$chroot_dir/etc/apt/sources.list.d/security.list"
+            sed "s/$distro/$distro-$pocket/" < "$chroot_dir/etc/apt/sources.list" \
+                > "$chroot_dir/etc/apt/sources.list.d/$pocket.list"
             ;;
         "Debian")
-            echo "deb http://security.debian.org/ $distro/updates main" \
-                 > "$chroot_dir/etc/apt/sources.list.d/security.list"
+            case "$pocket" in
+                proposed)
+                    real_pocket=proposed-updates
+                    ;;
+                security)
+                    real_pocket="$distro/updates"
+                    mirror_dir_postfix="-security"
+                    ;;
+                *)
+                    real_pocket="$pocket"
+                    ;;
+            esac
+            sed "s|/debian |/debian$mirror_dir_postfix |;s/$distro/$distro-$pocket/" < "$chroot_dir/etc/apt/sources.list" \
+                > "$chroot_dir/etc/apt/sources.list.d/$pocket.list"
             ;;
     esac
 }
 
-disable_security_updates() {
-    local chroot_dir
+# pocket can be "proposed", "updates" or "security", not the actual distro-specific pocket name
+disable_pocket() {
+    local chroot_dir pocket
     chroot_dir="$1"
-
-    rm "$chroot_dir/etc/apt/sources.list.d/security.list"
-}
-
-enable_release_updates() {
-    local chroot_dir distro
-    chroot_dir="$1"
-    distro="$2"
-
-    sed "s/$distro/$distro-updates/" < "$chroot_dir/etc/apt/sources.list" \
-        > "$chroot_dir/etc/apt/sources.list.d/updates.list"
-}
-
-disable_release_updates() {
-    local chroot_dir
-    chroot_dir="$1"
-
-    rm "$chroot_dir/etc/apt/sources.list.d/updates.list"
+    pocket="$2"
+    rm "$chroot_dir/etc/apt/sources.list.d/$pocket.list"
 }
 
 upgrade_python_apt() {
@@ -93,12 +91,12 @@ upgrade_python_apt() {
     # systems are running most likely. This also contains latest stability fixes
     # and speed optimizations, thus speed regressions nd improvements can be
     # tracked in autopkgtest runs.
-    enable_security_updates "$chroot_dir" "$distro"
-    enable_release_updates "$chroot_dir" "$distro"
+    enable_pocket "$chroot_dir" security
+    enable_pocket "$chroot_dir" updates
     chroot_exec "$chroot_dir" apt-get update
     chroot_exec "$chroot_dir" apt-get install -y python3-apt 2>&1
-    disable_release_updates "$chroot_dir"
-    disable_security_updates "$chroot_dir"
+    disable_pocket "$chroot_dir" updates
+    disable_pocket "$chroot_dir" security
     chroot_exec "$chroot_dir" apt-get update
 }
 
