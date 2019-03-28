@@ -4,6 +4,9 @@
 # On development releases the latest stable release is tested since there are no
 # security updates to test with.
 
+# Also test if packages can be upgraded to -updates and -proposed, but failures
+# in -proposed are ignored since those can be issues in the packages.
+
 set -e
 
 chroot_dir=$AUTOPKGTEST_TMP/chroot
@@ -49,8 +52,8 @@ cp ../unattended-upgrades_*.deb "$chroot_dir/tmp/"
 chroot_exec "$chroot_dir" bash -c 'apt install -y /tmp/unattended-upgrades_*deb' 2>&1
 
 
-enable_security_updates "$chroot_dir" "$distro"
-enable_release_updates "$chroot_dir" "$distro"
+enable_pocket "$chroot_dir" security
+enable_pocket "$chroot_dir" updates
 chroot_exec "$chroot_dir" apt-get update
 
 # save list of manually installed packages
@@ -62,7 +65,7 @@ chroot_exec "$chroot_dir" apt-get clean
 run_u_u "$chroot_dir"
 
 echo "Checking if there is anything left not upgraded:"
-disable_release_updates "$chroot_dir"
+disable_pocket "$chroot_dir" updates
 chroot_exec "$chroot_dir" apt-get update
 chroot_exec "$chroot_dir" apt-get upgrade --with-new-pkgs -s | tee "$chroot_dir/tmp/updates-left"
 
@@ -70,3 +73,17 @@ chroot_exec "$chroot_dir" apt-get upgrade --with-new-pkgs -s | tee "$chroot_dir/
 
 echo "Checking if originally auto-removable packages are kept:"
 chroot_exec "$chroot_dir" dpkg -l hello | grep 'ii  hello'
+
+echo "Checking if package versions from -updates can be upgraded to as well.."
+enable_pocket "$chroot_dir" updates
+chroot_exec "$chroot_dir" apt-get update
+
+echo 'Unattended-Upgrade::Allowed-Origins:: "*:*";' > "$chroot_dir/etc/apt/apt.conf.d/51u-u-all-origins"
+chroot_exec "$chroot_dir" unattended-upgrade --verbose --debug
+
+echo "Checking if package versions from -proposed can be upgraded to as well."
+echo "Failing here does not make the whole test fail because the root cause can be in other packages in -proposed"
+enable_pocket "$chroot_dir" proposed
+chroot_exec "$chroot_dir" apt-get update
+
+chroot_exec "$chroot_dir" unattended-upgrade --verbose --debug || true
