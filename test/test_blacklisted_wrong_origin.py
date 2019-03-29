@@ -38,7 +38,7 @@ class TestBlacklistedWrongOrigin(unittest.TestCase):
                                       [])
 
         self.assertListEqual([], pkgs_to_upgrade)
-        self.assertListEqual([], pkgs_kept_back)
+        self.assertEqual(0, len(pkgs_kept_back))
 
 
 if __name__ == "__main__":

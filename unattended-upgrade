@@ -50,15 +50,16 @@ import sys
 import syslog
 
 try:
-    from typing import AbstractSet, cast, Dict, Iterable, List, Tuple
+    from typing import AbstractSet, cast, DefaultDict, Iterable, List, Tuple
     AbstractSet  # pyflakes
-    Dict  # pyflakes
+    DefaultDict  # pyflakes
     Iterable  # pyflakes
     List  # pyflakes
     Tuple  # pyflakes
 except ImportError:
     pass
 
+from collections import defaultdict
 from datetime import date
 from email.message import Message
 from gettext import gettext as _
@@ -72,6 +73,8 @@ from subprocess import (
     Popen,
     PIPE,
 )
+from textwrap import wrap
+
 import apt
 import apt_inst
 import apt_pkg
@@ -236,8 +239,8 @@ class UnattendedUpgradesCache(apt.Cache):
             # all packages to be installed/upgraded. This will work where
             # package dependencies are similar for the adjusted and not
             # adjusted case, just with different versions.
-            logging.debug("falling back to marking %s, then adjusting changes"
-                          % pkg.name)
+            logging.debug("falling back to marking %s without adjustments, "
+                          "then adjusting changes" % pkg.name)
             for pkg2 in ([self[pkg_name] for pkg_name
                           in self._cached_candidate_pkgnames]):
                 pkg2.candidate = pkg2.versions[0]
@@ -268,8 +271,8 @@ class UnattendedUpgradesCache(apt.Cache):
         for marked_pkg in self.get_changes():
             if marked_pkg.name in self._cached_candidate_pkgnames:
                 continue
-            if not is_allowed_origin(marked_pkg.candidate,
-                                     self.allowed_origins):
+            if not is_in_allowed_origin(marked_pkg.candidate,
+                                        self.allowed_origins):
                 try:
                     ver_in_allowed_origin(marked_pkg,
                                           self.allowed_origins)
@@ -453,6 +456,38 @@ class Unlocked:
             apt_pkg.pkgsystem_lock()
 
 
+class KeptPkgs(defaultdict):
+    """
+    Packages to keep by highest allowed pretty-printed origin
+
+    """
+    def add(self, pkg, cache):
+        # type: (apt.Package, UnattendedUpgradesCache) -> None
+        allowed_origins = cache.allowed_origins
+        for origin in ver_in_allowed_origin(pkg, allowed_origins).origins:
+            if is_allowed_origin(origin, allowed_origins):
+                self[origin.origin + " " + origin.archive].add(pkg.name)
+                return
+
+    def pop_upgradable(self, cache):
+        # type: (UnattendedUpgradesCache) -> List[apt.Package]
+        upgradable = []
+        empty_sets = set()
+        for name, pkg_set in self.items():
+            remove_from_set = set()
+            for pkg_name in pkg_set:
+                pkg = cache[pkg_name]
+                if pkg.marked_install or pkg.marked_upgrade:
+                    remove_from_set.add(pkg_name)
+                    upgradable.append(pkg)
+            pkg_set -= remove_from_set
+            if not pkg_set:
+                empty_sets.add(name)
+        for empty_set in empty_sets:
+            del(self[empty_set])
+        return upgradable
+
+
 class UnattendedUpgradesResult:
     """
     Represent the (potentially partial) results of an unattended-upgrades
@@ -462,7 +497,7 @@ class UnattendedUpgradesResult:
                  success,                 # type: bool
                  result_str="",           # type: str
                  pkgs=[],                 # type: List[str]
-                 pkgs_kept_back=[],       # type: List[str]
+                 pkgs_kept_back=None,     # type: KeptPkgs
                  pkgs_removed=[],         # type: List[str]
                  pkgs_kept_installed=[],  # type: List[str]
                  update_stamp=False       # type: bool
@@ -472,6 +507,8 @@ class UnattendedUpgradesResult:
         self.result_str = result_str
         self.pkgs = pkgs
         self.pkgs_kept_back = pkgs_kept_back
+        if pkgs_kept_back is None:
+            self.pkgs_kept_back = KeptPkgs(set)
         self.pkgs_removed = pkgs_removed
         self.pkgs_kept_installed = pkgs_kept_installed
         self.update_stamp = update_stamp
@@ -765,14 +802,21 @@ def upgrade_in_minimal_steps(cache,            # type: apt.Cache
     return True
 
 
-def is_allowed_origin(ver, allowed_origins):
+def is_allowed_origin(origin, allowed_origins):
+    # type: (apt.package.Origin, List[str]) -> bool
+    for allowed in allowed_origins:
+        if match_whitelist_string(allowed, origin):
+            return True
+    return False
+
+
+def is_in_allowed_origin(ver, allowed_origins):
     # type: (apt.package.Version, List[str]) -> bool
     if not ver:
         return False
     for origin in ver.origins:
-        for allowed in allowed_origins:
-            if match_whitelist_string(allowed, origin):
-                return True
+        if is_allowed_origin(origin, allowed_origins):
+            return True
     return False
 
 
@@ -787,7 +831,7 @@ def ver_in_allowed_origin(pkg, allowed_origins):
                 continue
         except AttributeError:
             pass
-        if is_allowed_origin(ver, allowed_origins):
+        if is_in_allowed_origin(ver, allowed_origins):
             # leave as soon as we have the highest new candidate
             return ver
     raise NoAllowedOriginError()
@@ -889,7 +933,7 @@ def check_changes_for_sanity(cache, allowed_origins, blacklist, whitelist,
             if not any([o.trusted for o in pkg.candidate.origins]):
                 logging.debug("pkg %s is untrusted" % pkg.name)
                 return False
-            if not is_allowed_origin(pkg.candidate, allowed_origins):
+            if not is_in_allowed_origin(pkg.candidate, allowed_origins):
                 logging.debug("pkg %s not in allowed origin" % pkg.name)
                 return False
             if not is_pkg_change_allowed(pkg, blacklist, whitelist):
@@ -1092,16 +1136,10 @@ def host():
     return socket.getfqdn()
 
 
-# *sigh* textwrap is nice, but it breaks "linux-image" into two
-# seperate lines
-def wrap(t, width=70, subsequent_indent=""):
-    # type: (str, int, str) -> str
-    out = ""
-    for s in t.split():
-        if (len(out) - out.rfind("\n")) + len(s) > width:
-            out += "\n" + subsequent_indent
-        out += s + " "
-    return out
+def wrap_indent(t, subsequent_indent=" "):
+    # type: (str, str) -> str
+    return "\n".join(wrap(t, break_on_hyphens=False,
+                          subsequent_indent=subsequent_indent))
 
 
 def setup_apt_listchanges(conf="/etc/apt/listchanges.conf"):
@@ -1161,7 +1199,7 @@ def _send_mail_using_sendmail(from_address, to_address, subject, body):
 def send_summary_mail(pkgs,                 # type: List[str]
                       res,                  # type: bool
                       result_str,           # type: str
-                      pkgs_kept_back,       # type: List[str]
+                      pkgs_kept_back,       # type: KeptPkgs
                       pkgs_removed,         # type: List[str]
                       pkgs_kept_installed,  # type: List[str]
                       mem_log,              # type: StringIO
@@ -1173,7 +1211,7 @@ def send_summary_mail(pkgs,                 # type: List[str]
     if not to_email:
         return
     if not os.path.exists(MAIL_BINARY) and not os.path.exists(SENDMAIL_BINARY):
-        logging.error(_("No /usr/bin/mail or /usr/sbin/sendmail,"
+        logging.error(_("No /usr/bin/mail or /usr/sbin/sendmail, "
                         "can not send mail. "
                         "You probably want to install the mailx package."))
         return
@@ -1197,7 +1235,7 @@ def send_summary_mail(pkgs,                 # type: List[str]
         "{machine}: {result}").format(
             hold_flag=hold_flag_str, reboot_flag=reboot_flag_str,
             machine=host(), result="SUCCESS" if res else "FAILURE").strip()
-    body = wrap(_("Unattended upgrade result: %s") % result_str, 70, " ")
+    body = wrap_indent(_("Unattended upgrade result: %s") % result_str)
     body += "\n\n"
     if os.path.isfile(REBOOT_REQUIRED_FILE):
         body += _(
@@ -1208,19 +1246,22 @@ def send_summary_mail(pkgs,                 # type: List[str]
             body += _("Packages that were upgraded:\n")
         else:
             body += _("Packages that attempted to upgrade:\n")
-        body += " " + wrap(" ".join(pkgs), 70, " ")
+        body += " " + wrap_indent(" ".join(pkgs))
         body += "\n\n"
     if pkgs_kept_back:
         body += _("Packages with upgradable origin but kept back:\n")
-        body += " " + wrap(" ".join(pkgs_kept_back), 70, " ")
-        body += "\n\n"
+        for origin, origin_pkgs in pkgs_kept_back.items():
+            body += " " + origin + ":\n"
+            body += "  " + wrap_indent(" ".join(origin_pkgs),
+                                       subsequent_indent="  ") + "\n"
+        body += "\n"
     if pkgs_removed:
         body += _("Packages that were auto-removed:\n")
-        body += " " + wrap(" ".join(pkgs_removed), 70, " ")
+        body += " " + wrap_indent(" ".join(pkgs_removed))
         body += "\n\n"
     if pkgs_kept_installed:
         body += _("Packages that were kept from being auto-removed:\n")
-        body += " " + wrap(" ".join(pkgs_kept_installed), 70, " ")
+        body += " " + wrap_indent(" ".join(pkgs_kept_installed))
         body += "\n\n"
     if dpkg_log_content:
         body += _("Package installation log:") + "\n"
@@ -1436,7 +1477,7 @@ def write_stamp_file():
 
 def try_to_upgrade(pkg,               # type: apt.Package
                    pkgs_to_upgrade,   # type: List[apt.Package]
-                   pkgs_kept_back,    # type: List[str]
+                   pkgs_kept_back,    # type: KeptPkgs
                    cache,             # type: apt.Cache
                    allowed_origins,   # type: List[str]
                    blacklist,         # type: List[str]
@@ -1461,24 +1502,20 @@ def try_to_upgrade(pkg,               # type: apt.Package
             # re-eval pkgs_kept_back as the resolver may fail to
             # directly upgrade a pkg, but that may work during
             # a subsequent operation, see debian bug #639840
-            for pkgname in pkgs_kept_back:
-                if cache[pkgname].marked_install \
-                   or cache[pkgname].marked_upgrade:
-                    pkgs_kept_back.remove(pkgname)
-                    pkgs_to_upgrade.append(cache[pkgname])
+            pkgs_to_upgrade.extend(pkgs_kept_back.pop_upgradable(cache))
         else:
             logging.debug("sanity check failed for: %s"
                           % str({str(p.candidate)
                                  for p in cache.get_changes()}))
             rewind_cache(cache, pkgs_to_upgrade)
-            pkgs_kept_back.append(pkg.name)
+            pkgs_kept_back.add(pkg, cache)
     except (SystemError, NoAllowedOriginError) as e:
         # can't upgrade
         logging.warning(
             _("package %s upgradable but fails to "
                 "be marked for upgrade (%s)"), pkg.name, e)
         rewind_cache(cache, pkgs_to_upgrade)
-        pkgs_kept_back.append(pkg.name)
+        pkgs_kept_back.add(pkg, cache)
 
 
 def calculate_upgradable_pkgs(cache,             # type: apt.Cache
@@ -1487,9 +1524,9 @@ def calculate_upgradable_pkgs(cache,             # type: apt.Cache
                               blacklist,         # type: List[str]
                               whitelist,         # type: List[str]
                               ):
-    # type: (...) -> Tuple[List[apt.Package], List[str]]
+    # type: (...) -> Tuple[List[apt.Package], KeptPkgs]
     pkgs_to_upgrade = []  # type: List[apt.Package]
-    pkgs_kept_back = []   # type: List[str]
+    pkgs_kept_back = KeptPkgs(set)
 
     # now do the actual upgrade
     for pkg in cache:
@@ -1752,9 +1789,8 @@ def main(options, rootdir=""):
         log_content = get_dpkg_log_content(logfile_dpkg,
                                            install_start_time)
         if not options.dry_run:
-            send_summary_mail(["<unknown>"], False, _("An error occurred"), [],
-                              [], [],
-                              mem_log, log_content)
+            send_summary_mail(["<unknown>"], False, _("An error occurred"),
+                              None, [], [], mem_log, log_content)
         # Re-raise exceptions for apport
         raise
 
@@ -1998,7 +2034,7 @@ def run(options,             # type: Options
                 pkg_name = pkgname_from_deb(item.destfile)
                 if not is_pkgname_in_blacklist(pkg_name, blacklist):
                     blacklist.append("%s$" % re.escape(pkg_name))
-                pkgs_kept_back.append(pkgname_from_deb(pkg_name))
+                pkgs_kept_back.add(cache[pkg_name], cache)
                 pkg_conffile_prompt = True
 
         # redo the selection about the packages to upgrade based on the new
@@ -2022,7 +2058,7 @@ def run(options,             # type: Options
                     pkgs_to_upgrade.append(pkg)
                 else:
                     if not (pkg.name in pkgs_kept_back):
-                        pkgs_kept_back.append(pkg.name)
+                        pkgs_kept_back.add(pkg, cache)
                     logging.info(_("package %s not upgraded"), pkg.name)
                     cache.clear()
                     for pkg2 in pkgs_to_upgrade:
