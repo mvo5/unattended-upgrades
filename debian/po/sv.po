@@ -8,20 +8,20 @@ msgstr ""
 "Project-Id-Version: unattended-upgrades\n"
 "Report-Msgid-Bugs-To: unattended-upgrades@packages.debian.org\n"
 "POT-Creation-Date: 2017-12-12 23:02+0100\n"
-"PO-Revision-Date: 2017-02-17 08:25+0100\n"
-"Last-Translator: Jonatan Nyberg <jonatan@autistici.org>\n"
+"PO-Revision-Date: 2019-03-25 20:43+0100\n"
+"Last-Translator: Jonatan Nyberg <jonatan.nyberg.karl@gmail.com>\n"
 "Language-Team: swedish <debian-l10n-swedish@lists.debian.org>\n"
 "Language: sv\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"X-Generator: Poedit 1.8.11\n"
+"X-Generator: Poedit 2.2.1\n"
 
 #. Type: boolean
 #. Description
 #: ../templates:2001
 msgid "Automatically download and install stable updates?"
-msgstr "Automatiskt ladda ner och installera stabila uppdateringar?"
+msgstr "Hämta och installera stabila uppdateringar automatiskt?"
 
 #. Type: boolean
 #. Description
@@ -32,9 +32,9 @@ msgid ""
 "management tools. Alternatively, you can choose to have this system  "
 "automatically download and install important updates."
 msgstr ""
-"Tillämpa uppdateringar på en frekvent basis är en viktig del för att hålla "
-"system säkra. Som standard, behöver uppdateringar appliceras manuellt med "
-"hjälp av pakethanteringsverktyg. Alternativt kan du välja att detta system "
+"Att tillämpa uppdateringar ofta är en viktig del av att hålla system säkra. "
+"Som standard måste uppdateringar tillämpas manuellt med hjälp av "
+"pakethanteringsverktyg. Alternativt kan du välja att detta system "
 "automatiskt hämtar och installerar viktiga uppdateringar."
 
 #~ msgid "Origins-Pattern that packages must match to be upgraded:"
