@@ -877,6 +877,26 @@ def get_md5sum_for_file_in_deb(deb_file, conf_file):
     return pkg_md5sum
 
 
+def find_old_installed_conf_file(conf_file, prefix):
+    # type: (str, str) -> str
+    """Get location of the installed respective conf_file, with some heuristics
+    """
+    installed_conf_file = prefix + conf_file
+    maybe_installed_conf_file = None
+    if os.path.isdir(installed_conf_file):
+        # new /etc/foo may be old /etc/foo/foo, like in LP: #1822745
+        maybe_installed_conf_file = os.path.join(
+            installed_conf_file, os.path.basename(conf_file))
+    if not os.path.exists(installed_conf_file):
+        # new /etc/foo/foo may be old /etc/foo, probably by accident
+        maybe_installed_conf_file = os.path.dirname(installed_conf_file)
+    if ((maybe_installed_conf_file
+         and not os.path.isdir(maybe_installed_conf_file)
+         and os.path.exists(maybe_installed_conf_file))):
+        return maybe_installed_conf_file
+    return installed_conf_file
+
+
 # prefix is *only* needed for the build-in tests
 def conffile_prompt(destFile, prefix=""):
     # type: (str, str) -> bool
@@ -980,14 +1000,20 @@ def conffile_prompt(destFile, prefix=""):
     # in the previous version in the dpkg status file
     if pkg_conffiles:
         for conf_file in pkg_conffiles.split("\n"):
-            if (conf_file not in dpkg_status_conffiles and
-                    os.path.exists(prefix + conf_file)):
+            installed_conf_file = find_old_installed_conf_file(
+                conf_file, prefix)
+            if conf_file not in dpkg_status_conffiles \
+               and os.path.exists(installed_conf_file):
                 logging.debug("found conffile %s in new pkg but on dpkg "
                               "status" % conf_file)
                 pkg_md5sum = get_md5sum_for_file_in_deb(destFile, conf_file)
-                with open(prefix + conf_file, 'rb') as fp:
-                    if pkg_md5sum != apt_pkg.md5sum(fp):
-                        return True
+                if os.path.isdir(installed_conf_file):
+                    logging.debug("found conffile %s being a directory on the "
+                                  "system " % conf_file)
+                else:
+                    with open(installed_conf_file, 'rb') as fp:
+                        if pkg_md5sum != apt_pkg.md5sum(fp):
+                            return True
     return False
 
 
