@@ -739,6 +739,8 @@ def upgrade_in_minimal_steps(cache,            # type: apt.Cache
     # type: (...) -> bool
     install_log = LogInstallProgress(logfile_dpkg, verbose)
 
+    res = True
+
     # double check any changes we do
     allowed_origins = get_allowed_origins()
 
@@ -753,13 +755,22 @@ def upgrade_in_minimal_steps(cache,            # type: apt.Cache
         if should_stop():
             return False
         pkg = cache[pkgname]
-        if pkg.is_upgradable:
-            cache.mark_upgrade_adjusted(pkg,
-                                        from_user=not pkg.is_auto_installed)
-        elif not pkg.is_installed:
-            cache.mark_install_adjusted(pkg, from_user=False)
-        else:
+        try:
+            if pkg.is_upgradable:
+                cache.mark_upgrade_adjusted(
+                    pkg, from_user=not pkg.is_auto_installed)
+            elif not pkg.is_installed:
+                cache.mark_install_adjusted(pkg, from_user=False)
+            else:
+                continue
+        except Exception as e:
+            logging.warning(
+                _("package %s upgradable but fails to "
+                  "be marked for upgrade (%s)"), pkgname, e)
+            cache.clear()
+            res = False
             continue
+
         # double check that we are not running into side effects like
         # what could have been caused LP: #1020680
         if not check_changes_for_sanity(cache, allowed_origins, blacklist,
@@ -799,7 +810,7 @@ def upgrade_in_minimal_steps(cache,            # type: apt.Cache
         if len(to_upgrade) == 0:
             logging.info(_("All upgrades installed"))
             break
-    return True
+    return res
 
 
 def is_allowed_origin(origin, allowed_origins):
