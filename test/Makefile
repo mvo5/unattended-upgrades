@@ -2,7 +2,10 @@
 
 all: check
 
-check:
+test-packages:
+	$(MAKE) -C packages
+
+check: test-packages
 	set -e; \
 	find . -name 'test_*.py' | \
 	while read file; do \
@@ -15,6 +18,7 @@ check:
 	done
 
 clean:
+	$(MAKE) -C packages clean
 	rm -rf ./aptroot/var/cache/
 	rm -rf ./aptroot/var/lib/apt
 	rm -rf ./aptroot/var/run

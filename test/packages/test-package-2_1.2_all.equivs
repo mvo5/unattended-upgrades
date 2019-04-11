@@ -1,0 +1,10 @@
+Section: misc
+Priority: optional
+Standards-Version: 3.9.2
+
+Package: test-package-2
+Version: 1.2
+Description: Ships moved /etc/foo/foo /etc/foo
+File: etc/foo 644
+ This is a configuration file,
+ Totally.

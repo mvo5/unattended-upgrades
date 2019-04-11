@@ -4,6 +4,7 @@ Uploaders: Balint Reczey <rbalint@ubuntu.com>
 Section: admin
 Priority: optional
 Build-Depends: debhelper (>= 9.20160709),
+               equivs,
                po-debconf,
                python3,
                python3-dbus,
