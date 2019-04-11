@@ -2,7 +2,10 @@
 
 all: check
 
-check:
+test-packages:
+	$(MAKE) -C packages
+
+check: test-packages
 	# test with both py2 and py3 for now and also use coverage for the py2
 	set -e; \
 	find . -name 'test_*.py' | \
@@ -16,6 +19,7 @@ check:
 	done
 
 clean:
+	$(MAKE) -C packages clean
 	rm -rf ./aptroot/var/cache/
 	rm -rf ./aptroot/var/lib/apt
 	rm -rf ./aptroot/var/run

@@ -6,6 +6,13 @@ Conffiles:
  /etc/configuration-file 26b99d59ac8f5ecd3375107755ee8527
  /etc/configuration-file2 404d877bbd67dc2412ba80d7c92d6bc7
 
+Package: test-package-2
+Status: install ok installed
+Architecture: all
+Version: 0.9
+Conffiles:
+ /etc/foo/foo 26b99d59ac8f5ecd3375107755ee8527
+
 Package: multiple-conffiles
 Status: install ok installed
 Architecture: all
@@ -18,3 +25,4 @@ Package: test-package-new-conffile
 Status: install ok installed
 Architecture: all
 Version: 0.9
+

@@ -6,6 +6,7 @@ Section: admin
 Testsuite: autopkgtest
 Priority: optional
 Build-Depends: debhelper (>= 9.20160709),
+               equivs,
                gir1.2-glib-2.0,
                po-debconf,
                python,
