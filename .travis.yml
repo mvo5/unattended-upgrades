@@ -10,7 +10,7 @@ language: c
 before_install:
  - sudo apt-get update
  - sudo apt-get build-dep unattended-upgrades
- - sudo apt-get install -y dh-systemd fakeroot python-mock python3-mock
+ - sudo apt-get install -y dh-systemd fakeroot python-mock python3-mock equivs
  - which python3
  - sudo apt-get install python3-pip
  - sudo python3 -m pip install -U mypy
