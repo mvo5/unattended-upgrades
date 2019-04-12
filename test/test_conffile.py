@@ -47,6 +47,7 @@ No really.
         test_pkg = "./packages/test-package_1.2_all.deb"
         self.assertTrue(conffile_prompt(test_pkg, prefix="./root.conffile"),
                         "conffile prompt detection incorrect")
+        # changed /etc/foo/foo becomes different /etc/foo
         test_pkg = "./packages/test-package-2_1.2_all.deb"
         self.assertTrue(conffile_prompt(test_pkg, prefix="./root.conffile"),
                         "conffile prompt detection incorrect")
@@ -63,6 +64,16 @@ No really.
         # conf-test 0.9 is installed, 1.0 gets installed
         # they both have the same config files
         test_pkg = "./packages/conf-test-package_1.0.deb"
+        self.assertFalse(conffile_prompt(test_pkg, prefix="./root.conffile"),
+                         "conffile prompt detection incorrect")
+
+    def test_will_not_prompt_on_moves(self):
+        # changed /etc/foo becomes /etc/foo/foo, same as shipped before
+        test_pkg = "./packages/test-package_1.3_all.deb"
+        self.assertFalse(conffile_prompt(test_pkg, prefix="./root.conffile"),
+                         "conffile prompt detection incorrect")
+        # changed /etc/foo/foo becomes /etc/foo, same as shipped before
+        test_pkg = "./packages/test-package-2_1.3_all.deb"
         self.assertFalse(conffile_prompt(test_pkg, prefix="./root.conffile"),
                          "conffile prompt detection incorrect")
 
