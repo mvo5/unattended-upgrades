@@ -1,0 +1,11 @@
+Section: misc
+Priority: optional
+Standards-Version: 3.9.2
+
+Package: test-package
+Version: 1.3
+Description: Ships moved /etc/configuration-file/configuration-file
+File: /etc/configuration-file/configuration-file 644
+ This is a configuration file,
+ .
+ No really.
