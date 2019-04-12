@@ -1048,6 +1048,8 @@ def conffile_prompt(destFile, prefix=""):
         raise
     except LookupError as e:
         logging.debug("No conffiles in deb %s (%s)" % (destFile, e))
+    if not pkg_conffiles:
+        return False
 
     # Conffiles:
     #  /etc/bash_completion.d/m-a c7780fab6b14d75ca54e11e992a6c11c
@@ -1073,7 +1075,7 @@ def conffile_prompt(destFile, prefix=""):
         # might be a dpkg prompt (LP: #936870)
         if md5 == "newconffile":
             continue
-        if not pkg_conffiles or conf_file not in pkg_conffiles:
+        if conf_file not in pkg_conffiles:
             logging.debug("%s not in package conffiles %s" % (
                 conf_file, pkg_conffiles))
             continue
