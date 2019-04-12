@@ -1039,7 +1039,7 @@ def conffile_prompt(destFile, prefix=""):
     try:
         deb = apt_inst.DebFile(destFile)
         pkg_conffiles = deb.control.extractdata("conffiles").strip().decode(
-            "utf-8")
+            "utf-8").split("\n")
     except SystemError as e:
         print(_("Apt returned an error, exiting"))
         print(_("error message: %s") % e)
@@ -1073,7 +1073,7 @@ def conffile_prompt(destFile, prefix=""):
         # might be a dpkg prompt (LP: #936870)
         if md5 == "newconffile":
             continue
-        if not pkg_conffiles or conf_file not in pkg_conffiles.split("\n"):
+        if not pkg_conffiles or conf_file not in pkg_conffiles:
             logging.debug("%s not in package conffiles %s" % (
                 conf_file, pkg_conffiles))
             continue
@@ -1117,7 +1117,7 @@ def conffile_prompt(destFile, prefix=""):
     # now check if there are conffiles in the pkg that where not there
     # in the previous version in the dpkg status file
     if pkg_conffiles:
-        for conf_file in pkg_conffiles.split("\n"):
+        for conf_file in pkg_conffiles:
             installed_conf_file = find_old_installed_conf_file(
                 conf_file, prefix)
             if conf_file not in dpkg_status_conffiles \
