@@ -796,6 +796,25 @@ def is_pkg_change_allowed(pkg, blacklist, whitelist):
     return True
 
 
+def transitive_dependencies(pkg, cache, acc=set(), valid_types=None):
+    # type (apt.Package, apt.Cache, AbstractSet[str], AbstractSet[str]) -> bool
+    """ All (transitive) dependencies of the package
+
+        Note that alternative (|) dependencies are collected, too
+    """
+    for dep in pkg.candidate.dependencies:
+        for base_dep in dep:
+            if base_dep.name not in acc:
+                if not valid_types or base_dep.rawtype in valid_types:
+                    acc.add(base_dep.name)
+                    try:
+                        transitive_dependencies(cache[base_dep.name], cache,
+                                                acc, valid_types)
+                    except KeyError:
+                        pass
+    return acc
+
+
 def check_changes_for_sanity(cache, allowed_origins, blacklist, whitelist,
                              desired_pkg=None):
     # type: (apt.Cache, List[str], List[str], List[str], apt.Package) -> bool
