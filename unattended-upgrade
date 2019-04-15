@@ -190,13 +190,6 @@ class UnattendedUpgradesCache(apt.Cache):
         except NoAllowedOriginError:
             return False
 
-    def adjust_candidate_for_all_packages(self):
-        """ Adjust origin of all the upgradable/installable packages
-        """
-        for pkg in self:
-            if pkg.is_upgradable or not pkg.is_installed:
-                self.adjust_candidate(pkg)
-
     def call_checked(self, function, pkg, **kwargs):
         """ Call function and check if package is in the wanted state
         """
@@ -232,41 +225,23 @@ class UnattendedUpgradesCache(apt.Cache):
            and not pkg.is_upgradable:
             raise NoAllowedOriginError
         marking_succeeded = self.call_checked(function, pkg, **kwargs)
-        if not marking_succeeded:
-            # The package could not have been marked to install/upgrade
-            # with the current candidate adjustments.
-            # Try marking it without the adjustments then adjust
-            # all packages to be installed/upgraded. This will work where
-            # package dependencies are similar for the adjusted and not
-            # adjusted case, just with different versions.
-            logging.debug("falling back to marking %s without adjustments, "
-                          "then adjusting changes" % pkg.name)
-            for pkg2 in ([self[pkg_name] for pkg_name
-                          in self._cached_candidate_pkgnames]):
-                pkg2.candidate = pkg2.versions[0]
 
-            marking_succeeded = self.call_checked(function, pkg, **kwargs)
-            if marking_succeeded:
-                changes = self.get_changes()
-                for pkg2 in changes:
-                    self.adjust_candidate(pkg2)
-                if all({ver_in_allowed_origin(pkg2, self.allowed_origins)
-                        for pkg2 in changes}):
+        if not marking_succeeded:
+            logging.debug("falling back to adjusting %s's dependencies "
+                          "recursively" % pkg.name)
+            self.clear()
+            # adjust candidates in advance if needed
+            for pkg_name in self._cached_candidate_pkgnames:
+                self.adjust_candidate(self[pkg_name])
+
+            self.adjust_candidate(pkg)
+            for dep in transitive_dependencies(pkg, self):
+                try:
+                    self.adjust_candidate(self[dep])
+                except KeyError:
                     pass
-                else:
-                    # could not adjust all packages in changes to allowed
-                    # candidates
-                    self.clear()
 
-        if not marking_succeeded:
-            # The package could not have been marked to install/upgrade
-            # with the current candidate adjustments.
-            # As a last resort u-u marks _all_ upgradable or
-            # not installed packages' candidates to come from
-            # allowed origins and try marking the package again.
-            logging.debug("falling back to adjusting all packages")
-            self.adjust_candidate_for_all_packages()
-            marking_succeeded = self.call_checked(function, pkg, **kwargs)
+            self.call_checked(function, pkg, **kwargs)
 
         for marked_pkg in self.get_changes():
             if marked_pkg.name in self._cached_candidate_pkgnames:
