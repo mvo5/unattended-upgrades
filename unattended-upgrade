@@ -2187,6 +2187,10 @@ def run(options,             # type: Options
         return UnattendedUpgradesResult(
             False, _("Cache has broken packages, exiting"), pkgs=pkgs)
 
+    # make sure we start autoremovals with a clear cache
+    if cache.get_changes():
+        cache.clear()
+
     # the user wants *all* auto-removals to be removed
     # (unless u-u got signalled to stop gracefully quickly)
     pkgs_removed = []         # type: List[str]
