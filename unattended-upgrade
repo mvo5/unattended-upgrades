@@ -857,20 +857,22 @@ def is_pkg_change_allowed(pkg, blacklist, whitelist):
     return True
 
 
-def transitive_dependencies(pkg, cache, acc=set()):
-    # type (apt.Package, apt.Cache, AbstractSet[str]) -> bool
+def transitive_dependencies(pkg, cache, acc=set(), valid_types=None):
+    # type (apt.Package, apt.Cache, AbstractSet[str], AbstractSet[str]) -> bool
     """ All (transitive) dependencies of the package
+
+        Note that alternative (|) dependencies are collected, too
     """
-    # Note that alternative (|) dependencies are collected, too
-    valid_types = {'Depends', 'PreDepends', 'Recommends'}
     for dep in pkg.candidate.dependencies:
         for base_dep in dep:
-            if base_dep.name not in acc and base_dep.rawtype in valid_types:
-                acc.add(base_dep.name)
-                try:
-                    transitive_dependencies(cache[base_dep.name], cache, acc)
-                except KeyError:
-                    pass
+            if base_dep.name not in acc:
+                if not valid_types or base_dep.rawtype in valid_types:
+                    acc.add(base_dep.name)
+                    try:
+                        transitive_dependencies(cache[base_dep.name], cache,
+                                                acc, valid_types)
+                    except KeyError:
+                        pass
     return acc
 
 
@@ -882,10 +884,11 @@ def upgrade_order(to_upgrade, cache):
 
     upgrade_set_sizes = {}
     # calculate upgrade sets
+    follow_deps = {'Depends', 'PreDepends', 'Recommends'}
     for pkgname in to_upgrade:
         pkg = cache[pkgname]
-        upgrade_set_sizes[pkgname] = \
-            len(transitive_dependencies(pkg, cache).intersection(to_upgrade))
+        upgrade_set_sizes[pkgname] = len(transitive_dependencies(
+            pkg, cache, valid_types=follow_deps).intersection(to_upgrade))
     return sorted(upgrade_set_sizes, key=upgrade_set_sizes.get)
 
 
