@@ -1956,6 +1956,10 @@ def main(options, rootdir=""):
         logging.error(_("Cache has broken packages, exiting"))
         sys.exit(1)
 
+    # make sure we start autoremovals with a clear cache
+    if cache.get_changes():
+        cache.clear()
+
     # the user wants *all* auto-removals to be removed
     # (unless u-u got signalled to stop gracefully quickly)
     pkgs_removed = []         # type: List[str]
