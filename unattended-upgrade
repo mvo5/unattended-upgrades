@@ -202,7 +202,6 @@ class UnattendedUpgradesCache(apt.Cache):
            adjusted than only the one's in the final changes set.
         """
         new_pkgs_to_adjust = []  # List[str]
-        pkgs_with_no_allowed_origin = []
 
         # adjust candidates in advance if needed
         for pkg_name in self._cached_candidate_pkgnames:
@@ -261,7 +260,7 @@ class UnattendedUpgradesCache(apt.Cache):
                         continue
                     new_pkgs_to_adjust.append(marked_pkg)
                 except NoAllowedOriginError:
-                    pkgs_with_no_allowed_origin.append(marked_pkg)
+                    pass
 
         if new_pkgs_to_adjust:
             new_pkg_adjusted = False
@@ -271,9 +270,6 @@ class UnattendedUpgradesCache(apt.Cache):
                     new_pkg_adjusted = True
             if new_pkg_adjusted:
                 self.call_adjusted(function, pkg, **kwargs)
-        else:
-            if pkgs_with_no_allowed_origin:
-                raise NoAllowedOriginError
 
     def mark_upgrade_adjusted(self, pkg, **kwargs):
         self.call_adjusted(apt.package.Package.mark_upgrade, pkg, **kwargs)
