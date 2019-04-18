@@ -3,18 +3,50 @@ unattended-upgrades (1.12) UNRELEASED; urgency=medium
   [ Brannon Dorsey ]
   * Remove double "format" in 50unattended-upgrades configuration files
 
+  [ Daniel Herzig ]
+  * man: improve unattended-upgrade.8 man-page (Closes: #905289)
+
+  [ Jonatan Nyberg ]
+  * Swedish debconf strings update (Closes: #925488)
+
   [ Balint Reczey ]
   * Compare apt.package.Version objects and not the versions' string
     representation. This prevented adjusting candidates when the strings sorted
     differently (LP: #1820888)
   * Enable test_clean and test_patch_days tests
-  * Fall back to adjusting more packages' candidates
-    when a package from an allowed origin can't be marked to install/upgrade.
-    (LP: #1821101)
+  * Fall back to adjusting more packages' candidates when a package from an
+    allowed origin can't be marked to install/upgrade. (LP: #1821101)
   * Skip sending email when no package had to be installed, upgraded or removed
     (LP: #1821103) (Closes: #924554)
+  * Add a few debug logging points
+  * Report packages kept back by origin (LP: #1821376)
+  * Fix trailing newlines in wrapped email lines
+  * Describe candidate adjustment fallback better in the debug message
+  * Fix missing space. Thanks to Alban VIDAL
+  * Update POT file
+  * Test upgrades to -updates and to -proposed in upgrade-all-security
+    autopkgtest. Also enable -updates, too, while testing in Debian.
+  * Add ${distro_id}ESM:${distro_codename}-security to allowed origins
+    (LP: #1823376)
+  * Detect changes to moved conffiles (LP: #1823872)
+  * Add tests for checking conffile moves.
+    Build depend on and use equivs to generate new test packages
+  * Make sure autoremovals don't start with a dirty cache and remove other
+    packages (LP: #1824341)
+  * Stop raising NoAllowedOriginError when marking packages to upgrade/install
+    fails (LP: #1824876)
+  * Continue applying minimal sets when one set can't be marked for upgrade.
+    Thanks to Anderson Luiz Alves for the patch, it needed minor modifications
+    (LP: #1824341)
+  * Skip trying to upgrade held packages in call_adjusted() (LP: #1824804)
+  * Adjust only transitive dependencies in the fallback when a package from an
+    allowed origin can't be marked to install/upgrade.
+    This is a much lighter approach than marking every upgradable package
+    because the full fallback was triggered on packages held back as well,
+    using an excessive amount of CPU time. (LP: #1824804, #1824949)
+  * Follow all kinds of transitive dependencies when adjusting dependencies
 
- -- Balint Reczey <rbalint@ubuntu.com>  Thu, 21 Mar 2019 00:05:10 +0100
+ -- Balint Reczey <rbalint@ubuntu.com>  Thu, 18 Apr 2019 15:05:26 +0200
 
 unattended-upgrades (1.11) unstable; urgency=medium
 
