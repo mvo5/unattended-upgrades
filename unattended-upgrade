@@ -224,6 +224,10 @@ class UnattendedUpgradesCache(apt.Cache):
         new_pkgs_to_adjust = []  # List[str]
         pkgs_with_no_allowed_origin = []
 
+        if pkg._pkg.selected_state == apt_pkg.SELSTATE_HOLD:
+            logging.debug("pkg %s is on hold" % pkg.name)
+            return
+
         # adjust candidates in advance if needed
         for pkg_name in self._cached_candidate_pkgnames:
             self.adjust_candidate(self[pkg_name])
