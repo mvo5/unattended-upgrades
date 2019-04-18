@@ -1,4 +1,4 @@
-unattended-upgrades (1.12) UNRELEASED; urgency=medium
+unattended-upgrades (1.12) experimental; urgency=medium
 
   [ Brannon Dorsey ]
   * Remove double "format" in 50unattended-upgrades configuration files
@@ -45,8 +45,14 @@ unattended-upgrades (1.12) UNRELEASED; urgency=medium
     because the full fallback was triggered on packages held back as well,
     using an excessive amount of CPU time. (LP: #1824804, #1824949)
   * Follow all kinds of transitive dependencies when adjusting dependencies
+  * Split() conffile data to set of names only once
+  * Don't parse dpkg conffile db when there are no conffiles in the package
+  * Detect unchanged moved conffiles.
+    When a package moves a conffile properly without any change no conffile
+    prompt needs to be shown thus the package can be upgraded unattended even
+    when the conffile is changed locally. (LP: #1823872)
 
- -- Balint Reczey <rbalint@ubuntu.com>  Thu, 18 Apr 2019 15:05:26 +0200
+ -- Balint Reczey <rbalint@ubuntu.com>  Thu, 18 Apr 2019 16:38:31 +0200
 
 unattended-upgrades (1.11) unstable; urgency=medium
 
