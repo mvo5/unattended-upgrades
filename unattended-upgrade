@@ -1048,7 +1048,7 @@ def rewind_cache(cache, pkgs_to_upgrade):
     """ set the cache back to the state with packages_to_upgrade """
     cache.clear()
     for pkg2 in pkgs_to_upgrade:
-        pkg2.mark_install(from_user=not pkg2.is_auto_installed)
+        cache.mark_install_adjusted(pkg2, from_user=not pkg2.is_auto_installed)
     if cache.broken_count > 0:
         raise AssertionError("rewind_cache created a broken cache")
 
