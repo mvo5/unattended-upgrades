@@ -877,6 +877,9 @@ def transitive_dependencies(pkg, cache, acc=set(), valid_types=None):
 
         Note that alternative (|) dependencies are collected, too
     """
+    if not pkg.candidate:
+        return acc
+
     for dep in pkg.candidate.dependencies:
         for base_dep in dep:
             if base_dep.name not in acc:
