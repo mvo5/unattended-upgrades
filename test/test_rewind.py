@@ -44,6 +44,8 @@ class TestRewindCache(unittest.TestCase):
                                       in ["test-package", "test2-package",
                                           "test3-package"]])
         self.assertEqual(kept_back, ["z-package"])
+        unattended_upgrade.rewind_cache(self.cache, to_upgrade)
+        self.assertEqual(self.cache['test-package'].candidate.version, "2.0")
 
 
 if __name__ == "__main__":
