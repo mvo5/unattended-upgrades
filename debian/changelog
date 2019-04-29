@@ -1,5 +1,40 @@
-unattended-upgrades (1.1ubuntu1.18.04.7~16.04.3) UNRELEASED; urgency=medium
+unattended-upgrades (1.1ubuntu1.18.04.7~16.04.3) xenial; urgency=medium
 
+  * Detect changes to moved conffiles (LP: #1823872)
+    - Add tests for checking conffile moves.
+      Build depend on and use equivs to generate new test packages
+    - Split() conffile data to set of names only once
+    - Don't parse dpkg conffile db when there are no conffiles in the package
+  * Detect unchanged moved conffiles.
+    When a package moves a conffile properly without any change no conffile
+    prompt needs to be shown thus the package can be upgraded unattended.
+    (LP: #1823872)
+  * Skip sending email when no package had to be installed, upgraded or removed
+    (LP: #1821103) (Closes: #924554)
+  * Make sure autoremovals don't start with a dirty cache and remove other
+    packages (LP: #1824341)
+  * Continue applying minimal sets when one set can't be marked for upgrade.
+    Thanks to Anderson Luiz Alves for the patch, it needed minor modifications
+    (LP: #1824341)
+  * Stop raising NoAllowedOriginError when marking packages to upgrade/install
+    fails (LP: #1824876)
+  * Adjust only transitive dependencies in the fallback when a package from an
+    allowed origin can't be marked to install/upgrade.
+    This is a much lighter approach than marking every upgradable package
+    because the full fallback was triggered on packages held back as well,
+    using an excessive amount of CPU time.
+    Also it crashed with packages not having any version in allowed origins.
+    (LP: #1824804, #1824949)
+  * Skip trying to upgrade held packages in call_adjusted() (LP: #182480)
+  * Follow all kinds of transitive dependencies when adjusting dependencies
+  * Don't crash collecting transitive dependencies when package has no candidate
+    (LP: #1825886)
+  * Use mark_install_adjusted() in rewind_cache()
+    The original cache had packages marked with adjustments thus rewinding
+    should also do adjustments to reach the same state.
+    Also not using mark_install_adjusted() crashes when apt raises error on
+    held packages. (LP: #1826157)
+    - test_rewind: Update test to check if adjustend rewinding took place
   * do_auto_remove() is successful unless a commit() operation fails
     (LP: #1795696)
   * Compare apt.package.Version objects and not the versions' string
@@ -10,7 +45,7 @@ unattended-upgrades (1.1ubuntu1.18.04.7~16.04.3) UNRELEASED; urgency=medium
     when a package from an allowed origin can't be marked to install/upgrade.
     (LP: #1821101)
 
- -- Balint Reczey <rbalint@ubuntu.com>  Tue, 26 Mar 2019 17:06:36 +0100
+ -- Balint Reczey <rbalint@ubuntu.com>  Mon, 29 Apr 2019 12:23:14 +0200
 
 unattended-upgrades (1.1ubuntu1.18.04.7~16.04.2) xenial; urgency=medium
 
