@@ -25,7 +25,7 @@ unattended-upgrades (1.1ubuntu1.18.04.7~16.04.3) xenial; urgency=medium
     using an excessive amount of CPU time.
     Also it crashed with packages not having any version in allowed origins.
     (LP: #1824804, #1824949)
-  * Skip trying to upgrade held packages in call_adjusted() (LP: #182480)
+  * Skip trying to upgrade held packages in call_adjusted() (LP: #1824804)
   * Follow all kinds of transitive dependencies when adjusting dependencies
   * Don't crash collecting transitive dependencies when package has no candidate
     (LP: #1825886)
