@@ -1651,6 +1651,12 @@ def is_autoremove_valid(cache, pkgname, auto_removable, blacklist, whitelist):
                   "they include %s which package is related to the running "
                   "kernel: %s"), packagename, " ".join(sorted(pkgnames)))
             return False
+    if cache.install_count > 0:
+        logging.error(
+            "The following packages are marked for installation or upgrade "
+            "which is not allowed when performing autoremovals: %s",
+            " ".join([pkg.name for pkg in changes if not pkg.marked_delete]))
+        return False
     return True
 
 

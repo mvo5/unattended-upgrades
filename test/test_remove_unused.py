@@ -168,6 +168,28 @@ Unattended-Upgrade::Skip-Updates-On-Metered-Connections "false";
                              "Found '%s' in '%s'" % (needle_kernel_bad,
                                                      haystack))
 
+    def test_remove_valid(self):
+        allowed_origins = unattended_upgrade.get_allowed_origins()
+        cache = unattended_upgrade.UnattendedUpgradesCache(
+            rootdir=self.rootdir, allowed_origins=allowed_origins)
+        auto_removable = unattended_upgrade.get_auto_removable(cache)
+        print(auto_removable)
+        cache["old-unused-dependency"].mark_delete()
+        res = unattended_upgrade.is_autoremove_valid(
+            cache, "test-package-dependency", auto_removable, [], [])
+        self.assertTrue(res, "Simple autoremoval set is not valid")
+
+        res = unattended_upgrade.is_autoremove_valid(
+            cache, "test-package-dependency", set(), [], [])
+        self.assertFalse(res, "Autoremoving non-autoremovable package")
+
+        cache["forbidden-dependency"].mark_install()
+        auto_removable.add("forbidden-dependency")
+        res = unattended_upgrade.is_autoremove_valid(
+            cache, "test-package-dependency", auto_removable, [], [])
+        self.assertFalse(
+            res, "Package set to reinstall in cache is reinstalled")
+
 
 if __name__ == "__main__":
     # do not setup logging in here or the test will break
