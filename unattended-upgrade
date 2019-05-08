@@ -572,7 +572,7 @@ def versioned_kernel_pkgs_regexp():
         "APT::VersionedKernelPackages")
     if apt_versioned_kernel_pkgs:
         return re.compile("(" + "|".join(
-            ["^" + p + "-[0-9]+\\.[0-9\\.]+-.*"
+            ["^" + p + "-[1-9][0-9]*\\.[0-9]+\\.[0-9]+-[0-9]+(-.+)?$"
              for p in apt_versioned_kernel_pkgs]) + ")")
     else:
         return None
@@ -584,9 +584,20 @@ def running_kernel_pkgs_regexp():
     if apt_versioned_kernel_pkgs:
         running_kernel_version = subprocess.check_output(
             ["uname", "-r"], universal_newlines=True).rstrip()
-        return re.compile("(" + "|".join(
-            [("^" + p + "-" + re.escape(running_kernel_version) + "$")
-             for p in apt_versioned_kernel_pkgs]) + ")")
+        kernel_escaped = re.escape(running_kernel_version)
+        try:
+            kernel_noflavor_escaped = re.escape(
+                re.match("[1-9][0-9]*\\.[0-9]+\\.[0-9]+-[0-9]+",
+                         running_kernel_version)[0])
+            return re.compile("(" + "|".join(
+                [("^" + p + "-" + kernel_escaped + "$|^"
+                  + p + "-" + kernel_noflavor_escaped + "$")
+                 for p in apt_versioned_kernel_pkgs]) + ")")
+        except TypeError:
+            # flavor could not be cut from version
+            return re.compile("(" + "|".join(
+                [("^" + p + "-" + kernel_escaped + "$")
+                 for p in apt_versioned_kernel_pkgs]) + ")")
     else:
         return None
 

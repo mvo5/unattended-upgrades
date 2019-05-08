@@ -1,0 +1,3 @@
+#!/bin/sh
+
+test/autopkgtest_kernel_patterns.py
