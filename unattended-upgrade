@@ -151,25 +151,16 @@ class UnattendedUpgradesCache(apt.Cache):
         datetime.datetime.strptime("", "")
 
         # generate versioned_kernel_pkgs_regexp for later use
-        apt_versioned_kernel_pkgs = apt_pkg.config.value_list(
-            "APT::VersionedKernelPackages")
-        if apt_versioned_kernel_pkgs:
-            self.versioned_kernel_pkgs_regexp = re.compile("(" + "|".join(
-                ["^" + p + "-[0-9]+\\.[0-9\\.]+-.*"
-                 for p in apt_versioned_kernel_pkgs]) + ")")
+        self.versioned_kernel_pkgs_regexp = versioned_kernel_pkgs_regexp()
+        self.running_kernel_pkgs_regexp = running_kernel_pkgs_regexp()
+        if self.versioned_kernel_pkgs_regexp:
             logging.debug("Using %s regexp to find kernel packages",
                           self.versioned_kernel_pkgs_regexp.pattern)
-            running_kernel_version = subprocess.check_output(
-                ["uname", "-r"], universal_newlines=True).rstrip()
-            self.running_kernel_pkgs_regexp = re.compile("(" + "|".join(
-                [("^" + p + "-" + re.escape(running_kernel_version) + "$")
-                 for p in apt_versioned_kernel_pkgs]) + ")")
-            logging.debug("Using %s regexp to find running kernel packages",
-                          self.running_kernel_pkgs_regexp.pattern)
         else:
             logging.debug("APT::VersionedKernelPackages is not set")
-            self.versioned_kernel_pkgs_regexp = None
-            self.running_kernel_pkgs_regexp = None
+        if self.running_kernel_pkgs_regexp:
+            logging.debug("Using %s regexp to find running kernel packages",
+                          self.running_kernel_pkgs_regexp.pattern)
 
     def adjust_candidate(self, pkg):
         # type: (apt.Package) -> bool
@@ -574,6 +565,30 @@ def get_distro_codename():
 def get_distro_id():
     # type: () -> str
     return DISTRO_ID
+
+
+def versioned_kernel_pkgs_regexp():
+    apt_versioned_kernel_pkgs = apt_pkg.config.value_list(
+        "APT::VersionedKernelPackages")
+    if apt_versioned_kernel_pkgs:
+        return re.compile("(" + "|".join(
+            ["^" + p + "-[0-9]+\\.[0-9\\.]+-.*"
+             for p in apt_versioned_kernel_pkgs]) + ")")
+    else:
+        return None
+
+
+def running_kernel_pkgs_regexp():
+    apt_versioned_kernel_pkgs = apt_pkg.config.value_list(
+        "APT::VersionedKernelPackages")
+    if apt_versioned_kernel_pkgs:
+        running_kernel_version = subprocess.check_output(
+            ["uname", "-r"], universal_newlines=True).rstrip()
+        return re.compile("(" + "|".join(
+            [("^" + p + "-" + re.escape(running_kernel_version) + "$")
+             for p in apt_versioned_kernel_pkgs]) + ")")
+    else:
+        return None
 
 
 def get_allowed_origins_legacy():
