@@ -1,3 +1,10 @@
+unattended-upgrades (1.11.1) unstable; urgency=medium
+
+  * Skip sending email when no package had to be installed, upgraded or removed
+    (LP: #1821103) (Closes: #924554)
+
+ -- Balint Reczey <rbalint@ubuntu.com>  Tue, 21 May 2019 09:37:03 +0200
+
 unattended-upgrades (1.11) unstable; urgency=medium
 
   * Use defaults in unattended-upgrades.service when the APT configuration is
