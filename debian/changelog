@@ -1,3 +1,21 @@
+unattended-upgrades (1.13) UNRELEASED; urgency=medium
+
+  [ Alban VIDAL ]
+  * Update french translation.
+    Signed-off-by: Alban VIDAL <alban.vidal@zordhak.fr>
+
+  [ Balint Reczey ]
+  * Don't crash collecting transitive dependencies when package has no
+    candidate (LP: #1825886)
+  * Use mark_install_adjusted() in rewind_cache()
+    The original cache had packages marked with adjustments thus rewinding
+    should also do adjustments to reach the same state. Not using
+    mark_install_adjusted() also crashes when apt raises error on held
+    packages. (LP: #1826157)
+  * test_rewind: Update test to check if adjustend rewinding took place
+
+ -- Balint Reczey <rbalint@ubuntu.com>  Tue, 21 May 2019 23:18:12 +0200
+
 unattended-upgrades (1.12) experimental; urgency=medium
 
   [ Brannon Dorsey ]
