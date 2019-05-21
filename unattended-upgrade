@@ -77,6 +77,7 @@ import apt_pkg
 
 # the reboot required flag file used by packages
 REBOOT_REQUIRED_FILE = "/var/run/reboot-required"
+KEPT_PACKAGES_FILE = "var/lib/unattended-upgrades/kept-back"
 MAIL_BINARY = "/usr/bin/mail"
 SENDMAIL_BINARY = "/usr/sbin/sendmail"
 USERS = "/usr/bin/users"
@@ -1690,6 +1691,23 @@ def is_update_day():
     return False
 
 
+def update_kept_packages(kept_pkgs, kept_file):
+    # type: (DefaultDict[str, List[str]], str) -> None
+    if kept_pkgs:
+        pkgs_all_origins = set()
+        for origin_pkgs in kept_pkgs.values():
+            pkgs_all_origins.update(origin_pkgs)
+        try:
+            with open(kept_file, "w") as kf:
+                kf.write(" ".join(sorted(pkgs_all_origins)))
+        except Exception:
+            logging.error(_("Could not open %s for saving list of packages "
+                            "kept back." % kept_file))
+    else:
+        if os.path.exists(kept_file):
+            os.remove(kept_file)
+
+
 def main(options, rootdir=""):
     # type: (Options, str) -> int
     # useful for testing
@@ -2077,6 +2095,8 @@ def main(options, rootdir=""):
     if not options.dry_run:
         reboot_if_requested_and_needed()
     if successful_run:
+        update_kept_packages(pkgs_kept_back,
+                             os.path.join(rootdir, KEPT_PACKAGES_FILE))
         return 0
     else:
         return 1
