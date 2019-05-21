@@ -1,0 +1,11 @@
+#!/bin/sh
+#
+# helper for update-motd
+
+if [ -f /var/lib/unattended-upgrades/kept-back ]; then
+  cat <<EOF
+
+$(wc -w < /var/lib/unattended-upgrades/kept-back) updates could not be installed automatically. For more details,
+see /var/log/unattended-upgrades/unattended-upgrades.log
+EOF
+fi

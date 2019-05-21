@@ -51,6 +51,15 @@ esac
 
 chroot_exec "$chroot_dir" apt-get update
 
+# test update-motd when it is available
+if chroot_exec "$chroot_dir" apt-cache show update-motd > /dev/null 2>&1; then
+    chroot_exec "$chroot_dir" apt-get -y install update-motd
+    echo "Checking motd snippet of unattended-upgrades..."
+    echo "fake-foo libfoo1" > "$chroot_dir"/var/lib/unattended-upgrades/kept-back
+    chroot_exec "$chroot_dir" update-motd
+    grep -q "2 updates could not be installed automatically" "$chroot_dir"/run/motd || (echo "Motd does not show packgages kept back! Exiting..." && exit 1)
+fi
+
 # save list of manually installed packages
 chroot_exec "$chroot_dir" apt-mark showmanual > "$chroot_dir/tmp/manual"
 
@@ -64,3 +73,5 @@ chroot_exec "$chroot_dir" apt-get upgrade --with-new-pkgs -s | tee "$chroot_dir/
 
 ! grep "/$distro-security " "$chroot_dir/tmp/updates-left" || (echo "Security upgrades are held back! Exiting..." && exit 1)
 
+echo "Checking if /var/lib/unattended-upgrades/kept-back was removed."
+! [ -f "$chroot_dir/var/lib/unattended-upgrades/kept-back" ] || (echo "kept-back file still exists! Exiting..." && exit 1)
