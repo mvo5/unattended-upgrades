@@ -53,6 +53,12 @@ chroot_exec "$chroot_dir" bash -c 'apt install -y /tmp/unattended-upgrades_*deb'
 
 
 enable_pocket "$chroot_dir" security
+chroot_exec "$chroot_dir" apt-get update
+if ! chroot_exec "$chroot_dir" apt-get dist-upgrade -s | grep -q "^Ins"; then
+    echo "There are no security upgrades, skipping test..."
+    exit 77
+fi
+
 enable_pocket "$chroot_dir" updates
 chroot_exec "$chroot_dir" apt-get update
 
