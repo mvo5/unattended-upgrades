@@ -76,7 +76,7 @@ disable_pocket "$chroot_dir" updates
 chroot_exec "$chroot_dir" apt-get update
 chroot_exec "$chroot_dir" apt-get upgrade --with-new-pkgs -s | tee "$chroot_dir/tmp/updates-left"
 
-! grep "/$distro-security " "$chroot_dir/tmp/updates-left" || (echo "Security upgrades are held back! Exiting..." && exit 1)
+! grep "^Inst" "$chroot_dir/tmp/updates-left" || (echo "Security upgrades are held back! Exiting..." && exit 1)
 
 echo "Checking if originally auto-removable packages are kept:"
 chroot_exec "$chroot_dir" dpkg -l hello | grep 'ii  hello'
