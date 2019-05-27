@@ -4,7 +4,7 @@ Restrictions: needs-root, isolation-container, needs-reboot
 
 Tests: upgrade-all-security
 Depends: @, @builddeps@, debootstrap, distro-info
-Restrictions: needs-root, build-needed
+Restrictions: needs-root, build-needed, skippable
 
 Tests: upgrade-between-snapshots
 Depends: @, @builddeps@, debootstrap
