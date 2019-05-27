@@ -13,7 +13,8 @@ chroot_dir=$AUTOPKGTEST_TMP/chroot
 
 distro="$(lsb_release -c -s)"
 # fall back to latest release on any development release
-if [ "$distro" = sid ] || lsb_release -d -s | grep -q 'development branch'; then
+if [ "$distro" = sid ] || lsb_release -d -s | grep -q 'development branch' \
+       || ( distro-info -t 2> /dev/null && [ "$(distro-info -t)" = "$distro" ] ) ; then
     distro="$(distro-info -s)"
 fi
 
