@@ -93,9 +93,11 @@ Unattended-Upgrade::Package-Blacklist {
 // 'mailx' must be installed. E.g. "user@example.com"
 //Unattended-Upgrade::Mail "";
 
-// Set this value to "true" to get emails only on errors. Default
-// is to always send a mail if Unattended-Upgrade::Mail is set
-//Unattended-Upgrade::MailOnlyOnError "false";
+// Set this value to one of:
+//    "always", "only-on-error" or "on-change"
+// If this is not set, then any legacy MailOnlyOnError (boolean) value
+// is used to chose between "only-on-error" and "on-change"
+//Unattended-Upgrade::MailReport "on-change";
 
 // Remove unused automatically installed kernel-related packages
 // (kernel images, kernel headers and kernel version locked tools).
