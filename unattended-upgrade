@@ -1238,14 +1238,32 @@ def send_summary_mail(pkgs,                 # type: List[str]
                         "can not send mail. "
                         "You probably want to install the mailx package."))
         return
+
+    # The admin may well wish to get a mail report regardless of what was done.
+    # This is now set by Unattended-Upgrade::MailReport values of:
+    #       "always", "only-on-error" or "on-change"
+    # (you can achieve "never" by not setting Unattended-Upgrade::Mail).
+    # If this is not set, then set it using any legacy MailOnlyOnError
+    # setting (default True)
+    #
+    mail_opt = apt_pkg.config.find("Unattended-Upgrade::MailReport")
+    if (mail_opt == ""):    # None set - map from legacy value
+        if apt_pkg.config.find_b("Unattended-Upgrade::MailOnlyOnError", False):
+            mail_opt = "only-on-error"
+        else:
+            mail_opt = "on-change"
+
     # if the operation was successful and the user has requested to get
-    # mails on on errors, just exit here
-    if (res and apt_pkg.config.find_b(
-            "Unattended-Upgrade::MailOnlyOnError", False)):
+    # mails only on errors, just exit here
+    if (res and (mail_opt == "only-on-error")):
         return
+
     # if the run was successful but nothing had to be done skip sending email
-    if (res and not pkgs and not pkgs_kept_back and not pkgs_removed):
+    # unless the admin wants it anyway
+    if ((mail_opt != "always") and
+        res and not pkgs and not pkgs_kept_back and not pkgs_removed):
         return
+
     # Check if reboot-required flag is present
     reboot_flag_str = _(
         "[reboot required]") if os.path.isfile(REBOOT_REQUIRED_FILE) else ""
