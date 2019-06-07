@@ -13,7 +13,8 @@ chroot_dir=$AUTOPKGTEST_TMP/chroot
 
 distro="$(lsb_release -c -s)"
 # fall back to latest release on any development release
-if [ "$distro" = sid ] || lsb_release -d -s | grep -q 'development branch'; then
+if [ "$distro" = sid ] || lsb_release -d -s | grep -q 'development branch' \
+       || ( distro-info -t 2> /dev/null && [ "$(distro-info -t)" = "$distro" ] ) ; then
     distro="$(distro-info -s)"
 fi
 
@@ -53,6 +54,12 @@ chroot_exec "$chroot_dir" bash -c 'apt install -y /tmp/unattended-upgrades_*deb'
 
 
 enable_pocket "$chroot_dir" security
+chroot_exec "$chroot_dir" apt-get update
+if ! chroot_exec "$chroot_dir" apt-get dist-upgrade -s | grep -q "^Ins"; then
+    echo "There are no security upgrades, skipping test..."
+    exit 77
+fi
+
 enable_pocket "$chroot_dir" updates
 chroot_exec "$chroot_dir" apt-get update
 
@@ -69,7 +76,7 @@ disable_pocket "$chroot_dir" updates
 chroot_exec "$chroot_dir" apt-get update
 chroot_exec "$chroot_dir" apt-get upgrade --with-new-pkgs -s | tee "$chroot_dir/tmp/updates-left"
 
-! grep "/$distro-security " "$chroot_dir/tmp/updates-left" || (echo "Security upgrades are held back! Exiting..." && exit 1)
+! grep "^Inst" "$chroot_dir/tmp/updates-left" || (echo "Security upgrades are held back! Exiting..." && exit 1)
 
 echo "Checking if originally auto-removable packages are kept:"
 chroot_exec "$chroot_dir" dpkg -l hello | grep 'ii  hello'

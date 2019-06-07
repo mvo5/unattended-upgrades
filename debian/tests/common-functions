@@ -58,17 +58,17 @@ enable_pocket() {
         "Debian")
             case "$pocket" in
                 proposed)
-                    real_pocket=proposed-updates
+                    pocket_dir="${distro}-proposed-updates"
                     ;;
                 security)
-                    real_pocket="$distro/updates"
+                    pocket_dir="$distro/updates"
                     mirror_dir_postfix="-security"
                     ;;
                 *)
-                    real_pocket="$pocket"
+                    pocket_dir="${distro}-$pocket"
                     ;;
             esac
-            sed "s|/debian |/debian$mirror_dir_postfix |;s/$distro/$distro-$pocket/" < "$chroot_dir/etc/apt/sources.list" \
+            sed "s|/debian |/debian$mirror_dir_postfix |;s|$distro|$pocket_dir|" < "$chroot_dir/etc/apt/sources.list" \
                 > "$chroot_dir/etc/apt/sources.list.d/$pocket.list"
             ;;
     esac
