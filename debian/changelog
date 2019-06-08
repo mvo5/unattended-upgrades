@@ -1,3 +1,15 @@
+unattended-upgrades (1.11.2) unstable; urgency=medium
+
+  * Test upgrades to -updates and to -proposed in upgrade-all-security autopkgtest.
+    Also enable -updates, too, while testing in Debian.
+  * Skip upgrade-all-security test when there are no updates to test with.
+    Shortly after a release there may not be security updates against the
+    packages used in the chroot used for the test.
+  * Test with latest stable in upgrade-all-security on testing
+  * Fix testing Debian's updates in upgrade-all-security
+
+ -- Balint Reczey <rbalint@ubuntu.com>  Sat, 08 Jun 2019 16:59:45 +0200
+
 unattended-upgrades (1.11.1) unstable; urgency=medium
 
   * Skip sending email when no package had to be installed, upgraded or removed
