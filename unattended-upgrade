@@ -1301,8 +1301,9 @@ def send_summary_mail(pkgs,                 # type: List[str]
         ret = _send_mail_using_mailx(from_email, to_email, subject, body)
     else:
         raise AssertionError(
-            "This should never be reached, if we are here we either "
-            "have sendmail or mailx. Please report this as a bug.")
+            "This should never be reached as we previously validated that we "
+            "either have sendmail or mailx. Maybe they've been removed in "
+            "this right moment?")
     logging.debug("mail returned: %s", ret)
 
 
