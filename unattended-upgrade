@@ -87,6 +87,7 @@ import distro_info
 
 # the reboot required flag file used by packages
 REBOOT_REQUIRED_FILE = "/var/run/reboot-required"
+KEPT_PACKAGES_FILE = "var/lib/unattended-upgrades/kept-back"
 MAIL_BINARY = "/usr/bin/mail"
 SENDMAIL_BINARY = "/usr/sbin/sendmail"
 USERS = "/usr/bin/users"
@@ -1767,6 +1768,23 @@ def is_update_day():
     return False
 
 
+def update_kept_packages(kept_pkgs, kept_file):
+    # type: (DefaultDict[str, List[str]], str) -> None
+    if kept_pkgs:
+        pkgs_all_origins = set()
+        for origin_pkgs in kept_pkgs.values():
+            pkgs_all_origins.update(origin_pkgs)
+        try:
+            with open(kept_file, "w") as kf:
+                kf.write(" ".join(sorted(pkgs_all_origins)))
+        except FileNotFoundError:
+            logging.error(_("Could not open %s for saving list of packages "
+                            "kept back." % kept_file))
+    else:
+        if os.path.exists(kept_file):
+            os.remove(kept_file)
+
+
 def main(options, rootdir=""):
     # type: (Options, str) -> int
     # useful for testing
@@ -1793,6 +1811,12 @@ def main(options, rootdir=""):
     try:
         res = run(options, rootdir, mem_log, logfile_dpkg,
                   install_start_time)
+
+        if res.success and res.result_str:
+            # complete, successful run
+            update_kept_packages(res.pkgs_kept_back,
+                                 os.path.join(rootdir, KEPT_PACKAGES_FILE))
+
         if res.result_str and not options.dry_run:
             # there is some meaningful result which is worth an email
             log_content = get_dpkg_log_content(logfile_dpkg,
