@@ -204,10 +204,14 @@ Supported Options Reference
  Unattended-Upgrade::Sender "server@example.com";
  ```
 
-* `Unattended-Upgrade::MailOnlyOnError` - boolean (default:False)
+* `Unattended-Upgrade::MailReport` - string (default: "on-change")
  
- Only generate an email if some problem occurred during the 
- unattended-upgrades run.
+ Possible values are "always", "only-on-error" or "on-change".
+ If this value is not set then the value is set by using the legacy
+ option `Unattended-Upgrade::MailOnlyOnError` (default:False) to choose
+ between "only-on-error" and "on-change".
+
+ NOTE that "never" is achieved by not setting any `Unattended-Upgrade::Mail`
 
 * `Unattended-Upgrade::Remove-Unused-Dependencies` - boolean (default:False)
  

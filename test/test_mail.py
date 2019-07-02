@@ -92,7 +92,7 @@ class CommonTestsForMailxAndSendmail(object):
         unattended_upgrade.SENDMAIL_BINARY = "./no-sendmail-binary-here"
         # setup mail
         apt_pkg.config.set("Unattended-Upgrade::Mail", "root")
-        apt_pkg.config.set("Unattended-Upgrade::MailOnlyOnError", "false")
+        apt_pkg.config.set("Unattended-Upgrade::MailReport", "on-change")
         apt_pkg.config.set("Unattended-Upgrade::LogDir", self.tmpdir)
 
     def _return_mock_data(self, successful=True):
@@ -147,7 +147,7 @@ Debian-Security']
     def test_summary_mail_only_on_error(self):
         # default is to always send mail, ensure this is correct
         # for both success and failure
-        apt_pkg.config.set("Unattended-Upgrade::MailOnlyOnError", "false")
+        apt_pkg.config.set("Unattended-Upgrade::MailReport", "on-change")
         send_summary_mail(*self._return_mock_data(successful=True))
         with open(os.path.join(self.tmpdir, "mail.txt"), "rb") as fp:
             self._verify_common_mail_content(fp.read().decode("utf-8"))
@@ -157,8 +157,8 @@ Debian-Security']
         with open(os.path.join(self.tmpdir, "mail.txt"), "rb") as fp:
             self._verify_common_mail_content(fp.read().decode("utf-8"))
         os.remove(os.path.join(self.tmpdir, "mail.txt"))
-        # now test with "MailOnlyOnError"
-        apt_pkg.config.set("Unattended-Upgrade::MailOnlyOnError", "true")
+        # now test with "only-on-error"
+        apt_pkg.config.set("Unattended-Upgrade::MailReport", "only-on-error")
         send_summary_mail(*self._return_mock_data(successful=True))
         self.assertFalse(
             os.path.exists(os.path.join(self.tmpdir, "mail.txt")))
