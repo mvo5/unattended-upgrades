@@ -31,7 +31,8 @@ and the package manager (dpkg) output is logged to
 /var/log/unattended-upgrades/unattended-upgrades-dpkg.log
 .sp
 This script is the backend for the APT::Periodic::Unattended-Upgrade
-option and designed to be run from cron (e.g. via /etc/cron.daily/apt).
+option and designed to be run periodically by APT's systemd service
+(apt-daily-upgrade.service) or from cron (e.g. via /etc/cron.daily/apt).
 .SH OPTIONS
 unattended-upgrade accepts the following options:
 .TP
