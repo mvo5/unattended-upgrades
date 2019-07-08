@@ -12,4 +12,4 @@ Depends: @, @builddeps@, debootstrap
 
 Tests: kernel-patterns
 Depends: @, @builddeps@
-Restrictions: build-needed
+Restrictions: build-needed, allow-stderr
