@@ -1,4 +1,4 @@
-unattended-upgrades (1.13) UNRELEASED; urgency=medium
+unattended-upgrades (1.13) unstable; urgency=medium
 
   [ Alban VIDAL ]
   * Update french translation.
@@ -13,8 +13,40 @@ unattended-upgrades (1.13) UNRELEASED; urgency=medium
     mark_install_adjusted() also crashes when apt raises error on held
     packages. (LP: #1826157)
   * test_rewind: Update test to check if adjustend rewinding took place
+  * Only allow removals in valid autoremoval sets
+  * Fix one more log location in the man page (Closes: #928601)
+  * Factor out kernel regexp generation to functions
+  * Packages including kernel version without flavor in their name may be
+    kernel packages. Also add autopkgtest for checking if the generated
+    patterns cover the currently running kernel. (LP: #1828200)
+  * Skip upgrade-all-security test when there are no updates to test with.
+    Shortly after a release there may not be security updates against the
+    packages used in the chroot used for the test.
+  * Test with latest stable in upgrade-all-security on testing
+  * Fix testing Debian's updates in upgrade-all-security
+  * Store list of kept packages and report the number of them in motd
+    (LP: #1823070)
+  * Mention APT's apt-daily-upgrade.service in the man page
+  * 50unattended-upgrades.md5sum add MD5 of current files
+  * PEP8: Fix breaking line after binary operator
+  * debian/tests/control: Fix Depends: of upgrade-between-snapshots
+  * debian/tests/control: Allow stderr in kernel-patterns
 
- -- Balint Reczey <rbalint@ubuntu.com>  Tue, 21 May 2019 23:18:12 +0200
+  [ Gordon Lack ]
+  * Replace boolean Unattended-Upgrade::MailOnlyOnError2 mail reporting setting
+    with multi-valued (string) Unattended-Upgrade::MailReport.
+
+  [ Jaime Hablutzel ]
+  * Error message improved on very improbable condition
+
+  [ Clint Armstrong ]
+  * Fix showing multi-line strings on Plymouth.
+    When unattended-upgrades sends it's status to plymouth it sends a
+    multi-line string which causes plymouth to display overlapping text,
+    because plymouth only scrolls one line when the message is sent.
+    (LP: 1826406)
+
+ -- Balint Reczey <rbalint@ubuntu.com>  Mon, 08 Jul 2019 11:08:30 +0200
 
 unattended-upgrades (1.12) experimental; urgency=medium
 
