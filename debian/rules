@@ -35,6 +35,10 @@ ifneq ($(TARGET_DIST),UNRELEASED)
 		fi; \
 	done
 endif
+	if sort data/50unattended-upgrades.md5sum | uniq -c  | grep -v " 1 " ; then \
+		echo "ERROR:  ^ duplicate lines in data/50unattended-upgrades.md5sum"; \
+		exit 1; \
+	fi
 	set -e; for f in unattended-upgrade unattended-upgrade-shutdown; do \
 		ln -nsf $$f $$f.py; \
 		py3compile $$f.py; \
