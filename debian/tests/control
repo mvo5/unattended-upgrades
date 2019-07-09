@@ -8,7 +8,8 @@ Restrictions: needs-root, build-needed, skippable
 
 Tests: upgrade-between-snapshots
 Restrictions: needs-root, build-needed
+Depends: @, @builddeps@, debootstrap
 
 Tests: kernel-patterns
 Depends: @, @builddeps@
-Restrictions: build-needed
+Restrictions: build-needed, allow-stderr
