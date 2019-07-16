@@ -1708,10 +1708,10 @@ def update_kept_packages(kept_pkgs, kept_file):
             os.remove(kept_file)
 
 
-def main(options, rootdir=""):
+def main(options, rootdir="/"):
     # type: (Options, str) -> int
     # useful for testing
-    if rootdir:
+    if not rootdir == "/":
         _setup_alternative_rootdir(rootdir)
 
     # setup logging
