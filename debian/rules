@@ -2,6 +2,7 @@
 
 PYTHON=python3
 DIST=$(shell dpkg-vendor --query Vendor)
+TARGET_DIST=$(shell dpkg-parsechangelog -S Distribution)
 
 %:
 	dh $@ --with=systemd
@@ -26,6 +27,18 @@ override_dh_installinit:
 
 override_dh_auto_clean:
 	# Sanity-check before upload.
+ifneq ($(TARGET_DIST),UNRELEASED)
+	for i in $$(md5sum data/50unattended-upgrades.* | grep -v md5sum | cut -d" " -f1); do \
+		if ! grep -q $$i data/50unattended-upgrades.md5sum ; then \
+			echo "ERROR: $$i is missing from data/50unattended-upgrades.md5sum"; \
+			exit 1; \
+		fi; \
+	done
+endif
+	if sort data/50unattended-upgrades.md5sum | uniq -c  | grep -v " 1 " ; then \
+		echo "ERROR:  ^ duplicate lines in data/50unattended-upgrades.md5sum"; \
+		exit 1; \
+	fi
 	set -e; for f in unattended-upgrade unattended-upgrade-shutdown; do \
 		ln -nsf $$f $$f.py; \
 		py3compile $$f.py; \
