@@ -5,7 +5,7 @@
 # - language is "C" because the travis chroot for python installs a non-repo
 #   python3.3 from a PPA
 sudo: required
-dist: trusty
+dist: bionic
 language: c
 before_install:
  - sudo apt-get update
