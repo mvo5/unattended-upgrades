@@ -10,10 +10,11 @@ language: c
 before_install:
  - sudo apt-get update
  - sudo apt-get build-dep unattended-upgrades
- - sudo apt-get install -y dh-systemd fakeroot python3-mock python3-distro-info equivs
+ - sudo apt-get install -y fakeroot python3-coverage pyflakes3
  - which python3
+ - python3 --version
  - sudo apt-get install python3-pip
- - sudo python3 -m pip install -U mypy coverage
+ - sudo python3 -m pip install -U mypy
 # travis is "funny" it has a non-distro python3 that will not find
 # python modules installed via apt-get
 # note that tests are run during package build
