@@ -61,7 +61,14 @@ enable_pocket() {
                     pocket_dir="${distro}-proposed-updates"
                     ;;
                 security)
-                    pocket_dir="$distro/updates"
+                    case "$distro" in
+                        stretch|buster)
+                            pocket_dir="$distro/updates"
+                            ;;
+                        *)
+                            pocket_dir="${distro}-$pocket"
+                            ;;
+                    esac
                     mirror_dir_postfix="-security"
                     ;;
                 *)
