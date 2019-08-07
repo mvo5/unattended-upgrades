@@ -43,7 +43,8 @@ try:
 except ImportError:
     pass
 
-from optparse import OptionParser
+from optparse import OptionParser, Values
+Values  # pyflakes
 from gettext import gettext as _
 from threading import Event
 
@@ -120,7 +121,7 @@ def exit_log_result(success):
 class UnattendedUpgradesShutdown():
 
     def __init__(self, options):
-        # type: (Options) -> None
+        # type: (Values) -> None
         self.options = options
         self.max_delay = options.delay * 60
         self.iter_timer_set = False
