@@ -1,3 +1,23 @@
+unattended-upgrades (1.14) unstable; urgency=medium
+
+  [ Balint Reczey ]
+  * Check if md5sums of configuration files are shipped in releases
+  * debian/rules: Check duplicate lines in data/50unattended-upgrades.md5sum
+  * Use Debian's security updates from $distro-security starting with Bullseye
+  * Allow both ${distro_codename} or ${distro_codename}-security on Debian
+    as security update codenames. The latter will be used starting with
+    Bullseye, but to help backporting and testing the configuration file keeps
+    working on Buster and older releases. (Closes: #933138)
+  * Default to "/" as rootdir to fix saving list of kept packages.
+    Thanks to Paul Wise (Closes: #932160)
+  * data/50unattended-upgrades.md5sum: Update for change in Debian's config
+  * unattended-upgrade-shutdown: Fix FTBFS due to latest pyflakes' check
+
+  [ Tobias Bannert ]
+  * updated german translation
+
+ -- Balint Reczey <rbalint@ubuntu.com>  Wed, 07 Aug 2019 17:04:10 +0200
+
 unattended-upgrades (1.13) unstable; urgency=medium
 
   [ Alban VIDAL ]
