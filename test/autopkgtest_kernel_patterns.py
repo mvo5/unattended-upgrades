@@ -20,7 +20,7 @@ class TestKernelPatterns(unittest.TestCase):
             ["uname", "-r"], universal_newlines=True).rstrip()
         running_escaped_regexp = ".*" + re.escape(running_kernel_version)
         try:
-            running_noflavor_regexp = ".*" + re.escape(
+            running_noflavor_regexp = "linux.*-" + re.escape(
                 re.match("[1-9][0-9]*\\.[0-9]+\\.[0-9]+-[0-9]+",
                          running_kernel_version)[0])
         except TypeError:
