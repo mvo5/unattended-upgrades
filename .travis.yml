@@ -5,18 +5,14 @@
 # - language is "C" because the travis chroot for python installs a non-repo
 #   python3.3 from a PPA
 sudo: required
-dist: trusty
+dist: bionic
 language: c
 before_install:
  - sudo apt-get update
  - sudo apt-get build-dep unattended-upgrades
- - sudo apt-get install -y dh-systemd fakeroot python3-mock python3-distro-info equivs
+ - sudo apt-get install -y fakeroot python3-coverage pyflakes3 mypy
  - which python3
- - sudo apt-get install python3-pip
- - sudo python3 -m pip install -U mypy coverage
-# travis is "funny" it has a non-distro python3 that will not find
-# python modules installed via apt-get
-# note that tests are run during package build
+ - python3 --version
 script:
   - dpkg-buildpackage -d -us -uc -rfakeroot
   - sudo dpkg -i ../unattended-upgrades_*.deb
