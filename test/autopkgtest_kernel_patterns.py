@@ -20,7 +20,7 @@ class TestKernelPatterns(unittest.TestCase):
             ["uname", "-r"], universal_newlines=True).rstrip()
         running_escaped_regexp = ".*" + re.escape(running_kernel_version)
         try:
-            running_noflavor_regexp = ".*" + re.escape(
+            running_noflavor_regexp = "linux.*-" + re.escape(
                 re.match("[1-9][0-9]*\\.[0-9]+\\.[0-9]+-[0-9]+",
                          running_kernel_version)[0])
         except TypeError:
@@ -34,9 +34,18 @@ class TestKernelPatterns(unittest.TestCase):
             if re.match(running_noflavor_regexp, pkg_name):
                 if re.match(running_escaped_regexp, pkg_name) \
                    and not re.match(running_regexp, pkg_name):
+                    logging.debug("Package %s matched %s and %s, "
+                                  "but did not match %s",
+                                  pkg_name, running_noflavor_regexp,
+                                  running_escaped_regexp,
+                                  running_regexp)
                     not_matched.add(pkg_name)
                     continue
                 if not re.match(versioned_regexp, pkg_name):
+                    logging.debug("Package %s matched %s, "
+                                  "but did not match %s",
+                                  pkg_name, running_noflavor_regexp,
+                                  versioned_regexp)
                     not_matched.add(pkg.name)
 
         self.assertTrue(not not_matched,
