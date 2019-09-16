@@ -63,7 +63,7 @@ try:
 except ImportError:
     pass
 
-from collections import defaultdict
+from collections import defaultdict, namedtuple
 from datetime import date
 from email.message import Message
 from gettext import gettext as _
@@ -115,6 +115,8 @@ SIGNAL_STOP_REQUEST = False
 # messages to be logged only once
 logged_msgs = set()  # type: AbstractSet[str]
 
+NEVER_PIN = -32768
+
 
 class LoggingDateTime:
     """The date/time representation for the dpkg log file timestamps"""
@@ -139,6 +141,10 @@ class UnknownMatcherError(ValueError):
 
 class NoAllowedOriginError(ValueError):
     pass
+
+
+PkgPin = namedtuple('PkgPin', ['pkg', 'priority'])
+PkgFilePin = namedtuple('PkgFilePin', ['id', 'priority'])
 
 
 class UnattendedUpgradesCache(apt.Cache):
@@ -230,6 +236,88 @@ class UnattendedUpgradesCache(apt.Cache):
             logging.info(_("Package %s is kept back because a related package"
                            " is kept back or due to local apt_preferences(5).")
                          % pkg.name)
+
+    def pinning_from_regex_list(self, regexps, priority):
+        # type: (List[str], int) -> List[PkgPin]
+        """ Represent blacklist as Python regexps as list of pkg pinnings"""
+
+        pins = []  # type: List[PkgPin]
+        for regex in regexps:
+            if python_regex_is_posix(regex):
+                pins.append(PkgPin('/' + regex + '/', priority))
+            else:
+                # Python regex is not also an equivalent POSIX regexp.
+                # This is expected to be rare. Go through all the package names
+                # and pin all the matching ones.
+                for pkg in self._cache.packages:
+                    if re.match(regex, pkg.name):
+                        pins.append(PkgPin(pkg.name, priority))
+        return pins
+
+    def pinning_from_config(self):
+        # type: () -> List[Union[PkgPin, PkgFilePin]]
+        """ Represent configuration as list of pinnings
+
+            Assumes self.allowed_origins to be already set.
+        """
+
+        pins = []  # type: List[Union[PkgPin, PkgFilePin]]
+
+        # mark not allowed origins with 'never' pin
+        for pkg_file in self._cache.file_list:  # type: ignore
+            logging.debug("Checking if %s is allowed", pkg_file)
+            if not is_allowed_origin(pkg_file, self.allowed_origins):
+                # Set the magic 'never' pin on not allowed origins
+                logging.debug("Marking not allowed %s with %s pin", pkg_file,
+                              NEVER_PIN)
+                pins.append(PkgFilePin(pkg_file.id, NEVER_PIN))
+            # TODO(rbalint) pin not trusted origins with NEVER_PIN
+            elif self.strict_whitelist:
+                # set even allowed origins to -1 and set individual package
+                # priorities up later
+                pins.append(PkgFilePin(pkg_file.id, -1))
+
+        # mark blacklisted packages with 'never' pin
+        pins.extend(self.pinning_from_regex_list(  # type: ignore
+            self.blacklist, NEVER_PIN))
+        # set priority of whitelisted packages to high
+        pins.extend(self.pinning_from_regex_list(  # type: ignore
+            self.whitelist, 900))
+        if self.strict_whitelist:
+            policy = self._depcache.policy
+            # pin down already pinned packages which are not on the whitelist
+            # to not install locally pinned up packages accidentally
+            for pkg in self._cache.packages:
+                if pkg.has_versions \
+                   and policy.get_candidate_ver(pkg) > -1:  # type: ignore
+                    # the pin is higher than set for allowed origins, thus
+                    # there is extra pinning configuration
+                    if not is_pkgname_in_whitelist(pkg.name, self.whitelist):
+                        pins.append(PkgPin(pkg.name, NEVER_PIN))
+
+        return pins
+
+    def apply_pinning(self, pins):
+        # type: (List[Union[PkgPin, PkgFilePin]]) -> None
+        """ Apply the list of pins """
+
+        policy = self._depcache.policy
+        pkg_files = {f.id: f for f in self._cache.file_list}  # type: ignore
+        for pin in pins:
+            logging.debug("Applying pinning: %s" % str(pin))
+            if isinstance(pin, PkgPin):
+                policy.create_pin('Version', pin.pkg, '*',  # type: ignore
+                                  pin.priority)
+            elif isinstance(pin, PkgFilePin):
+                logging.debug("Applying pin %s to package_file: %s"
+                              % (pin.priority, str(pkg_files[pin.id])))
+                policy.set_priority(pkg_files[pin.id],  # type: ignore
+                                    pin.priority)
+
+    def open(self, progress=None):
+        apt.Cache.open(self, progress)
+        # apply pinning generated from unattended-upgrades configuration
+        self.apply_pinning(self.pinning_from_config())
 
     def adjust_candidate(self, pkg):
         # type: (apt.Package) -> bool
@@ -701,7 +789,7 @@ def get_allowed_origins():
 
 
 def match_whitelist_string(whitelist, origin):
-    # type: (str, apt.package.Origin) -> bool
+    # type: (str, Union[apt.package.Origin, apt_pkg.PackageFile]) -> bool
     """
     take a whitelist string in the form "origin=Debian,label=Debian-Security"
     and match against the given python-apt origin. A empty whitelist string
@@ -745,6 +833,12 @@ def match_whitelist_string(whitelist, origin):
         # logging.debug("matching %s=%s against %s" % (
         #              what, value, origin))
     return res
+
+
+def python_regex_is_posix(expression):
+    # type: (str) -> bool
+    """ Returns if the Python regex is also an equivalent POSIX regex """
+    return re.match("^[a-zA-Z0-9\\^\\$\\+\\.]*$", expression) is None
 
 
 def cache_commit(cache,           # type: apt.Cache
@@ -868,7 +962,7 @@ def upgrade_in_minimal_steps(cache,            # type: UnattendedUpgradesCache
 
 
 def is_allowed_origin(origin, allowed_origins):
-    # type: (apt.package.Origin, List[str]) -> bool
+    # type: (Union[apt.package.Origin, apt_pkg.PackageFile], List[str]) -> bool
     for allowed in allowed_origins:
         if match_whitelist_string(allowed, origin):
             return True
@@ -2110,6 +2204,7 @@ def run(options,             # type: Options
     if dpkg_conffile_prompt():
         # now check the downloaded debs for conffile conflicts and build
         # a blacklist
+        conffile_blacklist = []  # type: List[str]
         for item in fetcher.items:
             logging.debug("%s" % item)
             if item.status == item.STAT_ERROR:
@@ -2136,7 +2231,7 @@ def run(options,             # type: Options
                 logging.debug("%s is blacklisted because it is not trusted")
                 pkg_name = pkgname_from_deb(item.destfile)
                 if not is_pkgname_in_blacklist(pkg_name, cache.blacklist):
-                    cache.blacklist.append("%s$" % re.escape(pkg_name))
+                    conffile_blacklist.append("%s$" % re.escape(pkg_name))
             if not is_deb(item.destfile):
                 logging.debug("%s is not a .deb file" % item)
                 continue
@@ -2158,16 +2253,17 @@ def run(options,             # type: Options
                                 pkgname_from_deb(item.destfile))
                 pkg_name = pkgname_from_deb(item.destfile)
                 if not is_pkgname_in_blacklist(pkg_name, cache.blacklist):
-                    cache.blacklist.append("%s$" % re.escape(pkg_name))
+                    conffile_blacklist.append("%s$" % re.escape(pkg_name))
                 pkg_conffile_prompt = True
 
         # redo the selection about the packages to upgrade based on the new
         # blacklist
-        logging.debug("blacklist: %s" % cache.blacklist)
-        # whitelist
-        logging.debug("whitelist: %s" % cache.whitelist)
+        logging.debug("Packages blacklist due to conffile prompts: %s"
+                      % conffile_blacklist)
         # find out about the packages that are upgradable (in a allowed_origin)
-        if len(cache.blacklist) > 0 or len(cache.whitelist) > 0:
+        if len(conffile_blacklist) > 0:
+            cache.apply_pinning(cache.pinning_from_regex_list(
+                conffile_blacklist, NEVER_PIN))  # type: ignore
             old_pkgs_to_upgrade = pkgs_to_upgrade[:]
             pkgs_to_upgrade = []
             for pkg in old_pkgs_to_upgrade:
