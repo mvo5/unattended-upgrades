@@ -8,4 +8,4 @@ Restrictions: needs-root, build-needed
 
 Tests: upgrade-between-snapshots
 Depends: @, @builddeps@, debootstrap
-Restrictions: needs-root, build-needed
+Restrictions: needs-root, build-needed, flaky
