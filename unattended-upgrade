@@ -220,8 +220,12 @@ class UnattendedUpgradesCache(apt.Cache):
             self.adjust_candidate(self[pkg_name])
 
         if function == apt.package.Package.mark_upgrade \
-           and not pkg.is_upgradable:
-            raise NoAllowedOriginError
+                and not pkg.is_upgradable:
+            if not apt_pkg.config.find_b("Unattended-Upgrade::Allow-downgrade",
+                                         False):
+                raise NoAllowedOriginError
+            else:
+                function = apt.package.Package.mark_install
         marking_succeeded = self.call_checked(function, pkg, **kwargs)
 
         if not marking_succeeded:
@@ -250,7 +254,9 @@ class UnattendedUpgradesCache(apt.Cache):
                     ver_in_allowed_origin(marked_pkg,
                                           self.allowed_origins)
                     # important! this avoids downgrades below
-                    if pkg.is_installed and not pkg.is_upgradable:
+                    if pkg.is_installed and not pkg.is_upgradable and\
+                            apt_pkg.config.find_b("Unattended-Upgrade::Allow-"
+                                                  "downgrade", False):
                         continue
                     new_pkgs_to_adjust.append(marked_pkg)
                 except NoAllowedOriginError:
@@ -761,7 +767,11 @@ def upgrade_in_minimal_steps(cache,            # type: apt.Cache
             return False
         pkg = cache[pkgname]
         try:
-            if pkg.is_upgradable:
+            if pkg.is_upgradable or (pkg.is_installed and
+                                     pkg.candidate.version !=
+                                     pkg.installed.version) and\
+                    apt_pkg.config.find_b("Unattended-Upgrade:"
+                                          ":Allow-downgrade", False):
                 cache.mark_upgrade_adjusted(
                     pkg, from_user=not pkg.is_auto_installed)
             elif not pkg.is_installed:
@@ -1558,7 +1568,8 @@ def try_to_upgrade(pkg,               # type: apt.Package
             # try to adjust pkg itself first, if that throws an exception it
             # can't be upgraded on its own
             cache.adjust_candidate(pkg)
-            if not pkg.is_upgradable:
+            if not pkg.is_upgradable and not apt_pkg.config.find_b(
+                    "Unattended-Upgrade::Allow-downgrade", False):
                 return
         except NoAllowedOriginError:
             return
@@ -1599,17 +1610,22 @@ def calculate_upgradable_pkgs(cache,             # type: apt.Cache
 
     # now do the actual upgrade
     for pkg in cache:
-        if options.debug and pkg.is_upgradable:
+        if options.debug and pkg.is_upgradable or (pkg.is_installed and
+                                                   pkg.candidate.version !=
+                                                   pkg.installed.version)\
+                        and apt_pkg.config.find_b(
+                            "Unattended-Upgrade::Allow-downgrade", False):
             logging.debug("Checking: %s (%s)" % (
                 pkg.name, getattr(pkg.candidate, "origins", [])))
 
-        if (pkg.is_upgradable
+        if (pkg.is_upgradable or ((pkg.is_installed and pkg.candidate.version
+            != pkg.installed.version) and apt_pkg.config.find_b(
+                "Unattended-Upgrade::Allow-downgrade", False))
                 and is_pkgname_in_whitelist(pkg.name, whitelist)):
             try:
                 ver_in_allowed_origin(pkg, allowed_origins)
             except NoAllowedOriginError:
                 continue
-
             try_to_upgrade(pkg,
                            pkgs_to_upgrade,
                            pkgs_kept_back,
@@ -1896,7 +1912,9 @@ def main(options, rootdir="/"):
 def mark_pkgs_to_upgrade(cache, pkgs_to_upgrade):
     # type (apt.Cache, List[apt.Package]) -> None
     for pkg in pkgs_to_upgrade:
-        if pkg.is_upgradable:
+        if pkg.is_upgradable or (pkg.is_installed and pkg.candidate.version !=
+                                 pkg.installed.version) and\
+           apt_pkg.config.find_b("Unattended-Upgrade::Allow-downgrade", False):
             cache.mark_upgrade_adjusted(pkg,
                                         from_user=not pkg.is_auto_installed)
         elif not pkg.is_installed:
