@@ -225,15 +225,15 @@ class UnattendedUpgradesCache(apt.Cache):
         marking_succeeded = self.call_checked(function, pkg, **kwargs)
 
         if not marking_succeeded:
-            logging.debug("falling back to adjusting %s's dependencies "
-                          "recursively" % pkg.name)
+            logging.debug("falling back to adjusting %s's dependencies"
+                          % pkg.name)
             self.clear()
             # adjust candidates in advance if needed
             for pkg_name in self._cached_candidate_pkgnames:
                 self.adjust_candidate(self[pkg_name])
 
             self.adjust_candidate(pkg)
-            for dep in transitive_dependencies(pkg, self):
+            for dep in transitive_dependencies(pkg, self, level=1):
                 try:
                     self.adjust_candidate(self[dep])
                 except KeyError:
@@ -898,13 +898,18 @@ def is_pkg_change_allowed(pkg, blacklist, whitelist):
     return True
 
 
-def transitive_dependencies(pkg, cache, acc=set(), valid_types=None):
-    # type (apt.Package, apt.Cache, AbstractSet[str], AbstractSet[str]) -> bool
+def transitive_dependencies(pkg,               # type: apt.Package
+                            cache,             # type: apt.Cache
+                            acc=set(),         # type AbstractSet[str]
+                            valid_types=None,  # type: AbstractSet[str]
+                            level=None         # type: int
+                            ):
+    # type (...) -> AbstractSet[str]
     """ All (transitive) dependencies of the package
 
         Note that alternative (|) dependencies are collected, too
     """
-    if not pkg.candidate:
+    if not pkg.candidate or level is not None and level < 1:
         return acc
 
     for dep in pkg.candidate.dependencies:
@@ -913,8 +918,9 @@ def transitive_dependencies(pkg, cache, acc=set(), valid_types=None):
                 if not valid_types or base_dep.rawtype in valid_types:
                     acc.add(base_dep.name)
                     try:
-                        transitive_dependencies(cache[base_dep.name], cache,
-                                                acc, valid_types)
+                        transitive_dependencies(
+                            cache[base_dep.name], cache, acc, valid_types,
+                            level=(level - 1 if level is not None else None))
                     except KeyError:
                         pass
     return acc
