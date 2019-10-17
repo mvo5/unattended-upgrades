@@ -1,3 +1,15 @@
+unattended-upgrades (1.1ubuntu1.18.04.12) bionic; urgency=medium
+
+  * Report packages kept back by origin (LP: #1821376)
+  * Store list of kept packages and report the number of them in motd
+    (LP: #1823070)
+  * Default to "/" as rootdir to fix saving list of kept packages.
+    Thanks to Paul Wise (Closes: #932160)
+  * debian/tests/control: Mark upgrade-between-snapshots as flaky
+    (Closes: #941752) (LP: #1848354)
+
+ -- Balint Reczey <rbalint@ubuntu.com>  Fri, 18 Oct 2019 13:24:28 +0200
+
 unattended-upgrades (1.1ubuntu1.18.04.11) bionic; urgency=medium
 
   * Detect changes to moved conffiles (LP: #1823872)
