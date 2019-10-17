@@ -130,7 +130,7 @@ run_u_u() {
 
     ret=0
     for i in $(seq 5); do
-        chroot_exec "$chroot_dir" unattended-upgrade --download-only || ret=$?
+        chroot_exec "$chroot_dir" unattended-upgrade --download-only && break || ret=$?
         sleep 120
     done
     [ $ret = 0 ] || exit $ret
