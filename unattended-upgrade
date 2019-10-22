@@ -945,44 +945,52 @@ def upgrade_order(to_upgrade, cache):
 def check_changes_for_sanity(cache, allowed_origins, blacklist, whitelist,
                              desired_pkg=None):
     # type: (apt.Cache, List[str], List[str], List[str], apt.Package) -> bool
-    if cache._depcache.broken_count != 0:
+    sanity_check_result = sanity_problem(cache, allowed_origins, blacklist,
+                                         whitelist, desired_pkg=None)
+    if sanity_check_result is None:
+        return True
+    else:
+        logging.debug("sanity check failed for: %s : %s"
+                      % (str({str(p.candidate) for p in cache.get_changes()}),
+                         sanity_check_result))
         return False
+
+
+def sanity_problem(cache, allowed_origins, blacklist, whitelist,
+                   desired_pkg=None):
+    # type: (apt.Cache, List[str], List[str], List[str], apt.Package) -> str
+    if cache._depcache.broken_count != 0:
+        return ("there are broken packages in the cache")
     # If there are no packages to be installed they were kept back
     if cache.install_count == 0:
-        return False
+        return ("no package is selected to be upgraded or installed")
     changes = cache.get_changes()
     for pkg in changes:
         if pkg.marked_delete:
-            logging.debug("pkg %s now marked delete" % pkg.name)
-            return False
+            return ("pkg %s is marked to be deleted" % pkg.name)
         if pkg.marked_install or pkg.marked_upgrade:
             # apt will never fallback from a trusted to a untrusted
             # origin so its good enough if we have a single trusted one
             if not any([o.trusted for o in pkg.candidate.origins]):
-                logging.debug("pkg %s is untrusted" % pkg.name)
-                return False
+                return ("pkg %s is not from a trusted origin" % pkg.name)
             if not is_in_allowed_origin(pkg.candidate, allowed_origins):
-                logging.debug("pkg %s not in allowed origin" % pkg.name)
-                return False
+                return ("pkg %s is not in an allowed origin" % pkg.name)
             if not is_pkg_change_allowed(pkg, blacklist, whitelist):
-                logging.debug("pkg %s is blacklisted or not whitelisted"
-                              % pkg.name)
-                return False
+                return ("pkg %s is blacklisted or is not whitelisted"
+                        % pkg.name)
             # check if the package is unsafe to upgrade unattended
             ignore_require_restart = apt_pkg.config.find_b(
                 "Unattended-Upgrade::IgnoreAppsRequireRestart", False)
             upgrade_requires = pkg.candidate.record.get("Upgrade-Requires")
             if pkg.marked_upgrade and ignore_require_restart is False \
                and upgrade_requires == "app-restart":
-                logging.debug("pkg %s requires app-restart, not safe to "
-                              "upgrade unattended")
-                return False
+                return ("pkg %s requires app-restart, it is not safe to "
+                        "upgrade it unattended")
     # check that the package we want to upgrade is in the change set
     if desired_pkg and desired_pkg not in changes:
-        logging.debug("pkg %s to be marked for upgrade/install is not marked "
-                      "accordingly" % pkg.name)
-        return False
-    return True
+        return ("pkg %s to be marked for upgrade/install is not marked "
+                "accordingly" % desired_pkg.name)
+    return None
 
 
 def is_deb(file):
@@ -1579,9 +1587,6 @@ def try_to_upgrade(pkg,               # type: apt.Package
             # a subsequent operation, see debian bug #639840
             pkgs_to_upgrade.extend(pkgs_kept_back.pop_upgradable(cache))
         else:
-            logging.debug("sanity check failed for: %s"
-                          % str({str(p.candidate)
-                                 for p in cache.get_changes()}))
             rewind_cache(cache, pkgs_to_upgrade)
             pkgs_kept_back.add(pkg, cache)
     except (SystemError, NoAllowedOriginError) as e:
