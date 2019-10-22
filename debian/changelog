@@ -1,3 +1,33 @@
+unattended-upgrades (1.15) unstable; urgency=medium
+
+  [ Tobias Bannert ]
+  * update german translation.
+    Improved some formulations and punctuation.
+
+  [ Maarten ]
+  * Update Dutch translation (Closes: #941672)
+
+  [ Balint Reczey ]
+  * autopkgtest: Retry failing downloads a few times
+  * test/autopkgtest_kernel_patterns.py: Add debug statements
+  * test/autopkgtest_kernel_patterns.py: Use stricter pattern for
+    packages to check
+  * debian/tests/control: Mark upgrade-between-snapshots as flaky
+    (Closes: #941752)
+  * Fix whitespace (LP: #1848036)
+  * Explain sanity check failures better
+  * Adjust only direct dependencies when falling back to adjusting more
+    packages.
+    Adjusting all transitive dependencies is found to slow down upgrades too
+    much when many packages were upgradable but not with adjustments taking
+    place. If a package upgrade to be installed by unattended-upgrades requires
+    adjusting a transitive but not direct dependency, please add this
+    dependency as a direct dependency of the package to unlock the upgrade.
+    (Closes: #935653) (LP: #1848357)
+  * debian/tests/common-functions: Don't sleep after successful u-u run
+
+ -- Balint Reczey <rbalint@ubuntu.com>  Tue, 22 Oct 2019 18:48:33 +0200
+
 unattended-upgrades (1.14) unstable; urgency=medium
 
   [ Balint Reczey ]
