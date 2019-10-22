@@ -1958,7 +1958,7 @@ def run(options,             # type: Options
 
     # pkgs that are (for some reason) not safe to install
     blacklist = get_blacklist()
-    logging.info(_("Initial blacklist : %s"),
+    logging.info(_("Initial blacklist: %s"),
                  " ".join(blacklist))
 
     # install only these packages regardless of other upgrades available
