@@ -2084,11 +2084,11 @@ def run(options,             # type: Options
     except SystemError as e:
         logging.error("fetch.run() result: %s", e)
 
-    if cache.get_changes():
-        cache.clear()
-
     if options.download_only:
         return UnattendedUpgradesResult(True)
+
+    if cache.get_changes():
+        cache.clear()
 
     pkg_conffile_prompt = False
     if dpkg_conffile_prompt():
