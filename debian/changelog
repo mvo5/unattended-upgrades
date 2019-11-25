@@ -1,3 +1,20 @@
+unattended-upgrades (1.1ubuntu1.18.04.13) bionic; urgency=medium
+
+  * Fix non-minimal upgrades (LP: #1853861)
+    - Mark packages for performing non-minimal upgrades
+    - Clear cache after checking upgrades against the blacklist again.
+      This fixes the issue when the dirty cache caused all packages to be
+      upgraded in the first "minimal" step.
+      Thanks to Paul Wise
+    - Leave the cache clean when returning from calculate_upgradable_pkgs()
+      When collecting upgradable packages the upgradable ones stayed in the
+      cache and they were upgraded together even when unattended-upgrades
+      was configured to perform upgrades in minimal steps.
+      Thanks to Paul Wise
+    - Clear cache after downloading packages
+
+ -- Balint Reczey <rbalint@ubuntu.com>  Mon, 25 Nov 2019 16:23:06 +0100
+
 unattended-upgrades (1.1ubuntu1.18.04.12) bionic; urgency=medium
 
   * Report packages kept back by origin (LP: #1821376)
