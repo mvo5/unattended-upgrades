@@ -3,6 +3,7 @@ unattended-upgrades (1.16) UNRELEASED; urgency=medium
   * Trim trailing whitespace.
   * Use secure copyright file specification URI.
   * Use set -e rather than passing -e on the shebang-line.
+  * Add missing colon in closes line.
 
  -- Debian Janitor <janitor@jelmer.uk>  Sun, 01 Dec 2019 10:43:40 +0000
 
@@ -2251,7 +2252,7 @@ unattended-upgrades (0.36debian1) unstable; urgency=low
 
   * merge from ubuntu:
     * make cache calculations quicker (thanks to Ben Hutchings,
-      closes #475610)
+      closes: #475610)
     * add hostname in mail header, thanks to  Arthur de Jong
       (closes: #502171, LP: #245417)
     * better email summary of the performed actions
@@ -2284,7 +2285,7 @@ unattended-upgrades (0.36debian1) unstable; urgency=low
 unattended-upgrades (0.36) jaunty; urgency=low
 
   * make cache calculations quicker (thanks to Ben Hutchings,
-    closes #475610)
+    closes: #475610)
   * add hostname in mail header, thanks to  Arthur de Jong
     (closes: #502171, LP: #245417)
   * better email summary of the performed actions
