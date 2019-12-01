@@ -1,10 +1,13 @@
 unattended-upgrades (1.16) UNRELEASED; urgency=medium
 
   [ Kaupo Arulo ]
-  * * Allow package downgrade if Pin-Priority exceeds 1000
+  * Allow package downgrade if Pin-Priority exceeds 1000
 
   [ Balint Reczey ]
   * Save a Cache.clear() in download-only mode
+
+  [ Debian Janitor ]
+  * Trim trailing whitespace.
 
  -- Balint Reczey <rbalint@ubuntu.com>  Fri, 13 Dec 2019 17:02:05 +0100
 
@@ -818,7 +821,7 @@ unattended-upgrades (0.94) unstable; urgency=medium
 unattended-upgrades (0.93.1+nmu2) unstable; urgency=medium
 
   * Non-maintainer upload.
-  * Fix PEP8 failures (replace except: with except Exception:) 
+  * Fix PEP8 failures (replace except: with except Exception:)
     (Closes: #865897)
 
  -- Julian Andres Klode <jak@debian.org>  Thu, 20 Jul 2017 10:51:11 +0200
@@ -832,12 +835,12 @@ unattended-upgrades (0.93.1+nmu1) unstable; urgency=medium
     - d/rules : Remove the override_dh_installinit. The stop option is no longer
       available so the command falls back to default. This is the normal
       behavior so the override is not required
-    - d/unattended-upgrades.init : Add Default-Start runlevels, otherwise the 
+    - d/unattended-upgrades.init : Add Default-Start runlevels, otherwise the
       unattended-upgrades.service unit cannot be enabled on boot
     - d/postinst : Cleanup the stop symlinks created by the wrong
       override_dh_installinit. Without that, the systemd unit cannot be
       enabled correctly.
-      Force disable the service before deb-systemd-helper runs so the old 
+      Force disable the service before deb-systemd-helper runs so the old
       symlink is not left dangling (workaround for Debian Bug #797108).
       Force enable and start of the systemd unit to work around Debian Bug
       #797108 which fails to enable systemd units correctly when WantedBy=
@@ -847,7 +850,7 @@ unattended-upgrades (0.93.1+nmu1) unstable; urgency=medium
         Remove DefaultDependencies=no : Breaks normal shutdown dependencies
         Set After= to network.target and local-fs.target. Since our service is
         now ExecStop, it will run before network and local-fs become
-        unavailable. Add RequiresMountsFor=/var/log /var/run /var/lib /boot : 
+        unavailable. Add RequiresMountsFor=/var/log /var/run /var/lib /boot :
         Necessary if /var is a separate file system. Set WantedBy= to
         multi-user.target
     - Add DEP8 tests to verify the following :
@@ -1160,7 +1163,7 @@ unattended-upgrades (0.83) unstable; urgency=medium
   * debian/postinst:
     - set /var/log/unattended-upgrades/ permissions to 0750
       (closes: #757438). Thanks to Joey Hess
- 
+
  -- Michael Vogt <mvo@debian.org>  Fri, 17 Oct 2014 15:50:29 +0200
 
 unattended-upgrades (0.82.10) unstable; urgency=medium
@@ -1176,7 +1179,7 @@ unattended-upgrades (0.82.9) unstable; urgency=low
   * po/da.po:
     - updated, thanks to Joe Dalton, closes: #754130
   * debian/po/tr.po:
-    - add Turkish translation, thanks to Mert Dirik 
+    - add Turkish translation, thanks to Mert Dirik
       closes: #757500
   * unattended-upgrades:
     - improve docstring for adjust_candidate_versions
@@ -1214,7 +1217,7 @@ unattended-upgrades (0.82.6) unstable; urgency=medium
     - fix regression in rewind_cache() and add test (closes: 743594)
   * unattended-upgrade:
     - ensure minimal-upgrades-modes does not truncate dpkg output log
-  
+
  -- Michael Vogt <mvo@debian.org>  Tue, 08 Apr 2014 16:05:23 +0200
 
 unattended-upgrades (0.82.5) unstable; urgency=low
@@ -1225,7 +1228,7 @@ unattended-upgrades (0.82.5) unstable; urgency=low
   * unattended-upgrades:
     - fix pyflakes error with latest pyflakes (thanks to
       Barry Warsaw)
-  
+
   [ Martin Pitt ]
   * debian/tests/control: Add missing python-apt test dependency, so that
     tests also work with Python 2.
@@ -1237,7 +1240,7 @@ unattended-upgrades (0.82.4) unstable; urgency=low
   [ Simon McVittie ]
   * do not ship generated files (*.pyc) in the source package
     (closes: 741467)
-  
+
   [ Michael Vogt ]
   * add debian/source/format
 
@@ -1309,7 +1312,7 @@ unattended-upgrades (0.80) unstable; urgency=low
     - make the mail sending more robust when facing unicode encoding
       errors
   * switch to python3 by default
-  
+
   [ Loïc Minier ]
   * lp:~lool/unattended-upgrades/static-cherckers-fixes:
     - run the tests at build time instead of via auto-pkg-test
@@ -1343,15 +1346,15 @@ unattended-upgrades (0.80~exp3) UNRELEASEDexperimental; urgency=low
   * enable pep8/pyflakes by default
   * Add new Unattended-Upgrade::Automatic-Reboot-Time to control
     when machines that need reboot are rebooting
-  * Fix crash when --dry-run and --verbose are used (thanks to 
+  * Fix crash when --dry-run and --verbose are used (thanks to
     Bernhard Schmidt), closes: #705615
 
  -- Michael Vogt <michael.vogt@ubuntu.com>  Thu, 11 Apr 2013 06:45:05 +0200
 
 unattended-upgrades (0.80~exp2) experimental; urgency=low
 
-  * add codename based matching 
-  * add support for "${distro_id}", "${distro_codename}" in the 
+  * add codename based matching
+  * add support for "${distro_id}", "${distro_codename}" in the
     Unattended-Upgrade::Origins-Pattern based matching too
   * data/50unattended-upgrades.Debian:
     - improve documentation, thanks to Russell Stuart
@@ -1383,11 +1386,11 @@ unattended-upgrades (0.79.5) unstable; urgency=low
   * data/50unattended-upgrades.{Debian,Ubuntu}:
     - add missing ";" in the example config, thanks to  Tomas Pospisek
       closes: #684876
-    - remove codename based matching example as this needs a newer 
+    - remove codename based matching example as this needs a newer
       python-apt than available in wheezy, thanks to Russell Stuart
   * unattended-upgrade, test/test_origin_pattern.py:
     - if a unknown matcher token is found, raise a error instead of
-      silently ignoring it, thanks to Russell Stuart 
+      silently ignoring it, thanks to Russell Stuart
   * unattended-upgrade:
     - do not nice/ionice as this wil affect daemon restarts
       (closes: #701850)
@@ -1426,7 +1429,7 @@ unattended-upgrades (0.79.3ubuntu6) raring; urgency=low
     - log that sendmail works as an alternative to mailx
     - add the result of the upgrade to email subject, thanks to Yann 'Ze'
       Richard for the initial patch (LP: #1069809)
-  
+
   [ Michael Vogt ]
   * unattended-upgrade:
     - fix debug output for origins checking in py3
@@ -1469,7 +1472,7 @@ unattended-upgrades (0.79.3ubuntu2) quantal; urgency=low
 
   [ Marc Tardif ]
   * Fixed debug output when a package has no candidates (LP: #1046438)
-  
+
   [ Michael Vogt ]
   * debian/test/:
     - add dep8 tests
@@ -1564,7 +1567,7 @@ unattended-upgrades (0.79) unstable; urgency=low
     - fixes new style lsb-init output, closes: #678030
 
   [ Michael Vogt ]
-  * correctly detect conffile prompt for new conffiles that were 
+  * correctly detect conffile prompt for new conffiles that were
     normal files previously (like /etc/profile in base-files 6.8),
     closes: #673237
   * code cleanup in conffile detection and tests
@@ -1606,10 +1609,10 @@ unattended-upgrades (0.77) unstable; urgency=low
     - be robust about import apt_pkg failures (LP: #808449), e.g.
       during upgrades
     - log when install finished to help track down LP #434835
-    - do not log to syslog anymore as this *might* block and 
+    - do not log to syslog anymore as this *might* block and
       could cause  LP #434835 and was not working in most cases
       as syslog was killed before it could log
-    - log instead to /var/log/unattended-upgrades-shutdown.log 
+    - log instead to /var/log/unattended-upgrades-shutdown.log
       to help track down LP #434835
   * debian/unattended-upgrades.init:
     - add Required-{Start,Stop}: $local_fs to help track down LP #434835
@@ -1708,7 +1711,7 @@ unattended-upgrades (0.74.1) unstable; urgency=low
     Reuben Thomas, many thanks (closes: #632336)
   * lintian fixes
   * debian/rules, debian/unattended-upgrades.init:
-    - fix dh_initallinit arguments (closes: #630732) 
+    - fix dh_initallinit arguments (closes: #630732)
 
  -- Michael Vogt <mvo@debian.org>  Wed, 09 Nov 2011 09:26:56 +0100
 
@@ -1724,13 +1727,13 @@ unattended-upgrades (0.74) unstable; urgency=low
     - install initscripts but do not run them on install/upgrade
       (closes: #645919), thanks to Teodor MICU
   * data/50unattended-upgrades.Debian:
-    - update default Debian config for squeeze, thanks to 
+    - update default Debian config for squeeze, thanks to
       John Feuerstein for the example (closes: #609854)
   * debian/prerm:
     - ignore failures from versions where the initscript is run
       with "stop" even when not in shutdown mode (closes: #645919)
   * unattended-upgrade:
-    - ensure to release shutdown-lock before shutting down 
+    - ensure to release shutdown-lock before shutting down
       (closes: #645919)
   * debian/postinst, data/20auto-upgrades-disabled:
     - allow disabling via debconf (closes: #645971)
@@ -1748,11 +1751,11 @@ unattended-upgrades (0.73.1) unstable; urgency=low
       output to stdout (closes: #640329)
   * test/test_origin_pattern.py:
     - test fixes
-  
+
   [ Peter Eisentraut ]
   * debian/unattended-upgrade.init:
     - add support for "status" action
-  
+
   [ Iain Nicol ]
   * unattended-upgrade:
     - ensure pkgs_to_upgrade stays sorted and fix crash
@@ -1857,7 +1860,7 @@ unattended-upgrades (0.70) unstable; urgency=low
     - add tests for apt-listchanges.conf parser
   * unattended-upgrade:
     - add new Unattended-Upgrade::Origins-Pattern option that is much
-      more flexible than the previous Allowed-Origins. It supports 
+      more flexible than the previous Allowed-Origins. It supports
       match patterns like:
       "origin=Debian,label=Debian-Security,component=main"
       "site=security.debian.org"
@@ -1899,7 +1902,7 @@ unattended-upgrades (0.65ubuntu1) natty; urgency=low
   * debian/po/pt_BR.po:
     - updated, thanks to Adriano Rafael Gomes (closes: #607403)
   * debian/rules:
-    - use different template depending on the build host 
+    - use different template depending on the build host
       (ubuntu,debian)
     - remove obsolete arch-build target
   * data/50unattended-upgrades.Debian:
@@ -1971,7 +1974,7 @@ unattended-upgrades (0.62) unstable; urgency=low
 
   [ Alex Owen ]
   * allow ":" as seperator in Unattended-Upgrade::Allowed-Origins
-    (closes: #536754) 
+    (closes: #536754)
 
  -- Michael Vogt <mvo@debian.org>  Thu, 26 Aug 2010 18:41:06 +0200
 
@@ -1984,7 +1987,7 @@ unattended-upgrades (0.61) unstable; urgency=low
 unattended-upgrades (0.60ubuntu3) maverick; urgency=low
 
   * merged changes from debian-sid
-  * fix crash when the old package had a conffile but that 
+  * fix crash when the old package had a conffile but that
     disappears in the new pacakge
 
  -- Michael Vogt <michael.vogt@ubuntu.com>  Mon, 02 Aug 2010 12:08:21 +0200
@@ -2004,7 +2007,7 @@ unattended-upgrades (0.60ubuntu1) maverick; urgency=low
 
   * Include reboot required notification in sent emails (LP: #415202)
     and add test for it (thanks to Paul Elliott for the initial patch)
-  * allow ${distro_id} and ${distro_codename} in 
+  * allow ${distro_id} and ${distro_codename} in
     Unattended-Upgrade::Allowed-Origins and update conffile to it
 
  -- Michael Vogt <michael.vogt@ubuntu.com>  Mon, 17 May 2010 15:19:21 +0200
@@ -2012,7 +2015,7 @@ unattended-upgrades (0.60ubuntu1) maverick; urgency=low
 unattended-upgrades (0.55ubuntu4) lucid-proposed; urgency=low
 
   * unattended-upgrade:
-    - fix rewind_cache if a pkg fails to get marked for upgrade 
+    - fix rewind_cache if a pkg fails to get marked for upgrade
       (LP: #571734)
 
  -- Michael Vogt <michael.vogt@ubuntu.com>  Thu, 29 Apr 2010 16:39:45 +0200
@@ -2022,7 +2025,7 @@ unattended-upgrades (0.55ubuntu3) lucid; urgency=low
   [ Michael Vogt ]
   * add Vcs-Bzr header
   * unattended-upgrade-shutdown:
-    - add information to plymouth shutdown screen if a 
+    - add information to plymouth shutdown screen if a
       unattended-upgrade is in progress (LP: #506709)
 
   [ Loïc Minier ]
@@ -2052,7 +2055,7 @@ unattended-upgrades (0.55ubuntu1) lucid; urgency=low
 
 unattended-upgrades (0.52ubuntu1) karmic; urgency=low
 
-  * Add new option "Unattended-Upgrade::Automatic-Reboot" that 
+  * Add new option "Unattended-Upgrade::Automatic-Reboot" that
     will automatically reboot without confirmation if the upgrade
     requires a reboot (off by default) LP: #400018
   * fix typo in filename (LP: #397810)
@@ -2081,16 +2084,16 @@ unattended-upgrades (0.50ubuntu1) karmic; urgency=low
   * fix crash in ouput, thanks to Joerg Schuetter, closes: #535347
   * when running in --debug mode, also print debug output to stderr
   * add --dry-run option to simulate a run, but not actually install
-    something 
+    something
   * when running with --debug, install packages instead of just
     simulating the install, --dry-run is avaialble for simulation
   * check for packages on hold and do not upgrade them (closes: #511677)
   * deal better with failures in pkgname_from_deb() (LP: #305046)
   * improved the README some more (LP: #311052)
   * fix locking problem (LP: #359010)
-  * Contain unattended-upgrades log in the status mail as well 
+  * Contain unattended-upgrades log in the status mail as well
     (LP: #245422)
-  * ensure that unattended-upgrade is finished on shutdown 
+  * ensure that unattended-upgrade is finished on shutdown
     (LP: #191514)
 
  -- Michael Vogt <michael.vogt@ubuntu.com>  Mon, 06 Jul 2009 09:26:48 +0200
@@ -2104,7 +2107,7 @@ unattended-upgrades (0.42ubuntu1) karmic; urgency=low
   * debian/po/eu.po:
     - updated, thanks to Piarres Beobide, closes: #513436
   * debian/links
-    - add symlink to make binary name and package name match, 
+    - add symlink to make binary name and package name match,
       closes: #428965
 
  -- Michael Vogt <michael.vogt@ubuntu.com>  Tue, 16 Jun 2009 11:52:32 +0200
@@ -2125,7 +2128,7 @@ unattended-upgrades (0.42debian1) unstable; urgency=low
   * debian/po/eu.po:
     - updated, thanks to Piarres Beobide, closes: #513436
   * debian/links
-    - add symlink to make binary name and package name match, 
+    - add symlink to make binary name and package name match,
       closes: #428965
 
  -- Michael Vogt <mvo@debian.org>  Thu, 25 Jun 2009 16:07:29 +0200
@@ -2159,7 +2162,7 @@ unattended-upgrades (0.40ubuntu1) karmic; urgency=low
   * data/50unattended-upgrades:
     - updated for karmic
   * unattended-upgrade:
-    - use the new python-apt API to avoid deprecation 
+    - use the new python-apt API to avoid deprecation
       warnings
   * debian/control:
     - update depends on python-apt to (>= 0.7.9)
@@ -2225,7 +2228,7 @@ unattended-upgrades (0.37debian1) unstable; urgency=low
 
 unattended-upgrades (0.37) jaunty; urgency=low
 
-  * better debconf template and description (thanks to the 
+  * better debconf template and description (thanks to the
     debian-l10 team (closes: #508136)
   * debian/po/sv.po:
     - add sv.po debian template (closes: #508225)
@@ -2259,7 +2262,7 @@ unattended-upgrades (0.36debian1) unstable; urgency=low
     * better email summary of the performed actions
       (closes: #502351)
     * be more robust against failures to read the deb (LP: #227448)
-  * better debconf template and description (thanks to the 
+  * better debconf template and description (thanks to the
     debian-l10 team (closes: #508136)
   * debian/po/sv.po:
     - add sv.po debian template (closes: #508225)
@@ -2298,7 +2301,7 @@ unattended-upgrades (0.36) jaunty; urgency=low
 unattended-upgrades (0.35debian1) unstable; urgency=low
 
   * merge from ubuntu (new upstream release)
-  * add debconf prompt (priority medium) that asks if auto 
+  * add debconf prompt (priority medium) that asks if auto
     updates should be enabled
 
  -- Michael Vogt <mvo@debian.org>  Wed, 26 Nov 2008 10:46:08 +0100
@@ -2307,7 +2310,7 @@ unattended-upgrades (0.35) jaunty; urgency=low
 
   * updated for jaunty
   * improved README to make it clerer where the values of
-    (origin, archive) come from (thanks to 
+    (origin, archive) come from (thanks to
 
  -- Michael Vogt <michael.vogt@ubuntu.com>  Wed, 26 Nov 2008 10:44:31 +0100
 
@@ -2352,7 +2355,7 @@ unattended-upgrades (0.30ubuntu1) hardy; urgency=low
     conffile prompt in the log as a warning (LP: #133551)
   * create logdir if it does not exist (LP: #87338)
   * fix error when installing from file:// uris (LP: #56832)
-  
+
  -- Michael Vogt <michael.vogt@ubuntu.com>  Mon, 10 Mar 2008 11:57:17 +0100
 
 unattended-upgrades (0.26ubuntu1) hardy; urgency=low
@@ -2363,7 +2366,7 @@ unattended-upgrades (0.26ubuntu1) hardy; urgency=low
 
 unattended-upgrades (0.25.3ubuntu1) gutsy; urgency=low
 
-  * merged patch from Tuomas Jormola to detect if 
+  * merged patch from Tuomas Jormola to detect if
     dpkg --force-conf(new|old) is set (LP: #135247)
 
  -- Michael Vogt <michael.vogt@ubuntu.com>  Tue, 11 Sep 2007 21:37:13 +0200
@@ -2378,7 +2381,7 @@ unattended-upgrades (0.25.2ubuntu1) gutsy; urgency=low
 unattended-upgrades (0.25.1debian1-0.1) unstable; urgency=low
 
   * Non-Maintainter Update (BSP)
-  * Add dependency on apt (>=0.7) 
+  * Add dependency on apt (>=0.7)
     (closes: #475611)
 
  -- Bas Zoetekouw <bas@debian.org>  Sat, 14 Jun 2008 14:55:51 +0200
@@ -2388,7 +2391,7 @@ unattended-upgrades (0.25.1debian1) unstable; urgency=low
   * documentation updated
 
  -- Michael Vogt <mvo@debian.org>  Thu, 07 Jun 2007 13:36:47 +0200
-  
+
 unattended-upgrades (0.25.1) gutsy; urgency=low
 
   * documentation updated
@@ -2406,7 +2409,7 @@ unattended-upgrades (0.24debian1) unstable; urgency=low
   * new upstream version
 
  -- Michael Vogt <mvo@debian.org>  Tue, 24 Apr 2007 23:34:15 +0200
-  
+
 unattended-upgrades (0.23ubuntu3) feisty-proposed; urgency=low
 
   * added missing README (thanks to siretart, LP#109564)
@@ -2422,7 +2425,7 @@ unattended-upgrades (0.22ubuntu2) feisty; urgency=low
 
 unattended-upgrades (0.22ubuntu1) feisty; urgency=low
 
-  * be more careful about checking if we actually have a 
+  * be more careful about checking if we actually have a
     candidateOrigin (lp: #81055)
 
  -- Michael Vogt <michael.vogt@ubuntu.com>  Tue, 23 Jan 2007 11:38:44 +0100
@@ -2459,7 +2462,7 @@ unattended-upgrades (0.1ubuntu5) edgy; urgency=low
   * data/apt-check.py:
     - fix in the clear() method
   * data/50unattended-upgrades:
-    - updated to include edgy as default 
+    - updated to include edgy as default
 
  -- Michael Vogt <michael.vogt@ubuntu.com>  Tue,  4 Jul 2006 11:23:09 +0200
 
