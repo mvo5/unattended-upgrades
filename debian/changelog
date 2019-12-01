@@ -4,6 +4,7 @@ unattended-upgrades (1.16) UNRELEASED; urgency=medium
   * Use secure copyright file specification URI.
   * Use set -e rather than passing -e on the shebang-line.
   * Add missing colon in closes line.
+  * Fix day-of-week for changelog entries 0.38.
 
  -- Debian Janitor <janitor@jelmer.uk>  Sun, 01 Dec 2019 10:43:40 +0000
 
@@ -2206,7 +2207,7 @@ unattended-upgrades (0.38) jaunty; urgency=low
     - added eu.po translation (closes: #508984)
     - added ja.po translation (closes: #509748)
 
- -- Michael Vogt <michael.vogt@ubuntu.com>  Sat, 05 Jan 2009 10:38:34 +0100
+ -- Michael Vogt <michael.vogt@ubuntu.com>  Mon, 05 Jan 2009 10:38:34 +0100
 
 unattended-upgrades (0.37debian1) unstable; urgency=low
 
