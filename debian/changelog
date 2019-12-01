@@ -8,6 +8,7 @@ unattended-upgrades (1.16) UNRELEASED; urgency=medium
 
   [ Debian Janitor ]
   * Trim trailing whitespace.
+  * Use secure copyright file specification URI.
 
  -- Balint Reczey <rbalint@ubuntu.com>  Fri, 13 Dec 2019 17:02:05 +0100
 
