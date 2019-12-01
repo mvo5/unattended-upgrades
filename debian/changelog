@@ -2,6 +2,7 @@ unattended-upgrades (1.16) UNRELEASED; urgency=medium
 
   * Trim trailing whitespace.
   * Use secure copyright file specification URI.
+  * Use set -e rather than passing -e on the shebang-line.
 
  -- Debian Janitor <janitor@jelmer.uk>  Sun, 01 Dec 2019 10:43:40 +0000
 
