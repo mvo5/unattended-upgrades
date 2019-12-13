@@ -126,3 +126,6 @@ Unattended-Upgrade::DevRelease "auto";
 // Print debugging information both in unattended-upgrades and
 // in unattended-upgrade-shutdown
 // Unattended-Upgrade::Debug "false";
+
+// Allow package downgrade if Pin-Priority exceeds 1000
+// Unattended-Upgrade::Allow-downgrade "false";
