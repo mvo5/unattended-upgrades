@@ -1493,7 +1493,7 @@ def _setup_logging(options):
             "daemon")
         syslogHandler = logging.handlers.SysLogHandler(
             address='/dev/log',
-            facility=syslogFacility)
+            facility=syslogFacility)  # type: ignore
         syslogHandler.setFormatter(
             logging.Formatter("unattended-upgrade: %(message)s"))
         known = syslogHandler.facility_names.keys()  # type: ignore
