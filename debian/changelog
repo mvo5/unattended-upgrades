@@ -1,3 +1,13 @@
+unattended-upgrades (1.16) UNRELEASED; urgency=medium
+
+  [ Kaupo Arulo ]
+  * * Allow package downgrade if Pin-Priority exceeds 1000
+
+  [ Balint Reczey ]
+  * Save a Cache.clear() in download-only mode
+
+ -- Balint Reczey <rbalint@ubuntu.com>  Fri, 13 Dec 2019 17:02:05 +0100
+
 unattended-upgrades (1.15) unstable; urgency=medium
 
   [ Tobias Bannert ]
