@@ -56,7 +56,8 @@ try:
     Dict  # pyflakes
     Iterable  # pyflakes
     List  # pyflakes
-    from typing import Tuple, Union
+    from typing import Set, Tuple, Union
+    Set  # pyflakes
     Tuple  # pyflakes
     Union  # pyflakes
 except ImportError:
@@ -144,7 +145,7 @@ class UnattendedUpgradesCache(apt.Cache):
 
     def __init__(self, rootdir, allowed_origins):
         # type: (str, List[str]) -> None
-        self._cached_candidate_pkgnames = set()  # type: AbstractSet[str]
+        self._cached_candidate_pkgnames = set()  # type: Set[str]
         self.allowed_origins = allowed_origins
         apt.Cache.__init__(self, rootdir=rootdir)
 
@@ -740,7 +741,7 @@ def upgrade_normal(cache, logfile_dpkg, verbose):
     return res
 
 
-def upgrade_in_minimal_steps(cache,            # type: apt.Cache
+def upgrade_in_minimal_steps(cache,            # type: UnattendedUpgradesCache
                              pkgs_to_upgrade,  # type: List[str]
                              blacklist,        # type: List[str]
                              whitelist,        # type: List[str]
@@ -1035,7 +1036,8 @@ def get_md5sum_for_file_in_deb(deb_file, conf_file):
     md5_p = Popen(md5_cmd, stdin=tar_p.stdout, stdout=PIPE,
                   universal_newlines=True)
     pkg_md5sum = md5_p.communicate()[0].split()[0]
-    for p in [dpkg_p, tar_p, md5_p]:
+    for __p in [dpkg_p, tar_p, md5_p]:
+        p = cast(Popen, __p)
         p.stdout.close()
         p.wait()
     return pkg_md5sum
@@ -1196,7 +1198,7 @@ def dpkg_conffile_prompt():
 
 
 def rewind_cache(cache, pkgs_to_upgrade):
-    # type: (apt.Cache, List[apt.Package]) -> None
+    # type: (UnattendedUpgradesCache, List[apt.Package]) -> None
     """ set the cache back to the state with packages_to_upgrade """
     cache.clear()
     for pkg2 in pkgs_to_upgrade:
@@ -1491,7 +1493,7 @@ def _setup_logging(options):
             "daemon")
         syslogHandler = logging.handlers.SysLogHandler(
             address='/dev/log',
-            facility=syslogFacility)
+            facility=syslogFacility)  # type: ignore
         syslogHandler.setFormatter(
             logging.Formatter("unattended-upgrade: %(message)s"))
         known = syslogHandler.facility_names.keys()  # type: ignore
@@ -1571,7 +1573,7 @@ def write_stamp_file():
 def try_to_upgrade(pkg,               # type: apt.Package
                    pkgs_to_upgrade,   # type: List[apt.Package]
                    pkgs_kept_back,    # type: KeptPkgs
-                   cache,             # type: apt.Cache
+                   cache,             # type: UnattendedUpgradesCache
                    allowed_origins,   # type: List[str]
                    blacklist,         # type: List[str]
                    whitelist,         # type: List[str]
@@ -1687,8 +1689,13 @@ def get_auto_removable(cache):
             if pkg.is_auto_removable}
 
 
-def is_autoremove_valid(cache, pkgname, auto_removable, blacklist, whitelist):
-    # type: (apt.Cache, str, AbstractSet[str], List[str], List[str]) -> bool
+def is_autoremove_valid(cache,           # type: UnattendedUpgradesCache
+                        pkgname,         # type: str
+                        auto_removable,  # type: AbstractSet[str]
+                        blacklist,       # type: List[str]
+                        whitelist        # type: List[str]
+                        ):
+    # type: (...) -> bool
     changes = cache.get_changes()
     if not changes:
         # package is already removed
