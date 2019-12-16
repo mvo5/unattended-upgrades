@@ -1,10 +1,7 @@
-unattended-upgrades (1.16) UNRELEASED; urgency=medium
+unattended-upgrades (1.16) unstable; urgency=medium
 
   [ Kaupo Arulo ]
   * Allow package downgrade if Pin-Priority exceeds 1000
-
-  [ Balint Reczey ]
-  * Save a Cache.clear() in download-only mode
 
   [ Debian Janitor ]
   * Trim trailing whitespace.
@@ -13,7 +10,15 @@ unattended-upgrades (1.16) UNRELEASED; urgency=medium
   * Add missing colon in closes line.
   * Fix day-of-week for changelog entries 0.38.
 
- -- Balint Reczey <rbalint@ubuntu.com>  Fri, 13 Dec 2019 17:02:05 +0100
+  [ Balint Reczey ]
+  * Save a Cache.clear() in download-only mode
+  * debian/unattended-upgrades.service: Add /run to RequiresMountsFor
+    to work around long-standing systemd issue of not resolving symlinks to
+    mounts: https://github.com/systemd/systemd/issues/8907 (Closes: #946823)
+  * Keep mypy 0.750 happy.
+  * pep8: fix line breaks
+
+ -- Balint Reczey <rbalint@ubuntu.com>  Mon, 16 Dec 2019 19:58:50 +0100
 
 unattended-upgrades (1.15) unstable; urgency=medium
 
