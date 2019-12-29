@@ -2405,8 +2405,8 @@ if __name__ == "__main__":
     parser.add_option("", "--no-minimal-upgrade-steps",
                       action="store_false", default=minimal_steps_default,
                       dest="minimal_upgrade_steps",
-                      help=_("Upgrade in minimal steps (and allow "
-                             "interrupting with SIGTERM"))
+                      help=_("Upgrade all packages together instead of in "
+                             "smaller sets"))
     parser.add_option("", "--minimal_upgrade_steps",
                       action="store_true",
                       help=SUPPRESS_HELP,
