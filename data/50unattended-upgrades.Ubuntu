@@ -11,6 +11,8 @@ Unattended-Upgrade::Allowed-Origins {
 	// available, the policy for updates is such that unattended-upgrades
 	// should also install from here by default.
 	"${distro_id}ESM:${distro_codename}";
+	"${distro_id}ESM:${distro_codename}-apps-security";
+	"${distro_id}ESM:${distro_codename}-infra-security";
 	"${distro_id}ESM:${distro_codename}-security";
 //	"${distro_id}:${distro_codename}-updates";
 //	"${distro_id}:${distro_codename}-proposed";
