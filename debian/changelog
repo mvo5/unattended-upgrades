@@ -1,4 +1,4 @@
-unattended-upgrades (1.17) UNRELEASED; urgency=medium
+unattended-upgrades (1.17) unstable; urgency=medium
 
   [ Amit Gurdasani ]
   * Check that a candidate is available before checking the version has changed.
@@ -9,7 +9,7 @@ unattended-upgrades (1.17) UNRELEASED; urgency=medium
   * Fix help about --no-minimal-upgrade-steps (Closes: #946379)
   * data/50unattended-upgrades.Ubuntu: add new ESM repositories (LP: #1857051)
 
- -- Balint Reczey <rbalint@ubuntu.com>  Thu, 16 Jan 2020 20:50:22 +0100
+ -- Balint Reczey <rbalint@ubuntu.com>  Thu, 23 Jan 2020 16:20:04 +0100
 
 unattended-upgrades (1.16) unstable; urgency=medium
 
