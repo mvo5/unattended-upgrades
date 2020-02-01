@@ -244,7 +244,7 @@ msgstr ""
 
 #: ../unattended-upgrade:1883
 #, fuzzy, python-format
-msgid "Initial blacklist : %s"
+msgid "Initial blacklist: %s"
 msgstr "Paquets initialement sur la liste noire : %s"
 
 #: ../unattended-upgrade:1888

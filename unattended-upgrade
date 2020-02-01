@@ -514,7 +514,7 @@ def signal_handler(signal, frame):
 
 
 def log_once(msg):
-    #type: (str) -> None
+    # type: (str) -> None
     global logged_msgs
     if msg not in logged_msgs:
         logging.info(msg)
@@ -1996,13 +1996,11 @@ def run(options,             # type: Options
 
     # pkgs that are (for some reason) not safe to install
     blacklist = get_blacklist()
-    logging.info(_("Initial blacklist: %s"),
-                 " ".join(blacklist))
+    logging.info(_("Initial blacklist: %s"), " ".join(blacklist))
 
     # install only these packages regardless of other upgrades available
     whitelist = get_whitelist()
-    logging.info(_("Initial whitelist: %s"),
-                 " ".join(whitelist))
+    logging.info(_("Initial whitelist: %s"), " ".join(whitelist))
 
     logging.info(_("Starting unattended upgrades script"))
 

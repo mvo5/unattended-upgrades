@@ -241,7 +241,7 @@ msgstr "Läuft nicht in der Entwicklungsversion."
 
 #: ../unattended-upgrade:1883
 #, python-format
-msgid "Initial blacklist : %s"
+msgid "Initial blacklist: %s"
 msgstr "Anfangsnegativliste: %s"
 
 #: ../unattended-upgrade:1888

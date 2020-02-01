@@ -265,7 +265,7 @@ msgstr ""
 
 #: ../unattended-upgrade:1883
 #, python-format
-msgid "Initial blacklist : %s"
+msgid "Initial blacklist: %s"
 msgstr "Initiële zwarte lijst: %s"
 
 #: ../unattended-upgrade:1888
