@@ -1,7 +1,7 @@
 // Unattended-Upgrade::Origins-Pattern controls which packages are
 // upgraded.
 //
-// Lines below have the format is "keyword=value,...".  A
+// Lines below have the format "keyword=value,...".  A
 // package will be upgraded only if the values in its metadata match
 // all the supplied keywords in a line.  (In other words, omitted
 // keywords are wild cards.) The keywords originate from the Release
