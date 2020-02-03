@@ -1,3 +1,9 @@
+unattended-upgrades (1.18) UNRELEASED; urgency=medium
+
+  * 
+
+ -- Balint Reczey <rbalint@ubuntu.com>  Mon, 03 Feb 2020 11:24:15 +0100
+
 unattended-upgrades (1.17) unstable; urgency=medium
 
   [ Amit Gurdasani ]
