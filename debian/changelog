@@ -1,3 +1,9 @@
+unattended-upgrades (1.1ubuntu1.18.04.14) bionic; urgency=medium
+
+  * data/50unattended-upgrades.Ubuntu: add new ESM repositories (LP: #1857051)
+
+ -- Balint Reczey <rbalint@ubuntu.com>  Mon, 17 Feb 2020 12:37:03 +0100
+
 unattended-upgrades (1.1ubuntu1.18.04.13) bionic; urgency=medium
 
   * Fix non-minimal upgrades (LP: #1853861)
