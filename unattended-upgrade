@@ -157,7 +157,11 @@ class UnattendedUpgradesCache(apt.Cache):
 
         self.whitelist = apt_pkg.config.value_list(
             "Unattended-Upgrade::Package-Whitelist")
-        logging.info(_("Initial whitelist: %s"), " ".join(self.whitelist))
+        self.strict_whitelist = apt_pkg.config.find_b(
+            "Unattended-Upgrade::Package-Whitelist-Strict", False)
+        logging.info(_("Initial whitelist (%s): %s"),
+                     "strict" if self.strict_whitelist else "not strict",
+                     " ".join(self.whitelist))
         apt.Cache.__init__(self, rootdir=rootdir)
 
         # pre-heat lazy-loaded modules to avoid crash on python upgrade
@@ -179,9 +183,6 @@ class UnattendedUpgradesCache(apt.Cache):
         # type: () -> KeptPkgs
         """ Find kept packages not collected already """
 
-        strict_whitelist = apt_pkg.config.find_b(
-            "Unattended-Upgrade::Package-Whitelist-Strict", False)
-
         kept_packages = KeptPkgs(set)
         for pkg in self:
             if (pkg.is_installed and pkg.versions[0] > pkg.installed):
@@ -192,7 +193,7 @@ class UnattendedUpgradesCache(apt.Cache):
                         # package has a higher version in allowed origin
                         self.log_kept_package_excuse(
                             pkg._pkg, self.blacklist, self.whitelist,
-                            strict_whitelist,
+                            self.strict_whitelist,
                             allowed_origin_ver)
                         kept_packages.add(pkg, self)
                 except NoAllowedOriginError:
@@ -923,8 +924,8 @@ def is_pkgname_in_whitelist(pkgname, whitelist):
     return False
 
 
-def is_pkg_change_allowed(pkg, blacklist, whitelist):
-    # type: (apt.Package, List[str], List[str]) -> bool
+def is_pkg_change_allowed(pkg, blacklist, whitelist, strict_whitelist):
+    # type: (apt.Package, List[str], List[str], bool) -> bool
     if is_pkgname_in_blacklist(pkg.name, blacklist):
         logging.debug("pkg %s package has been blacklisted" % pkg.name)
         return False
@@ -932,8 +933,6 @@ def is_pkg_change_allowed(pkg, blacklist, whitelist):
     # whitelist, most people will want the relaxed whitelist
     # that whitelists a package but pulls in the package
     # dependencies
-    strict_whitelist = apt_pkg.config.find_b(
-        "Unattended-Upgrade::Package-Whitelist-Strict", False)
     if strict_whitelist and \
        not is_pkgname_in_whitelist(pkg.name, whitelist):
 
@@ -1020,8 +1019,10 @@ def sanity_problem(cache, desired_pkg):
                 return ("pkg %s is not from a trusted origin" % pkg.name)
             if not is_in_allowed_origin(pkg.candidate, cache.allowed_origins):
                 return ("pkg %s is not in an allowed origin" % pkg.name)
-            if not is_pkg_change_allowed(pkg, cache.blacklist,
-                                         cache.whitelist):
+            if not is_pkg_change_allowed(pkg,
+                                         cache.blacklist,
+                                         cache.whitelist,
+                                         cache.strict_whitelist):
                 return ("pkg %s is blacklisted or is not whitelisted"
                         % pkg.name)
             # check if the package is unsafe to upgrade unattended
@@ -1710,7 +1711,8 @@ def is_autoremove_valid(cache,           # type: UnattendedUpgradesCache
         return True
     pkgnames = {pkg.name for pkg in changes}
     for pkg in changes:
-        if not is_pkg_change_allowed(pkg, cache.blacklist, cache.whitelist):
+        if not is_pkg_change_allowed(pkg, cache.blacklist, cache.whitelist,
+                                     cache.strict_whitelist):
             logging.warning(
                 _("Keeping the following auto-removable package(s) because "
                   "they include %s which is set to be kept unmodified: %s"),

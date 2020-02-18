@@ -41,6 +41,7 @@ class MockCache(dict):
     allowed_origins = []  # type: List[str]
     blacklist = []        # type: List[str]
     whitelist = []        # type: List[str]
+    strict_whitelist = False  # type: bool
 
 
 class MockDepCache():
@@ -147,8 +148,7 @@ class TestOriginPatern(unittest.TestCase):
         cache.allowed_origins = ["o=Ubuntu"]
         cache.whitelist = ["whitelisted"]
         # test with strict whitelist
-        apt_pkg.config.set(
-            "Unattended-Upgrade::Package-Whitelist-Strict", "true")
+        cache.strict_whitelist = True
         # ensure that a not-whitelisted pkg will fail
         self.assertTrue(cache["not-whitelisted"].marked_upgrade)
         self.assertFalse(
