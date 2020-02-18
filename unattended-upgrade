@@ -143,10 +143,21 @@ class NoAllowedOriginError(ValueError):
 
 class UnattendedUpgradesCache(apt.Cache):
 
-    def __init__(self, rootdir, allowed_origins):
-        # type: (str, List[str]) -> None
+    def __init__(self, rootdir):
+        # type: (str) -> None
         self._cached_candidate_pkgnames = set()  # type: Set[str]
-        self.allowed_origins = allowed_origins
+
+        self.allowed_origins = get_allowed_origins()
+        logging.info(_("Allowed origins are: %s"),
+                     ", ".join(self.allowed_origins))
+
+        self.blacklist = apt_pkg.config.value_list(
+            "Unattended-Upgrade::Package-Blacklist")
+        logging.info(_("Initial blacklist: %s"), " ".join(self.blacklist))
+
+        self.whitelist = apt_pkg.config.value_list(
+            "Unattended-Upgrade::Package-Whitelist")
+        logging.info(_("Initial whitelist: %s"), " ".join(self.whitelist))
         apt.Cache.__init__(self, rootdir=rootdir)
 
         # pre-heat lazy-loaded modules to avoid crash on python upgrade
@@ -164,8 +175,8 @@ class UnattendedUpgradesCache(apt.Cache):
             logging.debug("Using %s regexp to find running kernel packages",
                           self.running_kernel_pkgs_regexp.pattern)
 
-    def find_kept_packages(self, blacklist, whitelist):
-        # type: (List[str], List[str]) -> KeptPkgs
+    def find_kept_packages(self):
+        # type: () -> KeptPkgs
         """ Find kept packages not collected already """
 
         strict_whitelist = apt_pkg.config.find_b(
@@ -180,7 +191,8 @@ class UnattendedUpgradesCache(apt.Cache):
                     if pkg.installed < allowed_origin_ver:
                         # package has a higher version in allowed origin
                         self.log_kept_package_excuse(
-                            pkg._pkg, blacklist, whitelist, strict_whitelist,
+                            pkg._pkg, self.blacklist, self.whitelist,
+                            strict_whitelist,
                             allowed_origin_ver)
                         kept_packages.add(pkg, self)
                 except NoAllowedOriginError:
@@ -777,8 +789,6 @@ def upgrade_normal(cache, logfile_dpkg, verbose):
 
 def upgrade_in_minimal_steps(cache,            # type: UnattendedUpgradesCache
                              pkgs_to_upgrade,  # type: List[str]
-                             blacklist,        # type: List[str]
-                             whitelist,        # type: List[str]
                              logfile_dpkg="",  # type: str
                              verbose=False,    # type: bool
                              ):
@@ -786,9 +796,6 @@ def upgrade_in_minimal_steps(cache,            # type: UnattendedUpgradesCache
     install_log = LogInstallProgress(logfile_dpkg, verbose)
 
     res = True
-
-    # double check any changes we do
-    allowed_origins = get_allowed_origins()
 
     # to upgrade contains the package names
     to_upgrade = set(pkgs_to_upgrade)
@@ -820,8 +827,7 @@ def upgrade_in_minimal_steps(cache,            # type: UnattendedUpgradesCache
 
         # double check that we are not running into side effects like
         # what could have been caused LP: #1020680
-        if not check_changes_for_sanity(cache, allowed_origins, blacklist,
-                                        whitelist):
+        if not check_changes_for_sanity(cache):
             logging.info("While building minimal partition: "
                          "cache has not allowed changes")
             cache.clear()
@@ -984,11 +990,9 @@ def upgrade_order(to_upgrade, cache):
     return sorted(upgrade_set_sizes, key=upgrade_set_sizes.get)
 
 
-def check_changes_for_sanity(cache, allowed_origins, blacklist, whitelist,
-                             desired_pkg=None):
-    # type: (apt.Cache, List[str], List[str], List[str], apt.Package) -> bool
-    sanity_check_result = sanity_problem(cache, allowed_origins, blacklist,
-                                         whitelist, desired_pkg=None)
+def check_changes_for_sanity(cache, desired_pkg=None):
+    # type: (UnattendedUpgradesCache, apt.Package) -> bool
+    sanity_check_result = sanity_problem(cache, desired_pkg)
     if sanity_check_result is None:
         return True
     else:
@@ -998,9 +1002,8 @@ def check_changes_for_sanity(cache, allowed_origins, blacklist, whitelist,
         return False
 
 
-def sanity_problem(cache, allowed_origins, blacklist, whitelist,
-                   desired_pkg=None):
-    # type: (apt.Cache, List[str], List[str], List[str], apt.Package) -> str
+def sanity_problem(cache, desired_pkg):
+    # type: (UnattendedUpgradesCache, apt.Package) -> str
     if cache._depcache.broken_count != 0:
         return ("there are broken packages in the cache")
     # If there are no packages to be installed they were kept back
@@ -1015,9 +1018,10 @@ def sanity_problem(cache, allowed_origins, blacklist, whitelist,
             # origin so its good enough if we have a single trusted one
             if not any([o.trusted for o in pkg.candidate.origins]):
                 return ("pkg %s is not from a trusted origin" % pkg.name)
-            if not is_in_allowed_origin(pkg.candidate, allowed_origins):
+            if not is_in_allowed_origin(pkg.candidate, cache.allowed_origins):
                 return ("pkg %s is not in an allowed origin" % pkg.name)
-            if not is_pkg_change_allowed(pkg, blacklist, whitelist):
+            if not is_pkg_change_allowed(pkg, cache.blacklist,
+                                         cache.whitelist):
                 return ("pkg %s is blacklisted or is not whitelisted"
                         % pkg.name)
             # check if the package is unsafe to upgrade unattended
@@ -1414,8 +1418,6 @@ def send_summary_mail(pkgs,                 # type: List[str]
 
 def do_install(cache,             # type: UnattendedUpgradesCache
                pkgs_to_upgrade,   # type: List[apt.Package]
-               blacklist,         # type: List[str]
-               whitelist,         # type: List[str]
                options,           # type: Options
                logfile_dpkg,      # type: str
                ):
@@ -1437,7 +1439,7 @@ def do_install(cache,             # type: UnattendedUpgradesCache
             # try upgrade all "pkgs" in minimal steps
             pkg_install_success = upgrade_in_minimal_steps(
                 cache, [pkg.name for pkg in pkgs_to_upgrade],
-                blacklist, whitelist, logfile_dpkg,
+                logfile_dpkg,
                 options.verbose or options.debug)
         else:
             mark_pkgs_to_upgrade(cache, pkgs_to_upgrade)
@@ -1541,16 +1543,6 @@ def _setup_logging(options):
     return mem_log
 
 
-def get_blacklist():
-    # type: () -> List[str]
-    return apt_pkg.config.value_list("Unattended-Upgrade::Package-Blacklist")
-
-
-def get_whitelist():
-    # type: () -> List[str]
-    return apt_pkg.config.value_list("Unattended-Upgrade::Package-Whitelist")
-
-
 def logged_in_users():
     # type: () -> AbstractSet[str]
     """Return a list of logged in users"""
@@ -1607,9 +1599,6 @@ def write_stamp_file():
 def try_to_upgrade(pkg,               # type: apt.Package
                    pkgs_to_upgrade,   # type: List[apt.Package]
                    cache,             # type: UnattendedUpgradesCache
-                   allowed_origins,   # type: List[str]
-                   blacklist,         # type: List[str]
-                   whitelist,         # type: List[str]
                    ):
     # type: (...) -> None
     try:
@@ -1624,8 +1613,7 @@ def try_to_upgrade(pkg,               # type: apt.Package
             return
         cache._cached_candidate_pkgnames.add(pkg.name)
         cache.mark_upgrade_adjusted(pkg, from_user=not pkg.is_auto_installed)
-        if check_changes_for_sanity(cache, allowed_origins, blacklist,
-                                    whitelist, pkg):
+        if check_changes_for_sanity(cache, pkg):
             # add to packages to upgrade
             pkgs_to_upgrade.append(pkg)
         else:
@@ -1648,9 +1636,6 @@ def candidate_version_changed(pkg,               # type: apt.Package
 
 def calculate_upgradable_pkgs(cache,            # type: UnattendedUpgradesCache
                               options,          # type: Options
-                              allowed_origins,  # type: List[str]
-                              blacklist,        # type: List[str]
-                              whitelist,        # type: List[str]
                               ):
     # type: (...) -> List[apt.Package]
     pkgs_to_upgrade = []  # type: List[apt.Package]
@@ -1663,17 +1648,14 @@ def calculate_upgradable_pkgs(cache,            # type: UnattendedUpgradesCache
                 pkg.name, getattr(pkg.candidate, "origins", [])))
 
         if (pkg.is_upgradable or candidate_version_changed(pkg)
-           and is_pkgname_in_whitelist(pkg.name, whitelist)):
+           and is_pkgname_in_whitelist(pkg.name, cache.whitelist)):
             try:
-                ver_in_allowed_origin(pkg, allowed_origins)
+                ver_in_allowed_origin(pkg, cache.allowed_origins)
             except NoAllowedOriginError:
                 continue
             try_to_upgrade(pkg,
                            pkgs_to_upgrade,
-                           cache,
-                           allowed_origins,
-                           blacklist,
-                           whitelist)
+                           cache)
 
     if cache.get_changes():
         cache.clear()
@@ -1720,8 +1702,6 @@ def get_auto_removable(cache):
 def is_autoremove_valid(cache,           # type: UnattendedUpgradesCache
                         pkgname,         # type: str
                         auto_removable,  # type: AbstractSet[str]
-                        blacklist,       # type: List[str]
-                        whitelist        # type: List[str]
                         ):
     # type: (...) -> bool
     changes = cache.get_changes()
@@ -1730,7 +1710,7 @@ def is_autoremove_valid(cache,           # type: UnattendedUpgradesCache
         return True
     pkgnames = {pkg.name for pkg in changes}
     for pkg in changes:
-        if not is_pkg_change_allowed(pkg, blacklist, whitelist):
+        if not is_pkg_change_allowed(pkg, cache.blacklist, cache.whitelist):
             logging.warning(
                 _("Keeping the following auto-removable package(s) because "
                   "they include %s which is set to be kept unmodified: %s"),
@@ -1772,8 +1752,6 @@ def do_auto_remove(cache,             # type: UnattendedUpgradesCache
                    auto_removable,    # type: AbstractSet[str]
                    logfile_dpkg,      # type: str
                    minimal_steps,     # type: bool
-                   blacklist,         # type: List[str]
-                   whitelist,         # type: List[str]
                    verbose=False,     # type: bool
                    dry_run=False      # type: bool
                    ):
@@ -1793,8 +1771,7 @@ def do_auto_remove(cache,             # type: UnattendedUpgradesCache
             if pkgname in pkgs_removed:
                 continue
             cache[pkgname].mark_delete()
-            if not is_autoremove_valid(cache, pkgname, auto_removable,
-                                       blacklist, whitelist):
+            if not is_autoremove_valid(cache, pkgname, auto_removable):
                 # this situation can occur when removing newly unused packages
                 # would also remove old unused packages which are not set
                 # for removal, thus getting there is not handled as an error
@@ -1813,8 +1790,7 @@ def do_auto_remove(cache,             # type: UnattendedUpgradesCache
     else:
         for pkgname in auto_removable:
             cache[pkgname].mark_delete()
-        if is_autoremove_valid(cache, "", auto_removable, blacklist,
-                               whitelist):
+        if is_autoremove_valid(cache, "", auto_removable):
             # do it in one step
             if not dry_run:
                 res, error = cache_commit(cache, logfile_dpkg, verbose)
@@ -2019,21 +1995,8 @@ def run(options,             # type: Options
         syslog.syslog(_("Not running on the development release."))
         logging.info(_("Not running on the development release."))
         return UnattendedUpgradesResult(True)
-    # format (origin, archive), e.g. ("Ubuntu","dapper-security")
-    allowed_origins = get_allowed_origins()
-
-    # pkgs that are (for some reason) not safe to install
-    blacklist = get_blacklist()
-    logging.info(_("Initial blacklist: %s"), " ".join(blacklist))
-
-    # install only these packages regardless of other upgrades available
-    whitelist = get_whitelist()
-    logging.info(_("Initial whitelist: %s"), " ".join(whitelist))
 
     logging.info(_("Starting unattended upgrades script"))
-
-    # display available origin
-    logging.info(_("Allowed origins are: %s"), ", ".join(allowed_origins))
 
     # check and get lock
     try:
@@ -2068,8 +2031,7 @@ def run(options,             # type: Options
 
     # get a cache
     try:
-        cache = UnattendedUpgradesCache(rootdir=rootdir,
-                                        allowed_origins=allowed_origins)
+        cache = UnattendedUpgradesCache(rootdir=rootdir)
     except SystemError as error:
         print(_("Apt returned an error, exiting"))
         print(_("error message: %s") % error)
@@ -2100,8 +2062,7 @@ def run(options,             # type: Options
     auto_removable = get_auto_removable(cache)
 
     # find out about the packages that are upgradable (in an allowed_origin)
-    pkgs_to_upgrade = calculate_upgradable_pkgs(
-        cache, options, allowed_origins, blacklist, whitelist)
+    pkgs_to_upgrade = calculate_upgradable_pkgs(cache, options)
     pkgs_to_upgrade.sort(key=lambda p: p.name)
     pkgs = [pkg.name for pkg in pkgs_to_upgrade]
     logging.debug("pkgs that look like they should be upgraded: %s"
@@ -2172,8 +2133,8 @@ def run(options,             # type: Options
                     "APT::Get::AllowUnauthenticated", False):
                 logging.debug("%s is blacklisted because it is not trusted")
                 pkg_name = pkgname_from_deb(item.destfile)
-                if not is_pkgname_in_blacklist(pkg_name, blacklist):
-                    blacklist.append("%s$" % re.escape(pkg_name))
+                if not is_pkgname_in_blacklist(pkg_name, cache.blacklist):
+                    cache.blacklist.append("%s$" % re.escape(pkg_name))
             if not is_deb(item.destfile):
                 logging.debug("%s is not a .deb file" % item)
                 continue
@@ -2194,17 +2155,17 @@ def run(options,             # type: Options
                                   "needs to be upgraded manually"),
                                 pkgname_from_deb(item.destfile))
                 pkg_name = pkgname_from_deb(item.destfile)
-                if not is_pkgname_in_blacklist(pkg_name, blacklist):
-                    blacklist.append("%s$" % re.escape(pkg_name))
+                if not is_pkgname_in_blacklist(pkg_name, cache.blacklist):
+                    cache.blacklist.append("%s$" % re.escape(pkg_name))
                 pkg_conffile_prompt = True
 
         # redo the selection about the packages to upgrade based on the new
         # blacklist
-        logging.debug("blacklist: %s" % blacklist)
+        logging.debug("blacklist: %s" % cache.blacklist)
         # whitelist
-        logging.debug("whitelist: %s" % whitelist)
+        logging.debug("whitelist: %s" % cache.whitelist)
         # find out about the packages that are upgradable (in a allowed_origin)
-        if len(blacklist) > 0 or len(whitelist) > 0:
+        if len(cache.blacklist) > 0 or len(cache.whitelist) > 0:
             old_pkgs_to_upgrade = pkgs_to_upgrade[:]
             pkgs_to_upgrade = []
             for pkg in old_pkgs_to_upgrade:
@@ -2212,10 +2173,7 @@ def run(options,             # type: Options
                               (pkg.name))
                 cache.mark_upgrade_adjusted(
                     pkg, from_user=not pkg.is_auto_installed)
-                if check_changes_for_sanity(cache,
-                                            allowed_origins,
-                                            blacklist,
-                                            whitelist):
+                if check_changes_for_sanity(cache):
                     pkgs_to_upgrade.append(pkg)
                 else:
                     logging.info(_("package %s not upgraded"), pkg.name)
@@ -2254,7 +2212,7 @@ def run(options,             # type: Options
              kernel_pkgs_removed,
              kernel_pkgs_kept_installed) = do_auto_remove(
                 cache, auto_removable_kernel_pkgs, logfile_dpkg,
-                options.minimal_upgrade_steps, blacklist, whitelist,
+                options.minimal_upgrade_steps,
                 options.verbose or options.debug, options.dry_run)
             auto_removable = get_auto_removable(cache)
 
@@ -2271,7 +2229,7 @@ def run(options,             # type: Options
         logging.info(_("No packages found that can be upgraded unattended "
                        "and no pending auto-removals"))
 
-        pkgs_kept_back = cache.find_kept_packages(blacklist, whitelist)
+        pkgs_kept_back = cache.find_kept_packages()
         return UnattendedUpgradesResult(
             kernel_pkgs_remove_success,
             _("No packages found that can be upgraded unattended and no "
@@ -2306,8 +2264,6 @@ def run(options,             # type: Options
         # do install
         pkg_install_success = do_install(cache,
                                          pkgs_to_upgrade,
-                                         blacklist,
-                                         whitelist,
                                          options,
                                          logfile_dpkg)
     # Was the overall run succesful: only if everything installed
@@ -2338,7 +2294,7 @@ def run(options,             # type: Options
          pkgs_removed,
          pkgs_kept_installed) = do_auto_remove(
             cache, auto_removals, logfile_dpkg, options.minimal_upgrade_steps,
-            blacklist, whitelist, options.verbose or options.debug,
+            options.verbose or options.debug,
             options.dry_run)
         successful_run = successful_run and pkg_remove_success
     # the user wants *only new* auto-removals to be removed
@@ -2351,7 +2307,7 @@ def run(options,             # type: Options
          pkgs_removed,
          pkgs_kept_installed) = do_auto_remove(
             cache, auto_removals, logfile_dpkg, options.minimal_upgrade_steps,
-            blacklist, whitelist, options.verbose or options.debug,
+            options.verbose or options.debug,
             options.dry_run)
         successful_run = successful_run and pkg_remove_success
 
@@ -2367,7 +2323,7 @@ def run(options,             # type: Options
             and pkg_install_success):
         clean_downloaded_packages(fetcher)
 
-    pkgs_kept_back = cache.find_kept_packages(blacklist, whitelist)
+    pkgs_kept_back = cache.find_kept_packages()
     return UnattendedUpgradesResult(
         successful_run, _("All upgrades installed"), pkgs,
         pkgs_kept_back,

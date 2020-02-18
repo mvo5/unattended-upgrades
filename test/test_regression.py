@@ -16,8 +16,13 @@ from mock import (
 
 from unattended_upgrade import do_install
 
+from typing import List
+
 
 class MockCache:
+    blacklist = []  # type: List[str]
+    whitelist = []  # type: List[str]
+
     def __iter__(self):
         raise StopIteration
 
@@ -51,7 +56,7 @@ class TestRegression(unittest.TestCase):
         options.minimal_upgrade_steps = False
         apt_pkg.config.set("Unattended-Upgrade::MinimalSteps", "False")
         do_install(cache=MockCache(), pkgs_to_upgrade=[pkg],
-                   blacklist=[], whitelist=[], options=options,
+                   options=options,
                    logfile_dpkg=logfile_dpkg)
         # if there is no exception here, we are good
         os.dup2(old_stderr, 2)

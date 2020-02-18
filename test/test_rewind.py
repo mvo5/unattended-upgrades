@@ -28,17 +28,14 @@ class TestRewindCache(unittest.TestCase):
         dpkg_status = os.path.abspath(
             os.path.join(rootdir, "var", "lib", "dpkg", "status"))
         apt.apt_pkg.config.set("Dir::State::status", dpkg_status)
-        self.allowed_origins = ["origin=Ubuntu,archive=lucid-security"]
         self.cache = unattended_upgrade.UnattendedUpgradesCache(
-            rootdir=rootdir, allowed_origins=self.allowed_origins)
+            rootdir=rootdir)
 
     def test_rewind_cache(self):
         """ Test that rewinding the cache works correctly, debian #743594 """
         options = MockOptions()
-        blacklist = []
-        whitelist = []
         to_upgrade = unattended_upgrade.calculate_upgradable_pkgs(
-            self.cache, options, self.allowed_origins, blacklist, whitelist)
+            self.cache, options)
         self.assertEqual(to_upgrade, [self.cache[p] for p
                                       in ["test-package", "test2-package",
                                           "test3-package"]])

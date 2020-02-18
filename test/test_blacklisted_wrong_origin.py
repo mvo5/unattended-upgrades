@@ -29,12 +29,11 @@ class TestBlacklistedWrongOrigin(unittest.TestCase):
         cache = Mock()
         cache.__iter__ = Mock(return_value=iter([pkg]))
         options = Mock()
+        cache.allowed_origins = ["o=allowed-origin"]
+        cache.blacklist = ["postgresql"]
+        cache.whitelist = []
 
-        pkgs_to_upgrade = calculate_upgradable_pkgs(cache,
-                                                    options,
-                                                    ["o=allowed-origin"],
-                                                    ["postgresql"],
-                                                    [])
+        pkgs_to_upgrade = calculate_upgradable_pkgs(cache, options)
 
         self.assertListEqual([], pkgs_to_upgrade)
 

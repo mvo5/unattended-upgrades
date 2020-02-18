@@ -27,11 +27,13 @@ class TestUnavailableCandidate(unittest.TestCase):
 
         cache = Mock()
         cache.__iter__ = Mock(return_value=iter([pkg]))
+        cache.allowed_origins = ["o=allowed-origin"]
+        cache.blacklist = ['findutils']
+        cache.whitelist = []
         options = Mock()
 
-        pkgs_to_upgrade = calculate_upgradable_pkgs(
-            cache, options, ['o=allowed-origin'],
-            ['findutils'], [])
+        pkgs_to_upgrade = \
+            calculate_upgradable_pkgs(cache, options)
 
         self.assertListEqual([], pkgs_to_upgrade)
 
