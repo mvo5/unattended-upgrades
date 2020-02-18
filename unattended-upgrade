@@ -1375,7 +1375,7 @@ def send_summary_mail(pkgs,                 # type: List[str]
     logging.debug("mail returned: %s", ret)
 
 
-def do_install(cache,             # type: apt.Cache
+def do_install(cache,             # type: UnattendedUpgradesCache
                pkgs_to_upgrade,   # type: List[apt.Package]
                blacklist,         # type: List[str]
                whitelist,         # type: List[str]
@@ -1616,11 +1616,11 @@ def candidate_version_changed(pkg,               # type: apt.Package
                 'Unattended-Upgrade::Allow-downgrade', False))
 
 
-def calculate_upgradable_pkgs(cache,             # type: apt.Cache
-                              options,           # type: Options
-                              allowed_origins,   # type: List[str]
-                              blacklist,         # type: List[str]
-                              whitelist,         # type: List[str]
+def calculate_upgradable_pkgs(cache,            # type: UnattendedUpgradesCache
+                              options,          # type: Options
+                              allowed_origins,  # type: List[str]
+                              blacklist,        # type: List[str]
+                              whitelist,        # type: List[str]
                               ):
     # type: (...) -> Tuple[List[apt.Package], KeptPkgs]
     pkgs_to_upgrade = []  # type: List[apt.Package]
@@ -1740,7 +1740,7 @@ def is_autoremove_valid(cache,           # type: UnattendedUpgradesCache
     return True
 
 
-def do_auto_remove(cache,             # type: apt.Cache
+def do_auto_remove(cache,             # type: UnattendedUpgradesCache
                    auto_removable,    # type: AbstractSet[str]
                    logfile_dpkg,      # type: str
                    minimal_steps,     # type: bool
