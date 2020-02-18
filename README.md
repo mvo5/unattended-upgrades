@@ -215,8 +215,8 @@ Supported Options Reference
 
 * `Unattended-Upgrade::Remove-Unused-Kernel-Packages` - boolean (default:True)
  
- Remove excessive unused kernel-related packages before upgrading so that
- /boot does not fill up.
+ Remove excessive unused kernel-related packages before upgrading to avoid
+ filling /boot or the root file system.
 
 * `Unattended-Upgrade::Remove-Unused-Dependencies` - boolean (default:False)
  
