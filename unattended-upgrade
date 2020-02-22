@@ -474,21 +474,15 @@ class Unlocked:
         # type: () -> None
         try:
             apt_pkg.pkgsystem_unlock_inner()
-        except AttributeError:
-            try:
-                apt_pkg.pkgsystem_unlock()
-            except Exception:
-                # earlier python-apt used to leak lock
-                logging.warning("apt_pkg.pkgsystem_unlock() failed due to not "
-                                "holding the lock but trying to continue")
-                pass
+        except Exception:
+            # earlier python-apt used to leak lock
+            logging.warning("apt_pkg.pkgsystem_unlock() failed due to not "
+                            "holding the lock but trying to continue")
+            pass
 
     def __exit__(self, exc_type, exc_value, exc_tb):
         # type: (object, object, object) -> None
-        try:
-            apt_pkg.pkgsystem_lock_inner()
-        except AttributeError:
-            apt_pkg.pkgsystem_lock()
+        apt_pkg.pkgsystem_lock_inner()
 
 
 class KeptPkgs(defaultdict):
@@ -758,11 +752,7 @@ def cache_commit(cache,           # type: apt.Cache
         iprogress = LogInstallProgress(logfile_dpkg, verbose)
 
     try:
-        if hasattr(apt_pkg, "pkgsystem_lock_inner"):
-            res = cache.commit(install_progress=iprogress)
-        else:
-            with Unlocked():
-                res = cache.commit(install_progress=iprogress)
+        res = cache.commit(install_progress=iprogress)
         cache.open()
     except SystemError as e:
         error = e
