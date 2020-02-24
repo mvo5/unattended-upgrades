@@ -100,6 +100,10 @@ upgrade_python_apt() {
     # tracked in autopkgtest runs.
     enable_pocket "$chroot_dir" security
     enable_pocket "$chroot_dir" updates
+    if [ "$distro" = "buster" ]; then
+        # python-apt 1.9.6 is not available in buster
+        exit 77
+    fi
     if [ "$distro" = "eoan" ]; then
         # python-apt 1.9.6 is not available in Eoan, use a PPA with backports
         chroot_exec "$chroot_dir" apt-get install -y software-properties-common 2>&1
