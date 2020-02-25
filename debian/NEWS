@@ -1,4 +1,4 @@
-unattended-upgrades (1.18) UNRELEASED; urgency=medium
+unattended-upgrades (1.18) experimental; urgency=medium
 
   Unattended-upgrades now applies ephemeral pinning (apt_preferences(5))
   to install packages only from allowed origins and also for

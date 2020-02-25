@@ -1,8 +1,41 @@
-unattended-upgrades (1.18) UNRELEASED; urgency=medium
+unattended-upgrades (1.18) experimental; urgency=medium
 
-  * 
+  [ louib ]
+  * Update blacklist translations
+  * Fix syntax in template conf files
 
- -- Balint Reczey <rbalint@ubuntu.com>  Mon, 03 Feb 2020 11:24:15 +0100
+  [ Balint Reczey ]
+  * Keep mypy 0.761 happy
+  * test: Create empty dirs to save kept packages list to them
+  * Log explanation about kept back packages (LP: #1850964)
+    (Closes: #945837, #903875)
+  * Use GitHub Actions for CI instead of Travis.
+    Run tests in Ubuntu Focal release because older releases don't have the
+    needed python-apt version.
+  * debian/tests/common-functions: Use backported python-apt from a PPA on Eoan
+  * debian/tests: Skip upgrade-between-snapshots test.
+    Python-apt's version is sid is too low for unattended-upgrades to work.
+  * Use apt_pkg.Hashes instead of deprecated apt_pkg.md5sum()
+  * autopkgtest: Skip upgrate-all-security in sid because buster can't be tested
+  * Make allowed_origins, blacklist and whitelist attributes of
+    UnattendedUpgradesCache
+  * Make strict_whitelist attribute of UnattendedUpgradesCache
+  * Apply pinning to disable not allowed origins and honor blacklist/whitelist.
+    This makes candidate adjustments obsolete, since apt's resolver would pick
+    candidates only from allowed origins by itself unless local pinning
+    configuration overrides that.
+  * Rely fully on pinning to disable allowed origins and stop adjusting
+    candidates.
+  * Drop Unattended-Upgrade::Allow-downgrade since now pinning is honored and
+    downgrades are allowed for package versions with priority >= 1000.
+    (Closes: #905877, #919046, #768087, #946491) (LP: #1251228, #1434115)
+  * Don't ignore allowed origin when the package's priority is < 100.
+    This used to be the way of honoring the priority, but now this special case
+    prevents the package from showing up as a package kept back.
+  * Assume frontend locking to be supported.
+    Python3-apt (>= 1.9.6~) is required which supports the frontend locking API
+
+ -- Balint Reczey <rbalint@ubuntu.com>  Tue, 25 Feb 2020 19:28:13 +0100
 
 unattended-upgrades (1.17) unstable; urgency=medium
 
