@@ -37,12 +37,11 @@ class TestRewindCache(unittest.TestCase):
         options = MockOptions()
         blacklist = []
         whitelist = []
-        to_upgrade, kept_back = unattended_upgrade.calculate_upgradable_pkgs(
+        to_upgrade = unattended_upgrade.calculate_upgradable_pkgs(
             self.cache, options, self.allowed_origins, blacklist, whitelist)
         self.assertEqual(to_upgrade, [self.cache[p] for p
                                       in ["test-package", "test2-package",
                                           "test3-package"]])
-        self.assertEqual(kept_back["Ubuntu lucid-security"], {"z-package"})
         unattended_upgrade.rewind_cache(self.cache, to_upgrade)
         self.assertEqual(self.cache['test-package'].candidate.version, "2.0")
 

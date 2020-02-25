@@ -48,10 +48,7 @@ class TestUntrusted(unittest.TestCase):
         unattended_upgrade.main(options, rootdir=self.rootdir)
         # read the log to see what happend
         with open(self.log) as f:
-            needle = "DEBUG InstCount=0 DelCount=0 BrokenCount=0"
             haystack = f.read()
-            self.assertTrue(needle in haystack,
-                            "Can not find '%s' in '%s'" % (needle, haystack))
             self.assertTrue(
                 "pkg test-package is not from a trusted origin" in haystack)
 
