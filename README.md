@@ -1,4 +1,4 @@
-[![Build Status][travis-image]][travis-url]
+
 Unattended upgrades
 ===================
 
@@ -293,5 +293,4 @@ Supported Options Reference
  The default is the daemon facility.
 
 
-[travis-image]: https://travis-ci.org/mvo5/unattended-upgrades.svg?branch=debian/sid
-[travis-url]: https://travis-ci.org/mvo5/unattended-upgrades
+![](https://github.com/mvo5/unattended-upgrades/workflows/build/badge.svg)

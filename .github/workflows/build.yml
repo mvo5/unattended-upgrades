@@ -1,0 +1,22 @@
+name: CI
+
+on: [push, pull_request]
+
+jobs:
+  autopkgtest:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+    - name: setup
+      run: |
+        sudo apt update
+        sudo apt install autopkgtest git-buildpackage
+        sudo snap install lxd --channel=3.0/stable
+        sudo usermod --append --groups lxd $(whoami)
+        sudo lxd init  --auto
+        sudo autopkgtest-build-lxd ubuntu-daily:focal
+    - name: build source
+      run: gbp buildpackage -S -d -nc --git-ignore-branch --git-prebuild=
+    - name: autopkgtest
+      # skipping tests is ok
+      run: sudo autopkgtest -U ../build-area/*.dsc -- lxd autopkgtest/ubuntu/focal/amd64 || [ $? == 2 ]
