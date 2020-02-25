@@ -742,7 +742,6 @@ def cache_commit(cache,           # type: apt.Cache
                  logfile_dpkg,    # type: str
                  verbose,         # type: bool
                  iprogress=None,  # type: apt.progress.base.InstallProgress
-                 reopen=True,     # type: bool
                  ):
     # type: (...) -> Tuple[bool, Exception]
     """Commit the changes from the given cache to the system"""
@@ -754,10 +753,7 @@ def cache_commit(cache,           # type: apt.Cache
 
     try:
         res = cache.commit(install_progress=iprogress)
-        if reopen:
-            cache.open()
-        else:
-            cache.clear()
+        cache.open()
     except SystemError as e:
         error = e
         if verbose:
@@ -855,8 +851,7 @@ def upgrade_in_minimal_steps(cache,            # type: UnattendedUpgradesCache
         # apply changes
         logging.debug("applying set %s" % changes)
 
-        res, error = cache_commit(cache, logfile_dpkg, verbose, install_log,
-                                  reopen=False)
+        res, error = cache_commit(cache, logfile_dpkg, verbose, install_log)
         if error:
             if verbose:
                 logging.exception("Exception happened during upgrade.")
@@ -870,7 +865,6 @@ def upgrade_in_minimal_steps(cache,            # type: UnattendedUpgradesCache
         if len(to_upgrade) == 0:
             logging.info(_("All upgrades installed"))
             break
-    cache.open()
     return res
 
 
