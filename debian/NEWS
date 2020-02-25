@@ -1,3 +1,20 @@
+unattended-upgrades (1.18) UNRELEASED; urgency=medium
+
+  Unattended-upgrades now applies ephemeral pinning (apt_preferences(5))
+  to install packages only from allowed origins and also for
+  whitelisting and blacklisting packages instead of adjusting package
+  versions to be installed.
+  The ephemeral pins are applied in addition to the pin-priorities set
+  by the local apt_preferences(5) configuration and unattended-upgrades
+  also still honors held packages set by apt-mark(8).
+
+  In the presence of custom apt_preferences configuration it is advised
+  to run "unattended-upgrades --dry-run --debug --verbose" printing the
+  ephemeral pinning configuration to see if the new behaviour matches
+  expectations.
+
+ -- Balint Reczey <rbalint@ubuntu.com>  Thu, 20 Feb 2020 18:47:23 +0100
+
 unattended-upgrades (1.8) unstable; urgency=medium
 
   When InstallOnShutdown was configured unattended-upgrades in

@@ -15,6 +15,8 @@ from unattended_upgrade import (
     UnknownMatcherError,
 )
 
+from typing import List
+
 
 class MockOrigin():
     trusted = True
@@ -36,6 +38,10 @@ class MockCache(dict):
     def get_changes(self):
         for pkgname in self.keys():
             yield self[pkgname]
+    allowed_origins = []  # type: List[str]
+    blacklist = []        # type: List[str]
+    whitelist = []        # type: List[str]
+    strict_whitelist = False  # type: bool
 
 
 class MockDepCache():
@@ -122,17 +128,16 @@ class TestOriginPatern(unittest.TestCase):
         cache = self._get_mock_cache()
         cache[pkg.name] = pkg
         # origins and blacklist
-        allowed_origins = ["o=Ubuntu"]
-        blacklist = ["linux-.*"]
+        cache.allowed_origins = ["o=Ubuntu"]
+        cache.blacklist = ["linux-.*"]
+        cache.Whitelist = [".*"]
         # with blacklist pkg
         self.assertFalse(
-            check_changes_for_sanity(
-                cache, allowed_origins, blacklist, [".*"]))
+            check_changes_for_sanity(cache))
         # with "normal" pkg
         pkg.name = "apt"
         self.assertTrue(
-            check_changes_for_sanity(
-                cache, allowed_origins, blacklist, [".*"]))
+            check_changes_for_sanity(cache))
 
     def test_whitelist_with_strict_whitelisting(self):
         cache = self._get_mock_cache()
@@ -140,15 +145,14 @@ class TestOriginPatern(unittest.TestCase):
             pkg = self._get_mock_package(name=pkgname)
             cache[pkg.name] = pkg
         # origins and blacklist
-        allowed_origins = ["o=Ubuntu"]
-        whitelist = ["whitelisted"]
+        cache.allowed_origins = ["o=Ubuntu"]
+        cache.whitelist = ["whitelisted"]
         # test with strict whitelist
-        apt_pkg.config.set(
-            "Unattended-Upgrade::Package-Whitelist-Strict", "true")
+        cache.strict_whitelist = True
         # ensure that a not-whitelisted pkg will fail
         self.assertTrue(cache["not-whitelisted"].marked_upgrade)
         self.assertFalse(
-            check_changes_for_sanity(cache, allowed_origins, [], whitelist))
+            check_changes_for_sanity(cache))
 
     def _get_mock_cache(self):
         cache = MockCache()
