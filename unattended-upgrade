@@ -1044,7 +1044,10 @@ def get_md5sum_for_file_installed(conf_file, prefix):
     # type: (str, str) -> str
     try:
         with open(prefix + conf_file, 'rb') as fb:
-            return apt_pkg.md5sum(fb)
+            for hash_string in apt_pkg.Hashes(fb).hashes:  # type: ignore
+                if hash_string.hashtype == 'MD5Sum':
+                    return hash_string.hashvalue
+            return None
     except IsADirectoryError:
         # the package replaces a directory wih a configuration file
         #

@@ -7,7 +7,7 @@ Depends: @, @builddeps@, debootstrap, distro-info
 Restrictions: needs-root, build-needed, skippable
 
 Tests: upgrade-between-snapshots
-Restrictions: needs-root, build-needed, flaky
+Restrictions: needs-root, build-needed, flaky, skippable
 Depends: @, @builddeps@, debootstrap
 
 Tests: kernel-patterns

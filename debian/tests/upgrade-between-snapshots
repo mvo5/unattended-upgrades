@@ -7,6 +7,9 @@ start_date=20171001T000000Z
 end_date=20171210T000000Z
 distro=sid
 
+# skip test since python-apt is not available in sid yet
+exit 77
+
 . debian/tests/common-functions
 
 check_arch
