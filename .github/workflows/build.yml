@@ -16,7 +16,7 @@ jobs:
         sudo lxd init  --auto
         sudo autopkgtest-build-lxd ubuntu-daily:focal
     - name: build source
-      run: gbp buildpackage -S -d -nc --git-ignore-branch --git-prebuild=
+      run: gbp buildpackage -us -uc -S -d -nc --git-ignore-branch --git-prebuild=
     - name: autopkgtest
       # skipping tests is ok
       run: sudo autopkgtest -U ../build-area/*.dsc -- lxd autopkgtest/ubuntu/focal/amd64 || [ $? == 2 ]
