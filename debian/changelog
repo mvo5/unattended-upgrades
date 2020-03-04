@@ -1,3 +1,11 @@
+unattended-upgrades (1.19) UNRELEASED; urgency=medium
+
+  * Revert relying fully on pinning. APT's resolver can't be fully relied
+    on because sometimes it does not find solutions.
+  * Treat locally installed package versions as coming from a whitelisted origin
+
+ -- Balint Reczey <rbalint@ubuntu.com>  Wed, 04 Mar 2020 17:59:19 +0100
+
 unattended-upgrades (1.18) experimental; urgency=medium
 
   [ louib ]
