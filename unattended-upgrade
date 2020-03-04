@@ -953,6 +953,11 @@ def upgrade_in_minimal_steps(cache,            # type: UnattendedUpgradesCache
 
 def is_allowed_origin(origin, allowed_origins):
     # type: (Union[apt.package.Origin, apt_pkg.PackageFile], List[str]) -> bool
+
+    # local origin is allowed by default
+    if origin.component == 'now' and origin.archive == 'now' and \
+       not origin.label and not origin.site:
+        return True
     for allowed in allowed_origins:
         if match_whitelist_string(allowed, origin):
             return True

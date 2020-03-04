@@ -168,7 +168,7 @@ class TestOriginPatern(unittest.TestCase):
         origin.label = label
         origin.archive = archive
         origin.site = site
-        origin.compoent = component
+        origin.component = component
         return origin
 
     def _get_mock_package(self, name="foo"):
