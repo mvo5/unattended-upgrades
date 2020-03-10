@@ -197,45 +197,44 @@ class UnattendedUpgradesCache(apt.Cache):
                         pkg, self.allowed_origins)
                     if pkg.installed < allowed_origin_ver:
                         # package has a higher version in allowed origin
-                        self.log_kept_package_excuse(
+                        logging.info(self.kept_package_excuse(
                             pkg._pkg, self.blacklist, self.whitelist,
                             self.strict_whitelist,
-                            allowed_origin_ver)
+                            allowed_origin_ver))
                         kept_packages.add(pkg, self)
                 except NoAllowedOriginError:
                     pass
         return kept_packages
 
-    def log_kept_package_excuse(self, pkg,          # apt.Package
-                                blacklist,          # type: List[str]
-                                whitelist,          # type: List[str]
-                                strict_whitelist,   # type: bool
-                                allowed_origin_ver  # type: apt.package.Version
-                                ):
-        # type: (...) -> None
+    def kept_package_excuse(self, pkg,          # apt.Package
+                            blacklist,          # type: List[str]
+                            whitelist,          # type: List[str]
+                            strict_whitelist,   # type: bool
+                            allowed_origin_ver  # type: apt.package.Version
+                            ):
+        # type: (...) -> str
         """ Log the excuse the package is kept back for """
         if pkg.selected_state == apt_pkg.SELSTATE_HOLD:
-            logging.info(_("Package %s is marked to be held back.") % pkg.name)
+            return _("Package %s is marked to be held back.") % pkg.name
         elif is_pkgname_in_blacklist(pkg.name, blacklist):
-            logging.info(_("Package %s is blacklisted.") % pkg.name)
+            return _("Package %s is blacklisted.") % pkg.name
         elif whitelist:
             if strict_whitelist:
                 if not is_pkgname_in_whitelist(pkg.name, whitelist):
-                    logging.info(_(
+                    return (_(
                         "Package %s is not on the strict whitelist.")
-                                 % pkg.name)
+                            % pkg.name)
                 else:
                     if not is_pkgname_in_whitelist(pkg.name, whitelist):
-                        logging.info(_(
+                        return (_(
                             "Package %s is not whitelisted and it is not a"
                             " dependency of a whitelisted package.")
-                                     % pkg.name)
+                                % pkg.name)
         elif not any([o.trusted for o in allowed_origin_ver.origins]):
-            logging.info(_("Package %s's origin is not trusted.") % pkg.name)
-        else:
-            logging.info(_("Package %s is kept back because a related package"
-                           " is kept back or due to local apt_preferences(5).")
-                         % pkg.name)
+            return _("Package %s's origin is not trusted.") % pkg.name
+        return (_("Package %s is kept back because a related package"
+                  " is kept back or due to local apt_preferences(5).")
+                % pkg.name)
 
     def pinning_from_regex_list(self, regexps, priority):
         # type: (List[str], int) -> List[PkgPin]
