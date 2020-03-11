@@ -374,10 +374,6 @@ class UnattendedUpgradesCache(apt.Cache):
             logging.debug("pkg %s is on hold" % pkg.name)
             return
 
-        # adjust candidates in advance if needed
-        for pkg_name in self._cached_candidate_pkgnames:
-            self.adjust_candidate(self[pkg_name])
-
         if function == apt.package.Package.mark_upgrade \
                 and not pkg.is_upgradable:
             if not apt_pkg.config.find_b("Unattended-Upgrade::Allow-downgrade",
@@ -387,7 +383,8 @@ class UnattendedUpgradesCache(apt.Cache):
                 function = apt.package.Package.mark_install
         marking_succeeded = self.call_checked(function, pkg, **kwargs)
 
-        if not marking_succeeded:
+        if not marking_succeeded or \
+           not check_changes_for_sanity(self, desired_pkg=pkg):
             logging.debug("falling back to adjusting %s's dependencies"
                           % pkg.name)
             self.clear()
