@@ -185,11 +185,15 @@ class UnattendedUpgradesCache(apt.Cache):
             logging.debug("Using %s regexp to find running kernel packages",
                           self.running_kernel_pkgs_regexp.pattern)
 
-    def find_kept_packages(self):
-        # type: () -> KeptPkgs
+    def find_kept_packages(self, dry_run):
+        # type: (bool) -> KeptPkgs
         """ Find kept packages not collected already """
 
         kept_packages = KeptPkgs(set)
+        if dry_run:
+            logging.info(_("The list of kept packages can't be calculated in "
+                           "dry-run mode."))
+            return kept_packages
         for pkg in self:
             if (pkg.is_installed and pkg.versions[0] > pkg.installed):
                 try:
@@ -2313,7 +2317,7 @@ def run(options,             # type: Options
         logging.info(_("No packages found that can be upgraded unattended "
                        "and no pending auto-removals"))
 
-        pkgs_kept_back = cache.find_kept_packages()
+        pkgs_kept_back = cache.find_kept_packages(options.dry_run)
         return UnattendedUpgradesResult(
             kernel_pkgs_remove_success,
             _("No packages found that can be upgraded unattended and no "
@@ -2407,7 +2411,7 @@ def run(options,             # type: Options
             and pkg_install_success):
         clean_downloaded_packages(fetcher)
 
-    pkgs_kept_back = cache.find_kept_packages()
+    pkgs_kept_back = cache.find_kept_packages(options.dry_run)
     return UnattendedUpgradesResult(
         successful_run, _("All upgrades installed"), pkgs,
         pkgs_kept_back,
