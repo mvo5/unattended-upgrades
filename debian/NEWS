@@ -1,4 +1,4 @@
-unattended-upgrades (1.18) experimental; urgency=medium
+unattended-upgrades (2.0) unstable; urgency=medium
 
   Unattended-upgrades now applies ephemeral pinning (apt_preferences(5))
   to install packages only from allowed origins and also for
@@ -12,6 +12,11 @@ unattended-upgrades (1.18) experimental; urgency=medium
   to run "unattended-upgrades --dry-run --debug --verbose" printing the
   ephemeral pinning configuration to see if the new behaviour matches
   expectations.
+
+  To work around APT resolver bugs preventing APT from always finding the
+  solution for installing complex package sets (#773281, #711128)
+  unattended-upgrades still falls back to adjusting package candidates
+  in addition to applying the ephemeral pinning.
 
  -- Balint Reczey <rbalint@ubuntu.com>  Thu, 20 Feb 2020 18:47:23 +0100
 
