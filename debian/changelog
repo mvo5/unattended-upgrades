@@ -1,3 +1,9 @@
+unattended-upgrades (2.1) UNRELEASED; urgency=medium
+
+  * 
+
+ -- Balint Reczey <rbalint@ubuntu.com>  Fri, 13 Mar 2020 00:39:56 +0100
+
 unattended-upgrades (2.0) unstable; urgency=medium
 
   * Revert relying fully on pinning. APT's resolver can't be fully relied
