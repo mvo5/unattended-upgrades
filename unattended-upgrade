@@ -185,6 +185,19 @@ class UnattendedUpgradesCache(apt.Cache):
             logging.debug("Using %s regexp to find running kernel packages",
                           self.running_kernel_pkgs_regexp.pattern)
 
+    def find_better_version(self, pkg):
+        # type (apt.Package) -> apt.package.Version
+        if pkg.is_installed and pkg.versions[0] > pkg.installed:
+            logging.debug(
+                "Package %s has a higher version available, checking if it is "
+                "from an allowed origin and is not pinned down.", pkg.name)
+            for v in pkg.versions:
+                if pkg.installed < v \
+                   and pkg.installed.policy_priority <= v.policy_priority \
+                   and is_in_allowed_origin(v, self.allowed_origins):
+                    return v
+        return None
+
     def find_kept_packages(self, dry_run):
         # type: (bool) -> KeptPkgs
         """ Find kept packages not collected already """
@@ -195,26 +208,21 @@ class UnattendedUpgradesCache(apt.Cache):
                            "dry-run mode."))
             return kept_packages
         for pkg in self:
-            if (pkg.is_installed and pkg.versions[0] > pkg.installed):
-                try:
-                    allowed_origin_ver = ver_in_allowed_origin(
-                        pkg, self.allowed_origins)
-                    if pkg.installed < allowed_origin_ver:
-                        # package has a higher version in allowed origin
-                        logging.info(self.kept_package_excuse(
-                            pkg._pkg, self.blacklist, self.whitelist,
-                            self.strict_whitelist,
-                            allowed_origin_ver))
-                        kept_packages.add(pkg, self)
-                except NoAllowedOriginError:
-                    pass
+            better_version = self.find_better_version(pkg)
+            if better_version:
+                logging.info(self.kept_package_excuse(pkg._pkg,
+                                                      self.blacklist,
+                                                      self.whitelist,
+                                                      self.strict_whitelist,
+                                                      better_version))
+                kept_packages.add(pkg, better_version, self)
         return kept_packages
 
     def kept_package_excuse(self, pkg,          # apt.Package
                             blacklist,          # type: List[str]
                             whitelist,          # type: List[str]
                             strict_whitelist,   # type: bool
-                            allowed_origin_ver  # type: apt.package.Version
+                            better_version      # type: apt.package.Version
                             ):
         # type: (...) -> str
         """ Log the excuse the package is kept back for """
@@ -234,7 +242,7 @@ class UnattendedUpgradesCache(apt.Cache):
                             "Package %s is not whitelisted and it is not a"
                             " dependency of a whitelisted package.")
                                 % pkg.name)
-        elif not any([o.trusted for o in allowed_origin_ver.origins]):
+        elif not any([o.trusted for o in better_version.origins]):
             return _("Package %s's origin is not trusted.") % pkg.name
         return (_("Package %s is kept back because a related package"
                   " is kept back or due to local apt_preferences(5).")
@@ -586,11 +594,13 @@ class KeptPkgs(defaultdict):
     Packages to keep by highest allowed pretty-printed origin
 
     """
-    def add(self, pkg, cache):
-        # type: (apt.Package, UnattendedUpgradesCache) -> None
-        allowed_origins = cache.allowed_origins
-        for origin in ver_in_allowed_origin(pkg, allowed_origins).origins:
-            if is_allowed_origin(origin, allowed_origins):
+    def add(self, pkg,  # type: apt.Package
+            version,    # type: apt.package.Version
+            cache       # type: UnattendedUpgradesCache
+            ):
+        # type: (...) -> None
+        for origin in version.origins:
+            if is_allowed_origin(origin, cache.allowed_origins):
                 self[origin.origin + " " + origin.archive].add(pkg.name)
                 return
 
