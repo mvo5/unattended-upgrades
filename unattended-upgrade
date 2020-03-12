@@ -268,7 +268,6 @@ class UnattendedUpgradesCache(apt.Cache):
 
         # mark not allowed origins with 'never' pin
         for pkg_file in self._cache.file_list:  # type: ignore
-            logging.debug("Checking if %s is allowed", pkg_file)
             if not is_allowed_origin(pkg_file, self.allowed_origins):
                 # Set the magic 'never' pin on not allowed origins
                 logging.debug("Marking not allowed %s with %s pin", pkg_file,
