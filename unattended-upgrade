@@ -215,7 +215,7 @@ class UnattendedUpgradesCache(apt.Cache):
                                                       self.whitelist,
                                                       self.strict_whitelist,
                                                       better_version))
-                kept_packages.add(pkg, self)
+                kept_packages.add(pkg, better_version, self)
         return kept_packages
 
     def kept_package_excuse(self, pkg,          # apt.Package
@@ -594,11 +594,13 @@ class KeptPkgs(defaultdict):
     Packages to keep by highest allowed pretty-printed origin
 
     """
-    def add(self, pkg, cache):
-        # type: (apt.Package, UnattendedUpgradesCache) -> None
-        allowed_origins = cache.allowed_origins
-        for origin in ver_in_allowed_origin(pkg, allowed_origins).origins:
-            if is_allowed_origin(origin, allowed_origins):
+    def add(self, pkg,  # type: apt.Package
+            version,    # type: apt.package.Version
+            cache       # type: UnattendedUpgradesCache
+            ):
+        # type: (...) -> None
+        for origin in version.origins:
+            if is_allowed_origin(origin, cache.allowed_origins):
                 self[origin.origin + " " + origin.archive].add(pkg.name)
                 return
 
