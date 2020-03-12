@@ -1,10 +1,21 @@
-unattended-upgrades (1.19) UNRELEASED; urgency=medium
+unattended-upgrades (2.0) unstable; urgency=medium
 
   * Revert relying fully on pinning. APT's resolver can't be fully relied
-    on because sometimes it does not find solutions.
+    on because sometimes it does not find the solution.
   * Treat locally installed package versions as coming from a whitelisted origin
+  * Don't list kept packages in dry-run mode.
+    Since the kept packages are calculated based on the final system state
+    all packages that would be upgraded would be listed as kept in dry-run mode.
+  * Try installing/upgrading packages without any adjustment first.
+    The applied pinning should be enough for APT's resolver to find the right
+    candidate most of the time. The candidate version adjustments are still done
+    in cases where APT's resolver fails
+  * Report only higher available allowed versions with higher priority as kept
+    (Closes: #952569)
+  * Drop very long debug message about checking package list file
+  * Honor pinning when listing origin of kept back packages
 
- -- Balint Reczey <rbalint@ubuntu.com>  Wed, 04 Mar 2020 17:59:19 +0100
+ -- Balint Reczey <rbalint@ubuntu.com>  Thu, 12 Mar 2020 22:52:58 +0100
 
 unattended-upgrades (1.18) experimental; urgency=medium
 
