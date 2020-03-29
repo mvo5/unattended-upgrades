@@ -3,12 +3,9 @@
 set -e
 
 chroot_dir=$AUTOPKGTEST_TMP/chroot
-start_date=20171001T000000Z
-end_date=20171210T000000Z
+start_date=20200309T000000Z
+end_date=20200328T000000Z
 distro=sid
-
-# skip test since python-apt is not available in sid yet
-exit 77
 
 . debian/tests/common-functions
 
@@ -21,9 +18,8 @@ sed -i 's/^deb /deb [check-valid-until=no] /' "$chroot_dir/etc/apt/sources.list"
 echo "deb-src [check-valid-until=no] http://snapshot.debian.org/archive/debian/${start_date}/ $distro main" >> "$chroot_dir/etc/apt/sources.list"
 chroot_exec "$chroot_dir" apt-get update
 
-# install mailutils for testing u-u email and mark python3.5-minimal
-# because otherwise u-u autoremoves it while running python3.5 code
-chroot_exec "$chroot_dir" apt-get install -y python3.5-minimal mailutils 2>&1
+# install mailutils for testing u-u email
+chroot_exec "$chroot_dir" apt-get install -y mailutils 2>&1
 
 # add package set with many dependencies
 # apt prints "W: APT had planned for dpkg to do more than it reported back" to stderr LP: #1647638
@@ -37,10 +33,10 @@ chroot_exec "$chroot_dir" bash -c 'apt install -y /tmp/unattended-upgrades_*deb'
 chroot_exec "$chroot_dir" apt-mark showmanual > "$chroot_dir/tmp/manual"
 
 # hold a package to test if autoremoval honors that
-chroot_exec "$chroot_dir" apt-mark hold libpoppler68
+chroot_exec "$chroot_dir" apt-mark hold libpython3.7-minimal
 
 # also blacklist a package
-echo 'Unattended-Upgrade::Package-Blacklist {"libx265-13.*"};' > \
+echo 'Unattended-Upgrade::Package-Blacklist {"libgphoto2-.*"};' > \
      "$chroot_dir/etc/apt/apt.conf.d/51unattended-upgrades-blacklist"
 
 # clean up to need less space for the test
@@ -58,8 +54,8 @@ echo "Upgrade should be performed in minimal steps, checking that..."
 grep -q "left to upgrade {" "$chroot_dir"/var/log/unattended-upgrades/unattended-upgrades.log || \
     (echo "FAILED: Upgrade was performed in a single step." ; exit 1)
 
-echo "libpoppler68 should be still installed and held:"
-chroot_exec "$chroot_dir" dpkg -l libpoppler68 | grep '^hi'
+echo "libpython3.7-minimal should be still installed and held:"
+chroot_exec "$chroot_dir" dpkg -l libpython3.7-minimal | grep '^hi'
 
-echo "libx265-130 should be still installed thanks to the blacklist"
-chroot_exec "$chroot_dir" dpkg -l libx265-130 | grep '^ii'
+echo "libgphoto2-6 should be still installed and kept back thanks to the blacklist"
+chroot_exec "$chroot_dir" dpkg -l libgphoto2-6 | grep '^ii.*2.5.23-2'
