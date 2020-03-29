@@ -377,8 +377,8 @@ class UnattendedUpgradesCache(apt.Cache):
         """
         new_pkgs_to_adjust = []  # List[str]
 
-        if pkg._pkg.selected_state == apt_pkg.SELSTATE_HOLD:
-            logging.debug("pkg %s is on hold" % pkg.name)
+        if not is_pkg_change_allowed(pkg, self.blacklist, self.whitelist,
+                                     self.strict_whitelist):
             return
 
         if function == apt.package.Package.mark_upgrade \
