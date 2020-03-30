@@ -1,8 +1,12 @@
-unattended-upgrades (2.1) UNRELEASED; urgency=medium
+unattended-upgrades (2.1) unstable; urgency=medium
 
-  * 
+  * Don't try adjusting candidate if none of the versions is a candidate
+    (Closes: #955135)
+  * Try marking package for installation or upgrade only when it is allowed
+    i.e. honor whitelist and blacklist, too.
+  * debian/tests/upgrade-between-snapshots: Restore running test
 
- -- Balint Reczey <rbalint@ubuntu.com>  Fri, 13 Mar 2020 00:39:56 +0100
+ -- Balint Reczey <rbalint@ubuntu.com>  Mon, 30 Mar 2020 20:59:29 +0200
 
 unattended-upgrades (2.0) unstable; urgency=medium
 
