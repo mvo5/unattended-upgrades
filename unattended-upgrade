@@ -385,7 +385,7 @@ class UnattendedUpgradesCache(apt.Cache):
                 and not pkg.is_upgradable:
             if not apt_pkg.config.find_b("Unattended-Upgrade::Allow-downgrade",
                                          False):
-                raise NoAllowedOriginError
+                return
             else:
                 function = apt.package.Package.mark_install
         marking_succeeded = self.call_checked(function, pkg, **kwargs)
