@@ -1,8 +1,11 @@
 unattended-upgrades (2.2) UNRELEASED; urgency=medium
 
   * ci: Use apt-get instead of apt to avoid warnings
+  * Don't raise NoAllowedOriginError from call_adjusted() (LP: #1871633)
+  * Clear cache changes in do_install() instead of raising error when a
+    package is marked for removal. (LP: #1871639)
 
- -- Balint Reczey <rbalint@ubuntu.com>  Tue, 31 Mar 2020 12:29:24 +0200
+ -- Balint Reczey <rbalint@ubuntu.com>  Thu, 09 Apr 2020 13:48:35 +0200
 
 unattended-upgrades (2.1) unstable; urgency=medium
 
