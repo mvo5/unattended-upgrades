@@ -19,7 +19,7 @@ from unattended_upgrade import do_install
 from typing import List
 
 
-class MockCache:
+class MockCache(dict):
     blacklist = []  # type: List[str]
     whitelist = []  # type: List[str]
 
@@ -55,7 +55,9 @@ class TestRegression(unittest.TestCase):
         options = Mock()
         options.minimal_upgrade_steps = False
         apt_pkg.config.set("Unattended-Upgrade::MinimalSteps", "False")
-        do_install(cache=MockCache(), pkgs_to_upgrade=[pkg],
+        cache = MockCache()
+        cache[pkg.name] = pkg
+        do_install(cache=cache, pkgs_to_upgrade=[pkg.name],
                    options=options,
                    logfile_dpkg=logfile_dpkg)
         # if there is no exception here, we are good

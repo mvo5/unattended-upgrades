@@ -385,7 +385,7 @@ class UnattendedUpgradesCache(apt.Cache):
                 and not pkg.is_upgradable:
             if not apt_pkg.config.find_b("Unattended-Upgrade::Allow-downgrade",
                                          False):
-                raise NoAllowedOriginError
+                return
             else:
                 function = apt.package.Package.mark_install
         marking_succeeded = self.call_checked(function, pkg, **kwargs)
@@ -1508,7 +1508,7 @@ def send_summary_mail(pkgs,                 # type: List[str]
 
 
 def do_install(cache,             # type: UnattendedUpgradesCache
-               pkgs_to_upgrade,   # type: List[apt.Package]
+               pkgs_to_upgrade,   # type: List[str]
                options,           # type: Options
                logfile_dpkg,      # type: str
                ):
@@ -1518,18 +1518,15 @@ def do_install(cache,             # type: UnattendedUpgradesCache
 
     logging.info(_("Writing dpkg log to %s"), logfile_dpkg)
 
-    marked_delete = [pkg for pkg in cache.get_changes() if pkg.marked_delete]
-    if marked_delete:
-        raise AssertionError(
-            "Internal error. The following packages are marked for "
-            "removal:%s" % " ".join([pkg.name for pkg in marked_delete]))
+    if cache.get_changes():
+        cache.clear()
 
     pkg_install_success = False
     try:
         if options.minimal_upgrade_steps:
             # try upgrade all "pkgs" in minimal steps
             pkg_install_success = upgrade_in_minimal_steps(
-                cache, [pkg.name for pkg in pkgs_to_upgrade],
+                cache, pkgs_to_upgrade,
                 logfile_dpkg,
                 options.verbose or options.debug)
         else:
@@ -2024,8 +2021,9 @@ def main(options, rootdir="/"):
 
 
 def mark_pkgs_to_upgrade(cache, pkgs_to_upgrade):
-    # type (apt.Cache, List[apt.Package]) -> None
-    for pkg in pkgs_to_upgrade:
+    # type (apt.Cache, List[str]) -> None
+    for pkg_name in pkgs_to_upgrade:
+        pkg = cache[pkg_name]
         if pkg.is_upgradable \
            or (pkg.is_installed
                and pkg.candidate.version != pkg.installed.version) \
@@ -2165,7 +2163,7 @@ def run(options,             # type: Options
     os.nice(old_priority - os.nice(0))
 
     # download what looks good
-    mark_pkgs_to_upgrade(cache, pkgs_to_upgrade)
+    mark_pkgs_to_upgrade(cache, pkgs)
 
     if options.debug:
         fetcher = apt_pkg.Acquire(apt.progress.text.AcquireProgress())
@@ -2357,7 +2355,7 @@ def run(options,             # type: Options
     if len(pkgs_to_upgrade) > 0:
         # do install
         pkg_install_success = do_install(cache,
-                                         pkgs_to_upgrade,
+                                         pkgs,
                                          options,
                                          logfile_dpkg)
     # Was the overall run succesful: only if everything installed
