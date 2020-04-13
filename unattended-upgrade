@@ -841,7 +841,7 @@ def match_whitelist_string(whitelist, origin):
 def python_regex_is_posix(expression):
     # type: (str) -> bool
     """ Returns if the Python regex is also an equivalent POSIX regex """
-    return re.match("^[a-zA-Z0-9\\^\\$\\+\\.]*$", expression) is None
+    return re.match("^[a-zA-Z0-9\\^\\$\\+\\.]*$", expression) is not None
 
 
 def cache_commit(cache,           # type: apt.Cache
