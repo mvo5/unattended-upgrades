@@ -255,7 +255,7 @@ class UnattendedUpgradesCache(apt.Cache):
         pins = []  # type: List[PkgPin]
         for regex in regexps:
             if python_regex_is_posix(regex):
-                pins.append(PkgPin('/' + regex + '/', priority))
+                pins.append(PkgPin('/^' + regex + '/', priority))
             else:
                 # Python regex is not also an equivalent POSIX regexp.
                 # This is expected to be rare. Go through all the package names
@@ -841,7 +841,7 @@ def match_whitelist_string(whitelist, origin):
 def python_regex_is_posix(expression):
     # type: (str) -> bool
     """ Returns if the Python regex is also an equivalent POSIX regex """
-    return re.match("^[a-zA-Z0-9\\^\\$\\+\\.]*$", expression) is None
+    return re.match("^[a-zA-Z0-9\\^\\$\\+\\.]*$", expression) is not None
 
 
 def cache_commit(cache,           # type: apt.Cache
@@ -2256,6 +2256,8 @@ def run(options,             # type: Options
                       % conffile_blacklist)
         # find out about the packages that are upgradable (in a allowed_origin)
         if len(conffile_blacklist) > 0:
+            for regex in conffile_blacklist:
+                cache.blacklist.append(regex)
             cache.apply_pinning(cache.pinning_from_regex_list(
                 conffile_blacklist, NEVER_PIN))  # type: ignore
             old_pkgs_to_upgrade = pkgs_to_upgrade[:]

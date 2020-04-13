@@ -1,3 +1,13 @@
+unattended-upgrades (2.3) UNRELEASED; urgency=medium
+
+  * Fix checking if Python regexp is also a POSIX regexp
+  * Prepend implied '^' when converting Python regex to a POSIX one
+  * Blacklist not trusted packages and ones with conffile prompts
+    instead of just pinning them once with NEVER_PIN which is can be cleared
+    later. (LP: #1871615) (Closes: #956339)
+
+ -- Balint Reczey <rbalint@ubuntu.com>  Mon, 13 Apr 2020 23:45:41 +0200
+
 unattended-upgrades (2.2) unstable; urgency=medium
 
   * ci: Use apt-get instead of apt to avoid warnings
