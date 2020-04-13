@@ -2256,6 +2256,8 @@ def run(options,             # type: Options
                       % conffile_blacklist)
         # find out about the packages that are upgradable (in a allowed_origin)
         if len(conffile_blacklist) > 0:
+            for regex in conffile_blacklist:
+                cache.blacklist.append(regex)
             cache.apply_pinning(cache.pinning_from_regex_list(
                 conffile_blacklist, NEVER_PIN))  # type: ignore
             old_pkgs_to_upgrade = pkgs_to_upgrade[:]
