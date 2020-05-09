@@ -363,10 +363,9 @@ class UnattendedUpgradesCache(apt.Cache):
             self.clear()
             return False
 
-        return (((function == apt.package.Package.mark_upgrade)
-                 and pkg.marked_upgrade)
-                or ((function == apt.package.Package.mark_install)
-                    and pkg.marked_install))
+        return ((function == apt.package.Package.mark_upgrade
+                 or function == apt.package.Package.mark_install)
+                and (pkg.marked_upgrade or pkg.marked_install))
 
     def call_adjusted(self, function, pkg, **kwargs):
         """Call function, but with adjusting
