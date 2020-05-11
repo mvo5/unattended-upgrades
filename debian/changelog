@@ -1,3 +1,14 @@
+unattended-upgrades (2.4) UNRELEASED; urgency=medium
+
+  * Fix checking if an upgrade/install marking succeeded.
+    The false negative result caused unattended-upgrades trying to apply
+    workarounds to upgrade/install the package using excessive amount of CPU
+    time. (Closes: #958883) (LP: #1877769)
+  * Treat "-" and ":" as valid parts of both Python and POSIX regular
+    expressions
+
+ -- Balint Reczey <rbalint@ubuntu.com>  Sat, 09 May 2020 16:14:14 +0200
+
 unattended-upgrades (2.3) unstable; urgency=medium
 
   * Fix checking if Python regexp is also a POSIX regexp
