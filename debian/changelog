@@ -1,4 +1,4 @@
-unattended-upgrades (2.4) UNRELEASED; urgency=medium
+unattended-upgrades (2.4) unstable; urgency=medium
 
   * Fix checking if an upgrade/install marking succeeded.
     The false negative result caused unattended-upgrades trying to apply
