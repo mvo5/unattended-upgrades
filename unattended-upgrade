@@ -299,11 +299,13 @@ class UnattendedUpgradesCache(apt.Cache):
             # to not install locally pinned up packages accidentally
             for pkg in self._cache.packages:
                 if pkg.has_versions:
-                     pkg_ver = policy.get_candidate_ver(pkg)
-                     if pkg_ver is not None and policy.get_priority(pkg_ver) > -1:
-                         # the pin is higher than set for allowed origins, thus
-                         # there is extra pinning configuration
-                         if not is_pkgname_in_whitelist(pkg.name, self.whitelist):
+                    pkg_ver = policy.get_candidate_ver(pkg)  # type: ignore
+                    if pkg_ver is not None \
+                       and policy.get_priority(pkg_ver) > -1:
+                        # the pin is higher than set for allowed origins, thus
+                        # there is extra pinning configuration
+                        if not is_pkgname_in_whitelist(pkg.name,
+                                                       self.whitelist):
                             pins.append(PkgPin(pkg.name, NEVER_PIN))
 
         return pins
