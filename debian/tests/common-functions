@@ -104,16 +104,8 @@ upgrade_python_apt() {
         # python-apt 1.9.6 is not available in buster
         exit 77
     fi
-    if [ "$distro" = "eoan" ]; then
-        # python-apt 1.9.6 is not available in Eoan, use a PPA with backports
-        chroot_exec "$chroot_dir" apt-get install -y software-properties-common 2>&1
-        chroot_exec "$chroot_dir" add-apt-repository -y ppa:rbalint/unattended-upgrades-test-deps
-    fi
     chroot_exec "$chroot_dir" apt-get update
     chroot_exec "$chroot_dir" apt-get install -y python3-apt 2>&1
-    if [ "$distro" = "eoan" ]; then
-        chroot_exec "$chroot_dir" add-apt-repository -y -r ppa:rbalint/unattended-upgrades-test-deps
-    fi
     disable_pocket "$chroot_dir" updates
     disable_pocket "$chroot_dir" security
     chroot_exec "$chroot_dir" apt-get update
