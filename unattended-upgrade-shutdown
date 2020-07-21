@@ -68,9 +68,9 @@ def do_usplash(msg):
 def do_plymouth(msg):
     # type: (str) -> None
     if os.path.exists("/bin/plymouth"):
-        for l in msg.split("\n"):
+        for line in msg.split("\n"):
             logging.debug("Running plymouth --text")
-            subprocess.call(["/bin/plymouth", "message", "--text", l])
+            subprocess.call(["/bin/plymouth", "message", "--text", line])
 
 
 def log_msg(msg, level=logging.WARN):
