@@ -1,5 +1,6 @@
 Source: unattended-upgrades
-Maintainer: Michael Vogt <mvo@debian.org>
+Maintainer: Ubuntu Developers <ubuntu-devel-discuss@lists.ubuntu.com>
+XSBC-Original-Maintainer: Michael Vogt <mvo@debian.org>
 Uploaders: Balint Reczey <rbalint@ubuntu.com>
 Section: admin
 Priority: optional

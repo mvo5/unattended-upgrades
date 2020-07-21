@@ -1,3 +1,17 @@
+unattended-upgrades (2.3ubuntu0.1) focal; urgency=medium
+
+  [ Balint Reczey ]
+  * Fix checking if an upgrade/install marking succeeded.
+    The false negative result caused unattended-upgrades trying to apply
+    workarounds to upgrade/install the package using excessive amount of CPU
+    time. (Closes: #958883) (LP: #1877769)
+  * Fix indentation and type error (LP: #1883082)
+
+  [ Jose Manuel Santamaria Lema ]
+  * Fix crash occuring when strict whitelist is in use (LP: #1883082)
+
+ -- Balint Reczey <rbalint@ubuntu.com>  Tue, 21 Jul 2020 17:20:12 +0200
+
 unattended-upgrades (2.3) unstable; urgency=medium
 
   * Fix checking if Python regexp is also a POSIX regexp
