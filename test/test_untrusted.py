@@ -51,6 +51,12 @@ class TestUntrusted(unittest.TestCase):
             haystack = f.read()
             self.assertTrue(
                 "pkg test-package is not from a trusted origin" in haystack)
+            if unattended_upgrade.get_distro_codename() == "sid":
+                self.assertFalse(
+                    "falling back to adjusting" in haystack)
+            else:
+                self.assertTrue(
+                    "falling back to adjusting" in haystack)
 
 
 if __name__ == "__main__":
