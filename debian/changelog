@@ -1,4 +1,4 @@
-unattended-upgrades (2.5) UNRELEASED; urgency=medium
+unattended-upgrades (2.5) unstable; urgency=medium
 
   [ Jose Manuel Santamaria Lema ]
   * Fix crash occuring when strict whitelist is in use (LP: #1883082)
