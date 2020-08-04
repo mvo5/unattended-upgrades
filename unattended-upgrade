@@ -392,8 +392,9 @@ class UnattendedUpgradesCache(apt.Cache):
                 function = apt.package.Package.mark_install
         marking_succeeded = self.call_checked(function, pkg, **kwargs)
 
-        if not marking_succeeded or \
-           not check_changes_for_sanity(self, desired_pkg=pkg):
+        if (not marking_succeeded
+            or not check_changes_for_sanity(self, desired_pkg=pkg)) \
+                and allow_marking_fallback():
             logging.debug("falling back to adjusting %s's dependencies"
                           % pkg.name)
             self.clear()
@@ -713,6 +714,13 @@ def get_distro_codename():
 def get_distro_id():
     # type: () -> str
     return DISTRO_ID
+
+
+def allow_marking_fallback():
+    # type: () -> bool
+    return apt_pkg.config.find_b(
+        "Unattended-Upgrade::Allow-APT-Mark-Fallback",
+        get_distro_codename() != "sid")
 
 
 def versioned_kernel_pkgs_regexp():
