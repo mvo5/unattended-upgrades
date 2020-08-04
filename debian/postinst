@@ -71,12 +71,6 @@ case "$1" in
 	ucf --three-way --debconf-ok "$NEWFILE" "$CONFIG"
 	ucfr unattended-upgrades "$CONFIG"
 
-        # Recover from incorrect init.d script header in versions < 0.64
-        if dpkg --compare-versions "$2" lt "0.64" \
-            && [ -f /etc/rc0.d/S[0-9][0-9]unattended-upgrades ] \
-            && [ -f /etc/rc6.d/S[0-9][0-9]unattended-upgrades ] ; then
-            update-rc.d -f unattended-upgrades remove
-        fi
         # Recover from broken dh_installinit override in versions < 0.93.1+nmu1 (or < 0.93.1ubuntu3 in Ubuntu)
         if ([ "$(lsb_release -i -s)" != "Ubuntu" ] \
                 && ( dpkg --compare-versions "$2" lt "0.93.1+nmu1" \

@@ -1,10 +1,12 @@
-unattended-upgrades (2.6) UNRELEASED; urgency=medium
+unattended-upgrades (2.6) unstable; urgency=medium
 
   * debian/tests/common-functions: Drop support for Ubuntu 19.10
   * Make APT marking fallback configurable and disable it on Sid
     (Closes: #960966)
+  * Drop handling pre-oldstable versions in maintainer scripts
+  * data/50unattended-upgrades.md5sum: Update for config file changes
 
- -- Balint Reczey <rbalint@ubuntu.com>  Tue, 21 Jul 2020 23:18:04 +0200
+ -- Balint Reczey <rbalint@ubuntu.com>  Tue, 04 Aug 2020 17:04:29 +0200
 
 unattended-upgrades (2.5) unstable; urgency=medium
 

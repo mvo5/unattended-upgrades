@@ -9,7 +9,6 @@ set -e
 
 CONFIG="/etc/apt/apt.conf.d/50unattended-upgrades"
 
-dpkg-maintscript-helper rm_conffile $CONFIG 0.86.4~ -- "$@"
 # if the transition to ucf was not handled properly, do it now
 case "$1" in
     install|upgrade)

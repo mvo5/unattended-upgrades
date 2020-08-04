@@ -17,8 +17,6 @@ set -e
 # for details, see http://www.debian.org/doc/debian-policy/ or
 # the debian-policy package
 
-dpkg-maintscript-helper rm_conffile /etc/apt/apt.conf.d/50unattended-upgrades 0.86.4~ -- "$@"
-
 case "$1" in
     purge)
 	if [ -x "`which ucf 2>/dev/null`" ]; then
