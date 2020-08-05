@@ -1,3 +1,9 @@
+unattended-upgrades (2.7) unstable; urgency=medium
+
+  * Fix test_rewind on Debian Sid fixing FTBFS.
+
+ -- Balint Reczey <rbalint@ubuntu.com>  Wed, 05 Aug 2020 14:03:32 +0200
+
 unattended-upgrades (2.6) unstable; urgency=medium
 
   * debian/tests/common-functions: Drop support for Ubuntu 19.10
