@@ -28,6 +28,8 @@ class TestRewindCache(unittest.TestCase):
         dpkg_status = os.path.abspath(
             os.path.join(rootdir, "var", "lib", "dpkg", "status"))
         apt.apt_pkg.config.set("Dir::State::status", dpkg_status)
+        apt.apt_pkg.config.set(
+            "Unattended-Upgrade::Allow-APT-Mark-Fallback", "true")
         self.cache = unattended_upgrade.UnattendedUpgradesCache(
             rootdir=rootdir)
 
