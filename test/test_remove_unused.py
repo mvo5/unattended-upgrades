@@ -52,7 +52,17 @@ Version: 1.0
 Package: linux-image-4.05.0-1021-kvm
 Status: install ok installed
 Architecture: all
-Version: 1.0
+Version: 1.21
+
+Package: linux-image-4.05.0-1022-kvm
+Status: install ok installed
+Architecture: all
+Version: 1.22
+
+Package: linux-image-4.05.0-1023-kvm
+Status: install ok installed
+Architecture: all
+Version: 1.23
 
 Package: z-package
 Status: install ok installed
