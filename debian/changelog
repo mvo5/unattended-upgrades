@@ -1,3 +1,18 @@
+unattended-upgrades (2.8) unstable; urgency=medium
+
+  [ Lucas Moura ]
+  * Add xenial 50unattended-upgrades version to md5sum.
+    On Xenial, we have a 50unattended-upgrades file that
+    is not covered on the md5sum history file. We are now adding
+    the md5sum of that Xenial file into it
+
+  [ Balint Reczey ]
+  * debian/tests/control: Add apt to test dependencies to get triggered
+  * test/test_remove_unused.py: Expect APT to protect two latest kernels.
+    This is a behaviour change in recent APT versions. (Closes: #980638)
+
+ -- Balint Reczey <rbalint@ubuntu.com>  Fri, 19 Feb 2021 13:11:42 +0100
+
 unattended-upgrades (2.7) unstable; urgency=medium
 
   * Fix test_rewind on Debian Sid fixing FTBFS.
