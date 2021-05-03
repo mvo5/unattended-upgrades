@@ -339,7 +339,7 @@ class UnattendedUpgradesShutdown():
         res = apt_pkg.get_lock(self.options.lock_file)
         logging.debug("get_lock returned %i" % res)
         # exit here if there is no lock
-        if res > 0:
+        if res < 0:
             logging.debug("lock not taken")
             if self.lock_was_taken:
                 exit_log_result(self.signal_sent)
