@@ -296,7 +296,8 @@ class UnattendedUpgradesShutdown():
         if self.on_shutdown_mode is None:
             self.on_shutdown_mode = (
                 not self.options.stop_only
-                and not self.stop_signal_received.is_set()
+                and ((self.options.wait_for_signal and self.stop_signal_received.is_set()) or
+                     (not self.options.wait_for_signal and not self.stop_signal_received.is_set()))
                 and self.apt_pkg_reinit_done
                 and apt_pkg.config.find_b(
                     "Unattended-Upgrade::InstallOnShutdown", False))
