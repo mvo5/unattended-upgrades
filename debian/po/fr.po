@@ -1,57 +1,466 @@
-# unattended-upgrades po-debconf file
-# Copyright (C) 2008
+# Paquet unattended-upgrades
+# Copyright (C) 2008-2019
 # This file is distributed under the same license as the unattended-upgrades package.
-# Michael Vogt <mvo@debian.org>, 2008
 #
+# Michael Vogt <mvo@debian.org>, 2008.
+# Alban Vidal <alban.vidal@zordhak.fr>, 2019.
+# Jean-Pierre Giraud <jean-pierregiraud@neuf.fr>, 2021.
 msgid ""
 msgstr ""
-"Project-Id-Version: 0.35debian1\n"
-"Report-Msgid-Bugs-To: unattended-upgrades@packages.debian.org\n"
-"POT-Creation-Date: 2017-12-12 23:02+0100\n"
-"PO-Revision-Date: 2015-11-05 09:34+0100\n"
-"Last-Translator: Steve Petruzzello <dlist@bluewin.ch>\n"
+"Project-Id-Version: unattended-upgrades 1.10\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2015-07-02 12:27+0200\n"
+"PO-Revision-Date: 2021-06-08 17:19+0100\n"
+"Last-Translator: Jean-Pierre Giraud <jean-pierregiraud@neuf.fr>\n"
 "Language-Team: French <debian-l10n-french@lists.debian.org>\n"
 "Language: fr\n"
 "MIME-Version: 1.0\n"
-"Content-Type: text/plain; charset=utf-8\n"
+"Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n > 1);\n"
+"X-Generator: Lokalize 2.0\n"
 
-#. Type: boolean
-#. Description
-#: ../templates:2001
-msgid "Automatically download and install stable updates?"
+#: ../unattended-upgrade:203 ../unattended-upgrade:746
+#: ../unattended-upgrade:1535
+#, python-format
+msgid "package %s upgradable but fails to be marked for upgrade (%s)"
 msgstr ""
-"Faut-il automatiquement télécharger et installer les mises à jour de la "
-"version stable ?"
+"Le paquet %s peut être mis à niveau mais échoue à être marqué comme tel (%s)"
 
-#. Type: boolean
-#. Description
-#: ../templates:2001
+#: ../unattended-upgrade:301
+#, python-format
+msgid "Progress: %s %% (%s)"
+msgstr "Progression : %s %% (%s)"
+
+#: ../unattended-upgrade:541
 msgid ""
-"Applying updates on a frequent basis is an important part of keeping systems "
-"secure. By default, updates need to be applied manually using package  "
-"management tools. Alternatively, you can choose to have this system  "
-"automatically download and install important updates."
+"Checking if system is running on battery is skipped. Please install "
+"powermgmt-base package to check power status and skip installing updates "
+"when the system is running on battery."
 msgstr ""
-"Il est important de mettre régulièrement son système à jour pour maintenir "
-"un haut niveau de sécurité. Par défaut, les mises à jour doivent être "
-"appliquées manuellement à l'aide d'un outil de gestion de paquets. "
-"Autrement, vous pouvez choisir d'automatiser ce processus de téléchargement "
-"et d'installation des mises à jour de sécurité."
+"La vérification de l'exécution du système sur batterie est ignorée. Veuillez "
+"installer le paquet powermgmt-base pour vérifier l'état de l'alimentation et "
+"ignorer l'installation des mises à jour lorsque le système fonctionne sur "
+"batterie."
 
-#~ msgid "Origins-Pattern that packages must match to be upgraded:"
-#~ msgstr ""
-#~ "Motif « Origin-Pattern » auquel les paquets doivent correspondre pour "
-#~ "être mis à jour :"
+#: ../unattended-upgrade:549
+msgid "System is on metered connection, stopping"
+msgstr "Le système a une connexion limitée, arrêt."
 
-#~ msgid "Please specify a value for the unattended-upgrades Origins-Pattern."
-#~ msgstr ""
-#~ "Veuillez indiquer une valeur pour le motif de correspondance « Origin-"
-#~ "Pattern » pour unattended-upgrades."
+#: ../unattended-upgrade:552
+msgid ""
+"Checking if connection is metered is skipped. Please install python3-gi "
+"package to detect metered connections and skip downloading updates."
+msgstr ""
+"La vérification de la limitation de connexion est ignorée. Veuillez "
+"installer le paquet python3-gi pour la détection des connexions limitées et "
+"ignorer le téléchargement des mises à jour."
 
-#~ msgid ""
-#~ "A package will be upgraded only if its metadata values match all the "
-#~ "supplied keywords in the origin line."
-#~ msgstr ""
-#~ "Un paquet sera mis à jour uniquement si ses métadonnées correspondent à "
-#~ "tous les mots clés indiqués ici."
+#: ../unattended-upgrade:600 ../unattended-upgrade:617
+#, python-format
+msgid "Unable to parse %s."
+msgstr "Impossible d'analyser %s."
+
+#: ../unattended-upgrade:701 ../unattended-upgrade:789
+#: ../unattended-upgrade:2230 ../unattended-upgrade-shutdown:111
+msgid "All upgrades installed"
+msgstr "Toutes les mises à niveau ont été installées"
+
+#: ../unattended-upgrade:703 ../unattended-upgrade:781
+msgid "Installing the upgrades failed!"
+msgstr "Échec de l'installation des mises à niveau !"
+
+#: ../unattended-upgrade:704 ../unattended-upgrade:782
+#: ../unattended-upgrade:1056 ../unattended-upgrade:1058
+#: ../unattended-upgrade:1933 ../unattended-upgrade:1935
+#, python-format
+msgid "error message: %s"
+msgstr "Message d'erreur : %s"
+
+#: ../unattended-upgrade:705 ../unattended-upgrade:783
+#, python-format
+msgid "dpkg returned a error! See %s for details"
+msgstr "dpkg a renvoyé une erreur ! Voir %s pour plus de détails"
+
+#: ../unattended-upgrade:1055 ../unattended-upgrade:1057
+#: ../unattended-upgrade:1932 ../unattended-upgrade:1934
+#: ../unattended-upgrade:1937
+msgid "Apt returned an error, exiting"
+msgstr "Apt a renvoyé une erreur, arrêt"
+
+#: ../unattended-upgrade:1234
+msgid ""
+"No /usr/bin/mail or /usr/sbin/sendmail, can not send mail. You probably want "
+"to install the mailx package."
+msgstr ""
+"L'exécutable /usr/bin/mail ou /usr/sbin/sendmail ne peut pas envoyer de "
+"courriel. Vous voulez probablement installer le paquet « mailx »."
+
+#: ../unattended-upgrade:1248
+msgid "[reboot required]"
+msgstr "[Redémarrage requis]"
+
+#: ../unattended-upgrade:1250
+msgid "[package on hold]"
+msgstr "[Paquet bloqué]"
+
+#: ../unattended-upgrade:1254
+#, python-brace-format
+msgid ""
+"{hold_flag}{reboot_flag} unattended-upgrades result for {machine}: {result}"
+msgstr ""
+"Résultat {hold_flag}{reboot_flag} d'unattended-upgrades pour {machine} : "
+"{result}"
+
+#: ../unattended-upgrade:1258
+#, python-format
+msgid "Unattended upgrade result: %s"
+msgstr "Résultat de la mise à niveau automatique : %s"
+
+#: ../unattended-upgrade:1262
+msgid ""
+"Warning: A reboot is required to complete this upgrade, or a previous one.\n"
+"\n"
+msgstr ""
+"Avertissement : un redémarrage est requis afin d'achever cette mise à niveau "
+"ou une précédente.\n"
+"\n"
+
+#: ../unattended-upgrade:1266
+msgid "Packages that were upgraded:\n"
+msgstr "Paquets mis à niveau :\n"
+
+#: ../unattended-upgrade:1268
+msgid "Packages that attempted to upgrade:\n"
+msgstr "Essai de mise à niveau des paquets :\n"
+
+#: ../unattended-upgrade:1272
+msgid "Packages with upgradable origin but kept back:\n"
+msgstr ""
+"Paquets susceptibles d'être mis à niveau mais maintenus dans leur état "
+"actuel :\n"
+
+#: ../unattended-upgrade:1279
+msgid "Packages that were auto-removed:\n"
+msgstr "Paquets supprimés automatiquement :\n"
+
+#: ../unattended-upgrade:1283
+msgid "Packages that were kept from being auto-removed:\n"
+msgstr "Paquets qui ont été empêchés d'être supprimés automatiquement :\n"
+
+#: ../unattended-upgrade:1287
+msgid "Package installation log:"
+msgstr "Journal d'installation des paquets :"
+
+#: ../unattended-upgrade:1290
+msgid "Unattended-upgrades log:\n"
+msgstr "Journal de unattended-upgrades :\n"
+
+#: ../unattended-upgrade:1317
+#, python-format
+msgid "Writing dpkg log to %s"
+msgstr "Écriture du journal de dpkg dans %s"
+
+#: ../unattended-upgrade:1469
+#, python-format
+msgid "Found %s, but not rebooting because %s is logged in."
+msgid_plural "Found %s, but not rebooting because %s are logged in."
+msgstr[0] "Trouvé %s, mais ne redémarre pas car %s est connecté."
+msgstr[1] "Trouvé %s, mais ne redémarre pas car %s sont connectés."
+
+#: ../unattended-upgrade:1624
+#, python-format
+msgid ""
+"Keeping the following auto-removable package(s) because they include %s "
+"which is set to be kept unmodified: %s"
+msgstr ""
+"Conserver le ou les paquets suivants, marqués à supprimer automatiquement, "
+"parce qu'ils incluent %s qui est réglé pour rester non modifié : %s"
+
+#: ../unattended-upgrade:1631
+#, python-format
+msgid ""
+"Keeping auto-removable %s package(s) because it would also remove the "
+"following packages which should be kept in this step: %s"
+msgstr ""
+"Conserver le ou les paquets %s, marqués à supprimer automatiquement, parce "
+"que cela enlèverait aussi les paquets qui devraient être gardés à cette "
+"étape : %s"
+
+#: ../unattended-upgrade:1637
+#, python-format
+msgid ""
+"Keeping %s auto-removable package(s) because it would also remove the "
+"following packages which should be kept in this step: %s"
+msgstr ""
+"Conserver le ou les paquets %s, marqués à supprimer automatiquement, parce "
+"que cela enlèverait aussi les paquets qui devraient être gardés à cette "
+"étape : %s"
+
+#: ../unattended-upgrade:1647
+#, python-format
+msgid ""
+"Keeping the following auto-removable package(s) because they include %s "
+"which package is related to the running kernel: %s"
+msgstr ""
+"Conserver le ou les paquets suivants, marqués à supprimer automatiquement, "
+"parce qu'ils incluent le paquet %s qui est lié au noyau en cours "
+"d'exécution : %s"
+
+#: ../unattended-upgrade:1710
+#, python-format
+msgid "Packages that were successfully auto-removed: %s"
+msgstr "Ces paquets ont été supprimés automatiquement correctement : %s"
+
+#: ../unattended-upgrade:1712
+#, python-format
+msgid "Packages that are kept back: %s"
+msgstr "Paquets qui sont conservés : %s"
+
+#: ../unattended-upgrade:1716
+msgid "Auto-removing the packages failed!"
+msgstr "La suppression automatique des paquets a échoué !"
+
+#: ../unattended-upgrade:1717
+#, python-format
+msgid "Error message: %s"
+msgstr "Message d'erreur : %s"
+
+#: ../unattended-upgrade:1718
+#, python-format
+msgid "dpkg returned an error! See %s for details"
+msgstr "dpkg a renvoyé une erreur ! Voir %s pour plus de détails"
+
+#: ../unattended-upgrade:1808 ../unattended-upgrade:2011
+#: ../unattended-upgrade:2012
+#, python-format
+msgid "An error occurred: %s"
+msgstr "Une erreur s'est produite : %s"
+
+#: ../unattended-upgrade:1812
+msgid "An error occurred"
+msgstr "Une erreur s'est produite"
+
+#: ../unattended-upgrade:1862 ../unattended-upgrade:1866
+#, python-format
+msgid "Not running on this development release before %s"
+msgstr "Ne fonctionne pas dans cette version de développement avant %s"
+
+#: ../unattended-upgrade:1875 ../unattended-upgrade:1876
+msgid "Not running on the development release."
+msgstr "Ne fonctionne pas dans la version de développement."
+
+#: ../unattended-upgrade:1883
+#, python-format
+msgid "Initial blacklist: %s"
+msgstr "Liste noire initiale : %s"
+
+#: ../unattended-upgrade:1888
+#, python-format
+msgid "Initial whitelist: %s"
+msgstr "Liste blanche initiale : %s"
+
+#: ../unattended-upgrade:1891
+msgid "Starting unattended upgrades script"
+msgstr "Démarrage du script de mise à niveau automatique"
+
+#: ../unattended-upgrade:1894
+#, python-format
+msgid "Allowed origins are: %s"
+msgstr "Les origines permises sont : %s"
+
+#: ../unattended-upgrade:1900
+msgid "Lock could not be acquired (another package manager running?)"
+msgstr ""
+"Verrouillage impossible (y a-t-il un autre gestionnaire de paquets en cours "
+"d'exécution ?)"
+
+#: ../unattended-upgrade:1902
+msgid "Cache lock can not be acquired, exiting"
+msgstr "Le verrouillage du cache est impossible, abandon"
+
+#: ../unattended-upgrade:1904
+msgid "Lock could not be acquired"
+msgstr "Le verrouillage du cache est impossible"
+
+#: ../unattended-upgrade:1913 ../unattended-upgrade:1914
+msgid "Unclean dpkg state detected, trying to correct"
+msgstr "Détection d'un état de dpkg impropre, tentative de correction"
+
+#: ../unattended-upgrade:1925
+#, python-format
+msgid ""
+"dpkg --configure -a output:\n"
+"%s"
+msgstr ""
+"sortie de « dpkg --configure -a » :\n"
+"%s"
+
+#: ../unattended-upgrade:1940 ../unattended-upgrade:1941
+#: ../unattended-upgrade:1943 ../unattended-upgrade:2179
+#: ../unattended-upgrade:2180 ../unattended-upgrade:2182
+msgid "Cache has broken packages, exiting"
+msgstr "Le cache contient des paquets cassés, abandon"
+
+#: ../unattended-upgrade:1987
+msgid "Upgrade was interrupted"
+msgstr "La mise à niveau a été interrompue"
+
+#: ../unattended-upgrade:1991
+#, python-format
+msgid "GetArchives() failed: %s"
+msgstr "Échec de GetArchives() : %s"
+
+#: ../unattended-upgrade:2014 ../unattended-upgrade:2016
+#: ../unattended-upgrade:2019
+#, python-format
+msgid "The URI %s failed to download, aborting"
+msgstr "Échec du téléchargement de l'URI %s, abandon"
+
+#: ../unattended-upgrade:2022 ../unattended-upgrade:2027
+#, python-format
+msgid "Download finished, but file %s not there?!?"
+msgstr "Téléchargement terminé mais le fichier %s est absent !"
+
+#: ../unattended-upgrade:2047 ../unattended-upgrade:2051
+#, python-format
+msgid "Package %s has conffile prompt and needs to be upgraded manually"
+msgstr ""
+"Le paquet %s propose une invite de fichier de configuration et nécessite une "
+"mise à niveau manuelle"
+
+#: ../unattended-upgrade:2082
+#, python-format
+msgid "package %s not upgraded"
+msgstr "Le paquet %s n'a pas été mis à niveau"
+
+#: ../unattended-upgrade:2112
+#, python-format
+msgid "Removing unused kernel packages: %s"
+msgstr "Suppression des paquets du noyau non utilisés :%s"
+
+#: ../unattended-upgrade:2133 ../unattended-upgrade:2137
+msgid ""
+"No packages found that can be upgraded unattended and no pending auto-"
+"removals"
+msgstr ""
+"Aucun paquet à mettre à niveau automatiquement ni à supprimer automatiquement"
+
+#: ../unattended-upgrade:2160
+#, python-format
+msgid "Packages that will be upgraded: %s"
+msgstr "Paquets mis à niveau : %s"
+
+#: ../unattended-upgrade:2270
+msgid "print debug messages"
+msgstr "Afficher les messages de débogage"
+
+#: ../unattended-upgrade:2273
+msgid "make apt/libapt print verbose debug messages"
+msgstr "Afficher les messages de débogage de apt/libapt"
+
+#: ../unattended-upgrade:2278
+msgid "print info messages"
+msgstr "Afficher les messages d'information"
+
+#: ../unattended-upgrade:2281
+msgid "Simulation, download but do not install"
+msgstr "Simulation, télécharger mais ne pas installer"
+
+#: ../unattended-upgrade:2284
+msgid "Only download, do not even try to install."
+msgstr "Téléchargement seulement, ne même pas essayer d'installer."
+
+#: ../unattended-upgrade:2287
+msgid ""
+"Upgrade in minimal steps (and allow interrupting with SIGTERM) (default)"
+msgstr ""
+"Mise à niveau par étapes minimales (et interruption avec SIGTERM autorisée)"
+"(par défaut)"
+
+#: ../unattended-upgrade:2292
+msgid "Upgrade in minimal steps (and allow interrupting with SIGTERM"
+msgstr ""
+"Mise à niveau par étapes minimales (et interruption avec SIGTERM autorisée)"
+
+#: ../unattended-upgrade:2301
+msgid "You need to be root to run this application"
+msgstr ""
+"Vous devez posséder les privilèges du superutilisateur pour exécuter cette "
+"application"
+
+#: ../unattended-upgrade-shutdown:86
+msgid ""
+"Unattended-upgrade in progress during shutdown, please don't turn off the "
+"computer"
+msgstr ""
+"Unattended-upgrade en cours durant l'extinction, merci de ne pas éteindre "
+"l'ordinateur."
+
+#: ../unattended-upgrade-shutdown:114
+msgid ""
+"Unattended-upgrades stopped. There may be upgrades left to be installed in "
+"the next run."
+msgstr ""
+"Unattended-upgrades est arrêté. Il peut rester des mises à niveau à "
+"installer lors de la prochaine exécution."
+
+#: ../unattended-upgrade-shutdown:167
+msgid "Stop ongoing upgrades or perform upgrades before shutdown"
+msgstr ""
+"Arrêter les mises à niveau en cours ou réaliser les mises à niveau avant "
+"l'extinction."
+
+#: ../unattended-upgrade-shutdown:206 ../unattended-upgrade-shutdown:263
+msgid "Unable to monitor PrepareForShutdown() signal, polling instead."
+msgstr ""
+"Surveillance du signal PrepareForShutdown() impossible, attente active "
+"activée à la place."
+
+#: ../unattended-upgrade-shutdown:209
+msgid ""
+"To enable monitoring the PrepareForShutdown() signal instead of polling "
+"please install the python3-gi package"
+msgstr ""
+"Pour activer la surveillance du signal PrepareForShutdown() à la place de "
+"l'attente active, veuillez installer le paquet python3-gi."
+
+#: ../unattended-upgrade-shutdown:266
+msgid "Maybe systemd-logind service is not running."
+msgstr "Le service systemd-logind n'est peut-être pas en cours d'exécution."
+
+#: ../unattended-upgrade-shutdown:289
+msgid "Apt returned an error thus shutdown mode is disabled"
+msgstr ""
+"Apt a renvoyé une erreur, par conséquent le mode extinction est désactivé."
+
+#: ../unattended-upgrade-shutdown:291 ../unattended-upgrade-shutdown:372
+#, python-format
+msgid "error message: '%s'"
+msgstr "Message d'erreur : %s"
+
+#: ../unattended-upgrade-shutdown:307
+msgid "Running unattended-upgrades in shutdown mode"
+msgstr "Exécution d'unattended-upgrades lors de l'extinction"
+
+#: ../unattended-upgrade-shutdown:328
+#, python-format
+msgid "Giving up on lockfile after %s minutes of delay"
+msgstr "Renonciation sur un fichier verrou après un délai de %s minutes."
+
+#: ../unattended-upgrade-shutdown:370
+msgid "Apt returned an error when loading configuration, using default values"
+msgstr ""
+"Apt a renvoyé une erreur lors du chargement de la configuration, utilisation "
+"des valeurs par défaut."
+
+#, fuzzy
+#~| msgid "Packages that will be upgraded: %s"
+#~ msgid "Some packages can not be upgraded: %s"
+#~ msgstr "Paquets mis à niveau: %s"
+
+#~ msgid "unattended-upgrades result for '%s': '%s'"
+#~ msgstr "résultat de unattended-upgrades pour '%s' : '%s'"
+
+#~ msgid "Progress: %s %%: (%s)"
+#~ msgstr "Progression : %s %% : (%s)"
