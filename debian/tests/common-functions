@@ -37,7 +37,10 @@ do_debootstrap() {
         rm -rf "$chroot_dir"
         sleep 120
     done
-    [ $ret = 0 ] || exit $ret
+    if [ $ret != 0 ]; then
+        echo "Running debootstrap failed, skipping test."
+        exit 77
+    fi
 
     mount --bind /dev/pts "$chroot_dir/dev/pts"
     mount --bind /proc "$chroot_dir/proc"
