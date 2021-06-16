@@ -1,6 +1,6 @@
 Source: unattended-upgrades
 Maintainer: Michael Vogt <mvo@debian.org>
-Uploaders: Balint Reczey <rbalint@ubuntu.com>
+Uploaders: Balint Reczey <balint@balintreczey.hu>
 Section: admin
 Priority: optional
 Build-Depends: debhelper (>= 9.20160709),
