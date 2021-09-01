@@ -147,7 +147,7 @@ Supported Options Reference
  packages with the `Unattended-Upgrade::Package-Whitelist-Strict`
  boolean option.
  `Unattended-Upgrade::Package-Blacklist` still applies, thus blacklisted
- packages covered by the whitelist will still not be upraded nor will be
+ packages covered by the whitelist will still not be upgraded nor will be
  installed or upgraded as dependencies of whitelisted packages.
 
  Example:
