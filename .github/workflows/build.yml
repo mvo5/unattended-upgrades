@@ -10,13 +10,13 @@ jobs:
     - name: setup
       run: |
         sudo apt-get update
-        sudo apt-get install autopkgtest git-buildpackage
+        sudo apt-get install distro-info autopkgtest git-buildpackage
         sudo snap install lxd --channel=stable
         sudo usermod --append --groups lxd $(whoami)
         sudo lxd init  --auto
-        sudo autopkgtest-build-lxd ubuntu:$(. /etc/os-release && echo $UBUNTU_CODENAME)
+        sudo autopkgtest-build-lxd ubuntu:$(distro-info --stable)
     - name: build source
       run: gbp buildpackage -us -uc -S -d -nc --git-ignore-branch --git-prebuild=
     - name: autopkgtest
       # skipping tests is ok
-      run: sudo autopkgtest -U ../build-area/*.dsc -- lxd autopkgtest/ubuntu/$(. /etc/os-release && echo $UBUNTU_CODENAME)/amd64 || [ $? == 2 ]
+      run: sudo autopkgtest -U ../build-area/*.dsc -- lxd autopkgtest/ubuntu/$(distro-info --stable)/amd64 || [ $? == 2 ]
