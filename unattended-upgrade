@@ -346,7 +346,9 @@ class UnattendedUpgradesCache(apt.Cache):
             # and to avoid picking a newer version, not selected by apt.
             # This helps avoiding upgrades to experimental's packages.
             if pkg.candidate is not None and new_cand < pkg.candidate:
-                logging.debug("adjusting candidate version: %s" % new_cand)
+                logging.debug(
+                    "adjusting candidate to version %s in allowed "
+                    "origin %s" % (new_cand, new_cand.origins))
                 pkg.candidate = new_cand
                 return True
             else:
@@ -1743,7 +1745,8 @@ def calculate_upgradable_pkgs(cache,            # type: UnattendedUpgradesCache
         if options.debug and pkg.is_upgradable \
            or candidate_version_changed(pkg):
             logging.debug("Checking: %s (%s)" % (
-                pkg.name, getattr(pkg.candidate, "origins", [])))
+                getattr(pkg, "candidate", pkg.name),
+                getattr(pkg.candidate, "origins", [])))
 
         if (pkg.is_upgradable or candidate_version_changed(pkg)
            and is_pkgname_in_whitelist(pkg.name, cache.whitelist)):
