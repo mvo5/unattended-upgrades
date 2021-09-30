@@ -14,9 +14,9 @@ jobs:
         sudo snap install lxd --channel=3.0/stable
         sudo usermod --append --groups lxd $(whoami)
         sudo lxd init  --auto
-        sudo autopkgtest-build-lxd ubuntu-daily:groovy
+        sudo autopkgtest-build-lxd ubuntu:$(. /etc/os-release && echo $UBUNTU_CODENAME)
     - name: build source
       run: gbp buildpackage -us -uc -S -d -nc --git-ignore-branch --git-prebuild=
     - name: autopkgtest
       # skipping tests is ok
-      run: sudo autopkgtest -U ../build-area/*.dsc -- lxd autopkgtest/ubuntu/groovy/amd64 || [ $? == 2 ]
+      run: sudo autopkgtest -U ../build-area/*.dsc -- lxd autopkgtest/ubuntu/$(. /etc/os-release && echo $UBUNTU_CODENAME)/amd64 || [ $? == 2 ]
