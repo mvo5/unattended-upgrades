@@ -11,7 +11,7 @@ jobs:
       run: |
         sudo apt-get update
         sudo apt-get install autopkgtest git-buildpackage
-        sudo snap install lxd --channel=3.0/stable
+        sudo snap install lxd --channel=stable
         sudo usermod --append --groups lxd $(whoami)
         sudo lxd init  --auto
         sudo autopkgtest-build-lxd ubuntu:$(. /etc/os-release && echo $UBUNTU_CODENAME)
