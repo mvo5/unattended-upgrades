@@ -36,10 +36,12 @@ except ImportError:
     pass
 import grp
 import io
+import json
 import locale
 import logging
 import logging.handlers
 import re
+import requests
 import os
 import select
 import signal
@@ -1411,6 +1413,114 @@ def _send_mail_using_sendmail(from_address, to_address, subject, body):
     return ret
 
 
+# Based on send_summary_mail():
+#   Builds dictionary of all items and return it(data)
+#   Purposely not using mem_log, and dpkg_log_content.
+#     Hard to represent in json structure.
+def webhook_data(pkgs,                 # type: List[str]
+                 res,                  # type: bool
+                 result_str,           # type: str
+                 pkgs_kept_back,       # type: KeptPkgs
+                 pkgs_removed,         # type: List[str]
+                 pkgs_kept_installed,  # type: List[str]
+                 mem_log,              # type: StringIO # IGNORED
+                 dpkg_log_content,     # type: str
+                 ):
+
+    webhook = apt_pkg.config.find_b("Unattended-Upgrade::Webhook", False)
+    if not webhook:
+        return
+
+    # Check if reboot-required flag is present
+    reboot_flag = (True) if os.path.isfile(REBOOT_REQUIRED_FILE) else False
+    # Check if packages are kept on hold
+    hold_flag = ((True) if pkgs_kept_back or pkgs_kept_installed else False)
+
+    # Result
+    result = "SUCCESS" if res else "FAILURE"
+
+    data = {
+        "hostname" : host(),
+        "reboot_flag" : reboot_flag,
+        "hold_flag" : hold_flag,
+        "result" : result,
+        "packages" : {}
+    }
+
+    if pkgs:
+        if res:
+            data['packages']['upgraded'] = pkgs
+        else:
+            data['packages']['attempted'] = pkgs
+
+    if pkgs_kept_back:
+        data['packages']['kept_back'] = {}
+
+        for origin, origin_pkgs in pkgs_kept_back.items():
+            data['packages']['kept_back'][origin] = origin_pkgs
+
+    if pkgs_removed:
+        data['packages']['autoremoved'] = pkgs_removed
+    if pkgs_kept_installed:
+        data['packages']['kept_installed'] = pkgs_kept_installed
+
+    logging.debug(data)
+    return data
+
+
+def webhook_notify(webhook_url, data):
+    payload = json.dumps(data)
+    if len(payload) > 2000:  # https://discord.com/developers/docs/resources/webhook#edit-webhook-message-jsonform-params
+        payload = data['packages'] = "Content removed to accomodate 2000 character limit."
+        payload = json.dumps(data)
+
+    r = requests.post(webhook_url, json={"content": f"{payload}" })
+    if r.status_code in ['200','204']:
+        return True
+    else:
+        return False
+
+def send_summary_webhook(pkgs,                 # type: List[str]
+                         res,                  # type: bool
+                         result_str,           # type: str
+                         pkgs_kept_back,       # type: KeptPkgs
+                         pkgs_removed,         # type: List[str]
+                         pkgs_kept_installed,  # type: List[str]
+                         mem_log,              # type: StringIO
+                         dpkg_log_content,     # type: str
+                         ):
+
+    send = apt_pkg.config.find_b("Unattended-Upgrade::Webhook", False)
+    webhook = apt_pkg.config.find("Unattended-Upgrade::WebhookUrl", "")
+
+    # Options: "always", "only-on-error" or "on-change"
+    sendwhen = apt_pkg.config.find("Unattended-Upgrade::WebhookReport")
+
+    # If webhook is not enabled or there is no webhook url, exit here
+    if (not send) or (not webhook):
+        return
+
+    # If the operation was successful and the user has requested to get
+    # webhooks only on errors, just exit here
+    if (res and (sendwhen == "only-on-error")):
+        return
+
+    # If the run was successful but nothing had to be done skip sending the webhook
+    # unless the admin wants it anyway
+    if (((sendwhen != "always") and res and not pkgs and not pkgs_kept_back and not pkgs_removed)):
+        return
+
+    # Get dictionary of the data needed
+    data = webhook_data(pkgs, res, result_str,
+                        pkgs_kept_back, pkgs_removed,
+                        pkgs_kept_installed, mem_log,
+                        dpkg_log_content)
+
+
+    # Notify webhook
+    webhook_notify(webhook, data)
+
+
 def send_summary_mail(pkgs,                 # type: List[str]
                       res,                  # type: bool
                       result_str,           # type: str
@@ -2006,6 +2116,14 @@ def main(options, rootdir="/"):
                               res.pkgs_kept_back, res.pkgs_removed,
                               res.pkgs_kept_installed, mem_log,
                               log_content)
+
+            # send webhook summary
+            send_summary_webhook(res.pkgs, res.success, res.result_str,
+                                 res.pkgs_kept_back, res.pkgs_removed,
+                                 res.pkgs_kept_installed, mem_log,
+                                 log_content)
+
+
         if res.update_stamp:
             # write timestamp file
             write_stamp_file()

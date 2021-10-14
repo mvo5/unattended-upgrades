@@ -141,3 +141,14 @@ Unattended-Upgrade::DevRelease "auto";
 // uninstallable packages at the expense of rarely keeping back packages which
 // could be upgraded or installed.
 // Unattended-Upgrade::Allow-APT-Mark-Fallback "true";
+
+// Webhooks
+// Enable Webhooks: true, false
+//Unattended-Upgrade::Webhook "false";
+
+// Where do you want to send the json?
+//Unattended-Upgrade::WebhookUrl "";
+
+// When for the webhook to execute
+// Set this value to one of: "always", "only-on-error" or "on-change"
+//Unattended-Upgrade::WebhookReport "only-on-change";
