@@ -41,7 +41,10 @@ import locale
 import logging
 import logging.handlers
 import re
-import requests
+try:
+    import requests
+except ImportError:
+    pass
 import os
 import select
 import signal
@@ -1469,16 +1472,24 @@ def webhook_data(pkgs,                 # type: List[str]
 
 
 def webhook_notify(webhook_url, data):
-    payload = json.dumps(data)
-    if len(payload) > 2000:  # https://discord.com/developers/docs/resources/webhook#edit-webhook-message-jsonform-params
-        payload = data['packages'] = "Content removed to accomodate 2000 character limit."
-        payload = json.dumps(data)
 
-    r = requests.post(webhook_url, json={"content": f"{payload}" })
-    if r.status_code in ['200','204']:
-        return True
-    else:
+    try:
+        payload = json.dumps(data)
+        if len(payload) > 2000:  # https://discord.com/developers/docs/resources/webhook#edit-webhook-message-jsonform-params
+            payload = data['packages'] = "Content removed to accomodate 2000 character limit."
+            payload = json.dumps(data)
+
+        r = requests.post(webhook_url, json={"content": f"{payload}" })
+        if r.status_code in ['200','204']:
+            return True
+        else:
+            return False
+
+    except NameError:
+        log_once(_("Notifiying Webhook is skipped. Please "
+                   "install python3-requests package to send webhooks."))
         return False
+
 
 def send_summary_webhook(pkgs,                 # type: List[str]
                          res,                  # type: bool

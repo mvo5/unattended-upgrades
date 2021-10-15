@@ -32,7 +32,6 @@ Depends: ${shlibs:Depends},
          python3-apt (>= 1.9.6~),
          python3-dbus,
          python3-distro-info,
-         python3-requests,
          ucf,
          lsb-release,
          lsb-base,
@@ -43,6 +42,7 @@ Suggests: bsd-mailx,
           needrestart,
           powermgmt-base,
           python3-gi
+          python3-requests,
 Description: automatic installation of security upgrades
  This package can download and install security upgrades automatically
  and unattended, taking care to only install packages from the
