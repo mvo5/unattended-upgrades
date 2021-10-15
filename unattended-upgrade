@@ -2129,7 +2129,7 @@ def main(options, rootdir="/"):
                               log_content)
 
             # send webhook summary
-            send_summary_webhook(res.pkgs, res.success, res.result_str,
+            result = send_summary_webhook(res.pkgs, res.success, res.result_str,
                                  res.pkgs_kept_back, res.pkgs_removed,
                                  res.pkgs_kept_installed, mem_log,
                                  log_content)
