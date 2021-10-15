@@ -1480,7 +1480,7 @@ def webhook_notify(webhook_url, data):
             payload = json.dumps(data)
 
         r = requests.post(webhook_url, json={"content": f"{payload}" })
-        if r.status_code in ['200','204']:
+        if r.status_code in range(200, 299):
             return True
         else:
             return False
