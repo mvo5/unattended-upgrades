@@ -152,3 +152,7 @@ Unattended-Upgrade::DevRelease "auto";
 // When for the webhook to execute
 // Set this value to one of: "always", "only-on-error" or "on-change"
 //Unattended-Upgrade::WebhookReport "on-change";
+
+// Set character limit for the JSON payload
+// Default: 2000; If set to 0 there is no limit.
+// Unattended-Upgrade::WebhookCharacterLimit 2000;

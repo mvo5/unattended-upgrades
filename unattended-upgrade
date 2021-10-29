@@ -1474,9 +1474,11 @@ def webhook_data(pkgs,                 # type: List[str]
 def webhook_notify(webhook_url, data):
 
     try:
+        charlimit = apt_pkg.config.find("Unattended-Upgrade::WebhookCharacterLimit", 2000)
         payload = json.dumps(data)
-        if len(payload) > 2000:  # https://discord.com/developers/docs/resources/webhook#edit-webhook-message-jsonform-params
-            payload = data['packages'] = "Content removed to accomodate 2000 character limit."
+        if (len(payload) > charlimit) and (charlimit != 0):
+            log_once(_(f"Webhook payload is greater than {charlimit} characters. Removing list of packages to accomodate limit."))
+            payload = data['packages'] = f"Content removed to accomodate {charlimit} character limit."
             payload = json.dumps(data)
 
         r = requests.post(webhook_url, json={"content": f"{payload}" })
