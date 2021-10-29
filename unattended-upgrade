@@ -1485,6 +1485,7 @@ def webhook_notify(webhook_url, data):
         if r.status_code in range(200, 299):
             return True
         else:
+            log_once(_(f"Notifying webhook failed with http response code: {f.status_code}"))
             return False
 
     except NameError:
