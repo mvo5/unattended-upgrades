@@ -165,14 +165,14 @@ Unattended-Upgrade::Package-Blacklist {
 
 // Webhooks
 // Enable Webhooks: true, false
-//Unattended-Upgrade::Webhook "false";
+// Unattended-Upgrade::Webhook "false";
 
 // Where do you want to send the json?
-//Unattended-Upgrade::WebhookUrl "";
+// Unattended-Upgrade::WebhookUrl "";
 
 // When for the webhook to execute
 // Set this value to one of: "always", "only-on-error" or "on-change"
-//Unattended-Upgrade::WebhookReport "on-change";
+// Unattended-Upgrade::WebhookReport "on-change";
 
 // Set character limit for the JSON payload
 // Default: 2000; If set to 0 there is no limit.
