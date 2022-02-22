@@ -11,9 +11,9 @@ check: test-packages
 	while read file; do \
 	    if [ -x $$file ]; then \
 		echo "Running $$file with python3"; \
-	    	python3 $$file 2>&1; \
+	    	PYTHONPATH=.. python3 $$file 2>&1; \
 		echo "Running $$file with python3-coverage"; \
-		python3 -m coverage run -a $$file 2>&1; \
+		PYTHONPATH=.. python3 -m coverage run -a $$file 2>&1; \
 	    fi \
 	done
 

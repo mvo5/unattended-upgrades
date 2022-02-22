@@ -3,6 +3,8 @@
 import datetime
 import logging
 import os
+import shutil
+import tempfile
 import unittest
 
 import apt
@@ -69,8 +71,11 @@ class TestUntrusted(unittest.TestCase):
                                "false")
         apt.apt_pkg.config.set("Unattended-Upgrade::OnlyOnAcPower",
                                "false")
-        unattended_upgrade.LOCK_FILE = "./u-u.lock"
-        self.rootdir = os.path.abspath("./root.untrusted")
+        tmpdir = tempfile.mkdtemp()
+        self.addCleanup(shutil.rmtree, tmpdir)
+        unattended_upgrade.LOCK_FILE = os.path.join(tmpdir, "u-u.lock")
+        self.rootdir = os.path.join(
+            os.path.dirname(__file__), "root.untrusted")
         self.log = os.path.join(
             self.rootdir, "var", "log", "unattended-upgrades",
             "unattended-upgrades.log")

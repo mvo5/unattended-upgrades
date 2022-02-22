@@ -1,8 +1,5 @@
 #!/usr/bin/python3
 
-import apt_pkg
-apt_pkg.config.set("Dir", "./aptroot")
-import apt
 import logging
 import glob
 import os
@@ -12,6 +9,10 @@ import subprocess
 import sys
 import time
 import unittest
+
+import apt_pkg
+apt_pkg.config.set("Dir", os.path.join(os.path.dirname(__file__), "aptroot"))
+import apt
 
 # debian
 #SOURCES_LIST="""
@@ -179,7 +180,8 @@ class TestUnattendedUpgrade(unittest.TestCase):
         apt.apt_pkg.config.clear("Acquire::http::ProxyAutoDetect")
 
         # create chroot
-        target = "./test-chroot.%s" % DISTRO
+        target = os.path.join(
+            os.path.dirname(__file__), "./test-chroot.%s" % DISTRO)
 
         # setup chroot if needed
         if clean_chroot:

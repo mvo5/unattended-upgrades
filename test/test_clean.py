@@ -7,7 +7,7 @@ import tempfile
 import unittest
 
 import apt_pkg
-apt_pkg.config.set("Dir", "./aptroot")
+apt_pkg.config.set("Dir", os.path.join(os.path.dirname(__file__), "aptroot"))
 import apt
 import unattended_upgrade
 

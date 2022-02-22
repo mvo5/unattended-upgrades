@@ -5,14 +5,16 @@ Note that this test is not run by the makefile in this folder, as it requires
 network access, and it fails in some situations (unclear which).
 """
 
-import apt_pkg
-apt_pkg.config.set("Dir", "./aptroot")
-import apt
 import glob
 import logging
 import os
+import os.path
 import re
 import unittest
+
+import apt_pkg
+apt_pkg.config.set("Dir", os.path.join(os.path.dirname(__file__), "aptroot"))
+import apt
 
 import unattended_upgrade
 
@@ -32,13 +34,14 @@ class MockOptions():
 class TestAgainstRealArchive(unittest.TestCase):
 
     def setUp(self):
-        for g in ["./aptroot/var/log/apt/*",
-                  "./aptroot/var/log/*"]:
+        self.rootdir = os.path.dirname(__file__)
+        for g in [self.rootdir + "/aptroot/var/log/apt/*",
+                  self.rootdir + "/aptroot/var/log/*"]:
             for f in glob.glob(g):
                 if os.path.isfile(f):
                     os.remove(f)
         # get a lucid based cache (test good until 04/2015)
-        cache = apt.Cache(rootdir="./aptroot")
+        cache = apt.Cache(rootdir=self.rootdir + "./aptroot")
         cache.update()
         del cache
         # ensure apt does not do any post-invoke stuff that fails
@@ -51,12 +54,13 @@ class TestAgainstRealArchive(unittest.TestCase):
         # create mock options
         options = MockOptions(dry_run=False, debug=True)
         # run unattended-upgrades against fake system
-        logdir = os.path.abspath("./aptroot/var/log/")
+        logdir = os.path.abspath(self.rootdir + "./aptroot/var/log/")
         logfile = os.path.join(logdir, "unattended-upgrades.log")
         apt_pkg.config.set("APT::UnattendedUpgrades::LogDir", logdir)
 
         # main
-        res = unattended_upgrade.main(options, os.path.abspath("./aptroot"))
+        res = unattended_upgrade.main(
+            options, os.path.abspath(self.rootdir + "./aptroot"))
         logging.debug(res)
         # check if the log file exists
         self.assertTrue(os.path.exists(logfile))

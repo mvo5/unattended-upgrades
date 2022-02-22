@@ -1,10 +1,12 @@
 #!/usr/bin/python3
 
 import os
+import shutil
+import tempfile
 import unittest
 
 import apt_pkg
-apt_pkg.config.set("Dir", "./aptroot")
+apt_pkg.config.set("Dir", os.path.join(os.path.dirname(__file__), "aptroot"))
 import apt
 
 import unattended_upgrade
@@ -24,7 +26,8 @@ class MockOptions(object):
 class TestUntrusted(unittest.TestCase):
 
     def setUp(self):
-        self.rootdir = os.path.abspath("./root.untrusted")
+        self.rootdir = os.path.abspath(
+            os.path.join(os.path.dirname(__file__), "./root.untrusted"))
         dpkg_status = os.path.abspath(
             os.path.join(self.rootdir, "var", "lib", "dpkg", "status"))
         apt.apt_pkg.config.set("Dir::State::status", dpkg_status)
@@ -44,7 +47,9 @@ class TestUntrusted(unittest.TestCase):
         # run it
         options = MockOptions()
         unattended_upgrade.DISTRO_DESC = "Ubuntu 10.04"
-        unattended_upgrade.LOCK_FILE = "./u-u.lock"
+        tmpdir = tempfile.mkdtemp()
+        self.addCleanup(shutil.rmtree, tmpdir)
+        unattended_upgrade.LOCK_FILE = os.path.join(tmpdir, "u-u.lock")
         unattended_upgrade.main(options, rootdir=self.rootdir)
         # read the log to see what happend
         with open(self.log) as f:
