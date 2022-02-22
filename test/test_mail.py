@@ -323,5 +323,5 @@ class SendmailAndMailxTestCase(SendmailTestCase):
 
 
 if __name__ == "__main__":
-    #logging.basicConfig(level=logging.DEBUG)
+    # logging.basicConfig(level=logging.DEBUG)
     unittest.main()
