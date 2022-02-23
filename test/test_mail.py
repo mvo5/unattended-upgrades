@@ -233,7 +233,7 @@ Debian-Security']
         mock_run.side_effect = Exception(exception_string)
         # run it
         options = MockOptions()
-        unattended_upgrade.LOCK_FILE = "./u-u.lock"
+        unattended_upgrade.LOCK_FILE = os.path.join(self.tempfdir("u-u.lock"))
         exception_raised = False
         try:
             unattended_upgrade.main(options)

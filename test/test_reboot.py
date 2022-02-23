@@ -4,7 +4,9 @@ import datetime
 import logging
 import os
 import unittest
+import shutil
 import subprocess
+import tempfile
 
 import apt_pkg
 apt_pkg.config.set("Dir", "./aptroot")
@@ -20,10 +22,11 @@ class RebootTestCase(unittest.TestCase):
 
     def setUp(self):
         # create reboot required file
-        REBOOT_REQUIRED_FILE = "./reboot-required"
+        tmpdir = tempfile.mkdtemp()
+        self.addCleanup(shutil.rmtree, tmpdir)
+        REBOOT_REQUIRED_FILE = os.path.join(tmpdir, "reboot-required")
         with open(REBOOT_REQUIRED_FILE, "w"):
             pass
-        self.addCleanup(lambda: os.remove(REBOOT_REQUIRED_FILE))
         unattended_upgrade.REBOOT_REQUIRED_FILE = REBOOT_REQUIRED_FILE
         # enable automatic-reboot
         apt_pkg.config.set("Unattended-Upgrade::Automatic-Reboot", "1")

@@ -1,11 +1,13 @@
 #!/usr/bin/python3
 
 import os
+import shutil
 import subprocess
+import tempfile
 import unittest
 
 import apt_pkg
-apt_pkg.config.set("Dir", "./aptroot")
+apt_pkg.config.set("Dir", os.path.join(os.path.dirname(__file__), "aptroot"))
 import apt
 
 import unattended_upgrade
@@ -25,7 +27,12 @@ class MockOptions(object):
 class TestRemoveUnused(unittest.TestCase):
 
     def setUp(self):
-        self.rootdir = os.path.abspath("./root.unused-deps")
+        self.rootdir = os.path.join(
+            os.path.dirname(__file__), "root.unused-deps")
+        # fake the lock
+        tmpdir = tempfile.mkdtemp()
+        self.addCleanup(shutil.rmtree, tmpdir)
+        unattended_upgrade.LOCK_FILE = os.path.join(tmpdir, "u-u.lock")
         # fake on_ac_power
         os.environ["PATH"] = (os.path.join(self.rootdir, "usr", "bin") + ":"
                               + os.environ["PATH"])
@@ -128,9 +135,7 @@ Unattended-Upgrade::Skip-Updates-On-Metered-Connections "false";
 """)
         options = MockOptions()
         unattended_upgrade.DISTRO_DESC = "Ubuntu 10.04"
-        unattended_upgrade.LOCK_FILE = "./u-u.lock"
-        unattended_upgrade.main(
-            options, rootdir="./root.unused-deps")
+        unattended_upgrade.main(options, rootdir=self.rootdir)
         with open(self.log) as f:
             # both the new and the old unused dependency are removed
             needle = "Packages that were successfully auto-removed: "\
@@ -157,9 +162,7 @@ Unattended-Upgrade::Skip-Updates-On-Metered-Connections "false";
 """)
         options = MockOptions()
         unattended_upgrade.DISTRO_DESC = "Ubuntu 10.04"
-        unattended_upgrade.LOCK_FILE = "./u-u.lock"
-        unattended_upgrade.main(
-            options, rootdir="./root.unused-deps")
+        unattended_upgrade.main(options, rootdir=self.rootdir)
         with open(self.log) as f:
             # ensure its only exactly one package that is removed
             needle_kernel_bad = "Removing unused kernel packages: "\

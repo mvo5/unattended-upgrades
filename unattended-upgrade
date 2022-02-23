@@ -1582,9 +1582,11 @@ def _get_logdir():
 def _setup_logging(options):
     # type: (Options) -> StringIO
 
-    # ensure this is run only once
     if len(logging.root.handlers) > 0:
-        return None
+        # clean previous loggers (only relevant because of tests)
+        root = logging.getLogger()
+        for h in root.handlers[:]:
+            root.removeHandler(h)
 
     # init the logging
     logdir = _get_logdir()
@@ -2101,7 +2103,8 @@ def run(options,             # type: Options
     # check and get lock
     try:
         apt_pkg.pkgsystem_lock()
-    except SystemError:
+    except SystemError as e:
+        print(e)
         logging.error(_("Lock could not be acquired (another package "
                         "manager running?)"))
         print(_("Cache lock can not be acquired, exiting"))

@@ -10,6 +10,7 @@ apt_pkg.config.set("Dir", os.path.join(os.path.dirname(__file__), "aptroot"))
 import apt
 
 import unattended_upgrade
+from test_base import BaseTest
 
 apt.apt_pkg.config.set("APT::Architecture", "amd64")
 
@@ -23,22 +24,10 @@ class MockOptions(object):
     minimal_upgrade_steps = True
 
 
-class TestUntrusted(unittest.TestCase):
+class TestUntrusted(BaseTest):
 
     def setUp(self):
-        self.rootdir = os.path.abspath(
-            os.path.join(os.path.dirname(__file__), "./root.untrusted"))
-        dpkg_status = os.path.abspath(
-            os.path.join(self.rootdir, "var", "lib", "dpkg", "status"))
-        apt.apt_pkg.config.set("Dir::State::status", dpkg_status)
-        apt.apt_pkg.config.clear("DPkg::Pre-Invoke")
-        apt.apt_pkg.config.clear("DPkg::Post-Invoke")
-        self.log = os.path.join(
-            self.rootdir, "var", "log", "unattended-upgrades",
-            "unattended-upgrades.log")
-
-    def tearDown(self):
-        os.remove(self.log)
+        BaseTest.setUp(self)
 
     def test_untrusted_check_without_conffile_check(self):
         # ensure there is no conffile_prompt check
@@ -47,9 +36,7 @@ class TestUntrusted(unittest.TestCase):
         # run it
         options = MockOptions()
         unattended_upgrade.DISTRO_DESC = "Ubuntu 10.04"
-        tmpdir = tempfile.mkdtemp()
-        self.addCleanup(shutil.rmtree, tmpdir)
-        unattended_upgrade.LOCK_FILE = os.path.join(tmpdir, "u-u.lock")
+        unattended_upgrade.LOCK_FILE = os.path.join(self.rootdir, "u-u.lock")
         unattended_upgrade.main(options, rootdir=self.rootdir)
         # read the log to see what happend
         with open(self.log) as f:
