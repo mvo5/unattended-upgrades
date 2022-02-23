@@ -6,7 +6,7 @@ import shutil
 import unittest
 
 import apt_pkg
-apt_pkg.config.set("Dir", os.path.join(os.path.dirname(__file__), "aptroot"))
+apt_pkg.config.set("Dir", "./aptroot")
 
 from unattended_upgrade import (
     conffile_prompt,
@@ -17,11 +17,9 @@ from unattended_upgrade import (
 class ConffilePromptTestCase(unittest.TestCase):
 
     def setUp(self):
-        self.rootdir = os.path.join(os.path.dirname(__file__), "root.conffile")
-        self.pkgdir = os.path.join(os.path.dirname(__file__), "packages")
         apt_pkg.config.set("Dir::State::status",
-                           self.rootdir + "/var/lib/dpkg/status")
-        with open(self.rootdir + "/etc/configuration-file", "w") as fp:
+                           "./root.conffile/var/lib/dpkg/status")
+        with open("./root.conffile/etc/configuration-file", "w") as fp:
             fp.write("""This is a configuration file,
 dfasddfasdff
 No really.
@@ -29,89 +27,86 @@ No really.
 
     def tearDown(self):
         try:
-            os.remove(self.rootdir + "/etc/configuration-file")
+            os.remove("./root.conffile/etc/configuration-file")
         except Exception:
             pass
         try:
-            shutil.rmtree(self.rootdir + "/etc/configuration-file")
+            shutil.rmtree("./root.conffile/etc/configuration-file")
         except Exception:
             pass
 
     def test_will_prompt(self):
         # conf-test 0.9 is installed, 1.1 gets installed
         # they both have different config files
-        test_pkg = os.path.join(self.pkgdir, "conf-test-package_1.1.deb")
-        self.assertTrue(conffile_prompt(test_pkg, prefix=self.rootdir),
+        test_pkg = "./packages/conf-test-package_1.1.deb"
+        self.assertTrue(conffile_prompt(test_pkg, prefix="./root.conffile"),
                         "conffile prompt detection incorrect")
 
     def test_will_prompt_on_moves(self):
         # changed /etc/foo becomes different /etc/foo/foo
-        test_pkg = os.path.join(self.pkgdir, "test-package_1.2_all.deb")
-        self.assertTrue(conffile_prompt(test_pkg, prefix=self.rootdir),
+        test_pkg = "./packages/test-package_1.2_all.deb"
+        self.assertTrue(conffile_prompt(test_pkg, prefix="./root.conffile"),
                         "conffile prompt detection incorrect")
         # changed /etc/foo/foo becomes different /etc/foo
-        test_pkg = os.path.join(self.pkgdir, "test-package-2_1.2_all.deb")
-        self.assertTrue(conffile_prompt(test_pkg, prefix=self.rootdir),
+        test_pkg = "./packages/test-package-2_1.2_all.deb"
+        self.assertTrue(conffile_prompt(test_pkg, prefix="./root.conffile"),
                         "conffile prompt detection incorrect")
 
     def test_prompt_on_deleted_modified_conffile(self):
         # conf-test 0.9 is installed, 1.1 gets installed
         # they both have different config files, this triggers a prompt
-        os.remove(os.path.join(self.rootdir, "etc/configuration-file"))
-        test_pkg = os.path.join(self.pkgdir, "conf-test-package_1.1.deb")
-        self.assertTrue(conffile_prompt(test_pkg, prefix=self.rootdir),
+        os.remove("./root.conffile/etc/configuration-file")
+        test_pkg = "./packages/conf-test-package_1.1.deb"
+        self.assertTrue(conffile_prompt(test_pkg, prefix="./root.conffile"),
                         "conffile prompt detection incorrect")
 
     def test_will_not_prompt(self):
         # conf-test 0.9 is installed, 1.0 gets installed
         # they both have the same config files
-        test_pkg = os.path.join(self.pkgdir, "conf-test-package_1.0.deb")
-        self.assertFalse(conffile_prompt(test_pkg, prefix=self.rootdir),
+        test_pkg = "./packages/conf-test-package_1.0.deb"
+        self.assertFalse(conffile_prompt(test_pkg, prefix="./root.conffile"),
                          "conffile prompt detection incorrect")
 
     def test_will_not_prompt_on_moves(self):
         # changed /etc/foo becomes /etc/foo/foo, same as shipped before
-        test_pkg = os.path.join(self.pkgdir, "test-package_1.3_all.deb")
-        self.assertFalse(conffile_prompt(test_pkg, prefix=self.rootdir),
+        test_pkg = "./packages/test-package_1.3_all.deb"
+        self.assertFalse(conffile_prompt(test_pkg, prefix="./root.conffile"),
                          "conffile prompt detection incorrect")
         # changed /etc/foo/foo becomes /etc/foo, same as shipped before
-        test_pkg = os.path.join(self.pkgdir, "test-package-2_1.3_all.deb")
-        self.assertFalse(conffile_prompt(test_pkg, prefix=self.rootdir),
+        test_pkg = "./packages/test-package-2_1.3_all.deb"
+        self.assertFalse(conffile_prompt(test_pkg, prefix="./root.conffile"),
                          "conffile prompt detection incorrect")
 
     def test_with_many_entries(self):
         # ensure we don't crash when encountering a conffile with overly
         # many entries
-        test_pkg = os.path.join(
-            self.pkgdir, "conf-test-package-257-conffiles_1.deb")
-        self.assertFalse(conffile_prompt(test_pkg, prefix=self.rootdir),
+        test_pkg = "./packages/conf-test-package-257-conffiles_1.deb"
+        self.assertFalse(conffile_prompt(test_pkg, prefix="./root.conffile"),
                          "conffile prompt detection incorrect")
 
     def test_will_not_prompt_because_of_conffile_removal(self):
         # no conffiles anymore in the pkg
-        test_pkg = os.path.join(
-            self.pkgdir, "conf-test-package-no-conffiles-anymore_2.deb")
-        self.assertFalse(conffile_prompt(test_pkg, prefix=self.rootdir),
+        test_pkg = "./packages/conf-test-package-no-conffiles-anymore_2.deb"
+        self.assertFalse(conffile_prompt(test_pkg, prefix="./root.conffile"),
                          "conffile prompt detection incorrect")
 
     def test_will_prompt_multiple(self):
         # multiple conffiles
-        test_pkg = os.path.join(self.pkgdir, "multiple-conffiles_2_all.deb")
-        self.assertTrue(conffile_prompt(test_pkg, prefix=self.rootdir),
+        test_pkg = "./packages/multiple-conffiles_2_all.deb"
+        self.assertTrue(conffile_prompt(test_pkg, prefix="./root.conffile"),
                         "conffile prompt detection incorrect")
 
     def test_will_prompt_for_new_conffile(self):
         # debian bug #673237, a package that was not a conffile now
         # becomes a conffile
-        test_pkg = os.path.join(
-            self.pkgdir, "conf-test-package-new-conffile_1.deb")
-        self.assertTrue(conffile_prompt(test_pkg, prefix=self.rootdir),
+        test_pkg = "./packages/conf-test-package-new-conffile_1.deb"
+        self.assertTrue(conffile_prompt(test_pkg, prefix="./root.conffile"),
                         "conffile prompt detection incorrect")
 
     def test_xz_compression(self):
-        test_pkg = os.path.join(self.pkgdir, "conf-test-xz_1.0_all.deb")
+        test_pkg = "./packages/conf-test-xz_1.0_all.deb"
         self.assertFalse(
-            conffile_prompt(test_pkg, prefix=self.rootdir),
+            conffile_prompt(test_pkg, prefix="./root.conffile"),
             "conffile prompt detection incorrect")
 
 

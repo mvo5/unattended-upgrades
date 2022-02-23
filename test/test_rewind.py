@@ -4,7 +4,7 @@ import os
 import unittest
 
 import apt_pkg
-apt_pkg.config.set("Dir", os.path.join(os.path.dirname(__file__), "aptroot"))
+apt_pkg.config.set("Dir", "./aptroot")
 import apt
 
 import unattended_upgrade
@@ -24,8 +24,7 @@ class MockOptions(object):
 class TestRewindCache(unittest.TestCase):
 
     def setUp(self):
-        rootdir = os.path.abspath(
-            os.path.join(os.path.dirname(__file__), "root.rewind"))
+        rootdir = os.path.abspath("./root.rewind")
         dpkg_status = os.path.abspath(
             os.path.join(rootdir, "var", "lib", "dpkg", "status"))
         apt.apt_pkg.config.set("Dir::State::status", dpkg_status)
