@@ -3,8 +3,6 @@
 
 import os
 import os.path
-import shutil
-import tempfile
 import unittest
 
 import apt_pkg
@@ -18,6 +16,8 @@ try:
 except ImportError:
     pass
 
+from test.test_base import TestBase
+
 
 class MockFetcher:
     items = []  # type: List[MockAcquireItem]
@@ -28,12 +28,7 @@ class MockAcquireItem:
         self.destfile = destfile
 
 
-class TestClean(unittest.TestCase):
-
-    def setUp(self):
-        self.tempdir = tempfile.mkdtemp()
-        self.addCleanup(shutil.rmtree, self.tempdir)
-        os.chdir(self.tempdir)
+class TestClean(TestBase):
 
     def test_clean(self):
         apt.apt_pkg.config.set("dir::cache::archives", self.tempdir)
