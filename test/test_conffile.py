@@ -12,11 +12,13 @@ from unattended_upgrade import (
     conffile_prompt,
     dpkg_conffile_prompt,
 )
+from test.test_base import TestBase
 
 
-class ConffilePromptTestCase(unittest.TestCase):
+class ConffilePromptTestCase(TestBase):
 
     def setUp(self):
+        TestBase.setUp(self)
         apt_pkg.config.set("Dir::State::status",
                            "./root.conffile/var/lib/dpkg/status")
         with open("./root.conffile/etc/configuration-file", "w") as fp:

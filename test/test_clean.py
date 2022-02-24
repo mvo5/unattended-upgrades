@@ -30,6 +30,10 @@ class MockAcquireItem:
 
 class TestClean(TestBase):
 
+    def setUp(self):
+        TestBase.setUp(self)
+        os.chdir(self.tempdir)
+
     def test_clean(self):
         apt.apt_pkg.config.set("dir::cache::archives", self.tempdir)
         os.makedirs("dir")

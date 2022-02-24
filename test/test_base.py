@@ -12,4 +12,5 @@ class TestBase(unittest.TestCase):
         super(TestBase, self).setUp()
         self.tempdir = tempfile.mkdtemp()
         self.addCleanup(shutil.rmtree, self.tempdir)
-        os.chdir(self.tempdir)
+        self.testdir = os.path.dirname(__file__)
+        os.chdir(self.testdir)
