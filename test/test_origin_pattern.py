@@ -18,6 +18,8 @@ from unattended_upgrade import (
 
 from typing import List
 
+from test.test_base import TestBase
+
 
 class MockOrigin():
     trusted = True
@@ -49,13 +51,7 @@ class MockDepCache():
     pass
 
 
-class TestOriginPatern(unittest.TestCase):
-
-    def setUp(self):
-        pass
-
-    def tearDown(self):
-        pass
+class TestOriginPatern(TestBase):
 
     def test_match_whitelist_string(self):
         origin = self._get_mock_origin(
