@@ -5,27 +5,20 @@ import subprocess
 import unittest
 
 import apt_pkg
-apt_pkg.config.set("Dir", "./aptroot")
+apt_pkg.config.set("Dir", os.path.join(os.path.dirname(__file__), "./aptroot"))
 import apt
 
+from test.test_base import TestBase, MockOptions
 import unattended_upgrade
 
 apt.apt_pkg.config.set("APT::Architecture", "amd64")
 
 
-class MockOptions(object):
-    debug = True
-    verbose = False
-    download_only = False
-    dry_run = False
-    apt_debug = False
-    minimal_upgrade_steps = True
-
-
-class TestRemoveUnused(unittest.TestCase):
+class TestRemoveUnused(TestBase):
 
     def setUp(self):
-        self.rootdir = os.path.abspath("./root.unused-deps")
+        TestBase.setUp(self)
+        self.rootdir = os.path.join(self.testdir, "root.unused-deps")
         # fake on_ac_power
         os.environ["PATH"] = (os.path.join(self.rootdir, "usr", "bin") + ":"
                               + os.environ["PATH"])
@@ -128,7 +121,6 @@ Unattended-Upgrade::Skip-Updates-On-Metered-Connections "false";
 """)
         options = MockOptions()
         unattended_upgrade.DISTRO_DESC = "Ubuntu 10.04"
-        unattended_upgrade.LOCK_FILE = "./u-u.lock"
         unattended_upgrade.main(
             options, rootdir="./root.unused-deps")
         with open(self.log) as f:
@@ -157,7 +149,6 @@ Unattended-Upgrade::Skip-Updates-On-Metered-Connections "false";
 """)
         options = MockOptions()
         unattended_upgrade.DISTRO_DESC = "Ubuntu 10.04"
-        unattended_upgrade.LOCK_FILE = "./u-u.lock"
         unattended_upgrade.main(
             options, rootdir="./root.unused-deps")
         with open(self.log) as f:
