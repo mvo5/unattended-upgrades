@@ -22,8 +22,6 @@ class TestLogInstallProgress(TestBase):
     def test_log_installprogress(self):
         logdir = os.path.join(self.tempdir, "mylog")
         apt_pkg.config.set("Unattended-Upgrade::LogDir", logdir)
-        # XXX: move this into TestBase
-        logging.root.handlers = []
         # FIXME: this test is really not testing much, see if that
         # can be improved
         _setup_logging(self.mock_options)
