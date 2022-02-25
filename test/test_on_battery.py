@@ -7,24 +7,18 @@ import apt_pkg
 apt_pkg.config.set("Dir", "./aptroot")
 import apt
 
+from test.test_base import MockOptions, TestBase
+
 import unattended_upgrade
 
 apt.apt_pkg.config.set("APT::Architecture", "amd64")
 
 
-class MockOptions(object):
-    debug = False
-    verbose = False
-    download_only = False
-    dry_run = True
-    apt_debug = False
-    minimal_upgrade_steps = True
-
-
-class OnBattery(unittest.TestCase):
+class OnBattery(TestBase):
 
     def setUp(self):
-        self.rootdir = os.path.abspath("./root.on-battery")
+        TestBase.setUp(self)
+        self.rootdir = os.path.join(self.testdir, "root.on-battery")
         # fake on_ac_power
         os.environ["PATH"] = (os.path.join(self.rootdir, "usr", "bin") + ":"
                               + os.environ["PATH"])

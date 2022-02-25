@@ -7,6 +7,15 @@ import tempfile
 import unittest
 
 
+class MockOptions(object):
+    debug = False
+    verbose = False
+    download_only = False
+    dry_run = True
+    apt_debug = False
+    minimal_upgrade_steps = True
+
+
 class TestBase(unittest.TestCase):
     def setUp(self):
         super(TestBase, self).setUp()
