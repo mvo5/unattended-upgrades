@@ -33,3 +33,5 @@ class TestBase(unittest.TestCase):
         os.chdir(self.testdir)
         # fake the lock file
         unattended_upgrade.LOCK_FILE = os.path.join(self.tempdir, "u-u.lock")
+        # XXX: some test monkey patch this without reset
+        unattended_upgrade.init_distro_info()

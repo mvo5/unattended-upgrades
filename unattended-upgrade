@@ -93,12 +93,18 @@ MAIL_BINARY = "/usr/bin/mail"
 SENDMAIL_BINARY = "/usr/sbin/sendmail"
 USERS = "/usr/bin/users"
 # no py3 lsb_release in debian :/
-DISTRO_CODENAME = subprocess.check_output(
-    ["lsb_release", "-c", "-s"], universal_newlines=True).strip()  # type: str
-DISTRO_DESC = subprocess.check_output(
-    ["lsb_release", "-d", "-s"], universal_newlines=True).strip()  # type: str
-DISTRO_ID = subprocess.check_output(
-    ["lsb_release", "-i", "-s"], universal_newlines=True).strip()  # type: str
+DISTRO_CODENAME = ""  # type: str
+DISTRO_DESC = ""  # type: str
+DISTRO_ID = ""  # type: str
+def init_distro_info():
+    global DISTRO_CODENAME, DISTRO_DESC, DISTRO_ID
+    DISTRO_CODENAME = subprocess.check_output(
+        ["lsb_release", "-c", "-s"], universal_newlines=True).strip()
+    DISTRO_DESC = subprocess.check_output(
+        ["lsb_release", "-d", "-s"], universal_newlines=True).strip()
+    DISTRO_ID = subprocess.check_output(
+        ["lsb_release", "-i", "-s"], universal_newlines=True).strip()
+init_distro_info()
 
 # Number of days before release of devel where we enable unattended
 # upgrades.
