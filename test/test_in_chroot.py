@@ -52,6 +52,7 @@ apt.apt_pkg.config.set("APT::Architecture", ARCH)
 import unattended_upgrade
 from test.test_base import TestBase, MockOptions
 
+
 class TestUnattendedUpgrade(TestBase):
 
     def _create_new_debootstrap_tarball(self, tarball, target):
