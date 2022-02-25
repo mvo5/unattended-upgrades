@@ -21,7 +21,6 @@ class TestLogdir(TestBase):
         # test log
         logdir = os.path.join(self.tempdir, "mylog")
         apt_pkg.config.set("Unattended-Upgrade::LogDir", logdir)
-        logging.root.handlers = []
         _setup_logging(self.mock_options)
         self.assertTrue(os.path.exists(logdir))
 
