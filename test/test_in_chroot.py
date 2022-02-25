@@ -48,20 +48,11 @@ APT_CONF = """APT::Architecture "%s";""" % ARCH
 ORIGINS_PATTERN = "origin=Ubuntu,archive=lucid-security"
 
 apt.apt_pkg.config.set("APT::Architecture", ARCH)
-sys.path.insert(0, "..")
+
 import unattended_upgrade
+from test.test_base import TestBase, MockOptions
 
-
-class MockOptions(object):
-    debug = False
-    verbose = True
-    apt_debug = False
-    download_only = False
-    dry_run = False
-    minimal_upgrade_steps = True
-
-
-class TestUnattendedUpgrade(unittest.TestCase):
+class TestUnattendedUpgrade(TestBase):
 
     def _create_new_debootstrap_tarball(self, tarball, target):
         print("creating initial test tarball, this is needed only once")
@@ -81,6 +72,10 @@ class TestUnattendedUpgrade(unittest.TestCase):
 
     def _unpack_debootstrap_tarball(self, tarball, target):
         subprocess.call(["tar", "xzf", tarball])
+
+    @unittest.skipIf(os.getuid() != 0, "must run as root")
+    def setUp(self):
+        TestBase.setUp(self)
 
     def test_normal_upgrade(self):
         print("Running normal unattended upgrade in chroot")
@@ -150,7 +145,7 @@ class TestUnattendedUpgrade(unittest.TestCase):
             self._verify_install_log_in_real_chroot(target, "libc-bin"))
         apt.apt_pkg.config.clear("Unattended-Upgrade::Package-Whitelist")
 
-    def _get_lockfile_location(self, target):
+    def _get_logfile_location(self, target):
         return os.path.join(
             target, "var/log/unattended-upgrades/unattended-upgrades.log")
 
@@ -171,10 +166,6 @@ class TestUnattendedUpgrade(unittest.TestCase):
         """ helper that runs the unattended-upgrade in a chroot
             and does some basic verifications
         """
-        if os.getuid() != 0:
-            print("Skipping because uid != 0")
-            return
-
         # clear to avoid pollution in the chroot
         apt.apt_pkg.config.clear("Acquire::http::ProxyAutoDetect")
 
@@ -241,7 +232,7 @@ class TestUnattendedUpgrade(unittest.TestCase):
 
     def _verify_install_log_in_real_chroot(self, target, needle_pkg):
         # examine log
-        log = self._get_lockfile_location(target)
+        log = self._get_logfile_location(target)
         logfile = open(log).read()
         #print(logfile)
         if not re.search("Packages that will be upgraded:.*%s" % needle_pkg,
