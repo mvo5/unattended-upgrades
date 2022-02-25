@@ -4,6 +4,7 @@ import logging
 import os
 import os.path
 import shutil
+import subprocess
 import tempfile
 import unittest
 
@@ -22,6 +23,11 @@ class MockOptions(object):
 
 
 class TestBase(unittest.TestCase):
+    def setUpClass():
+        # XXX: find a more elegant way
+        pkgdir = os.path.join(os.path.dirname(__file__), "packages")
+        subprocess.check_call(["make", "-C", pkgdir])
+
     def setUp(self):
         super(TestBase, self).setUp()
         self.tempdir = tempfile.mkdtemp()
