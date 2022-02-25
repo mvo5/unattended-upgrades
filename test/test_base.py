@@ -6,9 +6,11 @@ import shutil
 import tempfile
 import unittest
 
+import unattended_upgrade
+
 
 class MockOptions(object):
-    debug = False
+    debug = True
     verbose = False
     download_only = False
     dry_run = True
@@ -23,3 +25,5 @@ class TestBase(unittest.TestCase):
         self.addCleanup(shutil.rmtree, self.tempdir)
         self.testdir = os.path.dirname(__file__)
         os.chdir(self.testdir)
+        # fake the lock file
+        unattended_upgrade.LOCK_FILE = os.path.join(self.tempdir, "u-u.lock")
