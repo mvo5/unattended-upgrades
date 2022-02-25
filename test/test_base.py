@@ -7,6 +7,8 @@ import shutil
 import tempfile
 import unittest
 
+import apt
+
 import unattended_upgrade
 
 
@@ -35,3 +37,5 @@ class TestBase(unittest.TestCase):
         unattended_upgrade.LOCK_FILE = os.path.join(self.tempdir, "u-u.lock")
         # XXX: some test monkey patch this without reset
         unattended_upgrade.init_distro_info()
+        # reset apt config
+        apt.apt_pkg.init_config()
