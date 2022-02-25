@@ -16,25 +16,18 @@ apt_pkg.config.set("Dir", os.path.join(os.path.dirname(__file__), "aptroot"))
 import apt
 
 import unattended_upgrade
+from test.test_base import TestBase, MockOptions
 
 
 apt_pkg.config.set("APT::Architecture", "amd64")
 
 
-class MockOptions():
-    def __init__(self, debug=True, dry_run=False):
-        self.debug = debug
-        self.dry_run = dry_run
-        self.apt_debug = False
-        self.minimal_upgrade_steps = True
-        self.verbose = False
-
-
 # FIXME: port to something more recent than lucid(!)
-class TestAgainstRealArchive(unittest.TestCase):
+class TestAgainstRealArchive(TestBase):
 
     @unittest.skipIf(os.getuid() != 0, "must run as root")
     def setUp(self):
+        TestBase.setUp(self)
         for g in ["./aptroot/var/log/apt/*",
                   "./aptroot/var/log/*"]:
             for f in glob.glob(g):
