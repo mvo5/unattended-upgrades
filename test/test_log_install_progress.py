@@ -3,8 +3,6 @@
 import logging
 import os
 import os.path
-import sys
-import tempfile
 import unittest
 
 import apt_pkg

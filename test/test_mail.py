@@ -4,12 +4,9 @@ from __future__ import unicode_literals
 
 from email.parser import Parser
 from io import StringIO
-import logging
 from mock import patch
 import os
-import shutil
 import sys
-import tempfile
 from textwrap import dedent
 import unittest
 
