@@ -1,7 +1,6 @@
 #!/usr/bin/python3
 
 import datetime
-import logging
 import os
 import unittest
 
@@ -73,10 +72,6 @@ class TestUntrusted(TestBase):
                                      "apt.conf")
 
         os.rename(self.apt_conf, self.apt_conf + ".bak")
-        # XXX: remove this
-        for hdlr in logging.root.handlers:
-            hdlr.close()
-        logging.root.handlers = []
 
     def tearDown(self):
         os.remove(self.log)
