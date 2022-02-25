@@ -19,6 +19,9 @@ class TestRemoveUnused(TestBase):
     def setUp(self):
         TestBase.setUp(self)
         self.rootdir = os.path.join(self.testdir, "root.unused-deps")
+        unattended_upgrade.DISTRO_ID = "ubuntu"
+        unattended_upgrade.DISTRO_CODENAME = "lucid"
+        unattended_upgrade.DISTRO_DESC = "Ubuntu 10.04"
         # fake on_ac_power
         os.environ["PATH"] = (os.path.join(self.rootdir, "usr", "bin") + ":"
                               + os.environ["PATH"])
@@ -120,9 +123,7 @@ Unattended-Upgrade::Remove-Unused-Dependencies "true";
 Unattended-Upgrade::Skip-Updates-On-Metered-Connections "false";
 """)
         options = MockOptions()
-        unattended_upgrade.DISTRO_DESC = "Ubuntu 10.04"
-        unattended_upgrade.main(
-            options, rootdir="./root.unused-deps")
+        unattended_upgrade.main(options, rootdir=self.rootdir)
         with open(self.log) as f:
             # both the new and the old unused dependency are removed
             needle = "Packages that were successfully auto-removed: "\
@@ -148,9 +149,7 @@ Unattended-Upgrade::Remove-New-Unused-Dependencies "true";
 Unattended-Upgrade::Skip-Updates-On-Metered-Connections "false";
 """)
         options = MockOptions()
-        unattended_upgrade.DISTRO_DESC = "Ubuntu 10.04"
-        unattended_upgrade.main(
-            options, rootdir="./root.unused-deps")
+        unattended_upgrade.main(options, rootdir=self.rootdir)
         with open(self.log) as f:
             # ensure its only exactly one package that is removed
             needle_kernel_bad = "Removing unused kernel packages: "\
