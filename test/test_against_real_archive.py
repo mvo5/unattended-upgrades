@@ -30,8 +30,9 @@ class MockOptions():
 
 
 # FIXME: port to something more recent than lucid(!)
-class xxxTestAgainstRealArchive(unittest.TestCase):
+class TestAgainstRealArchive(unittest.TestCase):
 
+    @unittest.skipIf(os.getuid() != 0, "must run as root")
     def setUp(self):
         for g in ["./aptroot/var/log/apt/*",
                   "./aptroot/var/log/*"]:
