@@ -4,27 +4,20 @@ import os
 import unittest
 
 import apt_pkg
-apt_pkg.config.set("Dir", "./aptroot")
+apt_pkg.config.set("Dir", os.path.join(os.path.dirname(__file__), "./aptroot"))
 import apt
 
 import unattended_upgrade
+from test.test_base import TestBase, MockOptions
 
 apt.apt_pkg.config.set("APT::Architecture", "amd64")
 
 
-class MockOptions(object):
-    debug = False
-    verbose = False
-    download_only = False
-    dry_run = True
-    apt_debug = False
-    minimal_upgrade_steps = True
-
-
-class TestRewindCache(unittest.TestCase):
+class TestRewindCache(TestBase):
 
     def setUp(self):
-        rootdir = os.path.abspath("./root.rewind")
+        TestBase.setUp(self)
+        rootdir = os.path.join(self.testdir, "root.rewind")
         dpkg_status = os.path.abspath(
             os.path.join(rootdir, "var", "lib", "dpkg", "status"))
         apt.apt_pkg.config.set("Dir::State::status", dpkg_status)
@@ -36,6 +29,7 @@ class TestRewindCache(unittest.TestCase):
     def test_rewind_cache(self):
         """ Test that rewinding the cache works correctly, debian #743594 """
         options = MockOptions()
+        options.try_run = True
         to_upgrade = unattended_upgrade.calculate_upgradable_pkgs(
             self.cache, options)
         self.assertEqual(to_upgrade, [self.cache[p] for p
