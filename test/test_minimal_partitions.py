@@ -35,18 +35,22 @@ class TestMinimalPartitions(TestBase):
     def setUp(self):
         TestBase.setUp(self)
         # setup dry-run mode for apt
-        apt_pkg.config.set("Dir", os.path.join(self.testdir, "aptroot"))
+        rootdir = os.path.join(self.testdir, "aptroot")
+        apt_pkg.config.set("Dir", rootdir)
         apt_pkg.config.set("Dir::Cache", "/tmp")
+        self.addCleanup(apt_pkg.config.clear, "Dir::Cache")
         apt_pkg.config.set("Debug::NoLocking", "1")
         apt_pkg.config.set("Debug::pkgDPkgPM", "1")
         apt_pkg.config.set(
             "Dir::State::extended_states",
             os.path.join(self.tempdir, "extended_states"))
+        self.addCleanup(apt_pkg.config.clear, "Dir::state::extended_states")
         apt_pkg.config.clear("Dpkg::Post-Invoke")
         apt_pkg.config.clear("Dpkg::Pre-Install-Pkgs")
-        self.cache = apt.Cache()
+        self.cache = apt.Cache(rootdir=rootdir)
         # for the log
         apt_pkg.config.set("Unattended-Upgrade::LogDir", self.tempdir)
+        self.addCleanup(apt_pkg.config.clear, "Unattended-Upgrade::LogDir")
 
     def test_upgrade_in_minimal_steps(self):
         self.cache.upgrade(True)

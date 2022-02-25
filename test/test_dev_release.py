@@ -62,8 +62,8 @@ class TestUntrusted(TestBase):
         apt.apt_pkg.config.set("Unattended-Upgrade::OnlyOnAcPower",
                                "false")
         self.rootdir = os.path.join(self.testdir, "root.untrusted")
-        os.makedirs(os.path.join(
-            self.rootdir, "var/lib/dpkg/updates"), exist_ok=True)
+        apt.apt_pkg.config.set("Dir::State::status", os.path.join(
+            self.rootdir, "var/lib/dpkg/status"))
         self.log = os.path.join(
             self.rootdir, "var", "log", "unattended-upgrades",
             "unattended-upgrades.log")

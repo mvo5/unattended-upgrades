@@ -25,10 +25,9 @@ class TestRemoveUnused(TestBase):
         # fake on_ac_power
         os.environ["PATH"] = (os.path.join(self.rootdir, "usr", "bin") + ":"
                               + os.environ["PATH"])
-        dpkg_status = os.path.abspath(
-            os.path.join(self.rootdir, "var", "lib", "dpkg", "status"))
+        mock_dpkg_status = os.path.join(self.rootdir, "var/lib/dpkg/status")
         # fake dpkg status
-        with open(dpkg_status, "w") as fp:
+        with open(mock_dpkg_status, "w") as fp:
             fp.write("""Package: test-package
 Status: install ok installed
 Architecture: all
@@ -70,7 +69,7 @@ Status: install ok installed
 Architecture: all
 Version: 1.0
 """)
-        apt.apt_pkg.config.set("Dir::State::status", dpkg_status)
+        apt.apt_pkg.config.set("Dir::State::status", mock_dpkg_status)
         apt.apt_pkg.config.clear("DPkg::Pre-Invoke")
         apt.apt_pkg.config.clear("DPkg::Post-Invoke")
         apt.apt_pkg.config.set("Debug::NoLocking", "true")

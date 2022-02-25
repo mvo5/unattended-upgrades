@@ -36,6 +36,7 @@ class TestClean(TestBase):
 
     def test_clean(self):
         apt.apt_pkg.config.set("dir::cache::archives", self.tempdir)
+        self.addCleanup(apt.apt_pkg.config.clear, "dir::cache::archives")
         os.makedirs("dir")
         with open("file1", "w"):
             pass
