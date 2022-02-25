@@ -1,8 +1,5 @@
 #!/usr/bin/python3
 
-import apt_pkg
-apt_pkg.config.set("Dir", "./aptroot")
-import apt
 import logging
 import glob
 import os
@@ -11,6 +8,10 @@ import shutil
 import subprocess
 import time
 import unittest
+
+import apt_pkg
+apt_pkg.config.set("Dir", os.path.join(os.path.dirname(__file__), "aptroot"))
+import apt
 
 # debian
 #SOURCES_LIST="""

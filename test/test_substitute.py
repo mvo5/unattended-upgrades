@@ -1,9 +1,11 @@
 #!/usr/bin/python3
 
-import apt_pkg
-apt_pkg.config.set("Dir", "./aptroot")
 import logging
+import os
 import unittest
+
+import apt_pkg
+apt_pkg.config.set("Dir", os.path.join(os.path.dirname(__file__), "aptroot"))
 
 import unattended_upgrade
 from unattended_upgrade import substitute, get_allowed_origins

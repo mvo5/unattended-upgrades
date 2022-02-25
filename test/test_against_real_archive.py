@@ -5,14 +5,15 @@ Note that this test is not run by the makefile in this folder, as it requires
 network access, and it fails in some situations (unclear which).
 """
 
-import apt_pkg
-apt_pkg.config.set("Dir", "./aptroot")
-import apt
 import glob
 import logging
 import os
 import re
 import unittest
+
+import apt_pkg
+apt_pkg.config.set("Dir", os.path.join(os.path.dirname(__file__), "aptroot"))
+import apt
 
 import unattended_upgrade
 
