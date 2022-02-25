@@ -10,10 +10,13 @@ apt_pkg.config.set("Dir", os.path.join(os.path.dirname(__file__), "aptroot"))
 import unattended_upgrade
 from unattended_upgrade import substitute, get_allowed_origins
 
+from test.test_base import TestBase
 
-class TestSubstitude(unittest.TestCase):
+
+class TestSubstitute(TestBase):
 
     def setUp(self):
+        TestBase.setUp(self)
         # monkey patch DISTRO_{CODENAME, ID}
         unattended_upgrade.DISTRO_CODENAME = "nacked"
         unattended_upgrade.DISTRO_ID = "MyDistroID"

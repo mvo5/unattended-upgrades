@@ -14,21 +14,26 @@ from mock import (
 )
 
 import unattended_upgrade
+from test.test_base import TestBase
 
 
-class RebootTestCase(unittest.TestCase):
+class RebootTestCase(TestBase):
 
     def setUp(self):
+        TestBase.setUp(self)
         # create reboot required file
-        REBOOT_REQUIRED_FILE = "./reboot-required"
+        REBOOT_REQUIRED_FILE = os.path.join(self.tempdir, "reboot-required")
         with open(REBOOT_REQUIRED_FILE, "w"):
             pass
-        self.addCleanup(lambda: os.remove(REBOOT_REQUIRED_FILE))
+        self.reboot_required_file = unattended_upgrade.REBOOT_REQUIRED_FILE
         unattended_upgrade.REBOOT_REQUIRED_FILE = REBOOT_REQUIRED_FILE
         # enable automatic-reboot
         apt_pkg.config.set("Unattended-Upgrade::Automatic-Reboot", "1")
         apt_pkg.config.set(
             "Unattended-Upgrade::Automatic-Reboot-WithUsers", "1")
+
+    def tearDown(self):
+        unattended_upgrade.REBOOT_REQUIRED_FILE = self.reboot_required_file
 
     @patch("subprocess.check_output")
     def test_no_reboot_done_because_no_stamp(self, mock_call):

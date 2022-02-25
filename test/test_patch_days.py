@@ -7,11 +7,13 @@ from mock import patch
 import apt
 
 import unattended_upgrade
+from test.test_base import TestBase
 
 
-class TestUpdateDays(unittest.TestCase):
+class TestUpdateDays(TestBase):
 
     def setUp(self):
+        TestBase.setUp(self)
         apt.apt_pkg.config.clear("Unattended-Upgrade::Update-Days")
 
     def test_update_days_no_patch_days_always_runs_uu(self):

@@ -16,6 +16,7 @@ from mock import (
 )
 
 from unattended_upgrade import do_install
+from test.test_base import TestBase
 
 from typing import List
 
@@ -34,7 +35,7 @@ class MockCache(dict):
         return
 
 
-class TestRegression(unittest.TestCase):
+class TestRegression(TestBase):
 
     @unittest.skipIf(sys.version_info[0] != 3, "only works on py3")
     @patch("unattended_upgrade.upgrade_normal")

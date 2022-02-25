@@ -120,13 +120,14 @@ No really.
             "conffile prompt detection incorrect")
 
 
-class DpkgConffileTestCase(unittest.TestCase):
+class DpkgConffileTestCase(TestBase):
     """
     This tests that the detection if dpkg will prompt at all works,
     i.e. if the user has decided to use a --force-conf{old,new} option
     """
 
     def setUp(self):
+        TestBase.setUp(self)
         apt_pkg.config.clear("DPkg::Options")
 
     def test_no_dpkg_prompt_option(self):
