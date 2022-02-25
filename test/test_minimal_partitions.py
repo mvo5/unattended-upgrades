@@ -35,31 +35,38 @@ class TestMinimalPartitions(TestBase):
     def setUp(self):
         TestBase.setUp(self)
         # setup dry-run mode for apt
-        rootdir = os.path.join(self.testdir, "aptroot")
-        apt_pkg.config.set("Dir", rootdir)
-        apt_pkg.config.set("Dir::Cache", "/tmp")
-        self.addCleanup(apt_pkg.config.clear, "Dir::Cache")
         apt_pkg.config.set("Debug::NoLocking", "1")
-        apt_pkg.config.set("Debug::pkgDPkgPM", "1")
+        #apt_pkg.config.set("Debug::pkgDPkgPM", "1")
         apt_pkg.config.set(
             "Dir::State::extended_states",
             os.path.join(self.tempdir, "extended_states"))
         self.addCleanup(apt_pkg.config.clear, "Dir::state::extended_states")
         apt_pkg.config.clear("Dpkg::Post-Invoke")
         apt_pkg.config.clear("Dpkg::Pre-Install-Pkgs")
+        rootdir = os.path.join(self.testdir, "aptroot")
         self.cache = apt.Cache(rootdir=rootdir)
-        # for the log
+        # mock LogDir config
+        self.u_u_logdir = apt_pkg.config.get("Unattended-Upgrade::LogDir")
         apt_pkg.config.set("Unattended-Upgrade::LogDir", self.tempdir)
-        self.addCleanup(apt_pkg.config.clear, "Unattended-Upgrade::LogDir")
+        # mock PROGRESS_LOG
+        self.progress_log = unattended_upgrade.PROGRESS_LOG
+        unattended_upgrade.PROGRESS_LOG = os.path.join(
+            self.tempdir, "var/run/unatteded-upgrades.progress")
+        # mock LogInstallProgress
+        self.log_install_progress = unattended_upgrade.LogInstallProgress
+        unattended_upgrade.LogInstallProgress = LogInstallProgressMock
+
+    def tearDown(self):
+        # restore mocks
+        unattended_upgrade.PROGRESS_LOG = self.progress_log
+        apt_pkg.config.set("Unattended-Upgrade::LogDir", self.u_u_logdir)
+        unattended_upgrade.LogInstallProgress = self.log_install_progress
 
     def test_upgrade_in_minimal_steps(self):
         self.cache.upgrade(True)
         # upgrade only a tiny subset in the test
         pkgs_to_upgrade = [
             pkg.name for pkg in self.cache.get_changes()][:5]
-        unattended_upgrade.PROGRESS_LOG = \
-            "./aptroot/var/run/unatteded-upgrades.progress"
-        unattended_upgrade.LogInstallProgress = LogInstallProgressMock
         unattended_upgrade.upgrade_in_minimal_steps(
             self.cache, pkgs_to_upgrade, "",
             os.path.join(self.tempdir, "mylog"))
