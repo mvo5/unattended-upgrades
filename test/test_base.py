@@ -23,7 +23,8 @@ class MockOptions(object):
 
 
 class TestBase(unittest.TestCase):
-    def setUpClass():
+    @classmethod
+    def setUpClass(cls):
         # XXX: find a more elegant way
         pkgdir = os.path.join(os.path.dirname(__file__), "packages")
         subprocess.check_call(["make", "-C", pkgdir])
