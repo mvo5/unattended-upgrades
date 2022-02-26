@@ -572,6 +572,24 @@ class LogInstallProgress(apt.progress.base.InstallProgress):
         return pid
 
 
+class TryingToBeNice():
+    def __init__(self, increment):
+        self.increment = increment
+        self.old_priority = os.nice(0)
+
+    def __enter__(self):
+        try:
+            # Check that we will be able to restore the priority
+            os.nice(-1)
+            os.nice(self.increment)
+        except PermissionError:
+            # So bad, we couldn't be nicier
+            pass
+
+    def __exit__(self, _type, value, traceback):
+        os.nice(self.old_priority - os.nice(0))
+    
+
 class Unlocked:
     """
     Context manager for unlocking the apt lock while cache.commit() is run
@@ -2146,31 +2164,16 @@ def run(options,             # type: Options
         return UnattendedUpgradesResult(
             False, _("Cache has broken packages, exiting"))
 
-    # FIXME: make this into a ContextManager
-    # be nice when calculating the upgrade as its pretty CPU intensive
-    old_priority = os.nice(0)
-    try:
-        # Check that we will be able to restore the priority
-        os.nice(-1)
-        os.nice(20)
-    except OSError as e:
-        if e.errno in (errno.EPERM, errno.EACCES):
-            pass
-        else:
-            raise
-
-    auto_removable = get_auto_removable(cache)
-
-    # find out about the packages that are upgradable (in an allowed_origin)
-    pkgs_to_upgrade = calculate_upgradable_pkgs(cache, options)
-    pkgs_to_upgrade.sort(key=lambda p: p.name)
-    pkgs = [pkg.name for pkg in pkgs_to_upgrade]
-    logging.debug("pkgs that look like they should be upgraded: %s"
-                  % "\n".join(pkgs))
-
-    # FIXME: make this into a ContextManager
-    # stop being nice
-    os.nice(old_priority - os.nice(0))
+    with TryingToBeNince(20):
+        auto_removable = get_auto_removable(cache)
+        
+        # find out about the packages that are upgradable (in an
+        # allowed_origin)
+        pkgs_to_upgrade = calculate_upgradable_pkgs(cache, options)
+        pkgs_to_upgrade.sort(key=lambda p: p.name)
+        pkgs = [pkg.name for pkg in pkgs_to_upgrade]
+        logging.debug("pkgs that look like they should be upgraded: %s"
+                      % "\n".join(pkgs))
 
     # download what looks good
     mark_pkgs_to_upgrade(cache, pkgs)
