@@ -1,4 +1,4 @@
 #!/bin/sh
 
-cd test
-make
+python3 -m unittest
+
