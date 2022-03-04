@@ -46,3 +46,14 @@ class TestBase(unittest.TestCase):
         unattended_upgrade.init_distro_info()
         # reset apt config
         apt.apt_pkg.init_config()
+        # must be last
+        self._saved_apt_conf = {}
+        for k in apt.apt_pkg.config.keys():
+            if not k.endswith("::"):
+                self._saved_apt_conf[k] = apt.apt_pkg.config.get(k)
+        self.addCleanup(self.enforce_apt_config_reset)
+
+    def enforce_apt_config_reset(self):
+        for k in self._saved_apt_conf:
+            v = self._saved_apt_conf[k]
+            apt.apt_pkg.config.set(k, v)
