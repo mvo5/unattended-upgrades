@@ -111,6 +111,7 @@ Auto-Installed: 1
              os.path.join(self.rootdir, "var", "cache", "apt", "*.bin")])
 
     def test_remove_unused_dependencies(self):
+        apt.apt_pkg.config.clear("APT::VersionedKernelPackages")
         apt_conf = os.path.join(self.rootdir, "etc", "apt", "apt.conf")
         with open(apt_conf, "w") as fp:
             fp.write("""
