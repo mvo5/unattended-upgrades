@@ -23,7 +23,6 @@ class ConffilePromptTestCase(TestBase):
         self.packagedir = os.path.join(self.testdir, "packages")
         mock_dpkg_status = os.path.join(self.rootdir, "var/lib/dpkg/status")
         apt_pkg.config.set("Dir::State::status", mock_dpkg_status)
-        self.addCleanup(apt_pkg.config.clear, "Dir::state::status")
         with open(os.path.join(
                 self.rootdir, "etc/configuration-file"), "w") as fp:
             fp.write("""This is a configuration file,
@@ -136,12 +135,10 @@ class DpkgConffileTestCase(TestBase):
 
     def test_regression_lp1061498(self):
         apt_pkg.config.set("DPkg::Options::", "muup")
-        self.addCleanup(apt_pkg.config.clear, "DPkg::Options")
         self.assertTrue(dpkg_conffile_prompt())
 
     def test_dpkg_will_never_prompt(self):
         apt_pkg.config.set("DPkg::Options::", "--force-confold")
-        self.addCleanup(apt_pkg.config.clear, "DPkg::Options")
         self.assertFalse(dpkg_conffile_prompt())
 
 
