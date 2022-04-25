@@ -295,7 +295,7 @@ Supported Options Reference
  ```
  The default is the daemon facility.
 
-* `Unattended-Upgrade::Webhook` - string (default:"false")
+* `Unattended-Upgrade::Webhook` - boolean (default:False)
 
  Generate json to push to a webhook url.
  Requires the `Unattended-Upgrade::WebhookUrl` option to be set.
@@ -306,16 +306,24 @@ Supported Options Reference
  ```
  The default is False - Webhooks will not be notified.
 
-* `Unattended-Upgrade::WebhookUrl` - string (default:"")
+* `Unattended-Upgrade::WebhookUrl` - list of strings (default:"")
 
- Specify the URL you wish to POST the json data structure to.
+ Specify a list URLs you wish to POST the json data structure to.
  Requires the `Unattended-Upgrade::Webhook` option to be set to true.
+
+ Uses the Apprise library: https://github.com/caronc/apprise
+ Please see their readme for the specific syntax for your application.
+
+ You may include as many notification url as you require.
 
  Example:
  ```
- Unattended-Upgrade::WebhookUrl "https://example.com/webhook";
+ Unattended-Upgrade::WebhookUrl {
+     "apprise://hostname/token";
+     "slack://TokenA/TokenB/TokenC";
+ };
  ```
- The default is "".
+ The default is {};.
 
 * `Unattended-Upgrade::WebhookReport` - string (default:"on-change")
 

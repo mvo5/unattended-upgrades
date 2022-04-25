@@ -42,7 +42,7 @@ import logging
 import logging.handlers
 import re
 try:
-    import requests
+    import apprise
 except ImportError:
     pass
 import os
@@ -1471,27 +1471,48 @@ def webhook_data(pkgs,                 # type: List[str]
     return data
 
 
-def webhook_notify(webhook_url, data):
+def get_webhookurls():
+    # type: () -> List[str]
+    """ return a list of webhook urls from apt.conf
+    """
+    webhook_urls = []
+    key = "Unattended-Upgrade::WebhookUrl"
+    try:
+        # apt_pkg.config.value_list(key): returns two of the same value.
+        # work around for now is to make the list a set to make the urls unique.
+        for s in set(apt_pkg.config.value_list(key)):
+            webhook_urls.append(s)
+    except ValueError:
+        logging.error(_("Unable to parse %s." % key))
+        raise
+    return webhook_urls
+
+
+def webhook_notify(webhooks, data):
 
     try:
-        charlimit = int(apt_pkg.config.find("Unattended-Upgrade::WebhookCharacterLimit", "2000"))
+        #charlimit = int(apt_pkg.config.find("Unattended-Upgrade::WebhookCharacterLimit", "2000"))
         payload = json.dumps(data)
-        if (len(payload) > charlimit) and (charlimit != 0):
-            log_once(_(f"Webhook payload is greater than {charlimit} characters. Removing list of packages to accomodate limit."))
-            payload = data['packages'] = f"Content removed to accomodate {charlimit} character limit."
-            payload = json.dumps(data)
 
-        r = requests.post(webhook_url, json={"content": f"{payload}" })
-        if r.status_code in range(200, 299):
-            return True
-        else:
-            log_once(_(f"Notifying webhook failed with http response code: {f.status_code}"))
-            return False
+        # Create an Apprise instance
+        apobj = apprise.Apprise()
+
+        # Add all of the notification services by their server url.
+        for url in webhooks:
+            apobj.add(url)
+
+        # Then notify these services any time you desire. The below would
+        # notify all of the services loaded into our Apprise object.
+        apobj.notify(
+            body=payload,
+            title='Unattended-Upgrades',
+        )
 
     except NameError:
         log_once(_("Notifiying Webhook is skipped. Please "
-                   "install python3-requests package to send webhooks."))
+                   "install the python module apprise to send webhooks."))
         return False
+
 
 
 def send_summary_webhook(pkgs,                 # type: List[str]
@@ -1505,13 +1526,14 @@ def send_summary_webhook(pkgs,                 # type: List[str]
                          ):
 
     send = apt_pkg.config.find_b("Unattended-Upgrade::Webhook", False)
-    webhook = apt_pkg.config.find("Unattended-Upgrade::WebhookUrl", "")
 
     # Options: "always", "only-on-error" or "on-change"
     sendwhen = apt_pkg.config.find("Unattended-Upgrade::WebhookReport")
 
+    webhooks = get_webhookurls()
+
     # If webhook is not enabled or there is no webhook url, exit here
-    if (not send) or (not webhook):
+    if (not send) or (not webhooks):
         return
 
     # If the operation was successful and the user has requested to get
@@ -1532,7 +1554,7 @@ def send_summary_webhook(pkgs,                 # type: List[str]
 
 
     # Notify webhook
-    webhook_notify(webhook, data)
+    webhook_notify(webhooks, data)
 
 
 def send_summary_mail(pkgs,                 # type: List[str]
