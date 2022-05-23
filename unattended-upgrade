@@ -1491,8 +1491,23 @@ def get_webhookurls():
 def webhook_notify(webhooks, data):
 
     try:
-        #charlimit = int(apt_pkg.config.find("Unattended-Upgrade::WebhookCharacterLimit", "2000"))
+        charlimit = int(apt_pkg.config.find("Unattended-Upgrade::WebhookCharacterLimit", "2000"))
         payload = json.dumps(data)
+
+        # This is a weak attempt at ensuring we can send something to the webhook
+        # in case we go over a character limit.
+        if (len(payload) > charlimit) and (charlimit > 0)):
+            # Replacing data['packages'] should mean that the payload is below the default character limit.
+            payload = data['packages'] = "Content removed to accomodate %s character limit." % charlimit
+            payload = json.dumps(data)
+
+            # If we are still above the limit set by the user: stop and log the failure.
+            # It is up to the user to set a reasonable value.
+            # The default value is meant to be reasonable for most use cases.
+            if len(payload) > charlimit:
+                log_once(_("Notifiying Webhook is skipped. Please "
+                           "set the character limit to higher value."))
+                return False
 
         # Create an Apprise instance
         apobj = apprise.Apprise()
