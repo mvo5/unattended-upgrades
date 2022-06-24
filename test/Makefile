@@ -25,5 +25,4 @@ clean:
 	find .. -type d -name __pycache__ | xargs rm -rf
 
 coverage-html:
-	echo "output in htmlcov/
 	python3 -m coverage html
