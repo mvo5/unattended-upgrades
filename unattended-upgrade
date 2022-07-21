@@ -574,6 +574,15 @@ class LogInstallProgress(apt.progress.base.InstallProgress):
         self._log_in_dpkg_log("Log ended: %s\n\n"
                               % LoggingDateTime.as_string())
 
+    def __del__(self):
+        # this can be removed once
+        #   https://salsa.debian.org/apt-team/python-apt/-/merge_requests/64
+        # is merged everywhere
+        if hasattr(self, "status_stream"):
+            self.status_stream.close()
+        if hasattr(self, "write_stream"):
+            self.write_stream.close()
+
     def fork(self):
         # type: () -> int
         self._log_in_dpkg_log("Log started: %s\n"
