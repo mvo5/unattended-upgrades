@@ -85,7 +85,7 @@ class TestOriginPatern(unittest.TestCase):
         apt_pkg.read_config_file(
             apt_pkg.config, "./data/50unattended-upgrades.Test")
         allowed_origins = unattended_upgrade.get_allowed_origins()
-        #print allowed_origins
+        # print allowed_origins
         self.assertTrue("o=aOrigin,a=aArchive" in allowed_origins)
         self.assertTrue("s=aSite,l=aLabel" in allowed_origins)
         self.assertTrue("o=Google\\, Inc.,suite=stable" in allowed_origins)
@@ -101,7 +101,7 @@ class TestOriginPatern(unittest.TestCase):
         apt_pkg.read_config_file(
             apt_pkg.config, "./data/50unattended-upgrades.compat")
         allowed_origins = unattended_upgrade.get_allowed_origins()
-        #print allowed_origins
+        # print allowed_origins
         self.assertTrue("o=Google\\, Inc.,a=stable" in allowed_origins)
         self.assertTrue("o=MoreCorp\\, eink,a=stable" in allowed_origins)
         # test whitelist

@@ -235,13 +235,13 @@ class UnattendedUpgradesCache(apt.Cache):
                 if not is_pkgname_in_whitelist(pkg.name, whitelist):
                     return (_(
                         "Package %s is not on the strict whitelist.")
-                            % pkg.name)
+                        % pkg.name)
                 else:
                     if not is_pkgname_in_whitelist(pkg.name, whitelist):
                         return (_(
                             "Package %s is not whitelisted and it is not a"
                             " dependency of a whitelisted package.")
-                                % pkg.name)
+                            % pkg.name)
         elif not any([o.trusted for o in better_version.origins]):
             return _("Package %s's origin is not trusted.") % pkg.name
         return (_("Package %s is kept back because a related package"

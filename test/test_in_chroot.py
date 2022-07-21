@@ -14,19 +14,19 @@ import time
 import unittest
 
 # debian
-#SOURCES_LIST="""
-#deb http://ftp.de.debian.org/debian squeeze main contrib non-free
-#deb http://ftp.de.debian.org/debian squeeze-updates main contrib non-free
-#deb http://ftp.de.debian.org/debian squeeze-proposed-updates main contrib \
+# SOURCES_LIST="""
+# deb http://ftp.de.debian.org/debian squeeze main contrib non-free
+# deb http://ftp.de.debian.org/debian squeeze-updates main contrib non-free
+# deb http://ftp.de.debian.org/debian squeeze-proposed-updates main contrib \
 #  non-free
-#deb http://security.debian.org squeeze/updates main contrib non-free
-#"""
-#DISTRO="squeeze"
-#ARCH="i386"
-#TARBALL="%s-%s.tgz" % (DISTRO, ARCH)
-#MIRROR="http://ftp.de.debian.org/debian"
-#APT_CONF="""APT::Architecture "%s";""" % ARCH
-#ORIGINS_PATTERN="origin=Debian,archive=stable,label=Debian-Security"
+# deb http://security.debian.org squeeze/updates main contrib non-free
+# """
+# DISTRO="squeeze"
+# ARCH="i386"
+# TARBALL="%s-%s.tgz" % (DISTRO, ARCH)
+# MIRROR="http://ftp.de.debian.org/debian"
+# APT_CONF="""APT::Architecture "%s";""" % ARCH
+# ORIGINS_PATTERN="origin=Debian,archive=stable,label=Debian-Security"
 
 
 # ubuntu
@@ -231,7 +231,7 @@ class TestUnattendedUpgrade(unittest.TestCase):
                 if pid == apid:
                     ret = os.WEXITSTATUS(status)
                     break
-        #print("*******************", all_progress)
+        # print("*******************", all_progress)
         self.assertEqual(ret, 0)
         # this number is a bit random, we just want to be sure we have
         # progress data
@@ -243,7 +243,7 @@ class TestUnattendedUpgrade(unittest.TestCase):
         # examine log
         log = self._get_lockfile_location(target)
         logfile = open(log).read()
-        #print(logfile)
+        # print(logfile)
         if not re.search("Packages that will be upgraded:.*%s" % needle_pkg,
                          logfile):
             logging.warn(
@@ -259,10 +259,10 @@ class TestUnattendedUpgrade(unittest.TestCase):
             logging.warn("Did not find %s upgrade in %s" % (
                          dpkg_log, needle_pkg))
             return False
-        #print(dpkg_logfile)
+        # print(dpkg_logfile)
         return True
 
 
 if __name__ == "__main__":
-    #logging.basicConfig(level=logging.DEBUG)
+    # logging.basicConfig(level=logging.DEBUG)
     unittest.main()

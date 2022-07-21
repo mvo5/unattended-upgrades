@@ -76,13 +76,13 @@ class TestAgainstRealArchive(unittest.TestCase):
         self.assertTrue(
             re.search("DEBUG skipping blacklisted package 'ant-doc'", log))
         # test dpkg install log
-        #term_log = open("aptroot/var/log/apt/term.log").read()
+        # term_log = open("aptroot/var/log/apt/term.log").read()
         # FIXME: when we redirect STDIN the below test will break - however
         #        we need to redirect it as otherwise we may hang forever
         #        - this is actually a bug in apt that uses "tcgetattr(0, &tt)"
         #          on FD=0 instead of FD=1
-        #print term_log
-        #self.assertTrue(
+        # print term_log
+        # self.assertTrue(
         #    re.search(
         #        "fake-dpkg: --status-fd .* --configure.*awstats", term_log))
 
