@@ -1,10 +1,11 @@
 #!/usr/bin/python3
 
-import apt_pkg
 import logging
+import os
 import unittest
 
-apt_pkg.config.set("Dir", "./aptroot")
+import apt_pkg
+apt_pkg.config.set("Dir", os.path.join(os.path.dirname(__file__), "aptroot"))
 
 import unattended_upgrade
 from unattended_upgrade import (
@@ -16,6 +17,8 @@ from unattended_upgrade import (
 )
 
 from typing import List
+
+from test.test_base import TestBase
 
 
 class MockOrigin():
@@ -48,13 +51,7 @@ class MockDepCache():
     pass
 
 
-class TestOriginPatern(unittest.TestCase):
-
-    def setUp(self):
-        pass
-
-    def tearDown(self):
-        pass
+class TestOriginPatern(TestBase):
 
     def test_match_whitelist_string(self):
         origin = self._get_mock_origin(

@@ -1,24 +1,15 @@
 #!/usr/bin/python3
 
 import datetime
-import logging
 import os
 import unittest
 
 import apt
 
+from test.test_base import TestBase, MockOptions
 import unattended_upgrade
 
 apt.apt_pkg.config.set("APT::Architecture", "amd64")
-
-
-class MockOptions(object):
-    debug = True
-    verbose = False
-    dry_run = True
-    apt_debug = False
-    minimal_upgrade_steps = False
-    download_only = False
 
 
 class MockDistroAuto(object):
@@ -61,16 +52,18 @@ class MockDistroInfoModule(object):
         self.UbuntuDistroInfo = ubuntu
 
 
-class TestUntrusted(unittest.TestCase):
+class TestUntrusted(TestBase):
 
     def setUp(self):
+        TestBase.setUp(self)
         apt.apt_pkg.config.set("Unattended-Upgrade::"
                                "Skip-Updates-On-Metered-Connections",
                                "false")
         apt.apt_pkg.config.set("Unattended-Upgrade::OnlyOnAcPower",
                                "false")
-        unattended_upgrade.LOCK_FILE = "./u-u.lock"
-        self.rootdir = os.path.abspath("./root.untrusted")
+        self.rootdir = os.path.join(self.testdir, "root.untrusted")
+        apt.apt_pkg.config.set("Dir::State::status", os.path.join(
+            self.rootdir, "var/lib/dpkg/status"))
         self.log = os.path.join(
             self.rootdir, "var", "log", "unattended-upgrades",
             "unattended-upgrades.log")
@@ -79,9 +72,6 @@ class TestUntrusted(unittest.TestCase):
                                      "apt.conf")
 
         os.rename(self.apt_conf, self.apt_conf + ".bak")
-        for hdlr in logging.root.handlers:
-            hdlr.close()
-        logging.root.handlers = []
 
     def tearDown(self):
         os.remove(self.log)

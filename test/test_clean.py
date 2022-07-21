@@ -2,12 +2,11 @@
 
 
 import os
-import shutil
-import tempfile
+import os.path
 import unittest
 
 import apt_pkg
-apt_pkg.config.set("Dir", "./aptroot")
+apt_pkg.config.set("Dir", os.path.join(os.path.dirname(__file__), "aptroot"))
 import apt
 import unattended_upgrade
 
@@ -16,6 +15,8 @@ try:
     List   # pyflaks
 except ImportError:
     pass
+
+from test.test_base import TestBase
 
 
 class MockFetcher:
@@ -27,15 +28,15 @@ class MockAcquireItem:
         self.destfile = destfile
 
 
-class TestClean(unittest.TestCase):
+class TestClean(TestBase):
 
     def setUp(self):
-        self.tempdir = tempfile.mkdtemp()
-        self.addCleanup(shutil.rmtree, self.tempdir)
+        TestBase.setUp(self)
         os.chdir(self.tempdir)
 
     def test_clean(self):
         apt.apt_pkg.config.set("dir::cache::archives", self.tempdir)
+        self.addCleanup(apt.apt_pkg.config.clear, "dir::cache::archives")
         os.makedirs("dir")
         with open("file1", "w"):
             pass

@@ -1,3 +1,5 @@
 #!/bin/sh
 
-test/autopkgtest_kernel_patterns.py
+set -ex
+
+PYTHONPATH=. test/autopkgtest_kernel_patterns.py

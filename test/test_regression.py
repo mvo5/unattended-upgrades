@@ -1,13 +1,14 @@
 #!/usr/bin/python3
 # -*- coding: utf-8 -*-
 
-import apt_pkg
-apt_pkg.config.set("Dir", "./aptroot")
 import io
 import os
 import sys
 import tempfile
 import unittest
+
+import apt_pkg
+apt_pkg.config.set("Dir", os.path.join(os.path.dirname(__file__), "aptroot"))
 
 from mock import (
     Mock,
@@ -15,6 +16,7 @@ from mock import (
 )
 
 from unattended_upgrade import do_install
+from test.test_base import TestBase
 
 from typing import List
 
@@ -33,7 +35,7 @@ class MockCache(dict):
         return
 
 
-class TestRegression(unittest.TestCase):
+class TestRegression(TestBase):
 
     @unittest.skipIf(sys.version_info[0] != 3, "only works on py3")
     @patch("unattended_upgrade.upgrade_normal")
