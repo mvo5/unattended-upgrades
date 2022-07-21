@@ -236,8 +236,10 @@ class TestUnattendedUpgrade(TestBase):
         log = self._get_logfile_location(target)
         logfile = open(log).read()
         # print(logfile)
-        if not re.search("Packages that will be upgraded:.*%s" % needle_pkg, logfile):
-            logging.warn("Can not find expected %s upgrade in log" % needle_pkg)
+        if not re.search("Packages that will be upgraded:.*%s" % needle_pkg,
+                         logfile):
+            logging.warn(
+                "Can not find expected %s upgrade in log" % needle_pkg)
             return False
         if "ERROR Installing the upgrades failed" in logfile:
             logging.warn("Got a ERROR in the logfile")
