@@ -1,4 +1,6 @@
 #!/bin/sh
 
-cd test
-make
+set -ex
+
+python3 -m unittest
+
