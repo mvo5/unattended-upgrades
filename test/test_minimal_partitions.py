@@ -36,7 +36,7 @@ class TestMinimalPartitions(TestBase):
         TestBase.setUp(self)
         # setup dry-run mode for apt
         apt_pkg.config.set("Debug::NoLocking", "1")
-        #apt_pkg.config.set("Debug::pkgDPkgPM", "1")
+        # apt_pkg.config.set("Debug::pkgDPkgPM", "1")
         apt_pkg.config.set(
             "Dir::State::extended_states",
             os.path.join(self.tempdir, "extended_states"))
