@@ -177,7 +177,7 @@ class UnattendedUpgradesShutdown():
                 dbus_interface='org.freedesktop.DBus.Properties')
             return (getter_interface.Get(
                 "org.freedesktop.login1.Manager", "InhibitDelayMaxUSec")
-                    / (1000 * 1000))
+                / (1000 * 1000))
         except dbus.exceptions.DBusException:
             return 3
 
@@ -328,7 +328,7 @@ class UnattendedUpgradesShutdown():
             if (time.time() - self.start_time) > self.max_delay:
                 logging.warning(_(
                     "Giving up on lockfile after %s minutes of delay"),
-                                self.max_delay / 60)
+                    self.max_delay / 60)
                 sys.exit(1)
 
         if not self.stop_signal_received.is_set():

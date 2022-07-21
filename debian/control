@@ -15,7 +15,7 @@ Build-Depends-Indep: python3-dev,
                      python3-distro-info,
                      pycodestyle | pep8,
 #                    powermgmt-base, (tests disable on_ac_power checks)
-                     pyflakes3,
+                     flake8,
                      python3-apt (>= 1.9.6~),
                      python3-mock,
                      lsb-release
