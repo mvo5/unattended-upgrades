@@ -1,3 +1,14 @@
+unattended-upgrades (2.9) unstable; urgency=medium
+
+  [ Jean-Pierre Giraud ]
+  * French translation updates (Closes: #989635)
+
+  [ Balint Reczey ]
+  * debian/tests/common-functions: Skip test if debootstrapping fails
+  * debian/control: Remove myself from Uploaders
+
+ -- Balint Reczey <balint@balintreczey.hu>  Thu, 21 Jul 2022 14:25:14 +0200
+
 unattended-upgrades (2.8) unstable; urgency=medium
 
   [ Lucas Moura ]
