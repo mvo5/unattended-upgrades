@@ -4,6 +4,7 @@
 /test/.coverage
 /test/.mypy_cache/
 /test/root.*/
+/test/aptroot/var/cache/
 /test/packages/test-package*.deb
 /test/u-u.lock
 __pycache__/
