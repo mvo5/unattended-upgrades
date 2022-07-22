@@ -1,0 +1,28 @@
+name: CI
+
+on: [push, pull_request]
+
+jobs:
+  tests:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+    - name: static checks
+      run: |
+        sudo apt update
+        sudo apt build-dep -y ./
+        sudo apt install -y python3-pytest
+        pytest-3
+    - name: setup
+      run: |
+        sudo apt-get update
+        sudo apt-get install distro-info autopkgtest git-buildpackage
+        sudo snap install lxd --channel=stable
+        sudo usermod --append --groups lxd $(whoami)
+        sudo lxd init  --auto
+        sudo autopkgtest-build-lxd ubuntu:$(distro-info --stable)
+    - name: build source
+      run: gbp buildpackage -us -uc -S -d -nc --git-ignore-branch --git-prebuild=
+    - name: autopkgtest
+      # skipping tests is ok
+      run: sudo autopkgtest -U ../build-area/*.dsc -- lxd autopkgtest/ubuntu/$(distro-info --stable)/amd64 || [ $? == 2 ]

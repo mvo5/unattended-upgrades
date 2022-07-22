@@ -30,6 +30,11 @@ do_debootstrap() {
     chroot_dir="$2"
     mirror="$3"
 
+    if [ $(systemd-detect-virt) = "lxc" ]; then
+       echo "mkdnod fails in lxc, skipping debootstrap"
+       exit 77
+    fi
+
     ret=0
     for i in $(seq 5); do
         debootstrap --include eatmydata,time "$@" 2>&1 && break || ret=$?

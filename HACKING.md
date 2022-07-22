@@ -10,6 +10,8 @@ Running tests
 
 Please run:
 
-        $ make -C test
+    $ PYTHONPATH=. python3 -m unittest
 
+Or
 
+	$ PYTHONPATH=. python3 -m pytest
