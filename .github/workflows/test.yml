@@ -11,7 +11,8 @@ jobs:
       run: |
         sudo apt update
         sudo apt build-dep -y ./
-        make -C test
+        sudo apt install -y python3-pytest
+        pytest-3
     - name: setup
       run: |
         sudo apt-get update
