@@ -92,13 +92,27 @@ KEPT_PACKAGES_FILE = "var/lib/unattended-upgrades/kept-back"
 MAIL_BINARY = "/usr/bin/mail"
 SENDMAIL_BINARY = "/usr/sbin/sendmail"
 USERS = "/usr/bin/users"
+
+
 # no py3 lsb_release in debian :/
-DISTRO_CODENAME = subprocess.check_output(
-    ["lsb_release", "-c", "-s"], universal_newlines=True).strip()  # type: str
-DISTRO_DESC = subprocess.check_output(
-    ["lsb_release", "-d", "-s"], universal_newlines=True).strip()  # type: str
-DISTRO_ID = subprocess.check_output(
-    ["lsb_release", "-i", "-s"], universal_newlines=True).strip()  # type: str
+DISTRO_CODENAME = ""  # type: str
+DISTRO_DESC = ""  # type: str
+DISTRO_ID = ""  # type: str
+
+
+def init_distro_info():
+    global DISTRO_CODENAME, DISTRO_DESC, DISTRO_ID
+    DISTRO_CODENAME = subprocess.check_output(
+        ["lsb_release", "-c", "-s"], universal_newlines=True).strip()
+    DISTRO_DESC = subprocess.check_output(
+        ["lsb_release", "-d", "-s"], universal_newlines=True).strip()
+    DISTRO_ID = subprocess.check_output(
+        ["lsb_release", "-i", "-s"], universal_newlines=True).strip()
+
+
+# init global distro info
+init_distro_info()
+
 
 # Number of days before release of devel where we enable unattended
 # upgrades.
@@ -235,13 +249,13 @@ class UnattendedUpgradesCache(apt.Cache):
                 if not is_pkgname_in_whitelist(pkg.name, whitelist):
                     return (_(
                         "Package %s is not on the strict whitelist.")
-                            % pkg.name)
+                        % pkg.name)
                 else:
                     if not is_pkgname_in_whitelist(pkg.name, whitelist):
                         return (_(
                             "Package %s is not whitelisted and it is not a"
                             " dependency of a whitelisted package.")
-                                % pkg.name)
+                            % pkg.name)
         elif not any([o.trusted for o in better_version.origins]):
             return _("Package %s's origin is not trusted.") % pkg.name
         return (_("Package %s is kept back because a related package"
@@ -559,6 +573,15 @@ class LogInstallProgress(apt.progress.base.InstallProgress):
         # type: () -> None
         self._log_in_dpkg_log("Log ended: %s\n\n"
                               % LoggingDateTime.as_string())
+
+    def __del__(self):
+        # this can be removed once
+        #   https://salsa.debian.org/apt-team/python-apt/-/merge_requests/64
+        # is merged everywhere
+        if hasattr(self, "status_stream"):
+            self.status_stream.close()
+        if hasattr(self, "write_stream"):
+            self.write_stream.close()
 
     def fork(self):
         # type: () -> int

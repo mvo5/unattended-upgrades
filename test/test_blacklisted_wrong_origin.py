@@ -7,11 +7,12 @@ import unittest
 from mock import (
     Mock,
 )
+from test.test_base import TestBase
 
 from unattended_upgrade import calculate_upgradable_pkgs
 
 
-class TestBlacklistedWrongOrigin(unittest.TestCase):
+class TestBlacklistedWrongOrigin(TestBase):
 
     @unittest.skipIf(sys.version_info[0] != 3, "only works on py3")
     def test_if_origin_does_not_match_then_blacklist_is_not_checked(self):

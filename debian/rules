@@ -13,7 +13,7 @@ override_dh_auto_build:
 	$(PYTHON) setup.py build
 
 override_dh_auto_test:
-	$(MAKE) -C test
+	$(PYTHON) setup.py test
 
 override_dh_auto_install:
 	$(PYTHON) setup.py install \

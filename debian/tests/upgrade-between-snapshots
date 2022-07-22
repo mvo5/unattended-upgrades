@@ -1,6 +1,6 @@
 #!/bin/sh
 
-set -e
+set -ex
 
 chroot_dir=$AUTOPKGTEST_TMP/chroot
 start_date=20200309T000000Z

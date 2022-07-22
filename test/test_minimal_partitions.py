@@ -1,12 +1,11 @@
 #!/usr/bin/python3
 
-import apt_pkg
-apt_pkg.config.set("Dir", "./aptroot")
-import apt
 import os
-import shutil
-import tempfile
 import unittest
+
+import apt_pkg
+apt_pkg.config.set("Dir", os.path.join(os.path.dirname(__file__), "aptroot"))
+import apt
 
 try:
     from typing import List, Tuple
@@ -16,6 +15,7 @@ except ImportError:
     pass
 
 import unattended_upgrade
+from test.test_base import TestBase
 
 
 class LogInstallProgressMock(unattended_upgrade.LogInstallProgress):
@@ -30,35 +30,43 @@ class LogInstallProgressMock(unattended_upgrade.LogInstallProgress):
         self.DATA.append([pkg, percent])
 
 
-class TestMinimalPartitions(unittest.TestCase):
+class TestMinimalPartitions(TestBase):
 
     def setUp(self):
+        TestBase.setUp(self)
         # setup dry-run mode for apt
-        apt_pkg.config.set("Dir", "./aptroot")
-        apt_pkg.config.set("Dir::Cache", "/tmp")
         apt_pkg.config.set("Debug::NoLocking", "1")
-        apt_pkg.config.set("Debug::pkgDPkgPM", "1")
-        apt_pkg.config.set("Dir::State::extended_states", "./extended_states")
+        # apt_pkg.config.set("Debug::pkgDPkgPM", "1")
+        apt_pkg.config.set(
+            "Dir::State::extended_states",
+            os.path.join(self.tempdir, "extended_states"))
+        self.addCleanup(apt_pkg.config.clear, "Dir::state::extended_states")
         apt_pkg.config.clear("Dpkg::Post-Invoke")
         apt_pkg.config.clear("Dpkg::Pre-Install-Pkgs")
-        self.cache = apt.Cache()
-        # for the log
-        self.tempdir = tempfile.mkdtemp()
-        self.addCleanup(lambda: shutil.rmtree(self.tempdir))
+        rootdir = os.path.join(self.testdir, "aptroot")
+        self.cache = apt.Cache(rootdir=rootdir)
+        # mock LogDir config
+        self.u_u_logdir = apt_pkg.config.get("Unattended-Upgrade::LogDir")
         apt_pkg.config.set("Unattended-Upgrade::LogDir", self.tempdir)
+        # mock PROGRESS_LOG
+        self.progress_log = unattended_upgrade.PROGRESS_LOG
+        unattended_upgrade.PROGRESS_LOG = os.path.join(
+            self.tempdir, "var/run/unatteded-upgrades.progress")
+        # mock LogInstallProgress
+        self.log_install_progress = unattended_upgrade.LogInstallProgress
+        unattended_upgrade.LogInstallProgress = LogInstallProgressMock
 
     def tearDown(self):
-        if os.path.exists("./extended_states"):
-            os.remove("./extended_states")
+        # restore mocks
+        unattended_upgrade.PROGRESS_LOG = self.progress_log
+        apt_pkg.config.set("Unattended-Upgrade::LogDir", self.u_u_logdir)
+        unattended_upgrade.LogInstallProgress = self.log_install_progress
 
     def test_upgrade_in_minimal_steps(self):
         self.cache.upgrade(True)
         # upgrade only a tiny subset in the test
         pkgs_to_upgrade = [
             pkg.name for pkg in self.cache.get_changes()][:5]
-        unattended_upgrade.PROGRESS_LOG = \
-            "./aptroot/var/run/unatteded-upgrades.progress"
-        unattended_upgrade.LogInstallProgress = LogInstallProgressMock
         unattended_upgrade.upgrade_in_minimal_steps(
             self.cache, pkgs_to_upgrade, "",
             os.path.join(self.tempdir, "mylog"))
