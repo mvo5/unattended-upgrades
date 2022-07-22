@@ -56,7 +56,8 @@ try:
     Dict  # pyflakes
     Iterable  # pyflakes
     List  # pyflakes
-    from typing import Set, Tuple, Union
+    from typing import Optional, Set, Tuple, Union
+    Optional  # pyflakes
     Set  # pyflakes
     Tuple  # pyflakes
     Union  # pyflakes
@@ -471,7 +472,7 @@ class LogInstallProgress(apt.progress.base.InstallProgress):
         self.progress_log = os.path.join(apt_pkg.config.find_dir("Dir"),
                                          progress_log)
         self.verbose = verbose
-        self.output_logfd = None  # type: int
+        self.output_logfd = None  # type: Optional[int]
 
     def status_change(self, pkg, percent, status):
         # type: (str, float, str) -> None
@@ -882,7 +883,7 @@ def cache_commit(cache,           # type: apt.Cache
                  verbose,         # type: bool
                  iprogress=None,  # type: apt.progress.base.InstallProgress
                  ):
-    # type: (...) -> Tuple[bool, Exception]
+    # type: (...) -> Tuple[bool, Optional[Exception]]
     """Commit the changes from the given cache to the system"""
 
     error = None
@@ -1109,7 +1110,7 @@ def upgrade_order(to_upgrade, cache):
         pkg = cache[pkgname]
         upgrade_set_sizes[pkgname] = len(transitive_dependencies(
             pkg, cache, valid_types=follow_deps).intersection(to_upgrade))
-    return sorted(upgrade_set_sizes, key=upgrade_set_sizes.get)
+    return sorted(upgrade_set_sizes, key=upgrade_set_sizes.get)  # type: ignore
 
 
 def check_changes_for_sanity(cache, desired_pkg=None):
@@ -1125,7 +1126,7 @@ def check_changes_for_sanity(cache, desired_pkg=None):
 
 
 def sanity_problem(cache, desired_pkg):
-    # type: (UnattendedUpgradesCache, apt.Package) -> str
+    # type: (UnattendedUpgradesCache, Optional[apt.Package]) -> Optional[str]
     if cache._depcache.broken_count != 0:
         return ("there are broken packages in the cache")
     # If there are no packages to be installed they were kept back
@@ -1135,6 +1136,8 @@ def sanity_problem(cache, desired_pkg):
     for pkg in changes:
         if pkg.marked_delete:
             return ("pkg %s is marked to be deleted" % pkg.name)
+        if not pkg.candidate:
+            return ("internal error: pkg %s has no candidate" % pkg.candidate)
         if pkg.marked_install or pkg.marked_upgrade:
             # apt will never fallback from a trusted to a untrusted
             # origin so its good enough if we have a single trusted one
@@ -1197,7 +1200,8 @@ def get_md5sum_for_file_in_deb(deb_file, conf_file):
     pkg_md5sum = md5_p.communicate()[0].split()[0]
     for __p in [dpkg_p, tar_p, md5_p]:
         p = cast(Popen, __p)
-        p.stdout.close()
+        if p.stdout:
+            p.stdout.close()
         p.wait()
     return pkg_md5sum
 
@@ -1209,7 +1213,7 @@ def get_md5sum_for_file_installed(conf_file, prefix):
             for hash_string in apt_pkg.Hashes(fb).hashes:  # type: ignore
                 if hash_string.hashtype == 'MD5Sum':
                     return hash_string.hashvalue
-            return None
+            raise Exception("no MD5Sum hashtype found in apt_pkg.Hashes")
     except IsADirectoryError:
         # the package replaces a directory wih a configuration file
         #
@@ -1228,7 +1232,7 @@ def get_md5sum_for_file_installed(conf_file, prefix):
 
 
 def map_conf_file(conf_file, conffiles):
-    # type: (str, Union[AbstractSet[str], Dict[str, str]]) -> str
+    # type: (str, Union[AbstractSet[str], Dict[str, str]]) -> Optional[str]
     """Find respective conffile in a set of conffiles with some heuristics
     """
     if conf_file in conffiles:
@@ -1293,10 +1297,9 @@ def conffile_prompt(destFile, prefix=""):
         li = line.split()
         conf_file = li[0]
         md5 = li[1]
+        obs = None  # type: Optional[str]
         if len(li) > 2:
             obs = li[2]
-        else:
-            obs = None
         # ignore if conffile is obsolete
         if obs == "obsolete":
             continue
@@ -1405,6 +1408,7 @@ def _send_mail_using_mailx(from_address, to_address, subject, body):
     mail = subprocess.Popen(
         [MAIL_BINARY, "-r", from_address, "-s", subject, to_address],
         stdin=subprocess.PIPE, universal_newlines=False)
+    assert mail.stdin  # mypy
     mail.stdin.write(encoded_body)
     mail.stdin.close()
     ret = mail.wait()
@@ -1428,6 +1432,7 @@ def _send_mail_using_sendmail(from_address, to_address, subject, body):
     sendmail = subprocess.Popen(
         [SENDMAIL_BINARY, "-oi", "-t"],
         stdin=subprocess.PIPE, universal_newlines=True)
+    assert sendmail.stdin  # mypy
     sendmail.stdin.write(msg.as_string())
     sendmail.stdin.close()
     ret = sendmail.wait()
@@ -1437,10 +1442,10 @@ def _send_mail_using_sendmail(from_address, to_address, subject, body):
 def send_summary_mail(pkgs,                 # type: List[str]
                       res,                  # type: bool
                       result_str,           # type: str
-                      pkgs_kept_back,       # type: KeptPkgs
+                      pkgs_kept_back,       # type: Optional[KeptPkgs]
                       pkgs_removed,         # type: List[str]
                       pkgs_kept_installed,  # type: List[str]
-                      mem_log,              # type: StringIO
+                      mem_log,              # type: Optional[StringIO]
                       dpkg_log_content,     # type: str
                       ):
     # type: (...) -> None
@@ -1524,7 +1529,10 @@ def send_summary_mail(pkgs,                 # type: List[str]
         body += dpkg_log_content
         body += "\n\n"
     body += _("Unattended-upgrades log:\n")
-    body += mem_log.getvalue()
+    if mem_log:
+        body += mem_log.getvalue()
+    else:
+        body += "no log available"
 
     from_email = apt_pkg.config.find("Unattended-Upgrade::Sender", "root")
 
@@ -1603,7 +1611,7 @@ def _get_logdir():
 
 
 def _setup_logging(options):
-    # type: (Options) -> StringIO
+    # type: (Options) -> Optional[StringIO]
 
     # ensure this is run only once
     if len(logging.root.handlers) > 0:
@@ -1749,7 +1757,7 @@ def try_to_upgrade(pkg,               # type: apt.Package
 
 def candidate_version_changed(pkg,               # type: apt.Package
                               ):
-    return (pkg.is_installed and pkg.candidate
+    return (pkg.is_installed and pkg.candidate and pkg.installed
             and pkg.candidate.version != pkg.installed.version
             and apt_pkg.config.find_b(
                 'Unattended-Upgrade::Allow-downgrade', False))
@@ -2070,7 +2078,7 @@ def mark_pkgs_to_upgrade(cache, pkgs_to_upgrade):
 
 def run(options,             # type: Options
         rootdir,             # type: str
-        mem_log,             # type: StringIO
+        mem_log,             # type: Optional[StringIO]
         logfile_dpkg,        # type: str
         install_start_time,  # type: datetime.datetime
         ):
