@@ -614,7 +614,7 @@ class TryingToBeNice():
 
     def __exit__(self, _type, value, traceback):
         os.nice(self.old_priority - os.nice(0))
-    
+
 
 class Unlocked:
     """
@@ -2198,9 +2198,9 @@ def run(options,             # type: Options
         return UnattendedUpgradesResult(
             False, _("Cache has broken packages, exiting"))
 
-    with TryingToBeNince(20):
+    with TryingToBeNice(20):
         auto_removable = get_auto_removable(cache)
-        
+
         # find out about the packages that are upgradable (in an
         # allowed_origin)
         pkgs_to_upgrade = calculate_upgradable_pkgs(cache, options)
