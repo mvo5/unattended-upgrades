@@ -3,10 +3,16 @@ name: CI
 on: [push, pull_request]
 
 jobs:
-  autopkgtest:
+  tests:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v2
+    - name: static checks
+      run: |
+        sudo apt update
+        sudo apt build-dep -y ./
+        sudo apt install -y python3-pytest
+        pytest-3
     - name: setup
       run: |
         sudo apt-get update
