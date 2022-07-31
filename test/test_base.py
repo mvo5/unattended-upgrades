@@ -58,6 +58,50 @@ class TestBase(unittest.TestCase):
             v = self._saved_apt_conf[k]
             apt.apt_pkg.config.set(k, v)
 
+    def make_fake_aptroot(self, template=None, fake_pkgs=[]):
+        tmpdir = tempfile.mkdtemp()
+        self.addCleanup(shutil.rmtree, tmpdir)
+        aptroot = os.path.join(tmpdir, "aptroot")
+        shutil.copytree(template, aptroot)
+        # fake dpkg status
+        mock_dpkg_status = os.path.join(aptroot, "var/lib/dpkg/status")
+        with open(mock_dpkg_status, "a") as fp:
+            for (pkgname, ver, deps) in fake_pkgs:
+                # only "Depends" supported right now, extend as needed
+                self.assertIn(set(deps.keys()), (set([]), set(["Depends"])))
+                dep_str = ""
+                if deps.get("Depends"):
+                    dep_str = "Depends: {}".format(",".join(deps.get("Depends", [])))
+                fp.write(
+                    """
+Package: %s
+Status: install ok installed
+Architecture: all
+Version: %s
+%s
+"""
+                    % (pkgname, ver, dep_str)
+                )
+        # setup everything to run dpkg
+        apt.apt_pkg.config.set("Dir::State::status", mock_dpkg_status)
+        apt.apt_pkg.config.clear("DPkg::Pre-Invoke")
+        apt.apt_pkg.config.clear("DPkg::Post-Invoke")
+        apt.apt_pkg.config.set("Debug::NoLocking", "true")
+        # we don't really run dpkg
+        fake_dpkg = os.path.join(aptroot, "usr", "bin", "dpkg")
+        if not os.path.exists(fake_dpkg):
+            os.makedirs(os.path.dirname(fake_dpkg), exist_ok=True)
+            with open(fake_dpkg, "w") as fp:
+                fp.write(
+                    """#!/usr/bin/python3
+import sys
+print(sys.argv)
+"""
+                )
+        os.chmod(fake_dpkg, 0o755)
+        apt.apt_pkg.config.set("Dir::Bin::Dpkg", fake_dpkg)
+        return aptroot
+
     def mock_distro(self, distro_id, codename, descr):
         for attr, fake_value in [
             ("DISTRO_ID", distro_id),
