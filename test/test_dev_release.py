@@ -137,6 +137,7 @@ Unattended-Upgrade::OnlyOnAcPower "false";
             self.assertTrue(needle in haystack,
                             "Can not find '%s' in '%s'" % (needle, haystack))
 
+    # FIXME: this test looks exactly like the test above?
     def test_norelease_devrelease(self):
         """The devel series has no release update, so do updates"""
         self.write_config("auto")
