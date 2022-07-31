@@ -23,6 +23,7 @@
 #
 
 import atexit
+import contextlib
 import copy
 import datetime
 import errno
@@ -2000,6 +2001,22 @@ def update_kept_pkgs_file(kept_pkgs, kept_file):
             os.remove(kept_file)
 
 
+@contextlib.contextmanager
+def try_nice(increment):
+    old_priority = os.nice(0)
+    try:
+        try:
+            # Check that we will be able to restore the priority
+            os.nice(-1)
+            os.nice(increment)
+        except PermissionError:
+            # So bad, we couldn't be nicier
+            pass
+        yield
+    finally:
+        os.nice(old_priority - os.nice(0))
+
+
 def main(options, rootdir="/"):
     # type: (Options, str) -> int
     # useful for testing
@@ -2180,31 +2197,16 @@ def run(options,             # type: Options
         return UnattendedUpgradesResult(
             False, _("Cache has broken packages, exiting"))
 
-    # FIXME: make this into a ContextManager
-    # be nice when calculating the upgrade as its pretty CPU intensive
-    old_priority = os.nice(0)
-    try:
-        # Check that we will be able to restore the priority
-        os.nice(-1)
-        os.nice(20)
-    except OSError as e:
-        if e.errno in (errno.EPERM, errno.EACCES):
-            pass
-        else:
-            raise
+    with try_nice(20):
+        auto_removable = get_auto_removable(cache)
 
-    auto_removable = get_auto_removable(cache)
-
-    # find out about the packages that are upgradable (in an allowed_origin)
-    pkgs_to_upgrade = calculate_upgradable_pkgs(cache, options)
-    pkgs_to_upgrade.sort(key=lambda p: p.name)
-    pkgs = [pkg.name for pkg in pkgs_to_upgrade]
-    logging.debug("pkgs that look like they should be upgraded: %s"
-                  % "\n".join(pkgs))
-
-    # FIXME: make this into a ContextManager
-    # stop being nice
-    os.nice(old_priority - os.nice(0))
+        # find out about the packages that are upgradable (in an
+        # allowed_origin)
+        pkgs_to_upgrade = calculate_upgradable_pkgs(cache, options)
+        pkgs_to_upgrade.sort(key=lambda p: p.name)
+        pkgs = [pkg.name for pkg in pkgs_to_upgrade]
+        logging.debug("pkgs that look like they should be upgraded: %s"
+                      % "\n".join(pkgs))
 
     # download what looks good
     mark_pkgs_to_upgrade(cache, pkgs)
