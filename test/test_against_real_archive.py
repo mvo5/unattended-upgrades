@@ -5,35 +5,31 @@ Note that this test is not run by the makefile in this folder, as it requires
 network access, and it fails in some situations (unclear which).
 """
 
-import apt_pkg
-apt_pkg.config.set("Dir", "./aptroot")
-import apt
 import glob
 import logging
 import os
 import re
 import unittest
 
+import apt_pkg
+
+apt_pkg.config.set("Dir", os.path.join(os.path.dirname(__file__), "aptroot"))
+import apt
+
 import unattended_upgrade
+from test.test_base import TestBase, MockOptions
 
 
 apt_pkg.config.set("APT::Architecture", "amd64")
 
 
-class MockOptions():
-    def __init__(self, debug=True, dry_run=False):
-        self.debug = debug
-        self.dry_run = dry_run
-        self.apt_debug = False
-        self.minimal_upgrade_steps = True
-        self.verbose = False
-
-
-class TestAgainstRealArchive(unittest.TestCase):
-
+# FIXME: port to something more recent than lucid(!)
+class TestAgainstRealArchive(TestBase):
+    @unittest.skip("FIXME: test needs porting")
+    @unittest.skipIf(os.getuid() != 0, "must run as root")
     def setUp(self):
-        for g in ["./aptroot/var/log/apt/*",
-                  "./aptroot/var/log/*"]:
+        TestBase.setUp(self)
+        for g in ["./aptroot/var/log/apt/*", "./aptroot/var/log/*"]:
             for f in glob.glob(g):
                 if os.path.isfile(f):
                     os.remove(f)
@@ -65,29 +61,28 @@ class TestAgainstRealArchive(unittest.TestCase):
         # check that stuff worked
         self.assertFalse(" ERROR " in log, log)
         # check if we actually have the expected ugprade in it
-        self.assertTrue(
-            re.search("INFO Packages that will be upgraded:.*awstats", log))
+        self.assertTrue(re.search("INFO Packages that will be upgraded:.*awstats", log))
         # apt-doc has a higher version in -updates than in -security
         # and no other dependencies so its a perfect test
-        self.assertTrue(
-            re.search("INFO Packages that will be upgraded:.*apt-doc", log))
+        self.assertTrue(re.search("INFO Packages that will be upgraded:.*apt-doc", log))
         self.assertFalse(
-            re.search("INFO Packages that will be upgraded:.*ant-doc", log))
-        self.assertTrue(
-            re.search("DEBUG skipping blacklisted package 'ant-doc'", log))
+            re.search("INFO Packages that will be upgraded:.*ant-doc", log)
+        )
+        self.assertTrue(re.search("DEBUG skipping blacklisted package 'ant-doc'", log))
         # test dpkg install log
-        #term_log = open("aptroot/var/log/apt/term.log").read()
+        # term_log = open("aptroot/var/log/apt/term.log").read()
         # FIXME: when we redirect STDIN the below test will break - however
         #        we need to redirect it as otherwise we may hang forever
         #        - this is actually a bug in apt that uses "tcgetattr(0, &tt)"
         #          on FD=0 instead of FD=1
-        #print term_log
-        #self.assertTrue(
+        # print term_log
+        # self.assertTrue(
         #    re.search(
         #        "fake-dpkg: --status-fd .* --configure.*awstats", term_log))
 
 
 if __name__ == "__main__":
     import locale
+
     locale.setlocale(locale.LC_ALL, "C")
     unittest.main()

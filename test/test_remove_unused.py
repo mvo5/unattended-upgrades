@@ -5,34 +5,29 @@ import subprocess
 import unittest
 
 import apt_pkg
-apt_pkg.config.set("Dir", "./aptroot")
+apt_pkg.config.set("Dir", os.path.join(os.path.dirname(__file__), "aptroot"))
 import apt
 
+from test.test_base import TestBase, MockOptions
 import unattended_upgrade
 
 apt.apt_pkg.config.set("APT::Architecture", "amd64")
 
 
-class MockOptions(object):
-    debug = True
-    verbose = False
-    download_only = False
-    dry_run = False
-    apt_debug = False
-    minimal_upgrade_steps = True
-
-
-class TestRemoveUnused(unittest.TestCase):
+class TestRemoveUnused(TestBase):
 
     def setUp(self):
-        self.rootdir = os.path.abspath("./root.unused-deps")
+        TestBase.setUp(self)
+        self.rootdir = os.path.join(self.testdir, "root.unused-deps")
+        unattended_upgrade.DISTRO_ID = "ubuntu"
+        unattended_upgrade.DISTRO_CODENAME = "lucid"
+        unattended_upgrade.DISTRO_DESC = "Ubuntu 10.04"
         # fake on_ac_power
         os.environ["PATH"] = (os.path.join(self.rootdir, "usr", "bin") + ":"
                               + os.environ["PATH"])
-        dpkg_status = os.path.abspath(
-            os.path.join(self.rootdir, "var", "lib", "dpkg", "status"))
+        mock_dpkg_status = os.path.join(self.rootdir, "var/lib/dpkg/status")
         # fake dpkg status
-        with open(dpkg_status, "w") as fp:
+        with open(mock_dpkg_status, "w") as fp:
             fp.write("""Package: test-package
 Status: install ok installed
 Architecture: all
@@ -74,7 +69,7 @@ Status: install ok installed
 Architecture: all
 Version: 1.0
 """)
-        apt.apt_pkg.config.set("Dir::State::status", dpkg_status)
+        apt.apt_pkg.config.set("Dir::State::status", mock_dpkg_status)
         apt.apt_pkg.config.clear("DPkg::Pre-Invoke")
         apt.apt_pkg.config.clear("DPkg::Post-Invoke")
         apt.apt_pkg.config.set("Debug::NoLocking", "true")
@@ -116,9 +111,11 @@ Auto-Installed: 1
              os.path.join(self.rootdir, "var", "cache", "apt", "*.bin")])
 
     def test_remove_unused_dependencies(self):
+        apt.apt_pkg.config.clear("APT::VersionedKernelPackages")
         apt_conf = os.path.join(self.rootdir, "etc", "apt", "apt.conf")
         with open(apt_conf, "w") as fp:
             fp.write("""
+Unattended-Upgrade::MinimalSteps "false";
 Unattended-Upgrade::Keep-Debs-After-Install "true";
 Unattended-Upgrade::Allowed-Origins {
     "Ubuntu:lucid-security";
@@ -127,10 +124,7 @@ Unattended-Upgrade::Remove-Unused-Dependencies "true";
 Unattended-Upgrade::Skip-Updates-On-Metered-Connections "false";
 """)
         options = MockOptions()
-        unattended_upgrade.DISTRO_DESC = "Ubuntu 10.04"
-        unattended_upgrade.LOCK_FILE = "./u-u.lock"
-        unattended_upgrade.main(
-            options, rootdir="./root.unused-deps")
+        unattended_upgrade.main(options, rootdir=self.rootdir)
         with open(self.log) as f:
             # both the new and the old unused dependency are removed
             needle = "Packages that were successfully auto-removed: "\
@@ -156,10 +150,7 @@ Unattended-Upgrade::Remove-New-Unused-Dependencies "true";
 Unattended-Upgrade::Skip-Updates-On-Metered-Connections "false";
 """)
         options = MockOptions()
-        unattended_upgrade.DISTRO_DESC = "Ubuntu 10.04"
-        unattended_upgrade.LOCK_FILE = "./u-u.lock"
-        unattended_upgrade.main(
-            options, rootdir="./root.unused-deps")
+        unattended_upgrade.main(options, rootdir=self.rootdir)
         with open(self.log) as f:
             # ensure its only exactly one package that is removed
             needle_kernel_bad = "Removing unused kernel packages: "\

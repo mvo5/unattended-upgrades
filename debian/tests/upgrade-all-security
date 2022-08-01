@@ -7,7 +7,7 @@
 # Also test if packages can be upgraded to -updates and -proposed, but failures
 # in -proposed are ignored since those can be issues in the packages.
 
-set -e
+set -ex
 
 chroot_dir=$AUTOPKGTEST_TMP/chroot
 

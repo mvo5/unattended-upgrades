@@ -1,36 +1,26 @@
 #!/usr/bin/python3
 
-import apt_pkg
-apt_pkg.config.set("Dir", "./aptroot")
 import logging
 import os
-import sys
-import tempfile
 import unittest
 
-sys.path.insert(0, "..")
+import apt_pkg
+apt_pkg.config.set("Dir", os.path.join(os.path.dirname(__file__), "aptroot"))
+
 from unattended_upgrade import _setup_logging
+from test.test_base import TestBase, MockOptions
 
 
-class MockOptions:
-    dry_run = False
-    debug = False
-    verbose = False
-    apt_debug = False
-
-
-class TestLogdir(unittest.TestCase):
+class TestLogdir(TestBase):
 
     def setUp(self):
-        self.tempdir = tempfile.mkdtemp()
-        apt_pkg.init()
+        TestBase.setUp(self)
         self.mock_options = MockOptions()
 
     def test_logdir(self):
         # test log
         logdir = os.path.join(self.tempdir, "mylog")
         apt_pkg.config.set("Unattended-Upgrade::LogDir", logdir)
-        logging.root.handlers = []
         _setup_logging(self.mock_options)
         self.assertTrue(os.path.exists(logdir))
 
