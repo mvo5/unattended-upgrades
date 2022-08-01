@@ -37,12 +37,12 @@ except ImportError:
     pass
 import grp
 import io
-import json
 import locale
 import logging
 import logging.handlers
 import re
 try:
+    import json
     import apprise
 except ImportError:
     pass
