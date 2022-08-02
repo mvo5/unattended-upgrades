@@ -27,6 +27,7 @@ class TestUntrusted(TestBase):
         self.log = os.path.join(
             self.rootdir, "var", "log", "unattended-upgrades",
             "unattended-upgrades.log")
+        self.mock_distro("ubuntu", "lucid", "Ubuntu 10.04")
 
     def tearDown(self):
         os.remove(self.log)
@@ -37,7 +38,6 @@ class TestUntrusted(TestBase):
 
         # run it
         options = MockOptions()
-        unattended_upgrade.DISTRO_DESC = "Ubuntu 10.04"
         unattended_upgrade.main(options, rootdir=self.rootdir)
         # read the log to see what happend
         with open(self.log) as f:

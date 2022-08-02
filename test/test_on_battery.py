@@ -30,6 +30,7 @@ class OnBattery(TestBase):
         self.log = os.path.join(
             self.rootdir, "var", "log", "unattended-upgrades",
             "unattended-upgrades.log")
+        self.mock_distro("ubuntu", "artful", "Artful Aardvark (development branch)")
 
     def tearDown(self):
         os.remove(self.log)
@@ -39,7 +40,6 @@ class OnBattery(TestBase):
 
         # run it
         options = MockOptions()
-        unattended_upgrade.DISTRO_DESC = "Ubuntu 10.04"
         ret = unattended_upgrade.main(options, rootdir=self.rootdir)
         self.assertTrue(ret == 1)
         # read the log to see what happend

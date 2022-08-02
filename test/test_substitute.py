@@ -7,7 +7,6 @@ import unittest
 import apt_pkg
 apt_pkg.config.set("Dir", os.path.join(os.path.dirname(__file__), "aptroot"))
 
-import unattended_upgrade
 from unattended_upgrade import substitute, get_allowed_origins
 
 from test.test_base import TestBase
@@ -17,9 +16,7 @@ class TestSubstitute(TestBase):
 
     def setUp(self):
         TestBase.setUp(self)
-        # monkey patch DISTRO_{CODENAME, ID}
-        unattended_upgrade.DISTRO_CODENAME = "nacked"
-        unattended_upgrade.DISTRO_ID = "MyDistroID"
+        self.mock_distro("MyDistroID", "mycodename", "MyDistroID descr")
 
     def testSubstitute(self):
         """ test if the substitute function works """
@@ -33,7 +30,7 @@ class TestSubstitute(TestBase):
         apt_pkg.config.set("Unattended-Upgrade::Allowed-Origins::",
                            "${distro_id} ${distro_codename}-security")
         li = get_allowed_origins()
-        self.assertTrue(("o=MyDistroID,a=nacked-security") in li)
+        self.assertIn("o=MyDistroID,a=mycodename-security", li)
 
 
 if __name__ == "__main__":

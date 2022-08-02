@@ -72,6 +72,7 @@ class TestUntrusted(TestBase):
                                      "apt.conf")
 
         os.rename(self.apt_conf, self.apt_conf + ".bak")
+        self.mock_distro("ubuntu", "artful", "Artful Aardvark (development branch)")
 
     def tearDown(self):
         os.remove(self.log)
@@ -89,7 +90,6 @@ Unattended-Upgrade::OnlyOnAcPower "false";
 
         # run it
         options = MockOptions()
-        unattended_upgrade.DISTRO_DESC = "Artful Aardvark (development branch)"
         unattended_upgrade.main(options, rootdir=self.rootdir)
         # read the log to see what happend
         with open(self.log) as f:
@@ -106,9 +106,6 @@ Unattended-Upgrade::OnlyOnAcPower "false";
         unattended_upgrade.distro_info = MockDistroInfoModule(MockDistroAuto)
 
         options = MockOptions()
-        unattended_upgrade.DISTRO_DESC = "Artful Aardvark (development branch)"
-        unattended_upgrade.DISTRO_CODENAME = "artful"
-        unattended_upgrade.DISTRO_ID = "ubuntu"
         unattended_upgrade.main(options, rootdir=self.rootdir)
         # read the log to see what happend
         with open(self.log) as f:
@@ -125,9 +122,6 @@ Unattended-Upgrade::OnlyOnAcPower "false";
         unattended_upgrade.distro_info = MockDistroInfoModule(MockDistroNoAuto)
 
         options = MockOptions()
-        unattended_upgrade.DISTRO_DESC = "Artful Aardvark (development branch)"
-        unattended_upgrade.DISTRO_CODENAME = "artful"
-        unattended_upgrade.DISTRO_ID = "ubuntu"
         unattended_upgrade.main(options, rootdir=self.rootdir)
         # read the log to see what happend
         with open(self.log) as f:
@@ -145,9 +139,6 @@ Unattended-Upgrade::OnlyOnAcPower "false";
         unattended_upgrade.distro_info = MockDistroInfoModule(MockDistroNoAuto)
 
         options = MockOptions()
-        unattended_upgrade.DISTRO_DESC = "Artful Aardvark (development branch)"
-        unattended_upgrade.DISTRO_CODENAME = "artful"
-        unattended_upgrade.DISTRO_ID = "ubuntu"
         unattended_upgrade.main(options, rootdir=self.rootdir)
         # read the log to see what happend
         with open(self.log) as f:
