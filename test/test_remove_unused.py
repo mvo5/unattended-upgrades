@@ -18,62 +18,24 @@ class TestRemoveUnused(TestBase):
 
     def setUp(self):
         TestBase.setUp(self)
-        self.rootdir = os.path.join(self.testdir, "root.unused-deps")
+        self.rootdir = self.make_fake_aptroot(
+            template=os.path.join(self.testdir, "root.unused-deps"),
+            fake_pkgs=[
+                ("test-package", "1.0", {"Depends": ["test-package-dependency"]}),
+                ("test-package-dependency", "1.0", {}),
+                ("any-old-unused-modules", "1.0", {}),
+                ("linux-image-4.05.0-1021-kvm", "1.21", {}),
+                ("linux-image-4.05.0-1022-kvm", "1.22", {}),
+                ("linux-image-4.05.0-1023-kvm", "1.23", {}),
+                ("z-package", "1.0", {}),
+                ("old-unused-dependency", "1.0", {}),
+            ]
+        )
         self.mock_distro("ubuntu", "lucid", "ubuntu 10.04")
+        # FIXME: make this more elegant
         # fake on_ac_power
         os.environ["PATH"] = (os.path.join(self.rootdir, "usr", "bin") + ":"
                               + os.environ["PATH"])
-        mock_dpkg_status = os.path.join(self.rootdir, "var/lib/dpkg/status")
-        # fake dpkg status
-        with open(mock_dpkg_status, "w") as fp:
-            fp.write("""Package: test-package
-Status: install ok installed
-Architecture: all
-Version: 1.0.test.pkg
-Depends: test-package-dependency
-
-Package: test-package-dependency
-Status: install ok installed
-Architecture: all
-Version: 1.0
-
-Package: any-old-unused-modules
-Status: install ok installed
-Architecture: all
-Version: 1.0
-
-Package: linux-image-4.05.0-1021-kvm
-Status: install ok installed
-Architecture: all
-Version: 1.21
-
-Package: linux-image-4.05.0-1022-kvm
-Status: install ok installed
-Architecture: all
-Version: 1.22
-
-Package: linux-image-4.05.0-1023-kvm
-Status: install ok installed
-Architecture: all
-Version: 1.23
-
-Package: z-package
-Status: install ok installed
-Architecture: all
-Version: 1.0
-
-Package: old-unused-dependency
-Status: install ok installed
-Architecture: all
-Version: 1.0
-""")
-        apt.apt_pkg.config.set("Dir::State::status", mock_dpkg_status)
-        apt.apt_pkg.config.clear("DPkg::Pre-Invoke")
-        apt.apt_pkg.config.clear("DPkg::Post-Invoke")
-        apt.apt_pkg.config.set("Debug::NoLocking", "true")
-        # we don't really run dpkg
-        apt.apt_pkg.config.set(
-            "Dir::Bin::Dpkg", os.path.join(self.rootdir, "bin", "dpkg"))
         # pretend test-package-dependency is auto-installed
         extended_states = os.path.join(
             self.rootdir, "var", "lib", "apt", "extended_states")
