@@ -52,6 +52,8 @@ class TestBase(unittest.TestCase):
             if not k.endswith("::"):
                 self._saved_apt_conf[k] = apt.apt_pkg.config.get(k)
         self.addCleanup(self.enforce_apt_config_reset)
+        # important to ensure that the updated apt config is applied
+        self.addCleanup(apt.apt_pkg.init_system)
 
     def enforce_apt_config_reset(self):
         for k in self._saved_apt_conf:
