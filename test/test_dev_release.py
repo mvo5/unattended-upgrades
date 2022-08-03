@@ -61,22 +61,14 @@ class TestDevRelease(TestBase):
                                "false")
         apt.apt_pkg.config.set("Unattended-Upgrade::OnlyOnAcPower",
                                "false")
-        self.rootdir = os.path.join(self.testdir, "root.untrusted")
-        apt.apt_pkg.config.set("Dir::State::status", os.path.join(
-            self.rootdir, "var/lib/dpkg/status"))
+        self.rootdir = self.make_fake_aptroot(
+            template=os.path.join(self.testdir, "root.untrusted"))
         self.log = os.path.join(
             self.rootdir, "var", "log", "unattended-upgrades",
             "unattended-upgrades.log")
-
         self.apt_conf = os.path.join(self.rootdir, "etc", "apt",
                                      "apt.conf")
-
-        os.rename(self.apt_conf, self.apt_conf + ".bak")
         self.mock_distro("ubuntu", "artful", "Artful Aardvark (development branch)")
-
-    def tearDown(self):
-        os.remove(self.log)
-        os.rename(self.apt_conf + ".bak", self.apt_conf)
 
     def write_config(self, devrelease):
         with open(self.apt_conf, "w") as fp:
