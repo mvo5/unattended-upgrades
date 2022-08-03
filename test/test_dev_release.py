@@ -52,7 +52,7 @@ class MockDistroInfoModule(object):
         self.UbuntuDistroInfo = ubuntu
 
 
-class TestUntrusted(TestBase):
+class TestDevRelease(TestBase):
 
     def setUp(self):
         TestBase.setUp(self)
@@ -131,12 +131,11 @@ Unattended-Upgrade::OnlyOnAcPower "false";
             self.assertTrue(needle in haystack,
                             "Can not find '%s' in '%s'" % (needle, haystack))
 
-    # FIXME: this test looks exactly like the test above?
     def test_norelease_devrelease(self):
         """The devel series has no release update, so do updates"""
         self.write_config("auto")
         # run it
-        unattended_upgrade.distro_info = MockDistroInfoModule(MockDistroNoAuto)
+        unattended_upgrade.distro_info = MockDistroInfoModule(MockDistroNoRelease)
 
         options = MockOptions()
         unattended_upgrade.main(options, rootdir=self.rootdir)
