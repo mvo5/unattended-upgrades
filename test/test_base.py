@@ -8,6 +8,8 @@ import subprocess
 import tempfile
 import unittest
 
+from unittest.mock import patch
+
 import apt
 
 import unattended_upgrade
@@ -42,8 +44,6 @@ class TestBase(unittest.TestCase):
         os.chdir(self.testdir)
         # fake the lock file
         unattended_upgrade.LOCK_FILE = os.path.join(self.tempdir, "u-u.lock")
-        # XXX: some test monkey patch this without reset
-        unattended_upgrade.init_distro_info()
         # reset apt config
         apt.apt_pkg.init_config()
         # must be last
@@ -57,3 +57,13 @@ class TestBase(unittest.TestCase):
         for k in self._saved_apt_conf:
             v = self._saved_apt_conf[k]
             apt.apt_pkg.config.set(k, v)
+
+    def mock_distro(self, distro_id, codename, descr):
+        for attr, fake_value in [
+            ("DISTRO_ID", distro_id),
+            ("DISTRO_CODENAME", codename),
+            ("DISTRO_DESC", descr),
+        ]:
+            patcher = patch("unattended_upgrade.{}".format(attr), fake_value)
+            patcher.start()
+            self.addCleanup(patcher.stop)

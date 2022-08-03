@@ -19,9 +19,7 @@ class TestRemoveUnused(TestBase):
     def setUp(self):
         TestBase.setUp(self)
         self.rootdir = os.path.join(self.testdir, "root.unused-deps")
-        unattended_upgrade.DISTRO_ID = "ubuntu"
-        unattended_upgrade.DISTRO_CODENAME = "lucid"
-        unattended_upgrade.DISTRO_DESC = "Ubuntu 10.04"
+        self.mock_distro("ubuntu", "lucid", "ubuntu 10.04")
         # fake on_ac_power
         os.environ["PATH"] = (os.path.join(self.rootdir, "usr", "bin") + ":"
                               + os.environ["PATH"])
