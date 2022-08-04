@@ -2,7 +2,6 @@
 
 import os
 import logging
-import shutil
 import unittest
 
 import apt_pkg
@@ -15,30 +14,19 @@ from unattended_upgrade import (
 from test.test_base import TestBase
 
 
-class ConffilePromptTestCase(TestBase):
+class TestConffilePrompt(TestBase):
 
     def setUp(self):
         TestBase.setUp(self)
-        self.rootdir = os.path.join(self.testdir, "root.conffile")
+        self.rootdir = self.make_fake_aptroot(
+            template=os.path.join(self.testdir, "root.conffile"))
         self.packagedir = os.path.join(self.testdir, "packages")
-        mock_dpkg_status = os.path.join(self.rootdir, "var/lib/dpkg/status")
-        apt_pkg.config.set("Dir::State::status", mock_dpkg_status)
         with open(os.path.join(
                 self.rootdir, "etc/configuration-file"), "w") as fp:
             fp.write("""This is a configuration file,
 dfasddfasdff
 No really.
 """)
-
-    def tearDown(self):
-        try:
-            os.remove(os.path.join(self.rootdir, "etc/configuration-file"))
-        except Exception:
-            pass
-        try:
-            shutil.rmtree(os.path.join(self.rootdir, "etc/configuration-file"))
-        except Exception:
-            pass
 
     def test_will_prompt(self):
         # conf-test 0.9 is installed, 1.1 gets installed
@@ -60,7 +48,7 @@ No really.
     def test_prompt_on_deleted_modified_conffile(self):
         # conf-test 0.9 is installed, 1.1 gets installed
         # they both have different config files, this triggers a prompt
-        os.remove("./root.conffile/etc/configuration-file")
+        os.remove(os.path.join(self.rootdir, "etc/configuration-file"))
         test_pkg = os.path.join(self.packagedir, "conf-test-package_1.1.deb")
         self.assertTrue(conffile_prompt(test_pkg, prefix=self.rootdir),
                         "conffile prompt detection incorrect")

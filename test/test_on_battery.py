@@ -14,34 +14,26 @@ import unattended_upgrade
 apt.apt_pkg.config.set("APT::Architecture", "amd64")
 
 
-class OnBattery(TestBase):
+class TestOnBattery(TestBase):
 
     def setUp(self):
         TestBase.setUp(self)
-        self.rootdir = os.path.join(self.testdir, "root.on-battery")
+        self.rootdir = self.make_fake_aptroot(
+            template=os.path.join(self.testdir, "root.on-battery"))
+        # FIXME: make this more elegant
         # fake on_ac_power
         os.environ["PATH"] = (os.path.join(self.rootdir, "usr", "bin") + ":"
                               + os.environ["PATH"])
-        dpkg_status = os.path.abspath(
-            os.path.join(self.rootdir, "var", "lib", "dpkg", "status"))
-        apt.apt_pkg.config.set("Dir::State::status", dpkg_status)
-        apt.apt_pkg.config.clear("DPkg::Pre-Invoke")
-        apt.apt_pkg.config.clear("DPkg::Post-Invoke")
         self.log = os.path.join(
             self.rootdir, "var", "log", "unattended-upgrades",
             "unattended-upgrades.log")
         self.mock_distro("ubuntu", "artful", "Artful Aardvark (development branch)")
 
-    def tearDown(self):
-        os.remove(self.log)
-
     def test_on_battery(self):
-        # ensure there is no conffile_prompt check
-
         # run it
         options = MockOptions()
         ret = unattended_upgrade.main(options, rootdir=self.rootdir)
-        self.assertTrue(ret == 1)
+        self.assertEqual(ret, 1)
         # read the log to see what happend
         with open(self.log) as f:
             needle = "System is on battery power, stopping"

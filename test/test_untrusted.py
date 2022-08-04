@@ -18,25 +18,14 @@ class TestUntrusted(TestBase):
 
     def setUp(self):
         TestBase.setUp(self)
-        self.rootdir = os.path.join(self.testdir, "root.untrusted")
-        dpkg_status = os.path.abspath(
-            os.path.join(self.rootdir, "var", "lib", "dpkg", "status"))
-        apt.apt_pkg.config.set("Dir::State::status", dpkg_status)
-        apt.apt_pkg.config.clear("DPkg::Pre-Invoke")
-        apt.apt_pkg.config.clear("DPkg::Post-Invoke")
+        self.rootdir = self.make_fake_aptroot(
+            template=os.path.join(self.testdir, "root.untrusted"))
         self.log = os.path.join(
             self.rootdir, "var", "log", "unattended-upgrades",
             "unattended-upgrades.log")
         self.mock_distro("ubuntu", "lucid", "Ubuntu 10.04")
 
-    def tearDown(self):
-        os.remove(self.log)
-
     def test_untrusted_check_without_conffile_check(self):
-        # ensure there is no conffile_prompt check
-        apt.apt_pkg.config.set("DPkg::Options::", "--force-confold")
-
-        # run it
         options = MockOptions()
         unattended_upgrade.main(options, rootdir=self.rootdir)
         # read the log to see what happend
