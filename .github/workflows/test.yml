@@ -13,6 +13,13 @@ jobs:
         sudo apt build-dep -y ./
         sudo apt install -y python3-pytest
         pytest-3
+        # ensure running each test standalone works
+        for f in test/test_*.py; do
+            if [ "$(basename $f)" = "test_base.py" ]; then
+                continue
+            fi
+            pytest-3 $f
+        done
     - name: setup
       run: |
         sudo apt-get update
