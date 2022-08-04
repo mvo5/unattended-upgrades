@@ -6,7 +6,6 @@ import os.path
 import unittest
 
 import apt_pkg
-apt_pkg.config.set("Dir", os.path.join(os.path.dirname(__file__), "aptroot"))
 
 from test.test_base import TestBase, MockOptions
 

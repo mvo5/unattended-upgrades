@@ -46,6 +46,11 @@ class TestBase(unittest.TestCase):
         unattended_upgrade.LOCK_FILE = os.path.join(self.tempdir, "u-u.lock")
         # reset apt config
         apt.apt_pkg.init_config()
+        apt.apt_pkg.config.set("APT::Architecture", "amd64")
+        # FIXME: would be nice to only set this if needed
+        apt.apt_pkg.config.set(
+            "Dir", os.path.join(os.path.dirname(__file__), "aptroot"))
+        apt.apt_pkg.init_system()
         # must be last
         self._saved_apt_conf = {}
         for k in apt.apt_pkg.config.keys():

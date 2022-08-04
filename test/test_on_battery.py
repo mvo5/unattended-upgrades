@@ -3,15 +3,9 @@
 import os
 import unittest
 
-import apt_pkg
-apt_pkg.config.set("Dir", os.path.join(os.path.dirname(__file__), "aptroot"))
-import apt
-
 from test.test_base import MockOptions, TestBase
 
 import unattended_upgrade
-
-apt.apt_pkg.config.set("APT::Architecture", "amd64")
 
 
 class TestOnBattery(TestBase):

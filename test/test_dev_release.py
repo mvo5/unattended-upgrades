@@ -9,8 +9,6 @@ import apt
 from test.test_base import TestBase, MockOptions
 import unattended_upgrade
 
-apt.apt_pkg.config.set("APT::Architecture", "amd64")
-
 
 class MockDistroAuto(object):
 
