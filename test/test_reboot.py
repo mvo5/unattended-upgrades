@@ -7,11 +7,10 @@ import unittest
 import subprocess
 
 import apt_pkg
-apt_pkg.config.set("Dir", os.path.join(os.path.dirname(__file__), "aptroot"))
 
-from mock import (
-    patch,
-)
+
+from mock import patch
+
 
 import unattended_upgrade
 from test.test_base import TestBase
