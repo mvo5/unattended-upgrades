@@ -118,3 +118,8 @@ print(sys.argv)
             patcher = patch("unattended_upgrade.{}".format(attr), fake_value)
             patcher.start()
             self.addCleanup(patcher.stop)
+
+    def mock_allowed_origins(self, origin_pattern):
+        apt.apt_pkg.config.set(
+            "Unattended-Upgrade::Origins-Pattern::", origin_pattern)
+        self.addCleanup(apt.apt_pkg.config.clear, "Unattended-Upgrade::Origins-Pattern")

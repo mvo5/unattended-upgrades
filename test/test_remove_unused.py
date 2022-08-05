@@ -29,7 +29,7 @@ class TestRemoveUnused(TestBase):
                 ("old-unused-dependency", "1.0", {}),
             ]
         )
-        self.mock_distro("ubuntu", "lucid", "ubuntu 10.04")
+        self.mock_distro("Ubuntu", "lucid", "ubuntu 10.04")
         # FIXME: make this more elegant
         # fake on_ac_power
         os.environ["PATH"] = (os.path.join(self.rootdir, "usr", "bin") + ":"

@@ -3,18 +3,15 @@
 import os
 import unittest
 
-import apt
-
 import unattended_upgrade
 from test.test_base import TestBase, MockOptions
-
-apt.apt_pkg.config.set("APT::Architecture", "amd64")
 
 
 class TestRewindCache(TestBase):
 
     def setUp(self):
         TestBase.setUp(self)
+        self.mock_allowed_origins("origin=Ubuntu,archive=lucid-security")
         rootdir = self.make_fake_aptroot(os.path.join(self.testdir, "root.rewind"))
         self.cache = unattended_upgrade.UnattendedUpgradesCache(rootdir=rootdir)
 

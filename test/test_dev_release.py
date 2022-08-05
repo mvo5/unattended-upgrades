@@ -66,7 +66,7 @@ class TestDevRelease(TestBase):
             "unattended-upgrades.log")
         self.apt_conf = os.path.join(self.rootdir, "etc", "apt",
                                      "apt.conf")
-        self.mock_distro("ubuntu", "artful", "Artful Aardvark (development branch)")
+        self.mock_distro("Ubuntu", "artful", "Artful Aardvark (development branch)")
 
     def write_config(self, devrelease):
         with open(self.apt_conf, "w") as fp:
