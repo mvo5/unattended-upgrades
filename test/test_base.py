@@ -47,13 +47,6 @@ class TestBase(unittest.TestCase):
         # reset apt config
         apt.apt_pkg.init_config()
         apt.apt_pkg.config.set("APT::Architecture", "amd64")
-        # FIXME: would be nice to only do this if needed
-        # FIXME2: test_minimal_partitoins still generates the caches in
-        #         ./test/aptrooot/var/cache/apt/* instead of the tmp location
-        rootdir = self.make_fake_aptroot(
-            template=os.path.join(os.path.dirname(__file__), "aptroot"))
-        apt.apt_pkg.config.set("Dir", rootdir)
-        apt.apt_pkg.init_system()
         # must be last
         self._saved_apt_conf = {}
         for k in apt.apt_pkg.config.keys():
