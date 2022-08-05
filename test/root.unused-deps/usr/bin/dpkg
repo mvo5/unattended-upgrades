@@ -4,6 +4,7 @@ import os
 import sys
 import subprocess
 
+
 if __name__ == "__main__":
    if "--unpack" in sys.argv:
       dpkg_status = os.path.join(
@@ -14,3 +15,5 @@ if __name__ == "__main__":
           ["sed", "-i", "/Depends:\ test-package-dependency/d", dpkg_status])
       subprocess.check_call(
           ["sed", "-i", "s/1.0.test.pkg/2.0.test.pkg/", dpkg_status])
+      with open(dpkg_status, "r") as fp:
+         print(fp.read())

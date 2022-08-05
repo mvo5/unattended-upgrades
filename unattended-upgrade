@@ -31,12 +31,16 @@ import email.charset
 import fcntl
 import fnmatch
 import gettext
+import glob
 try:
     from gi.repository.Gio import NetworkMonitor
 except ImportError:
     pass
 import grp
+import inspect
 import io
+from importlib.abc import Loader
+import importlib.util
 import locale
 import logging
 import logging.handlers
@@ -161,6 +165,166 @@ class NoAllowedOriginError(ValueError):
 
 PkgPin = namedtuple('PkgPin', ['pkg', 'priority'])
 PkgFilePin = namedtuple('PkgFilePin', ['id', 'priority'])
+
+
+class PluginDataPostrun(dict):
+    """PluginResultData represents the result of the unattended upgrade
+    operation for a plugin.
+
+    It can be used as a dict or as a dataclass like object.
+    """
+
+    def __init__(self, dict):
+        # type: (dict) -> None
+        self.update(dict)
+
+    @property
+    def plugin_api(self):
+        # type: () -> str
+        """The API for the plugin interface.
+
+        Major versions break compatiblity, minor versions only add fields.
+        """
+        return self["plugin_api"]
+
+    @property
+    def hostname(self):
+        # type: () -> Optional[str]
+        return self["hostname"]
+
+    @property
+    def success(self):
+        # type: () -> bool
+        return self["success"]
+
+    @property
+    def result(self):
+        # type: () -> str
+        return self["result"]
+
+    @property
+    def packages_upgraded(self):
+        # type () -> List[str]
+        return self.get("packages_upgraded")
+
+    @property
+    def packages_kept_back(self):
+        # type () -> List[str]
+        return self.get("packages_kept_back")
+
+    @property
+    def packages_removed(self):
+        # type () -> List[str]
+        return self.get("packages_removed")
+
+    @property
+    def packages_kept_installed(self):
+        # type () -> List[str]
+        return self.get("packages_kept_installed")
+
+    @property
+    def reboot_required(self):
+        # type () -> boolean
+        return self.get("reboot_required")
+
+    @property
+    def log_dpkg(self):
+        # type () -> str
+        return self.get("log_dpkg")
+
+    @property
+    def log_unattended_upgrades(self):
+        # type () -> Optional[str]
+        return self.get("log_unattended_upgrades")
+
+
+class PluginManager:
+    def __init__(self):
+        # type: () -> None
+        _plugin_dirs = [
+            "/etc/unattended-upgrades/plugins/",
+            "/usr/share/unattended-upgrades/plugins",
+        ]
+        cfg_plugin_paths = apt_pkg.config.value_list(
+            "Unattended-Upgrade::Dirs::Plugins")
+        if cfg_plugin_paths:
+            _plugin_dirs.extend(cfg_plugin_paths)
+        env_plugin_path = os.getenv("UNATTENDED_UPGRADES_PLUGIN_PATH")
+        if env_plugin_path:
+            _plugin_dirs.extend(env_plugin_path.split(":"))
+        self._plugins = self._load_plugins(_plugin_dirs)
+
+    def _load_plugins(self, paths):
+        # type: (List[str]) -> AbstractSet[object]
+        logging.debug("loading plugins from {}".format(paths))
+        plugins = set()
+        for path in paths:
+            for p in glob.glob(path + "/*.py"):
+                module_name = os.path.splitext(os.path.basename(p))[0]
+                try:
+                    plugin_spec = importlib.util.spec_from_file_location(module_name, p)
+                    if plugin_spec is None:
+                        raise ValueError(
+                            "plugin_spec for %s returned None" % module_name)
+                    mod = importlib.util.module_from_spec(plugin_spec)
+                    assert isinstance(plugin_spec.loader, Loader)
+                    plugin_spec.loader.exec_module(mod)
+                except Exception as e:
+                    logging.warn("cannot load plugin %s", e)
+                    continue
+                for __, member in inspect.getmembers(mod):
+                    # required class name prefix
+                    prefix = "UnattendedUpgradesPlugin"
+                    if inspect.isclass(member) and member.__name__.startswith(prefix):
+                        logging.debug("adding plugin %s %s", mod, member)
+                        plugins.add(member())
+        return plugins
+
+    def _call_plugin_func(self, func_name, *args):
+        # FIXME: add type annotations
+        for plugin in self._plugins:
+            plugin_func = getattr(plugin, func_name, None)
+            if plugin_func is not None:
+                try:
+                    plugin_func(*args)
+                except Exception as e:
+                    logging.warning('cannot run "%s" in plugin %s: %s' % (
+                        func_name, plugin, e))
+
+    def postrun(self, res, uu_log, dpkg_log):
+        # type: (UnattendedUpgradesResult, Optional[StringIO], str) -> None
+
+        # this gets the current function name (e.g. "postrun")
+        func_name = sys._getframe().f_code.co_name
+        kept_back = set()
+        # XXX: add "package-kept-back-details" only if someone asks (YAGNI)
+        kept_back_details = []
+        for origin, origin_pkgs in res.pkgs_kept_back.items():
+            for pkg in origin_pkgs:
+                kept_back.add(pkg)
+                kept_back_details.append({"package": pkg, "origin": origin})
+        # This is a custom dict because the expected main-use case for
+        # this is webhook support so json serialization should be
+        # trivial.  straightforward. The properties are there mostly
+        # for documentation purposes.
+        #
+        # Keep in sync with the PluginResult properties
+        result = PluginDataPostrun({
+            # increment minor version very time something is added
+            "plugin_api": "1.0",
+            "hostname": host(),
+            "success": res.success,
+            "result": res.result_str,
+            "packages_upgraded": res.pkgs,
+            "packages_kept_back": sorted(list(kept_back)),
+            "packages_removed": sorted(res.pkgs_removed),
+            "packages_kept_installed": sorted(res.pkgs_kept_installed),
+            "reboot_required": reboot_required(),
+            "log_dpkg": dpkg_log,
+        })
+        if uu_log is not None:
+            result["log_unattended_upgrades"] = uu_log.getvalue()
+        self._call_plugin_func(func_name, result)
 
 
 class UnattendedUpgradesCache(apt.Cache):
@@ -672,6 +836,11 @@ def is_dpkg_journal_dirty():
         if re.match("[0-9]+", f):
             return True
     return False
+
+
+def reboot_required():
+    # type: () -> bool
+    return os.path.isfile(REBOOT_REQUIRED_FILE)
 
 
 def signal_handler(signal, frame):
@@ -1489,7 +1658,7 @@ def send_summary_mail(pkgs,                 # type: List[str]
 
     # Check if reboot-required flag is present
     reboot_flag_str = _(
-        "[reboot required]") if os.path.isfile(REBOOT_REQUIRED_FILE) else ""
+        "[reboot required]") if reboot_required() else ""
     # Check if packages are kept on hold
     hold_flag_str = (_("[package on hold]") if pkgs_kept_back
                      or pkgs_kept_installed else "")
@@ -1501,7 +1670,7 @@ def send_summary_mail(pkgs,                 # type: List[str]
             machine=host(), result="SUCCESS" if res else "FAILURE").strip()
     body = wrap_indent(_("Unattended upgrade result: %s") % result_str)
     body += "\n\n"
-    if os.path.isfile(REBOOT_REQUIRED_FILE):
+    if reboot_required():
         body += _(
             "Warning: A reboot is required to complete this upgrade, "
             "or a previous one.\n\n")
@@ -1649,7 +1818,9 @@ def _setup_logging(options):
         logger.setLevel(logging.INFO)
         stdout_handler = logging.StreamHandler(sys.stdout)
         logger.addHandler(stdout_handler)
-    if apt_pkg.config.find("Unattended-Upgrade::Mail", ""):
+    # XXX: we always need memory logging if we use plugins
+    # if apt_pkg.config.find("Unattended-Upgrade::Mail", ""):
+    if True:
         mem_log_handler = logging.StreamHandler(mem_log)
         logger.addHandler(mem_log_handler)
     # Configure syslog if necessary
@@ -2040,6 +2211,8 @@ def main(options, rootdir="/"):
         logging.error("Lock file is already taken, exiting")
         return 1
 
+    plugin_manager = PluginManager()
+
     try:
         res = run(options, rootdir, mem_log, logfile_dpkg,
                   install_start_time)
@@ -2057,6 +2230,9 @@ def main(options, rootdir="/"):
                               res.pkgs_kept_back, res.pkgs_removed,
                               res.pkgs_kept_installed, mem_log,
                               log_content)
+            # report results to any plugin
+            plugin_manager.postrun(res, mem_log, log_content)
+
         if res.update_stamp:
             # write timestamp file
             write_stamp_file()
