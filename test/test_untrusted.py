@@ -17,7 +17,6 @@ class TestUntrusted(TestBase):
         self.log = os.path.join(
             self.rootdir, "var", "log", "unattended-upgrades",
             "unattended-upgrades.log")
-        self.mock_distro("Ubuntu", "lucid", "Ubuntu 10.04")
 
     def test_untrusted_check_without_conffile_check(self):
         options = MockOptions()

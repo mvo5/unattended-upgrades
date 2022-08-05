@@ -21,7 +21,6 @@ class TestOnBattery(TestBase):
         self.log = os.path.join(
             self.rootdir, "var", "log", "unattended-upgrades",
             "unattended-upgrades.log")
-        self.mock_distro("Ubuntu", "artful", "Artful Aardvark (development branch)")
 
     def test_on_battery(self):
         # run it
