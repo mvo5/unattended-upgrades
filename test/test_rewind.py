@@ -11,7 +11,7 @@ class TestRewindCache(TestBase):
 
     def setUp(self):
         TestBase.setUp(self)
-        self.mock_distro("Ubuntu", "lucid", "ubuntu 10.04")
+        self.mock_allowed_origins("origin=Ubuntu,archive=lucid-security")
         rootdir = self.make_fake_aptroot(os.path.join(self.testdir, "root.rewind"))
         self.cache = unattended_upgrade.UnattendedUpgradesCache(rootdir=rootdir)
 
