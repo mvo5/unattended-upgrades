@@ -89,6 +89,7 @@ Version: %s
         apt.apt_pkg.config.set("Dir::State::status", mock_dpkg_status)
         apt.apt_pkg.config.clear("DPkg::Pre-Invoke")
         apt.apt_pkg.config.clear("DPkg::Post-Invoke")
+        apt.apt_pkg.config.clear("DPkg::Pre-Install-Pkgs")
         apt.apt_pkg.config.set("Debug::NoLocking", "true")
         # we don't really run dpkg
         fake_dpkg = os.path.join(aptroot, "usr", "bin", "dpkg")
