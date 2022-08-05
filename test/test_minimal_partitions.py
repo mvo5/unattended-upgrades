@@ -34,16 +34,8 @@ class TestMinimalPartitions(TestBase):
 
     def setUp(self):
         TestBase.setUp(self)
-        # setup dry-run mode for apt
-        apt_pkg.config.set("Debug::NoLocking", "1")
-        # apt_pkg.config.set("Debug::pkgDPkgPM", "1")
-        apt_pkg.config.set(
-            "Dir::State::extended_states",
-            os.path.join(self.tempdir, "extended_states"))
-        self.addCleanup(apt_pkg.config.clear, "Dir::state::extended_states")
-        apt_pkg.config.clear("Dpkg::Post-Invoke")
-        apt_pkg.config.clear("Dpkg::Pre-Install-Pkgs")
-        rootdir = os.path.join(self.testdir, "aptroot")
+        rootdir = self.make_fake_aptroot(
+            template=os.path.join(os.path.dirname(__file__), "root.minimal-partitions"))
         self.cache = apt.Cache(rootdir=rootdir)
         # mock LogDir config
         self.u_u_logdir = apt_pkg.config.get("Unattended-Upgrade::LogDir")
