@@ -35,7 +35,7 @@ class TestMinimalPartitions(TestBase):
     def setUp(self):
         TestBase.setUp(self)
         rootdir = self.make_fake_aptroot(
-            template=os.path.join(os.path.dirname(__file__), "aptroot"))
+            template=os.path.join(os.path.dirname(__file__), "root.minimal-partitions"))
         self.cache = apt.Cache(rootdir=rootdir)
         # mock LogDir config
         self.u_u_logdir = apt_pkg.config.get("Unattended-Upgrade::LogDir")
