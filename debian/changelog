@@ -1,3 +1,13 @@
+unattended-upgrades (2.10) UNRELEASED; urgency=medium
+
+  [ Brian Murray ]
+  * kernel/postinst.d/unattended-upgrades: check to see if canonical-livepatch
+    is installed and enabled. In the event that it is and it says a reboot is
+    required do not update reboot-required files so that only one reboot
+    message appears in the message of the day.
+
+ -- Brian Murray <brian@ubuntu.com>  Mon, 17 Jan 2022 09:52:04 -0800
+
 unattended-upgrades (2.9.1) unstable; urgency=medium
 
   [ Jean-Pierre Giraud ]

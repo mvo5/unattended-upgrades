@@ -5,6 +5,29 @@ case "$DPKG_MAINTSCRIPT_PACKAGE::$DPKG_MAINTSCRIPT_NAME" in
       exit 0;;
 esac
 
+KERNEL_UPGRADED=0
+# Prefer showing the canonical-livepatch reboot message if one is required
+if [ -f "/snap/bin/canonical-livepatch" ]; then
+    # k-u-r returns 1 if livepatch isn't enabled or if a reboot isn't required
+    kur_rc=$(/snap/bin/canonical-livepatch kernel-upgrade-required 2> /dev/null)
+    if [ $? -eq 0 ]; then
+        exit 0;
+    elif [ $? -eq 1 ]; then
+        # status returns 1 if livepatch isn't enabled
+        status_rc=$(/snap/bin/canonical-livepatch status 2> /dev/null)
+        if [ $? -eq 0 ]; then
+            KERNEL_UPGRADED=1
+        fi
+    fi
+fi
+
+# while a reboot isn't required for the new kernel it might be for another package
+if [ $KERNEL_UPGRADED -eq 1 ]; then
+    if [ "$(echo $DPKG_MAINTSCRIPT_PACKAGE | cut -c1-5)" = "linux" ]; then
+        exit 0;
+    fi
+fi
+
 if [ -d /var/run ]; then
     touch /var/run/reboot-required
     if ! grep -q "^$DPKG_MAINTSCRIPT_PACKAGE$" /var/run/reboot-required.pkgs 2> /dev/null ; then
