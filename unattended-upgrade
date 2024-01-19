@@ -2371,7 +2371,7 @@ def run(options,             # type: Options
 
         pkgs_kept_back = cache.find_kept_packages(options.dry_run)
         return UnattendedUpgradesResult(
-            kernel_pkgs_remove_success,
+            kernel_pkgs_remove_success and not pkg_conffile_prompt,
             _("No packages found that can be upgraded unattended and no "
               "pending auto-removals"),
             pkgs_removed=kernel_pkgs_removed,
