@@ -38,4 +38,5 @@ if __name__ == "__main__":
         cmdclass={"build": build_extra.build_extra,
                   "build_i18n": build_i18n.build_i18n},
         test_suite="test",
+        py_modules=[],
     )
