@@ -15,6 +15,7 @@ from unattended_upgrade import (
 )
 
 from typing import List
+List  # flake8
 
 from test.test_base import TestBase
 

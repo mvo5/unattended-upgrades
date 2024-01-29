@@ -18,6 +18,7 @@ from unattended_upgrade import do_install
 from test.test_base import TestBase
 
 from typing import List
+List  # flake8
 
 
 class MockCache(dict):
