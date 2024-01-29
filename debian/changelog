@@ -1,3 +1,10 @@
+unattended-upgrades (2.9.1+nmu3) unstable; urgency=medium
+
+  * test: don't confuse -dbg and -unsigned with current running kernel
+    (Closes: #983363, #1012226)
+
+ -- Paul Gevers <elbrus@debian.org>  Sat, 31 Dec 2022 21:59:00 +0100
+
 unattended-upgrades (2.9.1+nmu2) unstable; urgency=high
 
   * Non-maintainer upload.

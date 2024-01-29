@@ -18,7 +18,7 @@ class TestKernelPatterns(unittest.TestCase):
         running_regexp = running_kernel_pkgs_regexp()
         running_kernel_version = subprocess.check_output(
             ["uname", "-r"], universal_newlines=True).rstrip()
-        running_escaped_regexp = ".*" + re.escape(running_kernel_version)
+        running_escaped_regexp = ".*" + re.escape(running_kernel_version) + '$'
         try:
             running_noflavor_regexp = "linux.*-" + re.escape(
                 re.match("[1-9][0-9]*\\.[0-9]+\\.[0-9]+-[0-9]+",
