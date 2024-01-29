@@ -12,6 +12,7 @@ if __name__ == "__main__":
         name='unattended-upgrades',
         version='0.1',
         scripts=['unattended-upgrade'],
+        packages=[],
         data_files=[
             ('../etc/logrotate.d/',
                 ["data/logrotate.d/unattended-upgrades"]),
