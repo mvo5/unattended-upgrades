@@ -1,3 +1,11 @@
+unattended-upgrades (2.9.1+nmu4) unstable; urgency=medium
+
+  * Non-maintainer upload.
+  * Don't run pyflakes, it dropped support for type comments.
+    (Closes: #1058172)
+
+ -- Stefano Rivera <stefanor@debian.org>  Mon, 22 Jan 2024 16:11:59 -0400
+
 unattended-upgrades (2.9.1+nmu3) unstable; urgency=medium
 
   * test: don't confuse -dbg and -unsigned with current running kernel
