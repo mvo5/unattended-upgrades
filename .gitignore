@@ -3,7 +3,7 @@
 /build/
 /test/.coverage
 /test/.mypy_cache/
-/test/packages/test-package*.deb
+/test/packages/test-package*
 /test/u-u.lock
 __pycache__/
 data/50unattended-upgrades
