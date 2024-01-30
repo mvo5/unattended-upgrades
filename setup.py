@@ -12,6 +12,7 @@ if __name__ == "__main__":
         name='unattended-upgrades',
         version='0.1',
         scripts=['unattended-upgrade'],
+        packages=[],
         data_files=[
             ('../etc/logrotate.d/',
                 ["data/logrotate.d/unattended-upgrades"]),
@@ -38,4 +39,5 @@ if __name__ == "__main__":
         cmdclass={"build": build_extra.build_extra,
                   "build_i18n": build_i18n.build_i18n},
         test_suite="test",
+        py_modules=[],
     )
