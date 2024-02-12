@@ -8,6 +8,6 @@ all: $(DEBS)
 	dpkg-deb -I $@ conffiles
 
 clean:
-	rm -f $(DEBS)
+	rm -f $(DEBS) *.buildinfo *.changes
 
 .PHONY: clean

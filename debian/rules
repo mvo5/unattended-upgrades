@@ -14,6 +14,8 @@ override_dh_auto_build:
 
 override_dh_auto_test:
 	$(PYTHON) setup.py test
+	# TODO: make sure this happens in the actual python test
+	make -C test/packages clean
 
 override_dh_auto_install:
 	$(PYTHON) setup.py install \
