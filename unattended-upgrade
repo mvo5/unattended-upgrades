@@ -344,6 +344,7 @@ class UnattendedUpgradesCache(apt.Cache):
                                     pin.priority)
 
     def open(self, progress=None):
+        # type: (Optional[apt.progress.base.OpProgress]) -> None
         apt.Cache.open(self, progress)
         # apply pinning generated from unattended-upgrades configuration
         self.apply_pinning(self.pinning_from_config())
@@ -884,7 +885,7 @@ def python_regex_is_posix(expression):
 def cache_commit(cache,           # type: apt.Cache
                  logfile_dpkg,    # type: str
                  verbose,         # type: bool
-                 iprogress=None,  # type: apt.progress.base.InstallProgress
+                 iprogress=None,  # type: Optional[apt.progress.base.InstallProgress]
                  ):
     # type: (...) -> Tuple[bool, Optional[Exception]]
     """Commit the changes from the given cache to the system"""
@@ -1075,8 +1076,8 @@ def is_pkg_change_allowed(pkg, blacklist, whitelist, strict_whitelist):
 def transitive_dependencies(pkg,               # type: apt.Package
                             cache,             # type: apt.Cache
                             acc=set(),         # type AbstractSet[str]
-                            valid_types=None,  # type: AbstractSet[str]
-                            level=None         # type: int
+                            valid_types=None,  # type: Optional[AbstractSet[str]]
+                            level=None         # type: Optional[int]
                             ):
     # type (...) -> AbstractSet[str]
     """ All (transitive) dependencies of the package
@@ -1117,7 +1118,7 @@ def upgrade_order(to_upgrade, cache):
 
 
 def check_changes_for_sanity(cache, desired_pkg=None):
-    # type: (UnattendedUpgradesCache, apt.Package) -> bool
+    # type: (UnattendedUpgradesCache, Optional[apt.Package]) -> bool
     sanity_check_result = sanity_problem(cache, desired_pkg)
     if sanity_check_result is None:
         return True
@@ -2127,7 +2128,8 @@ def run(options,             # type: Options
         except Exception as e:
             logging.warning("Could not figure out development release: %s" % e)
         else:
-            if ((devel.series == DISTRO_CODENAME
+            if ((isinstance(devel, distro_info.DistroRelease)
+                 and devel.series == DISTRO_CODENAME
                  and devel.release is not None
                  and devel.release - date.today() > DEVEL_UNTIL_RELEASE)):
                 syslog.syslog((_("Not running on this development "
