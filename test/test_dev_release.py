@@ -49,6 +49,8 @@ class MockDistroInfoModule(object):
     def __init__(self, ubuntu):
         self.UbuntuDistroInfo = ubuntu
 
+    DistroRelease = object
+
 
 class TestDevRelease(TestBase):
 
