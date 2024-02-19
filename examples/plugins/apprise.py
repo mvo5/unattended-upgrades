@@ -29,11 +29,9 @@ variables which should be placed in /etc/apt/apt.conf.d/51uu-apprise.
 
 import apt_pkg
 import json
-
 import logging
 import logging.handlers
 logged_msgs = set()  # type: AbstractSet[str]
-
 
 def log_once(msg):
     # type: (str) -> None
@@ -42,13 +40,11 @@ def log_once(msg):
         logging.info(msg)
         logged_msgs.add(msg)  # type: ignore
 
-
 try:
     import apprise
 except NameError:
     log_once(_("Notifiying Webhook is skipped. Please "
                "install the python module apprise to send webhooks."))
-
 
 # Note the plugin name must start with UnattendedUpgradesPlugin*
 class UnattendedUpgradesPluginApprise:
@@ -125,10 +121,10 @@ class UnattendedUpgradesPluginApprise:
         # This is a weak attempt at ensuring we can send something to the webhook
         # in case we go over a character limit.
         if (len(str(data)) > self.charlimit) and (self.charlimit > 0):
-            # Replacing data['log-dpkg'] and data['log-unattended-upgrades']
+            # Replacing data['log_dpkg'] and data['log_unattended_upgrades']
             # It's more likely the character limit will be met
-            data['log-dpkg'] = "R"
-            data['log-unattended-upgrades'] = "R"
+            data['log_dpkg'] = "R"
+            data['log_unattended_upgrades'] = "R"
             payload = json.dumps(data)
 
             # If we are still above the limit set by the user: stop and log the failure.
@@ -178,23 +174,23 @@ class UnattendedUpgradesPluginApprise:
         # If the run was successful but nothing had to be done skip sending the webhook
         # unless the admin wants it anyway
         if (((self.reporttype != "always") and data['success']
-                and not data['packages-upgraded']
-                and not data['packages-kept-back']
-                and not data['packages-kept-installed']
-                and not data['reboot-required'])):
+                and not data['packages_upgraded']
+                and not data['packages_kept_back']
+                and not data['packages_kept_installed']
+                and not data['reboot_required'])):
             return
 
         # Notify webhook
         self.webhook_notify(data)
 
+#    * "plugin_api": the API version as string of the form "1.0"
+#    * "hostname": The hostname of the machine that run u-u.
+#    * "success": A boolean that indicates if the run was successful
+#    * "result": A string with a human readable (and translated) status message
+#    * "packages_upgraded": A list of packages that got upgraded.
+#    * "packages_kept_back": A list of packages kept back.
+#    * "packages_kept_installed": A list of packages not auto-removed.
+#    * "reboot_required": Indicates a reboot is required.
+#    * "log_dpkg": The full dpkg log output.
+#    * "log_unattended_upgrades": The full unattended-upgrades log.
 
-#  * "plugin-api": the API version as string of the form "1.0"
-#  * "hostname": The hostname of the machine that run u-u.
-#  * "success": A boolean that indicates if the run was successful
-#  * "result-str": A string with a human readable (and translated) status message
-#  * "packages-upgraded": A list of packages that got upgraded.
-#  * "packages-kept-back": A list of packages kept back.
-#  * "packages-kept-installed": A list of packages not auto-removed.
-#  * "reboot-required": Indicates a reboot is required.
-#  * "log-dpkg": The full dpkg log output.
-#  * "log-unattended-upgrades": The full unattended-upgrades log.
