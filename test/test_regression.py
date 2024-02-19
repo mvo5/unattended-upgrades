@@ -3,16 +3,14 @@
 
 import io
 import os
-import sys
 import tempfile
 import unittest
-
-import apt_pkg
-
-from mock import (
+from unittest.mock import (
     Mock,
     patch,
 )
+
+import apt_pkg
 
 from unattended_upgrade import do_install
 from test.test_base import TestBase
@@ -37,7 +35,6 @@ class MockCache(dict):
 
 class TestRegression(TestBase):
 
-    @unittest.skipIf(sys.version_info[0] != 3, "only works on py3")
     @patch("unattended_upgrade.upgrade_normal")
     def test_do_install_fail_unicode_write(self, mock_upgrade_normal):
         """ test if the substitute function works """

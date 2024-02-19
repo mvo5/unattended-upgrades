@@ -17,7 +17,6 @@ Build-Depends-Indep: python3-dev,
 #                    powermgmt-base, (tests disable on_ac_power checks)
                      flake8,
                      python3-apt (>= 1.9.6~),
-                     python3-mock,
                      lsb-release
 Standards-Version: 4.1.4
 Vcs-Git: https://github.com/mvo5/unattended-upgrades.git
