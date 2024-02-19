@@ -9,8 +9,6 @@ from unittest.mock import patch
 
 import apt_pkg
 
-
-
 import unattended_upgrade
 from test.test_base import TestBase
 
