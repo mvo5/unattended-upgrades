@@ -5,11 +5,10 @@ import logging
 import os
 import unittest
 import subprocess
+from unittest.mock import patch
 
 import apt_pkg
 
-
-from mock import patch
 
 
 import unattended_upgrade

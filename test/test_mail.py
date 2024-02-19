@@ -1,12 +1,9 @@
 #!/usr/bin/python3
 # -*- coding: utf-8 -*-
-from __future__ import unicode_literals
-
 from email.parser import Parser
 from io import StringIO
-from mock import patch
+from unittest.mock import patch
 import os
-import sys
 from textwrap import dedent
 import unittest
 
@@ -272,10 +269,6 @@ class SendmailTestCase(CommonTestsForMailxAndSendmail, TestBase):
     def _verify_common_mail_content(self, mail_txt):
         CommonTestsForMailxAndSendmail._verify_common_mail_content(
             self, mail_txt)
-
-        # python2 needs this as utf8 encoded string (not unicode)
-        if sys.version < '3':
-            mail_txt = mail_txt.encode("utf-8")
 
         msg = Parser().parsestr(mail_txt)
         content_type = msg["Content-Type"]
