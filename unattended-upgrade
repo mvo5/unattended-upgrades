@@ -41,6 +41,11 @@ import locale
 import logging
 import logging.handlers
 import re
+try:
+    import json
+    import apprise
+except ImportError:
+    pass
 import os
 import select
 import signal
@@ -1443,6 +1448,170 @@ def _send_mail_using_sendmail(from_address, to_address, subject, body):
     return ret
 
 
+# Based on send_summary_mail():
+#   Builds dictionary of all items and return it(data)
+#   Purposely not using mem_log, and dpkg_log_content.
+#     Hard to represent in json structure.
+def webhook_data(pkgs,                 # type: List[str]
+                 res,                  # type: bool
+                 result_str,           # type: str
+                 pkgs_kept_back,       # type: KeptPkgs
+                 pkgs_removed,         # type: List[str]
+                 pkgs_kept_installed,  # type: List[str]
+                 mem_log,              # type: StringIO # IGNORED
+                 dpkg_log_content,     # type: str
+                 ):
+
+    webhook = apt_pkg.config.find_b("Unattended-Upgrade::Webhook", False)
+    if not webhook:
+        return
+
+    # Check if reboot-required flag is present
+    reboot_flag = (True) if os.path.isfile(REBOOT_REQUIRED_FILE) else False
+    # Check if packages are kept on hold
+    hold_flag = ((True) if pkgs_kept_back or pkgs_kept_installed else False)
+
+    # Result
+    result = "SUCCESS" if res else "FAILURE"
+
+    data = {
+        "hostname" : host(),
+        "reboot_flag" : reboot_flag,
+        "hold_flag" : hold_flag,
+        "result" : result,
+        "packages" : {}
+    }
+
+    if pkgs:
+        if res:
+            data['packages']['upgraded'] = pkgs
+        else:
+            data['packages']['attempted'] = pkgs
+
+    if pkgs_kept_back:
+        data['packages']['kept_back'] = {}
+
+        for origin, origin_pkgs in pkgs_kept_back.items():
+            data['packages']['kept_back'][origin] = origin_pkgs
+
+    if pkgs_removed:
+        data['packages']['autoremoved'] = pkgs_removed
+    if pkgs_kept_installed:
+        data['packages']['kept_installed'] = pkgs_kept_installed
+
+    logging.debug(data)
+    return data
+
+
+def get_webhookurls():
+    # type: () -> List[str]
+    """ return a list of webhook urls from apt.conf
+    """
+    webhook_urls = []
+    key = "Unattended-Upgrade::WebhookUrl"
+    try:
+        # apt_pkg.config.value_list(key): returns two of the same value.
+        # work around for now is to make the list a set to make the urls unique.
+        for s in set(apt_pkg.config.value_list(key)):
+            webhook_urls.append(s)
+    except ValueError:
+        logging.error(_("Unable to parse %s." % key))
+        raise
+    return webhook_urls
+
+
+# Turn sets into lists before serializing:
+def set_default(obj):
+    if isinstance(obj, set):
+        return list(obj)
+    raise TypeError
+
+def webhook_notify(webhooks, data):
+
+    try:
+        charlimit = int(apt_pkg.config.find("Unattended-Upgrade::WebhookCharacterLimit", "2000"))
+
+        # This is a weak attempt at ensuring we can send something to the webhook
+        # in case we go over a character limit.
+        if (len(str(data)) > charlimit) and (charlimit > 0):
+            # Replacing data['packages'] should mean that the payload is below the default character limit.
+            data['packages'] = "Content removed to accomodate character limit."
+            payload = json.dumps(data, default=set_default)
+
+            # If we are still above the limit set by the user: stop and log the failure.
+            # It is up to the user to set a reasonable value.
+            # The default value is meant to be reasonable for most use cases.
+            if len(payload) > charlimit:
+                log_once(_("Notifiying Webhook is skipped. Please "
+                           "set the character limit to higher value."))
+                return False
+        else:
+            payload = json.dumps(data, default=set_default)
+
+
+        # Create an Apprise instance
+        apobj = apprise.Apprise()
+
+        # Add all of the notification services by their server url.
+        for url in webhooks:
+            apobj.add(url)
+
+        # Then notify these services any time you desire. The below would
+        # notify all of the services loaded into our Apprise object.
+        apobj.notify(
+            body=payload,
+            title='Unattended-Upgrades',
+        )
+
+    except NameError:
+        log_once(_("Notifiying Webhook is skipped. Please "
+                   "install the python module apprise to send webhooks."))
+        return False
+
+
+
+def send_summary_webhook(pkgs,                 # type: List[str]
+                         res,                  # type: bool
+                         result_str,           # type: str
+                         pkgs_kept_back,       # type: KeptPkgs
+                         pkgs_removed,         # type: List[str]
+                         pkgs_kept_installed,  # type: List[str]
+                         mem_log,              # type: StringIO
+                         dpkg_log_content,     # type: str
+                         ):
+
+    send = apt_pkg.config.find_b("Unattended-Upgrade::Webhook", False)
+
+    # Options: "always", "only-on-error" or "on-change"
+    sendwhen = apt_pkg.config.find("Unattended-Upgrade::WebhookReport")
+
+    webhooks = get_webhookurls()
+
+    # If webhook is not enabled or there is no webhook url, exit here
+    if (not send) or (not webhooks):
+        return
+
+    # If the operation was successful and the user has requested to get
+    # webhooks only on errors, just exit here
+    if (res and (sendwhen == "only-on-error")):
+        return
+
+    # If the run was successful but nothing had to be done skip sending the webhook
+    # unless the admin wants it anyway
+    if (((sendwhen != "always") and res and not pkgs and not pkgs_kept_back and not pkgs_removed)):
+        return
+
+    # Get dictionary of the data needed
+    data = webhook_data(pkgs, res, result_str,
+                        pkgs_kept_back, pkgs_removed,
+                        pkgs_kept_installed, mem_log,
+                        dpkg_log_content)
+
+
+    # Notify webhook
+    webhook_notify(webhooks, data)
+
+
 def send_summary_mail(pkgs,                 # type: List[str]
                       res,                  # type: bool
                       result_str,           # type: str
@@ -2058,6 +2227,14 @@ def main(options, rootdir="/"):
                               res.pkgs_kept_back, res.pkgs_removed,
                               res.pkgs_kept_installed, mem_log,
                               log_content)
+
+            # send webhook summary
+            result = send_summary_webhook(res.pkgs, res.success, res.result_str,
+                                 res.pkgs_kept_back, res.pkgs_removed,
+                                 res.pkgs_kept_installed, mem_log,
+                                 log_content)
+
+
         if res.update_stamp:
             # write timestamp file
             write_stamp_file()

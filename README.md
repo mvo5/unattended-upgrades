@@ -295,5 +295,46 @@ Supported Options Reference
  ```
  The default is the daemon facility.
 
+* `Unattended-Upgrade::Webhook` - boolean (default:False)
+
+ Generate json to push to a webhook url.
+ Requires the `Unattended-Upgrade::WebhookUrl` option to be set.
+
+ Example - Enable webhook notifications:
+ ```
+ Unattended-Upgrade::Webhook "true";
+ ```
+ The default is False - Webhooks will not be notified.
+
+* `Unattended-Upgrade::WebhookUrl` - list of strings (default:"")
+
+ Specify a list URLs you wish to POST the json data structure to.
+ Requires the `Unattended-Upgrade::Webhook` option to be set to true.
+
+ Uses the Apprise library: https://github.com/caronc/apprise
+ Please see their readme for the specific syntax for your application.
+
+ You may include as many notification url as you require.
+
+ Example:
+ ```
+ Unattended-Upgrade::WebhookUrl {
+     "apprise://hostname/token";
+     "slack://TokenA/TokenB/TokenC";
+ };
+ ```
+ The default is {};.
+
+* `Unattended-Upgrade::WebhookReport` - string (default:"on-change")
+
+ Possible values are "always", "only-on-error" or "on-change".
+ Requires the `Unattended-Upgrade::Webhook` and `Unattended-Upgrade::WebhookUrl` options to be set.
+
+ Example:
+ ```
+ Unattended-Upgrade::WebhookReport "always";
+ ```
+ The default is "".
+
 
 ![](https://github.com/mvo5/unattended-upgrades/workflows/build/badge.svg)
