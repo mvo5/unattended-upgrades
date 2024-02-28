@@ -73,7 +73,7 @@ Unattended-Upgrade::Package-Blacklist {
 
 // Split the upgrade into the smallest possible chunks so that
 // they can be interrupted with SIGTERM. This makes the upgrade
-// a bit slower but it has the benefit that shutdown while a upgrade
+// a bit slower but it has the benefit that shutdown while an upgrade
 // is running is possible (with a small delay)
 //Unattended-Upgrade::MinimalSteps "true";
 
