@@ -31,6 +31,7 @@ Unattended-Upgrade::Origins-Pattern {
         "origin=Debian,codename=${distro_codename},label=Debian";
         "origin=Debian,codename=${distro_codename},label=Debian-Security";
         "origin=Debian,codename=${distro_codename}-security,label=Debian-Security";
+//      "o=Debian Backports,n=${distro_codename}-backports,l=Debian Backports";
 
         // Archive or Suite based matching:
         // Note that this will silently match a different release after
@@ -39,7 +40,7 @@ Unattended-Upgrade::Origins-Pattern {
 //      "o=Debian,a=stable";
 //      "o=Debian,a=stable-updates";
 //      "o=Debian,a=proposed-updates";
-//      "o=Debian Backports,a=${distro_codename}-backports,l=Debian Backports";
+//      "o=Debian Backports,a=stable-backports,l=Debian Backports";
 };
 
 // Python regular expressions, matching packages to exclude from upgrading
