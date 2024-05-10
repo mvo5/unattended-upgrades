@@ -5,7 +5,6 @@ Priority: optional
 Build-Depends: debhelper (>= 9.20160709),
                equivs,
                po-debconf,
-               powermgmt-base,
                python3,
                python3-dbus,
                python3-distutils-extra,
