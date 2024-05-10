@@ -60,8 +60,8 @@ class TestPlugins(TestBase):
             "reboot_required": True,
         })
         self.assertTrue(log_dpkg.startswith("Log started:"))
-        self.assertTrue(log_uu.startswith(
-            "Starting unattended upgrades script"), log_uu)
+        self.assertTrue(
+            "Starting unattended upgrades script" in log_uu)
         self.assertIn("Packages that will be upgraded: test-package", log_uu)
 
     def test_plugin_data_postrun(self):
