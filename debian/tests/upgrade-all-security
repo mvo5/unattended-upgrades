@@ -22,7 +22,7 @@ fi
 
 check_arch
 
-env DEB_BUILD_OPTIONS=nocheck dpkg-buildpackage -us -uc 2>&1
+env DEB_BUILD_OPTIONS=nocheck dpkg-buildpackage -us -uc -Zgzip 2>&1
 do_debootstrap "$distro" "$chroot_dir"
 
 if [ "$(dpkg-vendor --query Vendor)" = "Ubuntu" ]; then

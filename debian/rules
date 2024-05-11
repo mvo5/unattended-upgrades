@@ -22,6 +22,9 @@ override_dh_auto_install:
 		--root=$(CURDIR)/debian/unattended-upgrades \
 		--install-layout=deb
 
+override_dh_builddeb:
+	dh_builddeb -- $(UU_BUILDDEB_ARGS)
+
 override_dh_installinit:
 	# We do not want to run the init script in the postinst/prerm, its
 	# really only useful on shutdown, see Debian bug #645919.
