@@ -45,6 +45,12 @@ fi
 chroot_exec "$chroot_dir" apt-get install -y xfce4 apparmor hello 2>&1
 chroot_exec "$chroot_dir" apt-mark auto hello
 
+# the "ubuntu-advantage-tools" will pull in "ubuntu-pro-tools" which has
+# a conffile prompt (well, it does not because of {pre,post}inst magic but
+# unattended-upgrades cannot detect this, oh if only this was declarative
+# instead of imperative :(
+chroot_exec "$chroot_dir" apt-get remove -y ubuntu-advantage-tools
+
 # build and install updated python-apt since the one in the snapshot has memory allocation issues
 upgrade_python_apt "$chroot_dir" "$distro"
 
