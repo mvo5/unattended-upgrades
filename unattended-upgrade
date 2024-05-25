@@ -1518,6 +1518,7 @@ def conffile_prompt(destFile, prefix=""):
         #  current_md5 != pkg_md5sum != md5
         # and that will trigger a conffile prompt, we can
         # stop processing at this point and just return True
+        logging.debug("conffile prompt found for %s (%s)" % (conf_file, pkgname))
         return True
 
     # now check if there are conffiles in the pkg that where not there
@@ -1528,7 +1529,11 @@ def conffile_prompt(destFile, prefix=""):
             if not old_conf_file:
                 pkg_md5sum = get_md5sum_for_file_in_deb(destFile, conf_file)
                 current_md5 = get_md5sum_for_file_installed(conf_file, prefix)
+                logging.debug("no old_conf_file, pkg_md5sum: %s, current_md5: %s" % (
+                    pkg_md5sum, current_md5))
                 if current_md5 != "" and pkg_md5sum != current_md5:
+                    logging.debug("(old) conffile prompt found for %s (%s)" % (
+                        conf_file, pkgname))
                     return True
     return False
 
