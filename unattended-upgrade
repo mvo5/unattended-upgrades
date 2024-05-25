@@ -2227,6 +2227,7 @@ def main(options, rootdir="/"):
     try:
         res = run(options, rootdir, mem_log, logfile_dpkg,
                   install_start_time)
+        logging.debug("upgrade result: %s %s" % (res.success, res.result_str))
 
         if res.success and res.result_str:
             # complete, successful run
@@ -2596,6 +2597,9 @@ def run(options,             # type: Options
                                          logfile_dpkg)
     # Was the overall run succesful: only if everything installed
     # fine and nothing was held back because of a conffile prompt.
+    logging.debug("kernel_pkgs_remove_success: %s" % kernel_pkgs_remove_success)
+    logging.debug("pkg_install_success: %s", pkg_install_success)
+    logging.debug("pkg_conffile_prompt: %s" % pkg_conffile_prompt)
     successful_run = (kernel_pkgs_remove_success and pkg_install_success
                       and not pkg_conffile_prompt)
 
@@ -2624,6 +2628,7 @@ def run(options,             # type: Options
             cache, auto_removals, logfile_dpkg, options.minimal_upgrade_steps,
             options.verbose or options.debug,
             options.dry_run)
+        logging.debug("pkg_remove_success: %s" % pkg_remove_success)
         successful_run = successful_run and pkg_remove_success
     # the user wants *only new* auto-removals to be removed
     elif apt_pkg.config.find_b(
@@ -2637,6 +2642,7 @@ def run(options,             # type: Options
             cache, auto_removals, logfile_dpkg, options.minimal_upgrade_steps,
             options.verbose or options.debug,
             options.dry_run)
+        logging.debug("pkg_remove_success: %s" % pkg_remove_success)
         successful_run = successful_run and pkg_remove_success
 
     logging.debug("InstCount=%i DelCount=%i BrokenCount=%i"
