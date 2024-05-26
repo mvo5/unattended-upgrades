@@ -1,3 +1,18 @@
+unattended-upgrades (2.11) unstable; urgency=medium
+
+  [ Alexandre Detiste ]
+  * python2 cleaup
+  * flake8
+
+  [ Michael Vogt ]
+  * u-u: implement plugin system with `postrun()` functionality
+  * debian: switch to pytest in `debian/rules` and `test/Makefile`
+  * debian/tests: pass `-Zgzip` to dpkg-deb to avoid errors in tests
+  * unattended-upgrades: add debug output after run(), conffile prompt
+  * tests: workaround conffile prompt in "ubuntu-advanage-tools"
+
+ -- Michael Vogt <mvo@debian.org>  Sun, 26 May 2024 22:17:35 +0200
+
 unattended-upgrades (2.10) unstable; urgency=medium
 
   * setup: add `packages=[]` to fix setuptools being confused
