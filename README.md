@@ -240,6 +240,16 @@ Supported Options Reference
 
  Automatically reboot even if users are logged in.
 
+* `Unattended-Upgrade::Automatic-Reboot-Time` - time (default:"now")
+
+If automatic reboot is enabled and needed, reboot at the specific
+time instead of immediately.
+
+Example - reboot at 02:00:
+```
+Unattended-Upgrade::Automatic-Reboot-Time "02:00";
+```
+
 * `Unattended-Upgrade::Keep-Debs-After-Install` - boolean (default:False)
 
  Keep the downloaded deb packages after successful installs. By default
