@@ -64,6 +64,24 @@ Unattended-Upgrade::Package-Blacklist {
     // https://docs.python.org/3/howto/regex.html
 };
 
+// Only packages that match the regular expressions in this list will be
+// marked for upgrade. By default dependencies of whitelisted packages
+// are allowed. This can be changed to only ever allow whitelisted
+// packages with the Unattended-Upgrade::Package-Whitelist-Strict
+// boolean option.
+// Unattended-Upgrade::Package-Blacklist still applies, thus blacklisted
+// packages covered by the whitelist will still not be upgraded nor will be
+// installed or upgraded as dependencies of whitelisted packages.
+Unattended-Upgrade::Package-Whitelist {
+//  "bash";
+};
+
+// When set, allow only packages in Unattended-Upgrade::Package-Whitelist
+// to be upgraded. This means that you also need to list all the dependencies
+// of a whitelisted package, e.g. if A depends on B and only A is
+// whitelisted, it will be held back. The default is false.
+//Unattended-Upgrade::Package-Whitelist-Strict "false";
+
 // This option allows you to control if on a unclean dpkg exit
 // unattended-upgrades will automatically run 
 //   dpkg --force-confold --configure -a
@@ -93,6 +111,12 @@ Unattended-Upgrade::Package-Blacklist {
 // 'mailx' must be installed. E.g. "user@example.com"
 //Unattended-Upgrade::Mail "";
 
+// Use the specified value in the "From" field of outgoing mails.
+// Default is "root". Be aware that some mail providers do not
+// accept "root" as valid "From" field and therefore will reject
+// the mail.
+//Unattended-Upgrade::Sender "server@example.com";
+
 // Set this value to one of:
 //    "always", "only-on-error" or "on-change"
 // If this is not set, then any legacy MailOnlyOnError (boolean) value
@@ -111,7 +135,7 @@ Unattended-Upgrade::Package-Blacklist {
 //Unattended-Upgrade::Remove-Unused-Dependencies "false";
 
 // Automatically reboot *WITHOUT CONFIRMATION* if
-//  the file /var/run/reboot-required is found after the upgrade 
+//  the file /var/run/reboot-required is found after the upgrade
 //Unattended-Upgrade::Automatic-Reboot "false";
 
 // Automatically reboot even if there are users currently logged in
@@ -123,9 +147,29 @@ Unattended-Upgrade::Package-Blacklist {
 //  Default: "now"
 //Unattended-Upgrade::Automatic-Reboot-Time "02:00";
 
+// Keep the downloaded deb packages after successful installs. By default
+// these are removed after successful installs. Default is false.
+//Unattended-Upgrade::Keep-Debs-After-Install "false"
+
 // Use apt bandwidth limit feature, this example limits the download
 // speed to 70kb/sec
 //Acquire::http::Dl-Limit "70";
+
+// Set a dpkg command-line option. This is useful to e.g. force conffile
+// handling in dpkg.
+// Note that unattended-upgrades detects this option, and ensures that
+// packages with configuration prompts will never be held back.
+//
+// Example - force dpkg to keep the old configuration files:
+//Dpkg::Options {"--force-confold"};
+
+// Set the days of the week that updates should be applied. The days
+// can be specified as localized abbreviated or full names. Or as
+// integers where "0" is Sunday, "1" is Monday etc.
+// The default is an empty list which means updates are applied every day.
+//
+// Example - apply updates only on Monday and Friday:
+//Unattended-Upgrade::Update-Days {"Mon";"Fri"};
 
 // Enable logging to syslog. Default is False
 // Unattended-Upgrade::SyslogEnable "false";
