@@ -65,6 +65,8 @@ class TestBase(unittest.TestCase):
         self.addCleanup(shutil.rmtree, tmpdir)
         aptroot = os.path.join(tmpdir, "aptroot")
         shutil.copytree(template, aptroot)
+        # apt warns if this dir does not exist
+        os.makedirs(os.path.join(aptroot, "etc/apt/preferences.d"))
         # fake dpkg status
         mock_dpkg_status = os.path.join(aptroot, "var/lib/dpkg/status")
         with open(mock_dpkg_status, "a") as fp:
