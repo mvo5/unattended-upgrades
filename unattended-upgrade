@@ -91,6 +91,15 @@ import apt_pkg
 
 import distro_info
 
+# workaround debian #1076097, it's unclear why we get the warning:
+# "DeprecationWarning: This process (pid=3710789) is multi-threaded,
+#  use of fork() may lead to deadlocks in the child."
+# because nothing u-u/pyhton-apt/apt are not using threading but
+# this is not useful to our users so supress it.
+if not sys.warnoptions:
+    import warnings
+    warnings.filterwarnings("ignore", category=DeprecationWarning)
+
 
 # the reboot required flag file used by packages
 REBOOT_REQUIRED_FILE = "/var/run/reboot-required"
