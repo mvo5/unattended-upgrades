@@ -28,6 +28,9 @@ import copy
 import datetime
 import errno
 import email.charset
+# workaround LP:2080940, email.errors changes as part of a security
+# update in python itself but is lazy loaded so import early to ensure
+import email.generator
 import fcntl
 import fnmatch
 import gettext
