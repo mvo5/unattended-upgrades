@@ -895,7 +895,7 @@ def should_stop():
            and subprocess.call("on_ac_power") == 1:
             logging.warning("System is on battery power, stopping")
             return True
-    except FileNotFoundError:
+    except (FileNotFoundError, PermissionError):
         log_once(
             _("Checking if system is running on battery is skipped. Please "
               "install powermgmt-base package to check power status and skip "
