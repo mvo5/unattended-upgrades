@@ -6,7 +6,7 @@
 # Balint Reczey <rbalint@ubuntu.com>
 #
 # unattended-upgrade-shutdown - helper that checks if a
-# unattended-upgrade is in progress and waits until it exists
+# unattended-upgrade is in progress and waits until it exits
 #
 # This file is part of unattended-upgrades
 #
