@@ -1,4 +1,4 @@
-unattended-upgrades (2.12) UNRELEASED; urgency=medium
+unattended-upgrades (2.12) unstable; urgency=medium
 
   [ middlingphys ]
   * update japanese translation
