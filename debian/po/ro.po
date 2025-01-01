@@ -1,0 +1,49 @@
+# Mesajele în limba română pentru pachetul unattended-upgrades.
+# Romanian translation of unattended-upgrades.
+# Copyright © 2023 THE PACKAGE'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the unattended-upgrades package.
+#
+# Remus-Gabriel Chelu <remusgabriel.chelu@disroot.org>, 2023.
+#
+# Cronologia traducerii fișierului „unattended-upgrades”:
+# Traducerea inițială, făcută de R-GC, pentru versiunea unattended-upgrades 2.9.1+nmu3(2017-12-12).
+# Actualizare a traducerii pentru versiunea Y, făcută de X, Y(anul).
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: unattended-upgrades 2.9.1+nmu3\n"
+"Report-Msgid-Bugs-To: unattended-upgrades@packages.debian.org\n"
+"POT-Creation-Date: 2017-12-12 23:02+0100\n"
+"PO-Revision-Date: 2023-03-26 23:50+0200\n"
+"Last-Translator: Remus-Gabriel Chelu <remusgabriel.chelu@disroot.org>\n"
+"Language-Team: Romanian <debian-l10n-romanian@lists.debian.org>\n"
+"Language: ro\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=3; plural=(n==1 ? 0 : n==0 || (n!=1 && n%100>=1 && "
+"n%100<=19) ? 1 : 2);\n"
+"X-Bugs: Report translation errors to the Language-Team address.\n"
+"X-Generator: Poedit 3.2.2\n"
+
+#. Type: boolean
+#. Description
+#: ../templates:2001
+msgid "Automatically download and install stable updates?"
+msgstr ""
+"Doriți să descărcați și să instalați automat actualizările versiunii stabile?"
+
+#. Type: boolean
+#. Description
+#: ../templates:2001
+msgid ""
+"Applying updates on a frequent basis is an important part of keeping systems "
+"secure. By default, updates need to be applied manually using package  "
+"management tools. Alternatively, you can choose to have this system  "
+"automatically download and install important updates."
+msgstr ""
+"Aplicarea în mod frecvent a actualizărilor este o parte importantă a menținerii "
+"în siguranță a sistemelor. În mod implicit, actualizările trebuie aplicate "
+"manual folosind instrumente de gestionare a pachetelor. Alternativ, puteți "
+"alege ca acest sistem să descarce și să instaleze automat actualizări "
+"importante."
