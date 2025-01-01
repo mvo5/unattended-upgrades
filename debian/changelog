@@ -1,3 +1,48 @@
+unattended-upgrades (2.12) UNRELEASED; urgency=medium
+
+  [ middlingphys ]
+  * update japanese translation
+
+  [ Chris Hofstaedtler ]
+  * Install systemd-sleep part into /usr/lib (Closes: #1073745)
+
+  [ Adam Chovanec ]
+  * document missing option in the readme
+
+  [ Michael Vogt ]
+  * u-u: supress "DeprecationWarning" about fork() and multithreading
+  * test: create fake etc/apt/preferences.d to silence test warnings
+  * u-u: import "email.genators" package early as workaround
+  * data/50unattended-upgrades.md5sum: Update for config file changes
+
+  [ Kenyon Ralph ]
+  * unattended-upgrade-shutdown: fix typo in documentation
+
+  [ Wesley Schwengle ]
+  * Correct examples for Debian backports (Closes: #940151)
+
+  [ Marekjdj ]
+  * Fixed small typo in '50unattended-upgrades' config files.
+
+  [ Remus-Gabriel Chelu ]
+  * [INTL:ro] Romanian debconf templates translation of unattended-upgrades
+    (Closes: #1033760)
+
+  [ Atila KOÇ ]
+  * [INTL:tr] turkish debconf translation update (Closes: #1031852)
+
+  [ Camaleón ]
+  * [INTL:es] Spanish translation of the debconf template (Closes: #1029026)
+
+ -- Michael Vogt <mvo@debian.org>  Wed, 01 Jan 2025 18:22:25 +0100
+
+unattended-upgrades (2.11+nmu1) unstable; urgency=medium
+
+  * Non-maintainer upload.
+  * Install systemd-sleep part into /usr/lib. (Closes: #1073745)
+
+ -- Michael Biebl <biebl@debian.org>  Tue, 03 Sep 2024 14:46:13 +0200
+
 unattended-upgrades (2.11) unstable; urgency=medium
 
   [ Alexandre Detiste ]
