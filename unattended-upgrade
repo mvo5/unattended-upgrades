@@ -2095,6 +2095,7 @@ def do_auto_remove(cache,             # type: UnattendedUpgradesCache
 
     pkgs_removed = []         # type: List[str]
     pkgs_kept_installed = []  # type: List[str]
+    purge = apt_pkg.config.find_b("APT::Get::Purge", False)
     if minimal_steps:
         for pkgname in auto_removable:
             if should_stop():
@@ -2103,7 +2104,7 @@ def do_auto_remove(cache,             # type: UnattendedUpgradesCache
             logging.debug("marking %s for removal" % pkgname)
             if pkgname in pkgs_removed:
                 continue
-            cache[pkgname].mark_delete()
+            cache[pkgname].mark_delete(purge=purge)
             if not is_autoremove_valid(cache, pkgname, auto_removable):
                 # this situation can occur when removing newly unused packages
                 # would also remove old unused packages which are not set
@@ -2122,7 +2123,7 @@ def do_auto_remove(cache,             # type: UnattendedUpgradesCache
                 cache.clear()
     else:
         for pkgname in auto_removable:
-            cache[pkgname].mark_delete()
+            cache[pkgname].mark_delete(purge=purge)
         if is_autoremove_valid(cache, "", auto_removable):
             # do it in one step
             if not dry_run:
