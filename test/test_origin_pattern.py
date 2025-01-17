@@ -8,9 +8,9 @@ import apt_pkg
 import unattended_upgrade
 from unattended_upgrade import (
     check_changes_for_sanity,
-    is_in_allowed_origin,
+    ver_in_origins,
     get_distro_codename,
-    match_whitelist_string,
+    match_pattern_string,
     UnknownMatcherError,
 )
 
@@ -32,6 +32,10 @@ class MockPackage():
     pass
 
 
+class MockVersion():
+    pass
+
+
 class MockCache(dict):
     def __iter__(self):
         for pkgname in self.keys():
@@ -44,6 +48,8 @@ class MockCache(dict):
     blacklist = []        # type: List[str]
     whitelist = []        # type: List[str]
     strict_whitelist = False  # type: bool
+    blacklisted_origins = []  # type: List[str]
+    strict_blacklist = True  # type: bool
 
 
 class MockDepCache():
@@ -52,35 +58,35 @@ class MockDepCache():
 
 class TestOriginPatern(TestBase):
 
-    def test_match_whitelist_string(self):
+    def test_match_pattern_string(self):
         origin = self._get_mock_origin(
             "OriginUbuntu", "LabelUbuntu", "ArchiveUbuntu",
             "archive.ubuntu.com", "main")
         # good
         s = "o=OriginUbuntu"
-        self.assertTrue(match_whitelist_string(s, origin))
+        self.assertTrue(match_pattern_string(s, origin))
         s = "o=OriginUbuntu,l=LabelUbuntu,a=ArchiveUbuntu," \
             "site=archive.ubuntu.com"
-        self.assertTrue(match_whitelist_string(s, origin))
+        self.assertTrue(match_pattern_string(s, origin))
         # bad
         s = ""
-        self.assertFalse(match_whitelist_string(s, origin))
+        self.assertFalse(match_pattern_string(s, origin))
         s = "o=something"
-        self.assertFalse(match_whitelist_string(s, origin))
+        self.assertFalse(match_pattern_string(s, origin))
         s = "o=LabelUbuntu,a=no-match"
-        self.assertFalse(match_whitelist_string(s, origin))
+        self.assertFalse(match_pattern_string(s, origin))
         # with escaping
         origin = self._get_mock_origin("Google, Inc.", archive="stable")
         # good
         s = "o=Google\\, Inc.,a=stable"
-        self.assertTrue(match_whitelist_string(s, origin))
+        self.assertTrue(match_pattern_string(s, origin))
 
     def test_match_whitelist_from_conffile(self):
         # read some
         apt_pkg.config.clear("Unattended-Upgrade")
         apt_pkg.read_config_file(
             apt_pkg.config, "./data/50unattended-upgrades.Test")
-        allowed_origins = unattended_upgrade.get_allowed_origins()
+        allowed_origins = unattended_upgrade.get_origins_from_conf()
         # print allowed_origins
         self.assertTrue("o=aOrigin,a=aArchive" in allowed_origins)
         self.assertTrue("s=aSite,l=aLabel" in allowed_origins)
@@ -90,25 +96,25 @@ class TestOriginPatern(TestBase):
         codename = get_distro_codename()
         s = "a=${distro_codename}"
         origin = self._get_mock_origin("Foo", archive=codename)
-        self.assertTrue(match_whitelist_string(s, origin))
+        self.assertTrue(match_pattern_string(s, origin))
 
     def test_compatiblity(self):
         apt_pkg.config.clear("Unattended-Upgrade")
         apt_pkg.read_config_file(
             apt_pkg.config, "./data/50unattended-upgrades.compat")
-        allowed_origins = unattended_upgrade.get_allowed_origins()
+        allowed_origins = unattended_upgrade.get_origins_from_conf()
         # print allowed_origins
         self.assertTrue("o=Google\\, Inc.,a=stable" in allowed_origins)
         self.assertTrue("o=MoreCorp\\, eink,a=stable" in allowed_origins)
         # test whitelist
         pkg = self._get_mock_package()
-        self.assertTrue(is_in_allowed_origin(pkg.candidate, allowed_origins))
+        self.assertTrue(ver_in_origins(pkg.candidate, allowed_origins))
 
     def test_escaped_colon(self):
         apt_pkg.config.clear("Unattended-Upgrade")
         apt_pkg.read_config_file(
             apt_pkg.config, "./data/50unattended-upgrades.colon")
-        allowed_origins = unattended_upgrade.get_allowed_origins()
+        allowed_origins = unattended_upgrade.get_origins_from_conf()
 
         self.assertIn('o=http://foo.bar,a=stable', allowed_origins)
 
@@ -116,7 +122,7 @@ class TestOriginPatern(TestBase):
         apt_pkg.config.clear("Unattended-Upgrade")
         s = "xxx=OriginUbuntu"
         with self.assertRaises(UnknownMatcherError):
-            self.assertTrue(match_whitelist_string(s, None))
+            self.assertTrue(match_pattern_string(s, None))
 
     def test_blacklist(self):
         # get the mocks
@@ -180,6 +186,8 @@ class TestOriginPatern(TestBase):
                                  self._get_mock_origin(aorigin="Google, Inc.",
                                                        archive="stable")]
         pkg.candidate.record = {}
+        pkg.versions = [MockVersion()]
+        pkg.versions[0].origins = pkg.candidate.origins
         return pkg
 
     def test_match_whitelist_wildcard(self):
@@ -188,16 +196,16 @@ class TestOriginPatern(TestBase):
             "archive.ubuntu.com", "main")
         # good
         s = "o=OriginU*"
-        self.assertTrue(match_whitelist_string(s, origin))
+        self.assertTrue(match_pattern_string(s, origin))
         # bad
         s = "o=X*"
-        self.assertFalse(match_whitelist_string(s, origin))
+        self.assertFalse(match_pattern_string(s, origin))
         # good
         s = "o=?riginUbunt?"
-        self.assertTrue(match_whitelist_string(s, origin))
+        self.assertTrue(match_pattern_string(s, origin))
         # good
         s = "o=*Ubunt?"
-        self.assertTrue(match_whitelist_string(s, origin))
+        self.assertTrue(match_pattern_string(s, origin))
 
     def test_get_allowed_origins_legacy(self):
         for cfg, (distro_id, distro_codename) in (
