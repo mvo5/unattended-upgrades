@@ -223,13 +223,19 @@ Supported Options Reference
 
  NOTE that "never" is achieved by not setting any `Unattended-Upgrade::Mail`
 
+* `Unattended-Upgrade::Remove-Unused-Kernel-Packages` - boolean (default:True)
+ 
+ Remove excessive unused kernel-related packages before upgrading to avoid
+ filling /boot or the root file system.
+
 * `Unattended-Upgrade::Remove-Unused-Dependencies` - boolean (default:False)
  
  Remove all unused dependencies after the upgrade has finished.
 
 * `Unattended-Upgrade::Remove-New-Unused-Dependencies` - boolean (default:True)
 
- Remove any new unused dependencies after the upgrade has finished.
+ Even if the above is disabled, remove packages which became unused as a result
+ of the upgrade.
 
 * `Unattended-Upgrade::Automatic-Reboot` - boolean (default:False)
  
