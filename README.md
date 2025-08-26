@@ -139,7 +139,14 @@ Supported Options Reference
  that it's a list of regular expressions, so you may need to escape special
  characters like "+" as "\\+".
  
- Example:
+ Example: Any package with the "vim" prefix, including `vim` and `vim-doc`.
+ ```
+ Unattended-Upgrade::Package-Blacklist {
+     "vim";
+ };
+ ```
+ 
+ Example: Only the exact `libstdc++6` package.
  ```
  Unattended-Upgrade::Package-Blacklist {
      "libstdc\+\+6$";
