@@ -1039,7 +1039,7 @@ def version_age_days(version,                    # type: apt.package.Version
 def minimum_age_reason_for_version(pkg_name,                # type: str
                                    version,                 # type: apt.package.Version
                                    minimum_age_days,        # type: int
-                                   release_dates_by_archive # type: Dict[str, date]
+                                   release_dates_by_archive  # type: Dict[str, date]
                                    ):
     # type: (...) -> Optional[str]
     if minimum_age_days <= 0:
