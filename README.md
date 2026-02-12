@@ -196,6 +196,17 @@ Supported Options Reference
  unattended-upgrades, and it will stop the upgrade when it finishes the
  current upgrade step.
 
+* `Unattended-Upgrade::MinimumAge` - integer number of days (default:0)
+ 
+ Hold back upgrades until the package metadata is at least this many
+ days old. Set this to `7` to introduce a one week rollout delay. A value
+ of `0` disables this check.
+
+ Example:
+ ```
+ Unattended-Upgrade::MinimumAge "7";
+ ```
+
 * `Unattended-Upgrade::InstallOnShutdown` - boolean (default:False)
  
  Perform the upgrade when the machine is shutting down instead of

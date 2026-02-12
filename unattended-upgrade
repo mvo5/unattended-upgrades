@@ -31,6 +31,7 @@ import email.charset
 # workaround LP:2080940, email.errors changes as part of a security
 # update in python itself but is lazy loaded so import early to ensure
 import email.generator
+import email.utils
 import fcntl
 import fnmatch
 import gettext
@@ -354,10 +355,22 @@ class UnattendedUpgradesCache(apt.Cache):
     def __init__(self, rootdir):
         # type: (str) -> None
         self._cached_candidate_pkgnames = set()  # type: Set[str]
+        self._release_dates_by_archive = None  # type: Optional[Dict[str, date]]
+        self.minimum_age_days = apt_pkg.config.find_i(
+            "Unattended-Upgrade::MinimumAge", 0)
+        if self.minimum_age_days < 0:
+            logging.warning(
+                "Unattended-Upgrade::MinimumAge has a negative value (%s), "
+                "ignoring it.", self.minimum_age_days)
+            self.minimum_age_days = 0
 
         self.allowed_origins = get_allowed_origins()
         logging.info(_("Allowed origins are: %s"),
                      ", ".join(self.allowed_origins))
+        if self.minimum_age_days > 0:
+            logging.info("Only package updates at least %s days old are "
+                         "allowed (Unattended-Upgrade::MinimumAge).",
+                         self.minimum_age_days)
 
         self.blacklist = apt_pkg.config.value_list(
             "Unattended-Upgrade::Package-Blacklist")
@@ -386,6 +399,19 @@ class UnattendedUpgradesCache(apt.Cache):
         if self.running_kernel_pkgs_regexp:
             logging.debug("Using %s regexp to find running kernel packages",
                           self.running_kernel_pkgs_regexp.pattern)
+
+    def release_dates_by_archive(self):
+        # type: () -> Dict[str, date]
+        if self._release_dates_by_archive is None:
+            self._release_dates_by_archive = get_release_dates_by_archive(
+                apt_pkg.config.find_dir("Dir::State::lists"))
+        return self._release_dates_by_archive
+
+    def minimum_age_reason(self, pkg_name, version):
+        # type: (str, apt.package.Version) -> Optional[str]
+        return minimum_age_reason_for_version(
+            pkg_name, version, self.minimum_age_days,
+            self.release_dates_by_archive())
 
     def find_better_version(self, pkg):
         # type (apt.Package) -> apt.package.Version
@@ -444,6 +470,9 @@ class UnattendedUpgradesCache(apt.Cache):
                             "Package %s is not whitelisted and it is not a"
                             " dependency of a whitelisted package.")
                             % pkg.name)
+        reason = self.minimum_age_reason(pkg.name, better_version)
+        if reason:
+            return reason
         elif not any([o.trusted for o in better_version.origins]):
             return _("Package %s's origin is not trusted.") % pkg.name
         return (_("Package %s is kept back because a related package"
@@ -939,6 +968,95 @@ def allow_marking_fallback():
     return apt_pkg.config.find_b(
         "Unattended-Upgrade::Allow-APT-Mark-Fallback",
         get_distro_codename() != "sid")
+
+
+def parse_release_date(date_value):
+    # type: (Optional[str]) -> Optional[date]
+    if not date_value:
+        return None
+    try:
+        parsed = email.utils.parsedate_to_datetime(date_value)
+    except (TypeError, ValueError):
+        return None
+    if parsed is None:
+        return None
+    if parsed.tzinfo is None:
+        parsed = parsed.replace(tzinfo=datetime.timezone.utc)
+    return parsed.astimezone(datetime.timezone.utc).date()
+
+
+def get_release_dates_by_archive(lists_dir):
+    # type: (str) -> Dict[str, date]
+    dates_by_archive = {}  # type: Dict[str, date]
+    if not os.path.isdir(lists_dir):
+        return dates_by_archive
+
+    for release_file in glob.glob(os.path.join(lists_dir, "*_Release")) \
+            + glob.glob(os.path.join(lists_dir, "*_InRelease")):
+        m = re.search(r"_dists_([^_]+)_(?:In)?Release$",
+                      os.path.basename(release_file))
+        if not m:
+            continue
+        archive = m.group(1)
+        release_date = None
+        try:
+            with open(release_file, "r") as fp:
+                for line in fp:
+                    if line.startswith("Date:"):
+                        release_date = parse_release_date(
+                            line.split(":", 1)[1].strip())
+                        break
+        except OSError:
+            continue
+        if release_date is None:
+            continue
+        if archive not in dates_by_archive \
+                or release_date > dates_by_archive[archive]:
+            dates_by_archive[archive] = release_date
+    return dates_by_archive
+
+
+def version_age_days(version,                    # type: apt.package.Version
+                     release_dates_by_archive,   # type: Dict[str, date]
+                     today=None,                 # type: Optional[date]
+                     ):
+    # type: (...) -> Optional[int]
+    version_date = parse_release_date(version.record.get("Date"))
+    if version_date is None:
+        origin_dates = []
+        for origin in version.origins:
+            archive = getattr(origin, "archive", "")
+            if archive and archive in release_dates_by_archive:
+                origin_dates.append(release_dates_by_archive[archive])
+        if not origin_dates:
+            return None
+        version_date = max(origin_dates)
+    if today is None:
+        today = date.today()
+    return max(0, (today - version_date).days)
+
+
+def minimum_age_reason_for_version(pkg_name,                # type: str
+                                   version,                 # type: apt.package.Version
+                                   minimum_age_days,        # type: int
+                                   release_dates_by_archive # type: Dict[str, date]
+                                   ):
+    # type: (...) -> Optional[str]
+    if minimum_age_days <= 0:
+        return None
+    age_days = version_age_days(version, release_dates_by_archive)
+    if age_days is None:
+        return (
+            "Package %s is kept back because its publication date could "
+            "not be determined while Unattended-Upgrade::MinimumAge is set "
+            "to %s days."
+            % (pkg_name, minimum_age_days))
+    if age_days < minimum_age_days:
+        return (
+            "Package %s is kept back because it is only %s days old "
+            "(Unattended-Upgrade::MinimumAge is %s days)."
+            % (pkg_name, age_days, minimum_age_days))
+    return None
 
 
 def versioned_kernel_pkgs_regexp():
@@ -1981,8 +2099,12 @@ def calculate_upgradable_pkgs(cache,            # type: UnattendedUpgradesCache
         if (pkg.is_upgradable or candidate_version_changed(pkg)
            and is_pkgname_in_whitelist(pkg.name, cache.whitelist)):
             try:
-                ver_in_allowed_origin(pkg, cache.allowed_origins)
+                candidate = ver_in_allowed_origin(pkg, cache.allowed_origins)
             except NoAllowedOriginError:
+                continue
+            reason = cache.minimum_age_reason(pkg.name, candidate)
+            if reason:
+                logging.info(reason)
                 continue
             try_to_upgrade(pkg,
                            pkgs_to_upgrade,

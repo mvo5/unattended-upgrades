@@ -77,6 +77,10 @@ Unattended-Upgrade::Package-Blacklist {
 // is running is possible (with a small delay)
 //Unattended-Upgrade::MinimalSteps "true";
 
+// Delay package upgrades until the package metadata is at least N days old.
+// Set to "7" to keep fresh updates back for a week before installing.
+//Unattended-Upgrade::MinimumAge "7";
+
 // Install all updates when the machine is shutting down
 // instead of doing it in the background while the machine is running.
 // This will (obviously) make shutdown slower.

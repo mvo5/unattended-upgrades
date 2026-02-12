@@ -1,7 +1,9 @@
 #!/usr/bin/python3
 
+import datetime
 import logging
 import unittest
+from unittest.mock import Mock
 
 import apt_pkg
 
@@ -11,7 +13,9 @@ from unattended_upgrade import (
     is_in_allowed_origin,
     get_distro_codename,
     match_whitelist_string,
+    minimum_age_reason_for_version,
     UnknownMatcherError,
+    version_age_days,
 )
 
 from typing import List
@@ -51,6 +55,30 @@ class MockDepCache():
 
 
 class TestOriginPatern(TestBase):
+    def test_version_age_days_from_record_date(self):
+        now = datetime.date(2026, 2, 12)
+        version = Mock()
+        version.record = {"Date": "Thu, 05 Feb 2026 10:00:00 UTC"}
+        version.origins = []
+        self.assertEqual(version_age_days(version, {}, today=now), 7)
+
+    def test_version_age_days_from_release_archive_date(self):
+        now = datetime.date(2026, 2, 12)
+        version = Mock()
+        version.record = {}
+        origin = Mock()
+        origin.archive = "stable-security"
+        version.origins = [origin]
+        release_dates = {"stable-security": datetime.date(2026, 2, 10)}
+        self.assertEqual(version_age_days(version, release_dates, today=now), 2)
+
+    def test_minimum_age_reason_when_too_new(self):
+        version = Mock()
+        version.record = {"Date": "Thu, 12 Feb 2026 10:00:00 UTC"}
+        version.origins = []
+        reason = minimum_age_reason_for_version("bash", version, 7, {})
+        self.assertIn("bash", reason)
+        self.assertIn("MinimumAge", reason)
 
     def test_match_whitelist_string(self):
         origin = self._get_mock_origin(
