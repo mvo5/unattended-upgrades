@@ -558,6 +558,9 @@ def record_seen_versions(cache, state_file_path, now=None, today=None):
             ver = ver_in_allowed_origin(pkg, cache.allowed_origins)
         except NoAllowedOriginError:
             continue
+        # Skip if the allowed-origin candidate is already installed
+        if pkg.is_installed and pkg.installed and ver.version == pkg.installed.version:
+            continue
         current_candidates[pkg.name] = ver.version
 
     # Add new entries
@@ -2252,6 +2255,9 @@ def calculate_upgradable_pkgs(cache,            # type: UnattendedUpgradesCache
                 candidate = ver_in_allowed_origin(
                     pkg, cache.allowed_origins)
             except NoAllowedOriginError:
+                continue
+            # Skip if the allowed-origin candidate is already installed
+            if pkg.is_installed and pkg.installed and candidate.version == pkg.installed.version:
                 continue
             reason = cache.minimum_age_reason(
                 pkg.name, candidate.version)

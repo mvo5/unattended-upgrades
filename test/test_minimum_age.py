@@ -223,7 +223,8 @@ class TestFallbackPolicy(unittest.TestCase):
         self.assertIsNone(result)
 
 
-def _make_mock_pkg(name, version, origin_name="allowed-origin"):
+def _make_mock_pkg(name, version, origin_name="allowed-origin",
+                   installed_version="0.0.1"):
     """Build a mock package that looks upgradable from an allowed origin."""
     origin = Mock()
     origin.origin = origin_name
@@ -235,7 +236,7 @@ def _make_mock_pkg(name, version, origin_name="allowed-origin"):
     candidate.policy_priority = 500
 
     installed = Mock()
-    installed.version = "0.0.1"
+    installed.version = installed_version
     installed.policy_priority = 500
     installed.origins = [origin]
 
@@ -371,6 +372,40 @@ class TestCalculateUpgradablePkgsMinimumAge(unittest.TestCase):
 
         self.assertEqual(result, [pkg])
         _mock_try.assert_called_once()
+
+
+class TestSkipInstalledCandidate(unittest.TestCase):
+    """Packages where allowed-origin candidate == installed should be skipped."""
+
+    def test_record_seen_versions_skips_installed_version(self):
+        """If the best version from allowed origins is already installed,
+        record_seen_versions must not add it to seen_versions."""
+        pkg = _make_mock_pkg("linux-firmware", "1.40",
+                             installed_version="1.40")
+        cache = _make_mock_cache([pkg], {}, minimum_age_value="7d")
+        tmpdir = tempfile.mkdtemp()
+        self.addCleanup(shutil.rmtree, tmpdir)
+        state_file = os.path.join(tmpdir, "seen.json")
+
+        now = datetime.datetime(2099, 1, 15, 0, 0, 0)
+        seen = record_seen_versions(cache, state_file, now=now)
+        self.assertNotIn("linux-firmware", seen)
+
+    @patch("unattended_upgrade.try_to_upgrade",
+           side_effect=lambda pkg, lst, cache: lst.append(pkg))
+    def test_calculate_upgradable_skips_installed_candidate(self, _mock_try):
+        """If allowed-origin candidate == installed, the package must not
+        reach try_to_upgrade or appear in the result list."""
+        pkg = _make_mock_pkg("linux-firmware", "1.40",
+                             installed_version="1.40")
+        seen = {"linux-firmware": {"1.40": "2099-01-01T00:00:00Z"}}
+        cache = _make_mock_cache([pkg], seen, minimum_age_value="7d")
+        options = Mock()
+
+        result = calculate_upgradable_pkgs(cache, options)
+
+        self.assertEqual(result, [])
+        _mock_try.assert_not_called()
 
 
 class TestMinimumAgeRealAptroot(TestBase):
