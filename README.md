@@ -35,7 +35,7 @@ This can be changed either with the
 are listed in /etc/apt/apt.conf.d/50unattended-upgrades.
 Also in this file are a range of other options that can be configured.
 
-To override the configuration it is recommended to create an other APT
+To override the configuration it is recommended to create a separate APT
 configuration file fragment which overrides the shipped default
 value because updates to to shipped configuration file may conflict
 with the local changes blocking updating unattended-upgrades itself.
@@ -58,6 +58,20 @@ will upgrade a package if either the origin is "Google, Inc." and
 suite is "contrib" or if it comes from www.example.com and is in
 component "main".  The apt-cache policy short identifiers
 (e.g. "o" for "origin") are also supported.
+
+Note that, to properly override lists such as Origins-Pattern, you must
+first clear the stock-provided list before inserting your own. Otherwise,
+your custom origins will instead be allowed *in addition to* the stock values.
+For example, if you only want to allow the 'debian-security' origin,
+the 52unattended-upgrades-local file should contain something like this:
+
+```
+#clear Unattended-Upgrade::Origins-Pattern;
+Unattended-Upgrade::Origins-Pattern {
+        "origin=Debian,codename=${distro_codename},label=Debian-Security";
+        "origin=Debian,codename=${distro_codename}-security,label=Debian-Security";
+};
+```
 
 If you already configure what to install via apt pinning, you can
 simply use "origin=*", e.g.:
