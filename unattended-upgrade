@@ -49,6 +49,7 @@ import logging
 import logging.handlers
 import re
 import os
+import pwd
 import select
 import signal
 import socket
@@ -1874,13 +1875,37 @@ def _setup_logging(options):
 
 
 def logged_in_users():
-    # type: () -> AbstractSet[str]
+    # type: () -> tuple[AbstractSet[str],AbstractSet[str]]
     """Return a list of logged in users"""
     # the "users" command always returns a single line with:
     # "user1, user1, user2"
     users = subprocess.check_output(
         USERS, universal_newlines=True).rstrip('\n')
-    return set(users.split())
+    allusers = set(users.split())
+    sysusers = set()
+    for user in allusers:
+        try:
+            uid = pwd.getpwnam(user).pw_uid
+            if 0 < uid < 1000:
+                sysusers.add(user)
+        except KeyError:
+            pass
+    return allusers, sysusers
+
+
+def schedule_shutdown():
+    # type: () -> None
+    """reboot at the specified time"""
+    when = apt_pkg.config.find(
+        "Unattended-Upgrade::Automatic-Reboot-Time", "now")
+    logging.warning("Found %s, rebooting" % REBOOT_REQUIRED_FILE)
+    cmd = ["/sbin/shutdown", "-r", when]
+    try:
+        shutdown_msg = subprocess.check_output(cmd, stderr=subprocess.STDOUT)
+        if shutdown_msg.strip():
+            logging.warning("Shutdown msg: %s", shutdown_msg.strip())
+    except Exception as e:
+        logging.error("Failed to issue shutdown: %s", e)
 
 
 def reboot_if_requested_and_needed():
@@ -1892,29 +1917,47 @@ def reboot_if_requested_and_needed():
             "Unattended-Upgrade::Automatic-Reboot", False):
         return
     # see if we need to check for logged in users
-    if not apt_pkg.config.find_b(
-            "Unattended-Upgrade::Automatic-Reboot-WithUsers", True):
-        users = logged_in_users()
-        if users:
+    reboot_with_users = apt_pkg.config.find_b(
+        "Unattended-Upgrade::Automatic-Reboot-WithUsers", True)
+
+    # If we ignore logged in users for reboots, we can exit early after
+    # scheduling a reboot
+    if reboot_with_users:
+        schedule_shutdown()
+        return
+
+    reboot_with_sysusers = apt_pkg.config.find_b(
+        "Unattended-Upgrade::Automatic-Reboot-WithSystemUsers", True)
+
+    users, sysusers = logged_in_users()
+    real_users = users - sysusers
+
+    # Reboots with logged in users are disallowed at this point, but check
+    # whether system users block reboot
+    if reboot_with_sysusers:
+        if not real_users:
+            schedule_shutdown()
+        else:
             msg = gettext.ngettext(
-                "Found %s, but not rebooting because %s is logged in." % (
-                    REBOOT_REQUIRED_FILE, users),
-                "Found %s, but not rebooting because %s are logged in." % (
-                    REBOOT_REQUIRED_FILE, users),
-                len(users))
+                "Found %s, but not rebooting because non-system user %s is logged in." % (  # noqa: E501
+                    REBOOT_REQUIRED_FILE, real_users),
+                "Found %s, but not rebooting because non-system user %s are logged in." % (  # noqa: E501
+                    REBOOT_REQUIRED_FILE, real_users),
+                len(real_users))
             logging.warning(msg)
-            return
-    # reboot at the specified time
-    when = apt_pkg.config.find(
-        "Unattended-Upgrade::Automatic-Reboot-Time", "now")
-    logging.warning("Found %s, rebooting" % REBOOT_REQUIRED_FILE)
-    cmd = ["/sbin/shutdown", "-r", when]
-    try:
-        shutdown_msg = subprocess.check_output(cmd, stderr=subprocess.STDOUT)
-        if shutdown_msg.strip():
-            logging.warning("Shutdown msg: %s", shutdown_msg.strip())
-    except Exception as e:
-        logging.error("Failed to issue shutdown: %s", e)
+        return
+
+    if not users:
+        schedule_shutdown()
+        return
+
+    msg = gettext.ngettext(
+        "Found %s, but not rebooting because %s is logged in." % (
+            REBOOT_REQUIRED_FILE, users),
+        "Found %s, but not rebooting because %s are logged in." % (
+            REBOOT_REQUIRED_FILE, users),
+        len(users))
+    logging.warning(msg)
 
 
 def write_stamp_file():
