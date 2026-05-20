@@ -126,6 +126,10 @@ Unattended-Upgrade::Package-Blacklist {
 // is "true"
 //Unattended-Upgrade::Automatic-Reboot-WithSystemUsers "true";
 
+// A comma-separated list of users that are ignored when checking logged in
+// users for Automatic-Reboot-WithUsers and Automatic-Reboot-WithSystemUsers
+//Unattended-Upgrade::Automatic-Reboot-IgnoredUsers "Debian-gdm,sddm,lightdm";
+
 // If automatic reboot is enabled and needed, reboot at the specific
 // time instead of immediately
 //  Default: "now"

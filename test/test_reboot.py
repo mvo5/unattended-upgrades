@@ -136,6 +136,44 @@ class RebootTestCase(TestBase):
             "Called '%s' when nothing should have "
             "happen" % mock_call.call_args_list)
 
+    @patch("subprocess.check_output")
+    @patch("unattended_upgrade.logged_in_users",
+           return_value=({'greeter', 'user'}, {'greeter'}))
+    def test_reboot_greeter(self, mock_users, mock_call):
+        """Ensure that a reboot does not happen if a user is logged in"""
+        apt_pkg.config.set(
+            "Unattended-Upgrade::Automatic-Reboot-WithUsers", "0")
+        apt_pkg.config.set(
+            "Unattended-Upgrade::Automatic-Reboot-WithSystemUsers", "0")
+        apt_pkg.config.set(
+            "Unattended-Upgrade::Automatic-Reboot-IgnoredUsers",
+            "greeter,greeter2")
+        # some pgm that allways output a word
+        unattended_upgrade.reboot_if_requested_and_needed()
+        self.assertEqual(
+            mock_call.called, False,
+            "Called '%s' when nothing should have "
+            "happen" % mock_call.call_args_list)
+
+    @patch("subprocess.check_output", return_value="some shutdown msg")
+    @patch("unattended_upgrade.logged_in_users",
+           return_value=({'greeter'}, {'greeter'}))
+    def test_reboot_withonlysysusers_noblock(self, mock_users, mock_call):
+        """Ensure that a reboot happens when only system users are logged in"""
+        apt_pkg.config.set(
+            "Unattended-Upgrade::Automatic-Reboot-WithUsers", "0")
+        apt_pkg.config.set(
+            "Unattended-Upgrade::Automatic-Reboot-WithSystemUsers", "0")
+        apt_pkg.config.set(
+            "Unattended-Upgrade::Automatic-Reboot-IgnoredUsers",
+            "greeter,greeter2")
+        apt_pkg.config.set(
+            "Unattended-Upgrade::Automatic-Reboot-Time", "06:00")
+        # some pgm that allways output nothing
+        unattended_upgrade.reboot_if_requested_and_needed()
+        mock_call.assert_called_with(["/sbin/shutdown", "-r", "06:00"],
+                                     stderr=subprocess.STDOUT)
+
     @patch("subprocess.call")
     def test_logged_in_users(self, mock_call):
         # some pgm that allways output a word

@@ -1930,6 +1930,13 @@ def reboot_if_requested_and_needed():
         "Unattended-Upgrade::Automatic-Reboot-WithSystemUsers", True)
 
     users, sysusers = logged_in_users()
+
+    # Filter out non-blocking users from both sets
+    nonblocking_users = set(apt_pkg.config.find(
+        "Unattended-Upgrade::Automatic-Reboot-IgnoredUsers", "").split(","))
+    users -= nonblocking_users
+    sysusers -= nonblocking_users
+
     real_users = users - sysusers
 
     # Reboots with logged in users are disallowed at this point, but check
