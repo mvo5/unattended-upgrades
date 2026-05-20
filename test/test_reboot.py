@@ -44,14 +44,14 @@ class RebootTestCase(TestBase):
         self.assertEqual(mock_call.called, False)
 
     @patch("subprocess.check_output", return_value="some shutdown msg")
-    @patch("unattended_upgrade.logged_in_users", return_value={})
+    @patch("unattended_upgrade.logged_in_users", return_value=set())
     def test_reboot_now(self, mock_user, mock_call):
         unattended_upgrade.reboot_if_requested_and_needed()
         mock_call.assert_called_with(["/sbin/shutdown", "-r", "now"],
                                      stderr=subprocess.STDOUT)
 
     @patch("subprocess.check_output", return_value="some shutdown msg")
-    @patch("unattended_upgrade.logged_in_users", return_value={})
+    @patch("unattended_upgrade.logged_in_users", return_value=set())
     def test_reboot_time(self, mock_users, mock_call):
         apt_pkg.config.set(
             "Unattended-Upgrade::Automatic-Reboot-Time", "03:00")
@@ -60,7 +60,7 @@ class RebootTestCase(TestBase):
                                      stderr=subprocess.STDOUT)
 
     @patch("subprocess.check_output", return_value="some shutdown msg")
-    @patch("unattended_upgrade.logged_in_users", return_value={})
+    @patch("unattended_upgrade.logged_in_users", return_value=set())
     def test_reboot_withoutusers(self, mock_users, mock_call):
         """Ensure that a reboot happens when no users are logged in"""
         apt_pkg.config.set(
