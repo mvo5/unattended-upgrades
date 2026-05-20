@@ -46,6 +46,7 @@ class RebootTestCase(TestBase):
     @patch("subprocess.check_output", return_value="some shutdown msg")
     @patch("unattended_upgrade.logged_in_users", return_value=set())
     def test_reboot_now(self, mock_user, mock_call):
+        apt_pkg.config.set("Unattended-Upgrade::Automatic-Reboot-Time", "now")
         unattended_upgrade.reboot_if_requested_and_needed()
         mock_call.assert_called_with(["/sbin/shutdown", "-r", "now"],
                                      stderr=subprocess.STDOUT)
