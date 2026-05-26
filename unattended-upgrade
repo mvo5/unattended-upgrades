@@ -1265,7 +1265,7 @@ def is_pkg_change_allowed(pkg, blacklist, whitelist, strict_whitelist):
 
 def transitive_dependencies(pkg,               # type: apt.Package
                             cache,             # type: apt.Cache
-                            acc=set(),         # type AbstractSet[str]
+                            acc=None,          # type: Optional[Set[str]]
                             valid_types=None,  # type: Optional[AbstractSet[str]]
                             level=None         # type: Optional[int]
                             ):
@@ -1274,6 +1274,9 @@ def transitive_dependencies(pkg,               # type: apt.Package
 
         Note that alternative (|) dependencies are collected, too
     """
+    if acc is None:
+        acc = set()
+
     if not pkg.candidate or level is not None and level < 1:
         return acc
 
