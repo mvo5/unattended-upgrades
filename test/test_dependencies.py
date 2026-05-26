@@ -12,10 +12,13 @@ class TestDependencies(unittest.TestCase):
     def _get_pkg_with_deps(self, *dep_names):
         pkg = Mock()
         pkg.candidate = Mock()
-        pkg.candidate.dependencies = [
-            [Mock(name=name, rawtype="Depends")] for name in dep_names]
-        for dep, dep_name in zip(pkg.candidate.dependencies, dep_names):
-            dep[0].name = dep_name
+        pkg.candidate.dependencies = []
+        for dep_name in dep_names:
+            # Mock(name=...) sets the mock's repr, not its .name attribute;
+            # assign .name explicitly so base_dep.name returns the string.
+            dep = Mock(rawtype="Depends")
+            dep.name = dep_name
+            pkg.candidate.dependencies.append([dep])
         return pkg
 
     def test_transitive_dependencies_keeps_independent_calls_separate(self):
