@@ -32,7 +32,6 @@ Depends: ${misc:Depends},
          python3-dbus,
          python3-distro-info,
          ucf,
-         lsb-release,
          lsb-base,
          xz-utils
 Recommends: systemd-sysv | cron | cron-daemon | anacron
