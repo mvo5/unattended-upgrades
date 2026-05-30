@@ -136,8 +136,9 @@ Supported Options Reference
  Only packages from this origin:archive pair will be installed. You
  can see all available origin:archive pairs by running `apt-cache policy`
  and checking the "o=" and "a=" fields. Variable substitution is supported
- for ${distro_id} that contains the output of `lsb_release -i` and
- ${distro_codename} that contains the output of `lsb_release -c`.
+ for ${distro_id} that contains the output of `lsb_release -i`,
+ ${distro_codename} that contains the output of `lsb_release -c` and
+ ${distro_release} that contains the output of `lsb_release -r`.
  
  Example:
  ```
