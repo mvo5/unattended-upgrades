@@ -117,16 +117,19 @@ USERS = "/usr/bin/users"
 DISTRO_CODENAME = ""  # type: str
 DISTRO_DESC = ""  # type: str
 DISTRO_ID = ""  # type: str
+DISTRO_RELEASE = ""  # type: str
 
 
 def init_distro_info():
-    global DISTRO_CODENAME, DISTRO_DESC, DISTRO_ID
+    global DISTRO_CODENAME, DISTRO_DESC, DISTRO_ID, DISTRO_RELEASE
     DISTRO_CODENAME = subprocess.check_output(
         ["lsb_release", "-c", "-s"], universal_newlines=True).strip()
     DISTRO_DESC = subprocess.check_output(
         ["lsb_release", "-d", "-s"], universal_newlines=True).strip()
     DISTRO_ID = subprocess.check_output(
         ["lsb_release", "-i", "-s"], universal_newlines=True).strip()
+    DISTRO_RELEASE = subprocess.check_output(
+        ["lsb_release", "-r", "-s"], universal_newlines=True).strip()
 
 
 # init global distro info
@@ -918,10 +921,12 @@ def substitute(line):
     # type: (str) -> str
     """ substitude known mappings and return a new string
 
-    Currently supported ${distro-release}
+    Currently supported: ${distro_id}, ${distro_codename} and
+    ${distro_release}
     """
     mapping = {"distro_codename": get_distro_codename(),
-               "distro_id": get_distro_id()}
+               "distro_id": get_distro_id(),
+               "distro_release": get_distro_release()}
     return string.Template(line).substitute(mapping)
 
 
@@ -933,6 +938,11 @@ def get_distro_codename():
 def get_distro_id():
     # type: () -> str
     return DISTRO_ID
+
+
+def get_distro_release():
+    # type: () -> str
+    return DISTRO_RELEASE
 
 
 def allow_marking_fallback():
