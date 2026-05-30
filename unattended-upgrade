@@ -2133,6 +2133,26 @@ def is_autoremove_valid(cache,           # type: UnattendedUpgradesCache
     return True
 
 
+def _commit_auto_removals(cache,         # type: UnattendedUpgradesCache
+                          logfile_dpkg,  # type: str
+                          verbose,       # type: bool
+                          dry_run        # type: bool
+                          ):
+    # type: (...) -> Tuple[bool, str, List[str]]
+    """Commit the pending removals marked in the cache.
+
+    Returns a (success, error, pkgs_removed) tuple where pkgs_removed
+    holds the names of the packages that were actually removed (empty on
+    a dry-run or a failed commit).
+    """
+    if dry_run:
+        cache.clear()
+        return (True, "", [])
+    pkgnames = [pkg.name for pkg in cache.get_changes()]
+    res, error = cache_commit(cache, logfile_dpkg, verbose)
+    return (res, error, pkgnames if res else [])
+
+
 def do_auto_remove(cache,             # type: UnattendedUpgradesCache
                    auto_removable,    # type: AbstractSet[str]
                    logfile_dpkg,      # type: str
@@ -2142,6 +2162,7 @@ def do_auto_remove(cache,             # type: UnattendedUpgradesCache
                    ):
     # type: (...) -> Tuple[bool, List[str], List[str]]
     res = True
+    error = "unset"
     if not auto_removable:
         return (res, [], [])
 
@@ -2163,28 +2184,19 @@ def do_auto_remove(cache,             # type: UnattendedUpgradesCache
                 pkgs_kept_installed.append(pkgname)
                 cache.clear()
                 continue
-            if not dry_run:
-                changes = cache.get_changes()
-                pkgnames = {pkg.name for pkg in changes}
-                res, error = cache_commit(cache, logfile_dpkg, verbose)
-                if not res:
-                    break
-                pkgs_removed.extend(pkgnames)
-            else:
-                cache.clear()
+            res, error, removed = _commit_auto_removals(
+                cache, logfile_dpkg, verbose, dry_run)
+            if not res:
+                break
+            pkgs_removed.extend(removed)
     else:
         for pkgname in auto_removable:
             cache[pkgname].mark_delete()
         if is_autoremove_valid(cache, "", auto_removable):
             # do it in one step
-            if not dry_run:
-                changes = cache.get_changes()
-                pkgnames = {pkg.name for pkg in changes}
-                res, error = cache_commit(cache, logfile_dpkg, verbose)
-                if res:
-                    pkgs_removed.extend(pkgnames)
-            else:
-                cache.clear()
+            res, error, removed = _commit_auto_removals(
+                cache, logfile_dpkg, verbose, dry_run)
+            pkgs_removed.extend(removed)
         else:
             # removing the auto-removable packages would also remove
             # packages that are not set for removal, so keep them installed
