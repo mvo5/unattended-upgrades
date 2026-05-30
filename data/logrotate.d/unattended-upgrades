@@ -4,6 +4,10 @@
 {
   rotate 6
   monthly
+  # unattended-upgrades keeps the log file open while running so there
+  # is a race here when rotating mid-run. copytruncate keeps the original
+  # fd open so u-u can keep writing
+  copytruncate
   compress
   missingok
   notifempty
