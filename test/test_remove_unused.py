@@ -67,12 +67,11 @@ Auto-Installed: 1
             ["rm", "-f",
              os.path.join(self.rootdir, "var", "cache", "apt", "*.bin")])
 
-    def test_remove_unused_dependencies(self):
+    def _remove_unused_dependencies(self, minimal_steps):
         apt.apt_pkg.config.clear("APT::VersionedKernelPackages")
         apt_conf = os.path.join(self.rootdir, "etc", "apt", "apt.conf")
         with open(apt_conf, "w") as fp:
             fp.write("""
-Unattended-Upgrade::MinimalSteps "false";
 Unattended-Upgrade::Keep-Debs-After-Install "true";
 Unattended-Upgrade::Allowed-Origins {
     "Ubuntu:lucid-security";
@@ -81,6 +80,7 @@ Unattended-Upgrade::Remove-Unused-Dependencies "true";
 Unattended-Upgrade::Skip-Updates-On-Metered-Connections "false";
 """)
         options = MockOptions()
+        options.minimal_upgrade_steps = minimal_steps
         unattended_upgrade.main(options, rootdir=self.rootdir)
         with open(self.log) as f:
             # both the new and the old unused dependency are removed
@@ -90,6 +90,14 @@ Unattended-Upgrade::Skip-Updates-On-Metered-Connections "false";
             haystack = f.read()
             self.assertTrue(needle in haystack,
                             "Can not find '%s' in '%s'" % (needle, haystack))
+
+    def test_remove_unused_dependencies_minimal_steps(self):
+        self._remove_unused_dependencies(minimal_steps=True)
+
+    def test_remove_unused_dependencies_single_step(self):
+        # GH: #396 - the auto-removed packages were missing from the log
+        # when not minimizing the upgrade steps
+        self._remove_unused_dependencies(minimal_steps=False)
 
     def test_remove_unused_dependencies_new_unused_only(self):
         apt.apt_pkg.config.set("APT::VersionedKernelPackages::", "linux-image")
