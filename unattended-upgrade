@@ -2178,10 +2178,17 @@ def do_auto_remove(cache,             # type: UnattendedUpgradesCache
         if is_autoremove_valid(cache, "", auto_removable):
             # do it in one step
             if not dry_run:
+                changes = cache.get_changes()
+                pkgnames = {pkg.name for pkg in changes}
                 res, error = cache_commit(cache, logfile_dpkg, verbose)
+                if res:
+                    pkgs_removed.extend(pkgnames)
             else:
                 cache.clear()
         else:
+            # removing the auto-removable packages would also remove
+            # packages that are not set for removal, so keep them installed
+            pkgs_kept_installed = list(auto_removable)
             cache.clear()
 
     if res:
