@@ -113,7 +113,7 @@ Unattended-Upgrade::Package-Blacklist {
 
 // Automatically reboot *WITHOUT CONFIRMATION* if
 //  the file /var/run/reboot-required is found after the upgrade
-//Unattended-Upgrade::Automatic-Reboot "false";
+//Unattended-Upgrade::Automatic-Reboot "true";
 
 // Automatically reboot even if there are users currently logged in
 // when Unattended-Upgrade::Automatic-Reboot is set to true
