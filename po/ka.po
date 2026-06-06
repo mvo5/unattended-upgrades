@@ -1,0 +1,437 @@
+# Georgian translation for unattended-upgrades.
+# Copyright (C) 2026 unattended-upgrades's authors
+# This file is distributed under the same license as the unattended-upgrades package.
+# Temuri Doghonadze <temuri.doghonadze@gmail.com>, 2026.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: unattended-upgrades\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2015-07-02 12:27+0200\n"
+"PO-Revision-Date: 2026-01-14 07:10+0100\n"
+"Last-Translator: Temuri Doghonadze <temuri.doghonadze@gmail.com>\n"
+"Language-Team: Georgian <(nothing)>\n"
+"Language: ka\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+"X-Generator: Poedit 3.8\n"
+
+#: ../unattended-upgrade:203 ../unattended-upgrade:746
+#: ../unattended-upgrade:1535
+#, python-format
+msgid "package %s upgradable but fails to be marked for upgrade (%s)"
+msgstr ""
+"პაკეტი %s განახლებადია, მაგრამ მისი გასანახლებლად მონიშვნა შეუძლებელია (%s)"
+
+#: ../unattended-upgrade:301
+#, python-format
+msgid "Progress: %s %% (%s)"
+msgstr "მიმდინარეობა: %s %% (%s)"
+
+#: ../unattended-upgrade:541
+msgid ""
+"Checking if system is running on battery is skipped. Please install "
+"powermgmt-base package to check power status and skip installing updates "
+"when the system is running on battery."
+msgstr ""
+"შემოწმება, მიერთებულია თუ არა კვების კაბელი, გამოტოვებულია. დააყენეთ პაკეტი "
+"powermgmt-base კვების სტატუსის შესამოწმებლად და განახლებების დაყენების "
+"გამოსატოვებლად, როცა სისტემა ელემენტზე მუშაობს."
+
+#: ../unattended-upgrade:549
+msgid "System is on metered connection, stopping"
+msgstr "სისტემა გაზომვად კავშირზეა. გამოტოვება"
+
+#: ../unattended-upgrade:552
+msgid ""
+"Checking if connection is metered is skipped. Please install python3-gi "
+"package to detect metered connections and skip downloading updates."
+msgstr ""
+"შემოწმება, გაზომვადია თუ არა კავშირი, გამოტოვებულია. დააყენეთ პაკეტი python3-"
+"gi გაზომვადი კავშირების გამოსავლენად და განახლებების გადმოწერის "
+"გამოსატოვებლად."
+
+#: ../unattended-upgrade:600 ../unattended-upgrade:617
+#, python-format
+msgid "Unable to parse %s."
+msgstr "%s-ის დამუშავება შეუძლებელია."
+
+#: ../unattended-upgrade:701 ../unattended-upgrade:789
+#: ../unattended-upgrade:2230 ../unattended-upgrade-shutdown:111
+msgid "All upgrades installed"
+msgstr "ყველა განახლება დაყენებულია"
+
+#: ../unattended-upgrade:703 ../unattended-upgrade:781
+msgid "Installing the upgrades failed!"
+msgstr "განახლებების დაყენება ჩავარდა!"
+
+#: ../unattended-upgrade:704 ../unattended-upgrade:782
+#: ../unattended-upgrade:1056 ../unattended-upgrade:1058
+#: ../unattended-upgrade:1933 ../unattended-upgrade:1935
+#, python-format
+msgid "error message: %s"
+msgstr "შეცდომის შეტყობინება: %s"
+
+#: ../unattended-upgrade:705 ../unattended-upgrade:783
+#, python-format
+msgid "dpkg returned a error! See %s for details"
+msgstr "dpkg-მა შეცდომა დააბრუნა! დეტალებისთვის იხილეთ %s"
+
+#: ../unattended-upgrade:1055 ../unattended-upgrade:1057
+#: ../unattended-upgrade:1932 ../unattended-upgrade:1934
+#: ../unattended-upgrade:1937
+msgid "Apt returned an error, exiting"
+msgstr "Apt-მა შეცდომა დააბრუნა. გასვლა"
+
+#: ../unattended-upgrade:1234
+msgid ""
+"No /usr/bin/mail or /usr/sbin/sendmail, can not send mail. You probably want "
+"to install the mailx package."
+msgstr ""
+"/usr/bin/mail-ს და /usr/sbin/sendmail-ს ელფოსტის გაგზავნა არ შეუძლიათ. ალბათ "
+"გჭირდებათ, პაკეტი mailx დააყენოთ."
+
+#: ../unattended-upgrade:1248
+msgid "[reboot required]"
+msgstr "[საჭიროა გადატვირთვა]"
+
+#: ../unattended-upgrade:1250
+msgid "[package on hold]"
+msgstr "[პაკეტი შეკავებულია]"
+
+#: ../unattended-upgrade:1254
+#, python-brace-format
+msgid ""
+"{hold_flag}{reboot_flag} unattended-upgrades result for {machine}: {result}"
+msgstr ""
+"{hold_flag}{reboot_flag} unattended-upgrades-ის შედეგი მანქანისთვის "
+"{machine}: {result}"
+
+#: ../unattended-upgrade:1258
+#, python-format
+msgid "Unattended upgrade result: %s"
+msgstr "ყურადღებამიუქცეველი განახლების შედეგი: %s"
+
+#: ../unattended-upgrade:1262
+msgid ""
+"Warning: A reboot is required to complete this upgrade, or a previous one.\n"
+"\n"
+msgstr ""
+"გაფრთხილება: ამ, ან წილა განახლების დასასრულებლად საჭიროა გადატვირთვა.\n"
+"\n"
+
+#: ../unattended-upgrade:1266
+msgid "Packages that were upgraded:\n"
+msgstr "პაკეტები, რომლებიც განახლდა:\n"
+
+#: ../unattended-upgrade:1268
+msgid "Packages that attempted to upgrade:\n"
+msgstr "პაკეტები, რომლის განახლებაც ვცადეთ:\n"
+
+#: ../unattended-upgrade:1272
+msgid "Packages with upgradable origin but kept back:\n"
+msgstr "პაკეტები, რომლებსაც აქვთ განახლება, მაგრამ არ განახლებულა:\n"
+
+#: ../unattended-upgrade:1279
+msgid "Packages that were auto-removed:\n"
+msgstr "პაკეტები, რომლებიც ავტომატურად წაიშალა:\n"
+
+#: ../unattended-upgrade:1283
+msgid "Packages that were kept from being auto-removed:\n"
+msgstr "პაკეტები, რომლების ავტოწაშლაც არ მოხდა:\n"
+
+#: ../unattended-upgrade:1287
+msgid "Package installation log:"
+msgstr "პაკეტების დაყენების ჟურნალი:"
+
+#: ../unattended-upgrade:1290
+msgid "Unattended-upgrades log:\n"
+msgstr "Unattended-upgrades-ის ჟურნალი:\n"
+
+#: ../unattended-upgrade:1317
+#, python-format
+msgid "Writing dpkg log to %s"
+msgstr "dpkg-ის ჟურნალის ჩაწერა ფაილში %s"
+
+#: ../unattended-upgrade:1469
+#, python-format
+msgid "Found %s, but not rebooting because %s is logged in."
+msgid_plural "Found %s, but not rebooting because %s are logged in."
+msgstr[0] "აღმოჩენილია %s, მაგრამ გადატვირთვა არ მოხდება, რადგან %s შესულია."
+msgstr[1] "აღმოჩენილია %s, მაგრამ გადატვირთვა არ მოხდება, რადგან %s შესულია."
+
+#: ../unattended-upgrade:1624
+#, python-format
+msgid ""
+"Keeping the following auto-removable package(s) because they include %s "
+"which is set to be kept unmodified: %s"
+msgstr ""
+"შემდეგი ავტოწაშლადი პაკეტების შენარჩუნება, რადგან ისინი შეიცავენ %s-ს, "
+"რომელიც დაყენებულია, როგორც შესანარჩუნებელი: %s"
+
+#: ../unattended-upgrade:1631
+#, python-format
+msgid ""
+"Keeping auto-removable %s package(s) because it would also remove the "
+"following packages which should be kept in this step: %s"
+msgstr ""
+"შემდეგი ავტოწაშლადი %s პაკეტის შენარჩუნება, რადგან ეს ასევე წაშლიდა შემდეგ "
+"პაკეტებს, რომლებიც დაყენებულია, როგორც შენარჩუნებადი: %s"
+
+#: ../unattended-upgrade:1637
+#, python-format
+msgid ""
+"Keeping %s auto-removable package(s) because it would also remove the "
+"following packages which should be kept in this step: %s"
+msgstr ""
+"შემდეგი %s ავტოწაშლადი პაკეტის შენარჩუნება, რადგან ეს ასევე წაშლიდა შემდეგ "
+"პაკეტებს, რომლებიც დაყენებულია, როგორც შენარჩუნებადი: %s"
+
+#: ../unattended-upgrade:1647
+#, python-format
+msgid ""
+"Keeping the following auto-removable package(s) because they include %s "
+"which package is related to the running kernel: %s"
+msgstr ""
+"შემდეგი ავტოწაშლადი პაკეტების შენარჩუნება, რადგან ისინი შეიცავენ %s-ს რომლის "
+"პაკეტიც გაშვებულ ბირთვთანაა კავშირში: %s"
+
+#: ../unattended-upgrade:1710
+#, python-format
+msgid "Packages that were successfully auto-removed: %s"
+msgstr "პაკეტები, რომლებიც წარმატებულად წაიშალა ავტომატურად: %s"
+
+#: ../unattended-upgrade:1712
+#, python-format
+msgid "Packages that are kept back: %s"
+msgstr "პაკეტები, რომლებიც შენარჩუნდა: %s"
+
+#: ../unattended-upgrade:1716
+msgid "Auto-removing the packages failed!"
+msgstr "პაკეტების ავტოწაშლა ჩავარდა!"
+
+#: ../unattended-upgrade:1717
+#, python-format
+msgid "Error message: %s"
+msgstr "შეცდომის შეტყობინება: %s"
+
+#: ../unattended-upgrade:1718
+#, python-format
+msgid "dpkg returned an error! See %s for details"
+msgstr "dpkg-მა შეცდომა დააბრუნა! დეტალებისთვის იხილეთ %s"
+
+#: ../unattended-upgrade:1808 ../unattended-upgrade:2011
+#: ../unattended-upgrade:2012
+#, python-format
+msgid "An error occurred: %s"
+msgstr "შეცდომა: %s"
+
+#: ../unattended-upgrade:1812
+msgid "An error occurred"
+msgstr "აღმოჩენილია შეცდომა"
+
+#: ../unattended-upgrade:1862 ../unattended-upgrade:1866
+#, python-format
+msgid "Not running on this development release before %s"
+msgstr "%s-მდე ამ სატესტო გამოცემაზე არ გავეშვები"
+
+#: ../unattended-upgrade:1875 ../unattended-upgrade:1876
+msgid "Not running on the development release."
+msgstr "ამ სატესტო გამოცემაზე არ გავეშვები."
+
+#: ../unattended-upgrade:1883
+#, python-format
+msgid "Initial blacklist: %s"
+msgstr "საწყისი შავი სია: %s"
+
+#: ../unattended-upgrade:1888
+#, python-format
+msgid "Initial whitelist: %s"
+msgstr "საწყისი ტეთრი სია: %s"
+
+#: ../unattended-upgrade:1891
+msgid "Starting unattended upgrades script"
+msgstr "ყურადღების მიუქცეველი განახლებების სკრიპტის გაშვება"
+
+#: ../unattended-upgrade:1894
+#, python-format
+msgid "Allowed origins are: %s"
+msgstr "დაშვებული წყაროებია: %s"
+
+#: ../unattended-upgrade:1900
+msgid "Lock could not be acquired (another package manager running?)"
+msgstr ""
+"ბლოკის მიღება შეუძლებელია (გაშვებული გაქვთ კიდევ ერთი პაკეტების მმართველი?)"
+
+#: ../unattended-upgrade:1902
+msgid "Cache lock can not be acquired, exiting"
+msgstr "კეშის ბლოკის მიღება შეუძლებელია. გასვლა"
+
+#: ../unattended-upgrade:1904
+msgid "Lock could not be acquired"
+msgstr "ბლოკის მიღება შეუძლებელია"
+
+#: ../unattended-upgrade:1913 ../unattended-upgrade:1914
+msgid "Unclean dpkg state detected, trying to correct"
+msgstr "აღმოჩენილია dpkg-ის არასუფთა მდგომარეობა. ვცდი, გავასწორო"
+
+#: ../unattended-upgrade:1925
+#, python-format
+msgid ""
+"dpkg --configure -a output:\n"
+"%s"
+msgstr ""
+"dpkg --configure -a-მა გამოიტანა:\n"
+"%s"
+
+#: ../unattended-upgrade:1940 ../unattended-upgrade:1941
+#: ../unattended-upgrade:1943 ../unattended-upgrade:2179
+#: ../unattended-upgrade:2180 ../unattended-upgrade:2182
+msgid "Cache has broken packages, exiting"
+msgstr "კეშში აღმოჩენილია გაფუჭებული პაკეტები. გასვლა"
+
+#: ../unattended-upgrade:1987
+msgid "Upgrade was interrupted"
+msgstr "განახლება შეწყდა"
+
+#: ../unattended-upgrade:1991
+#, python-format
+msgid "GetArchives() failed: %s"
+msgstr "GetArchives() ჩავარდა: %s"
+
+#: ../unattended-upgrade:2014 ../unattended-upgrade:2016
+#: ../unattended-upgrade:2019
+#, python-format
+msgid "The URI %s failed to download, aborting"
+msgstr "URI-დამ %s გადმოწერის შეცდომა. მუშაობა შეწყდება"
+
+#: ../unattended-upgrade:2022 ../unattended-upgrade:2027
+#, python-format
+msgid "Download finished, but file %s not there?!?"
+msgstr "გადმოწერა დასრულდა, მაგრამ ფაილი %s არ არსებობს?!?"
+
+#: ../unattended-upgrade:2047 ../unattended-upgrade:2051
+#, python-format
+msgid "Package %s has conffile prompt and needs to be upgraded manually"
+msgstr "პაკეტს %s აქვს კონფიგურაციის მოთხოვნა და ხელით უნდა განახლდეს"
+
+#: ../unattended-upgrade:2082
+#, python-format
+msgid "package %s not upgraded"
+msgstr "პაკეტი %s არ განახლებულა"
+
+#: ../unattended-upgrade:2112
+#, python-format
+msgid "Removing unused kernel packages: %s"
+msgstr "წაიშლება გამოუყენებელი ბირთვის პაკეტები: %s"
+
+#: ../unattended-upgrade:2133 ../unattended-upgrade:2137
+msgid ""
+"No packages found that can be upgraded unattended and no pending auto-"
+"removals"
+msgstr ""
+"პაკეტები, რომლების განახლებაც ყურადღების მიუქცევლად შესაძლებელია, ან "
+"ავტოწაშლის რიგშია, აღმოჩენილი არაა"
+
+#: ../unattended-upgrade:2160
+#, python-format
+msgid "Packages that will be upgraded: %s"
+msgstr "პაკეტები, რომლებიც განახლდება: %s"
+
+#: ../unattended-upgrade:2270
+msgid "print debug messages"
+msgstr "გამართვის შეტყობინებების ჩვენება"
+
+#: ../unattended-upgrade:2273
+msgid "make apt/libapt print verbose debug messages"
+msgstr "apt/libapt-ის დამატებითი გამართვის შეტყობინებების ჩართვა"
+
+#: ../unattended-upgrade:2278
+msgid "print info messages"
+msgstr "ინფორმაციის შეტყობინებების გამოტანა"
+
+#: ../unattended-upgrade:2281
+msgid "Simulation, download but do not install"
+msgstr "სიმულაცია. გადმოწერა, მაგრამ არა დაყენება"
+
+#: ../unattended-upgrade:2284
+msgid "Only download, do not even try to install."
+msgstr "მხოლოდ გადმოწერა. დაყენების ცდაც კი არ მოხდება."
+
+#: ../unattended-upgrade:2287
+msgid ""
+"Upgrade in minimal steps (and allow interrupting with SIGTERM) (default)"
+msgstr ""
+"განახლება მინიმალური ნაბიჯებით (და SIGTERM-ით შეწყვეტის დაშვება) "
+"(ნაგულისხმევი)"
+
+#: ../unattended-upgrade:2292
+msgid "Upgrade in minimal steps (and allow interrupting with SIGTERM"
+msgstr "განახლება მინიმალური ნაბიჯებით (და SIGTERM-ით შეწყვეტის დაშვება"
+
+#: ../unattended-upgrade:2301
+msgid "You need to be root to run this application"
+msgstr "ამ აპლიკაციის გასაშვებად root უნდა ბრძანდებოდეთ"
+
+#: ../unattended-upgrade-shutdown:86
+msgid ""
+"Unattended-upgrade in progress during shutdown, please don't turn off the "
+"computer"
+msgstr ""
+"Unattended-upgrade მიმდინარეობს გამორთვის დროს. ნუ გამორთავთ კომპიუტერს"
+
+#: ../unattended-upgrade-shutdown:114
+msgid ""
+"Unattended-upgrades stopped. There may be upgrades left to be installed in "
+"the next run."
+msgstr ""
+"Unattended-upgrades გაჩერდა. შეიძლება, შემდეგ ჯერისთვის განახლებები დარჩა "
+"დასაყენებელი."
+
+#: ../unattended-upgrade-shutdown:167
+msgid "Stop ongoing upgrades or perform upgrades before shutdown"
+msgstr "მიმდინარე განახლებების გაჩერება, ან განახლება გამორთვის წინ"
+
+#: ../unattended-upgrade-shutdown:206 ../unattended-upgrade-shutdown:263
+msgid "Unable to monitor PrepareForShutdown() signal, polling instead."
+msgstr ""
+"PrepareForShutdown() სიგნალის მონიტორინგი შეუძლებელია, სამაგიეროდ ხმის "
+"მიცემა იქნება გამოყენებული."
+
+#: ../unattended-upgrade-shutdown:209
+msgid ""
+"To enable monitoring the PrepareForShutdown() signal instead of polling "
+"please install the python3-gi package"
+msgstr ""
+"ხმის მიცემის მაგიერ PrepareForShutdown() სიგნალის მონიტორინგის ჩასართავად "
+"დააყენეთ პაკეტი python3-gi"
+
+#: ../unattended-upgrade-shutdown:266
+msgid "Maybe systemd-logind service is not running."
+msgstr "შეიძლება, სერვისი systemd-logind გაშვებული არაა."
+
+#: ../unattended-upgrade-shutdown:289
+msgid "Apt returned an error thus shutdown mode is disabled"
+msgstr "Apt-მა შეცდომა დააბრუნა, ამიტომ გამორთვის რეჟიმი გათიშულია"
+
+#: ../unattended-upgrade-shutdown:291 ../unattended-upgrade-shutdown:372
+#, python-format
+msgid "error message: '%s'"
+msgstr "შეცდომის შეტყობინება: '%s'"
+
+#: ../unattended-upgrade-shutdown:307
+msgid "Running unattended-upgrades in shutdown mode"
+msgstr "unattended-upgrades გაშვებულია გამორთვის რეჟიმში"
+
+#: ../unattended-upgrade-shutdown:328
+#, python-format
+msgid "Giving up on lockfile after %s minutes of delay"
+msgstr "ბლოკის ფაილის მიტოვება %s წუთიანი დაყოვნების შემდეგ"
+
+#: ../unattended-upgrade-shutdown:370
+msgid "Apt returned an error when loading configuration, using default values"
+msgstr ""
+"Apt-მა კონფიგურაციის ჩატვირთვის შეცდომა დააბრუნა. გამოყენებული იქნება "
+"ნაგულისხმევი მნიშვნელობები"
