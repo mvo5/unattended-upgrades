@@ -42,6 +42,7 @@ except ImportError:
 import grp
 import inspect
 import io
+import json
 from importlib.abc import Loader
 import importlib.util
 import locale
@@ -57,6 +58,7 @@ import string
 import subprocess
 import sys
 import syslog
+import tempfile
 
 try:
     from typing import AbstractSet, cast, DefaultDict, Dict, Iterable, List
@@ -108,6 +110,9 @@ if not sys.warnoptions:
 # the reboot required flag file used by packages
 REBOOT_REQUIRED_FILE = "/var/run/reboot-required"
 KEPT_PACKAGES_FILE = "var/lib/unattended-upgrades/kept-back"
+SEEN_VERSIONS_FILE = "var/lib/unattended-upgrades/seen-versions.json"
+MINIMUM_AGE_FALLBACK_INSTALL = "install"
+MINIMUM_AGE_FALLBACK_HOLD = "hold"
 MAIL_BINARY = "/usr/bin/mail"
 SENDMAIL_BINARY = "/usr/sbin/sendmail"
 USERS = "/usr/bin/users"
@@ -350,6 +355,239 @@ class PluginManager:
         self._call_plugin_func(func_name, result)
 
 
+def load_seen_versions(state_file_path):
+    # type: (str) -> Dict[str, Dict[str, str]]
+    """Load seen-versions state from JSON file.
+
+    Returns a dict mapping package names to {version: first_seen_timestamp}.
+    Returns {} on missing file, corrupt JSON, or format mismatch.
+    """
+    try:
+        with open(state_file_path, "r") as fp:
+            data = json.load(fp)
+    except (OSError, ValueError) as e:
+        if not (isinstance(e, OSError) and e.errno == errno.ENOENT):
+            logging.warning("Could not load seen-versions state %s: %s",
+                            state_file_path, e)
+        return {}
+    if not isinstance(data, dict) or data.get("_format_version") != 1:
+        logging.warning("Unsupported seen-versions format in %s, resetting",
+                        state_file_path)
+        return {}
+    return data.get("packages", {})
+
+
+def save_seen_versions(state_file_path, packages_dict):
+    # type: (str, Dict[str, Dict[str, str]]) -> None
+    """Atomically save seen-versions state to JSON file."""
+    data = {
+        "_format_version": 1,
+        "packages": packages_dict,
+    }
+    dir_path = os.path.dirname(state_file_path)
+    try:
+        os.makedirs(dir_path, exist_ok=True)
+        fd, tmp_path = tempfile.mkstemp(dir=dir_path, suffix=".tmp")
+        try:
+            with os.fdopen(fd, "w") as fp:
+                json.dump(data, fp, indent=2, sort_keys=True)
+            os.rename(tmp_path, state_file_path)
+        except BaseException:
+            with contextlib.suppress(OSError):
+                os.unlink(tmp_path)
+            raise
+    except OSError as e:
+        logging.warning("Could not save seen-versions state %s: %s",
+                        state_file_path, e)
+
+
+def parse_minimum_age_setting(value):
+    # type: (str) -> Tuple[datetime.timedelta, str]
+    """Parse MinimumAge config value.
+
+    Supported forms:
+      - "7"   (days by default)
+      - "7d"  (days)
+      - "12h" (hours)
+    Returns (required_age_delta, normalized_setting_label).
+    """
+    normalized = (value or "").strip().lower()
+    if not normalized:
+        return datetime.timedelta(0), "0d"
+
+    match = re.match(r"^(\d+)([dh]?)$", normalized)
+    if match is None:
+        logging.warning(
+            "Invalid Unattended-Upgrade::MinimumAge value '%s', disabling",
+            value)
+        return datetime.timedelta(0), "0d"
+
+    amount = int(match.group(1))
+    unit = match.group(2) or "d"
+    if unit == "h":
+        return datetime.timedelta(hours=amount), "%dh" % amount
+    return datetime.timedelta(days=amount), "%dd" % amount
+
+
+def utcnow_without_microseconds():
+    # type: () -> datetime.datetime
+    """Return current UTC time as naive datetime without microseconds."""
+    return datetime.datetime.now(
+        datetime.timezone.utc).replace(tzinfo=None, microsecond=0)
+
+
+def first_seen_age_delta(pkg_name, version_str, seen_versions,
+                         now=None):
+    # type: (str, str, Dict[str, Dict[str, str]], Optional[datetime.datetime]) -> \
+    #       Optional[datetime.timedelta]
+    """Return the elapsed time since (pkg_name, version_str) was first seen.
+
+    Returns None if the package/version is not recorded.
+    """
+    pkg_versions = seen_versions.get(pkg_name)
+    if pkg_versions is None:
+        return None
+    first_seen_str = pkg_versions.get(version_str)
+    if first_seen_str is None:
+        return None
+    if now is None:
+        now = utcnow_without_microseconds()
+    try:
+        first_seen = datetime.datetime.strptime(
+            first_seen_str, "%Y-%m-%dT%H:%M:%SZ")
+    except ValueError:
+        logging.warning("Invalid timestamp '%s' for %s %s, treating as unknown",
+                        first_seen_str, pkg_name, version_str)
+        return None
+    return max(datetime.timedelta(0), now - first_seen)
+
+
+def first_seen_age_days(pkg_name, version_str, seen_versions, today=None):
+    # type: (str, str, Dict[str, Dict[str, str]], Optional[datetime.date]) -> \
+    #       Optional[int]
+    """Return the number of days since (pkg_name, version_str) was first seen.
+
+    Returns None if the package/version is not recorded.
+    """
+    if today is None:
+        now = None
+    else:
+        now = datetime.datetime.combine(today, datetime.time())
+    age_delta = first_seen_age_delta(
+        pkg_name, version_str, seen_versions, now=now)
+    if age_delta is None:
+        return None
+    return int(age_delta.total_seconds() // (24 * 3600))
+
+
+def minimum_age_reason_for_version(pkg_name, version, minimum_age,
+                                   seen_versions, fallback, now=None,
+                                   minimum_age_label=None, today=None):
+    # type: (str, str, Union[int, datetime.timedelta], Dict[str, Dict[str, str]], str,
+    #       Optional[datetime.datetime], Optional[str], Optional[datetime.date]) -> Optional[str]
+    """Check if a package version meets the MinimumAge requirement.
+
+    Returns a reason string if the package should be held back, None otherwise.
+    """
+    if today is not None and now is None:
+        now = datetime.datetime.combine(today, datetime.time())
+    if now is None:
+        now = utcnow_without_microseconds()
+
+    if isinstance(minimum_age, int):
+        minimum_age_delta = datetime.timedelta(days=max(0, minimum_age))
+        if minimum_age_label is None:
+            minimum_age_label = "%dd" % max(0, minimum_age)
+    else:
+        minimum_age_delta = minimum_age
+        if minimum_age_label is None:
+            minimum_age_label = "%dd" % int(
+                minimum_age_delta.total_seconds() // (24 * 3600))
+
+    if minimum_age_delta <= datetime.timedelta(0):
+        return None
+    age_delta = first_seen_age_delta(pkg_name, version, seen_versions, now=now)
+    if age_delta is None:
+        if fallback == MINIMUM_AGE_FALLBACK_INSTALL:
+            logging.warning(
+                "MinimumAge: no first-seen record for %s %s, "
+                "installing anyway (fallback=install)", pkg_name, version)
+            return None
+        else:
+            # fallback == "hold": treat as age 0
+            age_delta = datetime.timedelta(0)
+    if age_delta < minimum_age_delta:
+        unit = "h" if minimum_age_label.endswith("h") else "d"
+        if unit == "h":
+            age_value = int(age_delta.total_seconds() // 3600)
+            req_value = int(minimum_age_delta.total_seconds() // 3600)
+            unit_word = "hour(s)"
+        else:
+            age_value = int(age_delta.total_seconds() // (24 * 3600))
+            req_value = int(minimum_age_delta.total_seconds() // (24 * 3600))
+            unit_word = "day(s)"
+        return (
+            _("%(pkg)s %(ver)s is only %(age)d %(unit_word)s old"
+              " (MinimumAge: %(req)d%(unit)s), keeping back")
+            % {"pkg": pkg_name, "ver": version,
+               "age": age_value, "unit_word": unit_word,
+               "req": req_value, "unit": unit})
+    return None
+
+
+def record_seen_versions(cache, state_file_path, now=None, today=None):
+    # type: (UnattendedUpgradesCache, str, Optional[datetime.datetime], Optional[datetime.date]) -> \
+    #       Dict[str, Dict[str, str]]
+    """Record newly seen package versions and prune stale entries.
+
+    Returns the updated seen_versions dict.
+    """
+    seen_versions = load_seen_versions(state_file_path)
+    if now is None:
+        if today is not None:
+            now = datetime.datetime.combine(today, datetime.time())
+        else:
+            now = utcnow_without_microseconds()
+    now_str = now.strftime("%Y-%m-%dT%H:%M:%SZ")
+
+    # Collect current upgrade candidates: {pkg_name: version_str}
+    current_candidates = {}  # type: Dict[str, str]
+    for pkg in cache:
+        if not (pkg.is_upgradable or candidate_version_changed(pkg)):
+            continue
+        try:
+            ver = ver_in_allowed_origin(pkg, cache.allowed_origins)
+        except NoAllowedOriginError:
+            continue
+        # Skip if the allowed-origin candidate is already installed
+        if pkg.is_installed and pkg.installed and ver.version == pkg.installed.version:
+            continue
+        current_candidates[pkg.name] = ver.version
+
+    # Add new entries
+    for pkg_name, version_str in current_candidates.items():
+        if pkg_name not in seen_versions:
+            seen_versions[pkg_name] = {}
+        if version_str not in seen_versions[pkg_name]:
+            seen_versions[pkg_name][version_str] = now_str
+            logging.debug("MinimumAge: first seen %s %s on %s",
+                          pkg_name, version_str, now_str)
+
+    # Prune: remove entries not in current candidates
+    for pkg_name in list(seen_versions.keys()):
+        if pkg_name not in current_candidates:
+            del seen_versions[pkg_name]
+        else:
+            for ver_str in list(seen_versions[pkg_name].keys()):
+                if ver_str != current_candidates[pkg_name]:
+                    del seen_versions[pkg_name][ver_str]
+            if not seen_versions[pkg_name]:
+                del seen_versions[pkg_name]
+
+    save_seen_versions(state_file_path, seen_versions)
+    return seen_versions
+
+
 class UnattendedUpgradesCache(apt.Cache):
 
     def __init__(self, rootdir):
@@ -387,6 +625,36 @@ class UnattendedUpgradesCache(apt.Cache):
         if self.running_kernel_pkgs_regexp:
             logging.debug("Using %s regexp to find running kernel packages",
                           self.running_kernel_pkgs_regexp.pattern)
+
+        minimum_age_value = apt_pkg.config.find(
+            "Unattended-Upgrade::MinimumAge", "0")
+        self.minimum_age_delta, self.minimum_age_label = (
+            parse_minimum_age_setting(minimum_age_value))
+        # Backward-compatible attribute used by existing code/tests.
+        self.minimum_age_days = int(
+            self.minimum_age_delta.total_seconds() // (24 * 3600))
+
+        self.minimum_age_fallback = apt_pkg.config.find(
+            "Unattended-Upgrade::MinimumAge-Fallback", "hold").lower()
+        if self.minimum_age_fallback not in (
+                MINIMUM_AGE_FALLBACK_INSTALL, MINIMUM_AGE_FALLBACK_HOLD):
+            logging.warning(
+                "Unknown MinimumAge-Fallback value '%s', using 'hold'",
+                self.minimum_age_fallback)
+            self.minimum_age_fallback = MINIMUM_AGE_FALLBACK_HOLD
+
+        self.seen_versions = {}  # type: Dict[str, Dict[str, str]]
+
+        if self.minimum_age_delta > datetime.timedelta(0):
+            logging.info("MinimumAge is %s, fallback policy is '%s'",
+                         self.minimum_age_label, self.minimum_age_fallback)
+
+    def minimum_age_reason(self, pkg_name, version):
+        # type: (str, str) -> Optional[str]
+        return minimum_age_reason_for_version(
+            pkg_name, version, self.minimum_age_delta,
+            self.seen_versions, self.minimum_age_fallback,
+            minimum_age_label=self.minimum_age_label)
 
     def find_better_version(self, pkg):
         # type (apt.Package) -> apt.package.Version
@@ -447,6 +715,9 @@ class UnattendedUpgradesCache(apt.Cache):
                             % pkg.name)
         elif not any([o.trusted for o in better_version.origins]):
             return _("Package %s's origin is not trusted.") % pkg.name
+        reason = self.minimum_age_reason(pkg.name, better_version.version)
+        if reason:
+            return reason
         return (_("Package %s is kept back because a related package"
                   " is kept back or due to local apt_preferences(5).")
                 % pkg.name)
@@ -2034,8 +2305,17 @@ def calculate_upgradable_pkgs(cache,            # type: UnattendedUpgradesCache
         if (pkg.is_upgradable or candidate_version_changed(pkg)
            and is_pkgname_in_whitelist(pkg.name, cache.whitelist)):
             try:
-                ver_in_allowed_origin(pkg, cache.allowed_origins)
+                candidate = ver_in_allowed_origin(
+                    pkg, cache.allowed_origins)
             except NoAllowedOriginError:
+                continue
+            # Skip if the allowed-origin candidate is already installed
+            if pkg.is_installed and pkg.installed and candidate.version == pkg.installed.version:
+                continue
+            reason = cache.minimum_age_reason(
+                pkg.name, candidate.version)
+            if reason:
+                logging.info(reason)
                 continue
             try_to_upgrade(pkg,
                            pkgs_to_upgrade,
@@ -2473,6 +2753,10 @@ def run(options,             # type: Options
         logging.error(_("Cache has broken packages, exiting"))
         return UnattendedUpgradesResult(
             False, _("Cache has broken packages, exiting"))
+
+    if cache.minimum_age_delta > datetime.timedelta(0):
+        seen_file = os.path.join(rootdir, SEEN_VERSIONS_FILE)
+        cache.seen_versions = record_seen_versions(cache, seen_file)
 
     with try_nice(20):
         auto_removable = get_auto_removable(cache)
