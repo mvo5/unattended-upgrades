@@ -942,12 +942,22 @@ def allow_marking_fallback():
         get_distro_codename() != "sid")
 
 
+# The version part of a versioned kernel package name (or of "uname -r"),
+# i.e. everything up to but excluding the trailing "-<flavour>".  It is the
+# upstream "X.Y.Z" followed by either the classic "-<ABI>" number used by
+# Debian/Ubuntu (e.g. linux-image-6.1.0-9-amd64, linux-image-5.15.0-1021-kvm)
+# or the Debian revision baked into the package name of newer (trixie+)
+# kernels (e.g. linux-image-6.12.90+deb13.1-amd64, +deb13, +deb13+1). See #395.
+KERNEL_VERSION_REGEXP = ("[1-9][0-9]*\\.[0-9]+\\.[0-9]+"
+                         "(-[0-9]+|\\+deb[0-9]+(\\.[0-9]+|\\+[0-9]+)?)")
+
+
 def versioned_kernel_pkgs_regexp():
     apt_versioned_kernel_pkgs = apt_pkg.config.value_list(
         "APT::VersionedKernelPackages")
     if apt_versioned_kernel_pkgs:
         return re.compile("(" + "|".join(
-            ["^" + p + "-[1-9][0-9]*\\.[0-9]+\\.[0-9]+-[0-9]+(-.+)?$"
+            ["^" + p + "-" + KERNEL_VERSION_REGEXP + "(-.+)?$"
              for p in apt_versioned_kernel_pkgs]) + ")")
     else:
         return None
@@ -962,7 +972,7 @@ def running_kernel_pkgs_regexp():
         kernel_escaped = re.escape(running_kernel_version)
         try:
             kernel_noflavor_escaped = re.escape(
-                re.match("[1-9][0-9]*\\.[0-9]+\\.[0-9]+-[0-9]+",
+                re.match(KERNEL_VERSION_REGEXP,
                          running_kernel_version)[0])
             return re.compile("(" + "|".join(
                 [("^" + p + "-" + kernel_escaped + "$|^"
