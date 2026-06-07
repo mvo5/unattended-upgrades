@@ -107,11 +107,12 @@ print(sys.argv)
         apt.apt_pkg.config.set("Dir::Bin::Dpkg", fake_dpkg)
         return aptroot
 
-    def mock_distro(self, distro_id, codename, descr):
+    def mock_distro(self, distro_id, codename, descr, release="1.0"):
         for attr, fake_value in [
             ("DISTRO_ID", distro_id),
             ("DISTRO_CODENAME", codename),
             ("DISTRO_DESC", descr),
+            ("DISTRO_RELEASE", release),
         ]:
             patcher = patch("unattended_upgrade.{}".format(attr), fake_value)
             patcher.start()
