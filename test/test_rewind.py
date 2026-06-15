@@ -26,6 +26,17 @@ class TestRewindCache(TestBase):
         unattended_upgrade.rewind_cache(self.cache, to_upgrade)
         self.assertEqual(self.cache['test-package'].candidate.version, "2.0")
 
+    def test_calculate_upgradable_pkgs_stops_on_signal(self):
+        """ a stop signal aborts the package check at the next save point """
+        options = MockOptions()
+        options.try_run = True
+        self.addCleanup(
+            setattr, unattended_upgrade, "SIGNAL_STOP_REQUEST", False)
+        unattended_upgrade.SIGNAL_STOP_REQUEST = True
+        to_upgrade = unattended_upgrade.calculate_upgradable_pkgs(
+            self.cache, options)
+        self.assertEqual(to_upgrade, [])
+
 
 if __name__ == "__main__":
     import logging
