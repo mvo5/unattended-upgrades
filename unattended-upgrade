@@ -1345,9 +1345,12 @@ def check_changes_for_sanity(cache, desired_pkg=None):
     if sanity_check_result is None:
         return True
     else:
-        logging.debug("sanity check failed for: %s : %s"
-                      % (str({str(p.candidate) for p in cache.get_changes()}),
-                         sanity_check_result))
+        # the change set behind a failed check can be hundreds of
+        # packages: so only show the number and the failed pkg
+        if logging.getLogger().isEnabledFor(logging.DEBUG):
+            num_changes = sum(1 for _ in cache.get_changes())
+            logging.debug("sanity check failed for %d package(s): %s",
+                          num_changes, sanity_check_result)
         return False
 
 
