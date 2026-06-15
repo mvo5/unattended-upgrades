@@ -358,6 +358,11 @@ class UnattendedUpgradesCache(apt.Cache):
     def __init__(self, rootdir):
         # type: (str) -> None
         self._cached_candidate_pkgnames = set()  # type: Set[str]
+        # remember the version adjust_candidate() resolved for a package so we
+        # can re-apply it cheaply after a cache.clear() instead of recomputing
+        # ver_in_allowed_origin(); the result is deterministic for a run
+        self._resolved_candidate_versions = \
+            {}  # type: Dict[str, apt.package.Version]
 
         self.allowed_origins = get_allowed_origins()
         logging.info(_("Allowed origins are: %s"),
@@ -557,6 +562,7 @@ class UnattendedUpgradesCache(apt.Cache):
                     "adjusting candidate to version %s in allowed "
                     "origin %s" % (new_cand, new_cand.origins))
                 pkg.candidate = new_cand
+                self._resolved_candidate_versions[pkg.name] = new_cand
                 return True
             else:
                 return False
@@ -607,9 +613,13 @@ class UnattendedUpgradesCache(apt.Cache):
             logging.debug("falling back to adjusting %s's dependencies"
                           % pkg.name)
             self.clear()
-            # adjust candidates in advance if needed
+            # re-apply candidates adjusted earlier; cache.clear() reset them
+            # but ver_in_allowed_origin() is deterministic so we can restore
+            # the recorded version instead of recomputing it
             for pkg_name in self._cached_candidate_pkgnames:
-                self.adjust_candidate(self[pkg_name])
+                ver = self._resolved_candidate_versions.get(pkg_name)
+                if ver is not None and self[pkg_name].candidate != ver:
+                    self[pkg_name].candidate = ver
 
             self.adjust_candidate(pkg)
             for dep in transitive_dependencies(pkg, self, level=1):
