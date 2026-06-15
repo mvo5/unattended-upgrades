@@ -2074,6 +2074,11 @@ def calculate_upgradable_pkgs(cache,            # type: UnattendedUpgradesCache
 
     # now do the actual upgrade
     for pkg in cache:
+        # check the signal directly rather than should_stop() which spawns
+        # on_ac_power per call, too expensive in this per-package loop
+        if SIGNAL_STOP_REQUEST:
+            logging.warning(_("SIGNAL received, stopping package check"))
+            break
         if options.debug and pkg.is_upgradable \
            or candidate_version_changed(pkg):
             logging.debug("Checking: %s (%s)" % (
