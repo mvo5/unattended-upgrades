@@ -363,6 +363,9 @@ class UnattendedUpgradesCache(apt.Cache):
         # ver_in_allowed_origin(); the result is deterministic for a run
         self._resolved_candidate_versions = \
             {}  # type: Dict[str, apt.package.Version]
+        # memoize is_in_allowed_origin() results; a version's origins and the
+        # allowed_origins list are both constant for a run
+        self._in_allowed_origin_memo = {}  # type: Dict[Tuple[str, str], bool]
 
         self.allowed_origins = get_allowed_origins()
         logging.info(_("Allowed origins are: %s"),
@@ -405,7 +408,7 @@ class UnattendedUpgradesCache(apt.Cache):
             for v in pkg.versions:
                 if pkg.installed < v \
                    and pkg.installed.policy_priority <= v.policy_priority \
-                   and is_in_allowed_origin(v, self.allowed_origins):
+                   and self.is_in_allowed_origin_cached(v):
                     return v
         return None
 
@@ -582,6 +585,21 @@ class UnattendedUpgradesCache(apt.Cache):
             if self[pkg_name].candidate != ver:
                 self[pkg_name].candidate = ver
 
+    def is_in_allowed_origin_cached(self, ver):
+        # type: (Optional[apt.package.Version]) -> bool
+        """ memoized is_in_allowed_origin(); the result depends only on the
+            version (its origins are fixed) and allowed_origins, both constant
+            for a run, so it is safe to cache by (package name, version)
+        """
+        if ver is None:
+            return False
+        key = (ver.package.name, ver.version)
+        cached = self._in_allowed_origin_memo.get(key)
+        if cached is None:
+            cached = is_in_allowed_origin(ver, self.allowed_origins)
+            self._in_allowed_origin_memo[key] = cached
+        return cached
+
     def call_checked(self, function, pkg, **kwargs):
         """ Call function and check if package is in the wanted state
         """
@@ -641,8 +659,7 @@ class UnattendedUpgradesCache(apt.Cache):
         for marked_pkg in self.get_changes():
             if marked_pkg.name in self._cached_candidate_pkgnames:
                 continue
-            if not is_in_allowed_origin(marked_pkg.candidate,
-                                        self.allowed_origins):
+            if not self.is_in_allowed_origin_cached(marked_pkg.candidate):
                 try:
                     ver_in_allowed_origin(marked_pkg,
                                           self.allowed_origins)
@@ -1372,7 +1389,7 @@ def sanity_problem(cache, desired_pkg):
             # origin so its good enough if we have a single trusted one
             if not any([o.trusted for o in pkg.candidate.origins]):
                 return ("pkg %s is not from a trusted origin" % pkg.name)
-            if not is_in_allowed_origin(pkg.candidate, cache.allowed_origins):
+            if not cache.is_in_allowed_origin_cached(pkg.candidate):
                 return ("pkg %s is not in an allowed origin" % pkg.name)
             if not is_pkg_change_allowed(pkg,
                                          cache.blacklist,

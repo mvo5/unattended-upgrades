@@ -49,6 +49,19 @@ class TestRewindCache(TestBase):
         for pkg in to_upgrade:
             self.assertTrue(pkg.marked_install or pkg.marked_upgrade)
 
+    def test_is_in_allowed_origin_cached(self):
+        """ the memoized origin check matches the uncached one and caches """
+        pkg = self.cache["test-package"]
+        ver = pkg.candidate
+        expected = unattended_upgrade.is_in_allowed_origin(
+            ver, self.cache.allowed_origins)
+        self.assertEqual(self.cache.is_in_allowed_origin_cached(ver), expected)
+        self.assertIn((ver.package.name, ver.version),
+                      self.cache._in_allowed_origin_memo)
+        # second call returns the same cached result
+        self.assertEqual(self.cache.is_in_allowed_origin_cached(ver), expected)
+        self.assertFalse(self.cache.is_in_allowed_origin_cached(None))
+
     def test_calculate_upgradable_pkgs_stops_on_signal(self):
         """ a stop signal aborts the package check at the next save point """
         options = MockOptions()
