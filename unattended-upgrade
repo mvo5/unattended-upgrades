@@ -569,6 +569,19 @@ class UnattendedUpgradesCache(apt.Cache):
         except NoAllowedOriginError:
             return False
 
+    def restore_adjusted_candidates(self):
+        # type: () -> None
+        """ re-apply the candidate versions resolved by adjust_candidate()
+
+            cache.clear() resets candidates to their defaults, so they have to
+            be restored before re-marking against the previously resolved
+            state. ver_in_allowed_origin() is deterministic for a run, so
+            re-applying the recorded version is equivalent to recomputing it.
+        """
+        for pkg_name, ver in self._resolved_candidate_versions.items():
+            if self[pkg_name].candidate != ver:
+                self[pkg_name].candidate = ver
+
     def call_checked(self, function, pkg, **kwargs):
         """ Call function and check if package is in the wanted state
         """
@@ -613,13 +626,8 @@ class UnattendedUpgradesCache(apt.Cache):
             logging.debug("falling back to adjusting %s's dependencies"
                           % pkg.name)
             self.clear()
-            # re-apply candidates adjusted earlier; cache.clear() reset them
-            # but ver_in_allowed_origin() is deterministic so we can restore
-            # the recorded version instead of recomputing it
-            for pkg_name in self._cached_candidate_pkgnames:
-                ver = self._resolved_candidate_versions.get(pkg_name)
-                if ver is not None and self[pkg_name].candidate != ver:
-                    self[pkg_name].candidate = ver
+            # cache.clear() reset the candidates adjusted earlier, restore them
+            self.restore_adjusted_candidates()
 
             self.adjust_candidate(pkg)
             for dep in transitive_dependencies(pkg, self, level=1):
@@ -1588,6 +1596,27 @@ def dpkg_conffile_prompt():
 def rewind_cache(cache, pkgs_to_upgrade):
     # type: (UnattendedUpgradesCache, List[apt.Package]) -> None
     """ set the cache back to the state with packages_to_upgrade """
+    cache.clear()
+    # Fast path: the candidate versions of these packages and their deps were
+    # already resolved by adjust_candidate() in an earlier pass. Restore them
+    # and do a plain mark_install to reproduce the previously-accepted set
+    # without re-running the expensive per-package adjust/fallback recursion.
+    # rewind_cache() is called once per package that fails the sanity check,
+    # so that recursion makes the naive approach O(n^2) in the number of
+    # upgradable packages, which can peg the CPU when many are held back.
+    cache.restore_adjusted_candidates()
+    try:
+        for pkg2 in pkgs_to_upgrade:
+            pkg2.mark_install(from_user=not pkg2.is_auto_installed)
+        if (
+            cache.broken_count == 0
+            and sanity_problem(cache, None) is None
+            and all(pkg2.marked_install or pkg2.marked_upgrade
+                    for pkg2 in pkgs_to_upgrade)):
+            return
+    except SystemError:
+        pass
+    # Slow but always-correct fallback
     cache.clear()
     for pkg2 in pkgs_to_upgrade:
         cache.mark_install_adjusted(pkg2, from_user=not pkg2.is_auto_installed)
