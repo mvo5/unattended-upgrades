@@ -35,10 +35,6 @@ import fcntl
 import fnmatch
 import gettext
 import glob
-try:
-    from gi.repository.Gio import NetworkMonitor
-except ImportError:
-    pass
 import grp
 import inspect
 import io
@@ -150,6 +146,9 @@ SIGNAL_STOP_REQUEST = False
 
 # messages to be logged only once
 logged_msgs = set()  # type: AbstractSet[str]
+
+# keep the NetworkManager D-Bus query short so a slow NM never blocks long
+METERED_DBUS_TIMEOUT_MSEC = 2000
 
 NEVER_PIN = -32768
 
@@ -884,6 +883,46 @@ def log_once(msg):
         logged_msgs.add(msg)  # type: ignore
 
 
+def is_metered_connection():
+    # type: () -> Optional[bool]
+    """Return whether the active network connection is metered.
+
+    Returns True/False, or None when it cannot be determined (python3-gi
+    missing or NetworkManager not reachable on the system bus).
+
+    Queries NetworkManager's "Metered" D-Bus property directly rather than via
+    Gio.NetworkMonitor.get_default(), which on hosts without NetworkManager
+    dumps the entire kernel route table -- prohibitively expensive on machines
+    carrying a full BGP table (LP: #2157046, GH: #404).
+    """
+    try:
+        from gi.repository import Gio, GLib
+    except ImportError:
+        log_once(_("Checking if connection is metered is skipped. Please "
+                   "install python3-gi package to detect metered "
+                   "connections and skip downloading updates."))
+        return None
+    try:
+        bus = Gio.bus_get_sync(Gio.BusType.SYSTEM, None)
+        ret = bus.call_sync(
+            "org.freedesktop.NetworkManager",
+            "/org/freedesktop/NetworkManager",
+            "org.freedesktop.DBus.Properties",
+            "Get",
+            GLib.Variant("(ss)",
+                         ("org.freedesktop.NetworkManager", "Metered")),
+            GLib.VariantType("(v)"),
+            Gio.DBusCallFlags.NO_AUTO_START,
+            METERED_DBUS_TIMEOUT_MSEC,
+            None)
+    except GLib.Error as e:
+        log_once(_("Checking if connection is metered is skipped because "
+                   "NetworkManager could not be queried: %s") % str(e))
+        return None
+    # NMMetered enum: 1 = YES, 3 = GUESS_YES are metered
+    return ret.unpack()[0] in (1, 3)
+
+
 def should_stop():
     # type: () -> bool
     """
@@ -905,15 +944,9 @@ def should_stop():
               "installing updates when the system is running on battery."))
     if apt_pkg.config.find_b(
             "Unattended-Upgrade::Skip-Updates-On-Metered-Connections", True):
-        try:
-            if NetworkMonitor.get_network_metered(
-                    NetworkMonitor.get_default()):
-                logging.warning(_("System is on metered connection, stopping"))
-                return True
-        except NameError:
-            log_once(_("Checking if connection is metered is skipped. Please "
-                       "install python3-gi package to detect metered "
-                       "connections and skip downloading updates."))
+        if is_metered_connection():
+            logging.warning(_("System is on metered connection, stopping"))
+            return True
     return False
 
 
