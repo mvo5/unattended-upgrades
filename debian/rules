@@ -3,17 +3,17 @@
 PYTHON=python3
 DIST=$(shell dpkg-vendor --query Vendor)
 TARGET_DIST=$(shell dpkg-parsechangelog -S Distribution)
+export PYBUILD_TEST_ARGS=$(CURDIR)
 
 %:
-	dh $@ --with=systemd
+	dh $@ --buildsystem=pybuild
 
 override_dh_auto_build:
 	# copy the right template into place
 	cp data/50unattended-upgrades.$(DIST) data/50unattended-upgrades
 	$(PYTHON) setup.py build
 
-override_dh_auto_test:
-	$(PYTHON) -m pytest
+execute_after_dh_auto_test:
 	# TODO: make sure this happens in the actual python test
 	make -C test/packages clean
 
