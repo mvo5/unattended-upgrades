@@ -3,9 +3,10 @@
 PYTHON=python3
 DIST=$(shell dpkg-vendor --query Vendor)
 TARGET_DIST=$(shell dpkg-parsechangelog -S Distribution)
+export PYBUILD_TEST_ARGS=$(CURDIR)
 
 %:
-	dh $@ --with=systemd
+	dh $@ --with=systemd --buildsystem=pybuild
 
 override_dh_auto_build:
 	# copy the right template into place

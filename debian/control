@@ -3,6 +3,7 @@ Maintainer: Michael Vogt <mvo@debian.org>
 Section: admin
 Priority: optional
 Build-Depends: debhelper-compat (= 10),
+               dh-python,
                equivs,
                po-debconf,
                python3,
