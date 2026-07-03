@@ -6,7 +6,7 @@ TARGET_DIST=$(shell dpkg-parsechangelog -S Distribution)
 export PYBUILD_TEST_ARGS=$(CURDIR)
 
 %:
-	dh $@ --with=systemd --buildsystem=pybuild
+	dh $@ --buildsystem=pybuild
 
 override_dh_auto_build:
 	# copy the right template into place

@@ -2,7 +2,7 @@ Source: unattended-upgrades
 Maintainer: Michael Vogt <mvo@debian.org>
 Section: admin
 Priority: optional
-Build-Depends: debhelper-compat (= 10),
+Build-Depends: debhelper-compat (= 13),
                dh-python,
                equivs,
                po-debconf,
