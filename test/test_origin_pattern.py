@@ -40,6 +40,9 @@ class MockCache(dict):
     def get_changes(self):
         for pkgname in self.keys():
             yield self[pkgname]
+
+    def is_in_allowed_origin_cached(self, ver):
+        return is_in_allowed_origin(ver, self.allowed_origins)
     allowed_origins = []  # type: List[str]
     blacklist = []        # type: List[str]
     whitelist = []        # type: List[str]

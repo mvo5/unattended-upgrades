@@ -358,6 +358,14 @@ class UnattendedUpgradesCache(apt.Cache):
     def __init__(self, rootdir):
         # type: (str) -> None
         self._cached_candidate_pkgnames = set()  # type: Set[str]
+        # remember the version adjust_candidate() resolved for a package so we
+        # can re-apply it cheaply after a cache.clear() instead of recomputing
+        # ver_in_allowed_origin(); the result is deterministic for a run
+        self._resolved_candidate_versions = \
+            {}  # type: Dict[str, apt.package.Version]
+        # memoize is_in_allowed_origin() results; a version's origins and the
+        # allowed_origins list are both constant for a run
+        self._in_allowed_origin_memo = {}  # type: Dict[Tuple[str, str], bool]
 
         self.allowed_origins = get_allowed_origins()
         logging.info(_("Allowed origins are: %s"),
@@ -400,7 +408,7 @@ class UnattendedUpgradesCache(apt.Cache):
             for v in pkg.versions:
                 if pkg.installed < v \
                    and pkg.installed.policy_priority <= v.policy_priority \
-                   and is_in_allowed_origin(v, self.allowed_origins):
+                   and self.is_in_allowed_origin_cached(v):
                     return v
         return None
 
@@ -557,11 +565,40 @@ class UnattendedUpgradesCache(apt.Cache):
                     "adjusting candidate to version %s in allowed "
                     "origin %s" % (new_cand, new_cand.origins))
                 pkg.candidate = new_cand
+                self._resolved_candidate_versions[pkg.name] = new_cand
                 return True
             else:
                 return False
         except NoAllowedOriginError:
             return False
+
+    def restore_adjusted_candidates(self):
+        # type: () -> None
+        """ re-apply the candidate versions resolved by adjust_candidate()
+
+            cache.clear() resets candidates to their defaults, so they have to
+            be restored before re-marking against the previously resolved
+            state. ver_in_allowed_origin() is deterministic for a run, so
+            re-applying the recorded version is equivalent to recomputing it.
+        """
+        for pkg_name, ver in self._resolved_candidate_versions.items():
+            if self[pkg_name].candidate != ver:
+                self[pkg_name].candidate = ver
+
+    def is_in_allowed_origin_cached(self, ver):
+        # type: (Optional[apt.package.Version]) -> bool
+        """ memoized is_in_allowed_origin(); the result depends only on the
+            version (its origins are fixed) and allowed_origins, both constant
+            for a run, so it is safe to cache by (package name, version)
+        """
+        if ver is None:
+            return False
+        key = (ver.package.name, ver.version)
+        cached = self._in_allowed_origin_memo.get(key)
+        if cached is None:
+            cached = is_in_allowed_origin(ver, self.allowed_origins)
+            self._in_allowed_origin_memo[key] = cached
+        return cached
 
     def call_checked(self, function, pkg, **kwargs):
         """ Call function and check if package is in the wanted state
@@ -607,9 +644,8 @@ class UnattendedUpgradesCache(apt.Cache):
             logging.debug("falling back to adjusting %s's dependencies"
                           % pkg.name)
             self.clear()
-            # adjust candidates in advance if needed
-            for pkg_name in self._cached_candidate_pkgnames:
-                self.adjust_candidate(self[pkg_name])
+            # cache.clear() reset the candidates adjusted earlier, restore them
+            self.restore_adjusted_candidates()
 
             self.adjust_candidate(pkg)
             for dep in transitive_dependencies(pkg, self, level=1):
@@ -623,8 +659,7 @@ class UnattendedUpgradesCache(apt.Cache):
         for marked_pkg in self.get_changes():
             if marked_pkg.name in self._cached_candidate_pkgnames:
                 continue
-            if not is_in_allowed_origin(marked_pkg.candidate,
-                                        self.allowed_origins):
+            if not self.is_in_allowed_origin_cached(marked_pkg.candidate):
                 try:
                     ver_in_allowed_origin(marked_pkg,
                                           self.allowed_origins)
@@ -1327,9 +1362,12 @@ def check_changes_for_sanity(cache, desired_pkg=None):
     if sanity_check_result is None:
         return True
     else:
-        logging.debug("sanity check failed for: %s : %s"
-                      % (str({str(p.candidate) for p in cache.get_changes()}),
-                         sanity_check_result))
+        # the change set behind a failed check can be hundreds of
+        # packages: so only show the number and the failed pkg
+        if logging.getLogger().isEnabledFor(logging.DEBUG):
+            num_changes = sum(1 for _ in cache.get_changes())
+            logging.debug("sanity check failed for %d package(s): %s",
+                          num_changes, sanity_check_result)
         return False
 
 
@@ -1351,7 +1389,7 @@ def sanity_problem(cache, desired_pkg):
             # origin so its good enough if we have a single trusted one
             if not any([o.trusted for o in pkg.candidate.origins]):
                 return ("pkg %s is not from a trusted origin" % pkg.name)
-            if not is_in_allowed_origin(pkg.candidate, cache.allowed_origins):
+            if not cache.is_in_allowed_origin_cached(pkg.candidate):
                 return ("pkg %s is not in an allowed origin" % pkg.name)
             if not is_pkg_change_allowed(pkg,
                                          cache.blacklist,
@@ -1578,6 +1616,27 @@ def dpkg_conffile_prompt():
 def rewind_cache(cache, pkgs_to_upgrade):
     # type: (UnattendedUpgradesCache, List[apt.Package]) -> None
     """ set the cache back to the state with packages_to_upgrade """
+    cache.clear()
+    # Fast path: the candidate versions of these packages and their deps were
+    # already resolved by adjust_candidate() in an earlier pass. Restore them
+    # and do a plain mark_install to reproduce the previously-accepted set
+    # without re-running the expensive per-package adjust/fallback recursion.
+    # rewind_cache() is called once per package that fails the sanity check,
+    # so that recursion makes the naive approach O(n^2) in the number of
+    # upgradable packages, which can peg the CPU when many are held back.
+    cache.restore_adjusted_candidates()
+    try:
+        for pkg2 in pkgs_to_upgrade:
+            pkg2.mark_install(from_user=not pkg2.is_auto_installed)
+        if (
+            cache.broken_count == 0
+            and sanity_problem(cache, None) is None
+            and all(pkg2.marked_install or pkg2.marked_upgrade
+                    for pkg2 in pkgs_to_upgrade)):
+            return
+    except SystemError:
+        pass
+    # Slow but always-correct fallback
     cache.clear()
     for pkg2 in pkgs_to_upgrade:
         cache.mark_install_adjusted(pkg2, from_user=not pkg2.is_auto_installed)
@@ -2035,6 +2094,11 @@ def calculate_upgradable_pkgs(cache,            # type: UnattendedUpgradesCache
 
     # now do the actual upgrade
     for pkg in cache:
+        # check the signal directly rather than should_stop() which spawns
+        # on_ac_power per call, too expensive in this per-package loop
+        if SIGNAL_STOP_REQUEST:
+            logging.warning(_("SIGNAL received, stopping package check"))
+            break
         if options.debug and pkg.is_upgradable \
            or candidate_version_changed(pkg):
             logging.debug("Checking: %s (%s)" % (
