@@ -2186,7 +2186,7 @@ def _commit_auto_removals(cache,         # type: UnattendedUpgradesCache
                           verbose,       # type: bool
                           dry_run        # type: bool
                           ):
-    # type: (...) -> Tuple[bool, str, List[str]]
+    # type: (...) -> Tuple[bool, Optional[Exception], List[str]]
     """Commit the pending removals marked in the cache.
 
     Returns a (success, error, pkgs_removed) tuple where pkgs_removed
@@ -2195,7 +2195,7 @@ def _commit_auto_removals(cache,         # type: UnattendedUpgradesCache
     """
     if dry_run:
         cache.clear()
-        return (True, "", [])
+        return (True, None, [])
     pkgnames = [pkg.name for pkg in cache.get_changes()]
     res, error = cache_commit(cache, logfile_dpkg, verbose)
     return (res, error, pkgnames if res else [])
@@ -2210,7 +2210,7 @@ def do_auto_remove(cache,             # type: UnattendedUpgradesCache
                    ):
     # type: (...) -> Tuple[bool, List[str], List[str]]
     res = True
-    error = "unset"
+    error = None  # type: Optional[Exception]
     if not auto_removable:
         return (res, [], [])
 

@@ -18,6 +18,7 @@ Build-Depends-Indep: python3-dev,
                      pycodestyle <!nocheck> | pep8 <!nocheck>,
 #                    powermgmt-base, (tests disable on_ac_power checks)
                      flake8 <!nocheck>,
+                     mypy <!nocheck>,
                      python3-apt (>= 1.9.6~),
                      lsb-release
 Standards-Version: 4.1.4
