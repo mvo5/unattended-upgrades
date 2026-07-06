@@ -1,3 +1,40 @@
+unattended-upgrades (2.13) unstable; urgency=medium
+
+  [ Michael Vogt ]
+  * test: run coverage via python3 module instead of binary
+  * data: update 50unattended-upgrades.md5sum
+  * test: simplify mock creation in TestDependencies
+  * log: fix `auto-removed` and `kept back` log in normal mode
+  * u-u: extract _commit_auto_removals helper
+  * matching: add support for `${distro_release}`
+  * data: tweak logrotate config to use copytruncate
+  * core: stop the calculate_upgradable_pkgs on SIGNAL_STOP_REQUEST
+  * net: use NetworkManager.Metered instead of gio.NetworkMonitor (Closes: #404)
+
+  [ koratfood ]
+  * README.md: Mention how to properly override origins
+
+  [ Darafei Praliaskouski ]
+  * Fix transitive dependency accumulator reuse (#393)
+
+  [ Jörg Behrmann ]
+  * tests: fix mocked logged_in_users return value to empty sets
+  * tests: explicitly set time in test_reboot_now
+  * Add a new setting Automatic-Reboot-WithSystemUsers
+  * Add a new settng Automatic-Reboot-NonBlockingUsers
+
+  [ Spencer Runde ]
+  * feat: include esm legacy {infra,apps} in Ubuntu conf
+  * chore: update md5sum for Ubuntu conf changes
+
+  [ Bastian Germann ]
+  * debian: Implement nocheck
+  * debian: Switch to pybuild
+  * debian: Raise debhelper-compat to 13
+  * debian: Drop unused debhelper variable
+
+ -- Michael Vogt <mvo@debian.org>  Mon, 06 Jul 2026 18:39:18 +0200
+
 unattended-upgrades (2.12+nmu1) unstable; urgency=medium
 
   * Non-maintainer upload.
