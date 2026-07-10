@@ -78,6 +78,18 @@ Unattended-Upgrade::Package-Blacklist {
 // is running is possible (with a small delay)
 //Unattended-Upgrade::MinimalSteps "true";
 
+// Delay package upgrades until each package version has been available
+// for at least N days/hours.
+// Examples: "7" (7 days), "7d" (7 days), "12h" (12 hours).
+// If no suffix is specified, days are assumed.
+//Unattended-Upgrade::MinimumAge "7";
+
+// What to do when the age of a package cannot be determined
+// (corrupted state file, unwritable filesystem, clock skew, etc.)
+// "hold" = keep package back (conservative, default)
+// "install" = install anyway (prioritize security updates over delay policy)
+//Unattended-Upgrade::MinimumAge-Fallback "hold";
+
 // Install all updates when the machine is shutting down
 // instead of doing it in the background while the machine is running.
 // This will (obviously) make shutdown slower.
