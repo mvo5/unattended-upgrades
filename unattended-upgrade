@@ -47,6 +47,7 @@ import re
 import os
 import pwd
 import select
+import shlex
 import signal
 import socket
 import string
@@ -109,23 +110,62 @@ SENDMAIL_BINARY = "/usr/sbin/sendmail"
 USERS = "/usr/bin/users"
 
 
-# no py3 lsb_release in debian :/
 DISTRO_CODENAME = ""  # type: str
 DISTRO_DESC = ""  # type: str
 DISTRO_ID = ""  # type: str
 DISTRO_RELEASE = ""  # type: str
 
+OS_RELEASE_PATHS = ["/etc/os-release", "/usr/lib/os-release"]
 
-def init_distro_info():
+
+def parse_os_release(paths=None):
+    # type: (Optional[List[str]]) -> Dict[str, str]
+    """Parse the first available os-release(5) file into a dict.
+
+    This is the same data lsb_release(1) reports on modern systems, so we
+    read it directly and avoid spawning lsb_release (and depending on the
+    lsb-release package being installed at all).
+    """
+    # TODO: replace with platform.freedesktop_os_release() once the minimum
+    # Python is >= 3.10 (Bullseye is still on 3.9, Bionic on 3.6)
+    data = {}  # type: Dict[str, str]
+    for path in (paths or OS_RELEASE_PATHS):
+        try:
+            f = open(path)
+        except FileNotFoundError:
+            continue
+        with f:
+            for line in f:
+                line = line.strip()
+                if not line or line.startswith("#") or "=" not in line:
+                    continue
+                key, value = line.split("=", 1)
+                # values may be shell-quoted, see os-release(5)
+                try:
+                    tokens = shlex.split(value)
+                except ValueError:
+                    tokens = [value.strip("\"'")]
+                data[key.strip()] = tokens[0] if tokens else ""
+        break
+    return data
+
+
+def init_distro_info(paths=None):
+    # type: (Optional[List[str]]) -> None
     global DISTRO_CODENAME, DISTRO_DESC, DISTRO_ID, DISTRO_RELEASE
-    DISTRO_CODENAME = subprocess.check_output(
-        ["lsb_release", "-c", "-s"], universal_newlines=True).strip()
-    DISTRO_DESC = subprocess.check_output(
-        ["lsb_release", "-d", "-s"], universal_newlines=True).strip()
-    DISTRO_ID = subprocess.check_output(
-        ["lsb_release", "-i", "-s"], universal_newlines=True).strip()
-    DISTRO_RELEASE = subprocess.check_output(
-        ["lsb_release", "-r", "-s"], universal_newlines=True).strip()
+    os_release = parse_os_release(paths)
+    # mimic the values lsb_release(1) derives from os-release
+    distro_id = os_release.get("ID", "")
+    # capitalize the first letter (e.g. "ubuntu" -> "Ubuntu")
+    distro_id = distro_id[:1].upper() + distro_id[1:]
+    # use NAME if it only differs from ID in capitalization
+    name = os_release.get("NAME", "")
+    if name and distro_id.lower() == name.lower():
+        distro_id = name
+    DISTRO_ID = distro_id or "n/a"
+    DISTRO_DESC = os_release.get("PRETTY_NAME", "n/a")
+    DISTRO_RELEASE = os_release.get("VERSION_ID", "n/a")
+    DISTRO_CODENAME = os_release.get("VERSION_CODENAME", "n/a")
 
 
 # init global distro info
