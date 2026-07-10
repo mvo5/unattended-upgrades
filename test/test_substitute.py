@@ -6,7 +6,7 @@ import unittest
 import apt_pkg
 
 
-from unattended_upgrade import substitute, get_allowed_origins
+from unattended_upgrade import substitute, get_origins_from_conf
 
 from test.test_base import TestBase
 
@@ -30,11 +30,11 @@ class TestSubstitute(TestBase):
             "o=obs://x/Debian_42,n=Debian_42")
 
     def test_get_allowed_origins_with_substitute(self):
-        """ test if substitute for get_allowed_origins works """
+        """ test if substitute for get_origins_from_conf works """
         apt_pkg.config.clear("Unattended-Upgrade::Allowed-Origins")
         apt_pkg.config.set("Unattended-Upgrade::Allowed-Origins::",
                            "${distro_id} ${distro_codename}-security")
-        li = get_allowed_origins()
+        li = get_origins_from_conf()
         self.assertIn("o=MyDistroID,a=mycodename-security", li)
 
 
