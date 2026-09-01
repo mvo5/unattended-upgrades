@@ -1,0 +1,19 @@
+Package: ordinary-root
+Architecture: all
+Version: 2.0
+Depends: driver-dependency (= 2.0)
+Description-en: ordinary package with a deferred-install dependency
+Filename: ./ordinary-root_2.0_all.deb
+
+Package: driver-dependency
+Architecture: all
+Version: 2.0
+Defer-Install-To-Shutdown: yes
+Description-en: deferred-install package selected as a dependency
+Filename: ./driver-dependency_2.0_all.deb
+
+Package: unrelated-safe
+Architecture: all
+Version: 2.0
+Description-en: unrelated package safe to upgrade normally
+Filename: ./unrelated-safe_2.0_all.deb

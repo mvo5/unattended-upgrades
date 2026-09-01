@@ -1228,6 +1228,19 @@ def python_regex_is_posix(expression: str) -> bool:
     return re.match("^[-a-zA-Z0-9\\^\\$\\+\\.:]*$", expression) is not None
 
 
+DEFER_INSTALL_FIELD = "Defer-Install-To-Shutdown"
+
+
+def candidate_defers_install(pkg: apt.Package) -> bool:
+    # Opt-in: a package whose candidate carries Defer-Install-To-Shutdown: yes
+    # must not be installed during the running session; its whole transaction
+    # is deferred to shutdown instead.
+    candidate = pkg.candidate
+    return bool(candidate and str(
+        candidate.record.get(DEFER_INSTALL_FIELD) or "").strip().lower()
+        == "yes")
+
+
 def cache_commit(cache: apt.Cache,
                  logfile_dpkg: str,
                  verbose: bool,
@@ -1235,10 +1248,23 @@ def cache_commit(cache: apt.Cache,
                  ) -> tuple[bool, Exception | None]:
     """Commit the changes from the given cache to the system"""
 
-    error = None
+    error = None  # type: Optional[Exception]
     res = False
     if iprogress is None:
         iprogress = LogInstallProgress(logfile_dpkg, verbose)
+
+    deferred_packages = [
+        pkg.name for pkg in cache.get_changes()
+        if (pkg.marked_install or pkg.marked_upgrade)
+        and candidate_defers_install(pkg)
+    ]
+    if deferred_packages:
+        error = RuntimeError(
+            "refusing to install packages marked for deferred installation "
+            "unattended: %s" % ", ".join(deferred_packages))
+        logging.error("%s", error)
+        cache.clear()
+        return res, error
 
     try:
         res = cache.commit(install_progress=iprogress)
@@ -1578,6 +1604,9 @@ def sanity_problem(cache: UnattendedUpgradesCache,
         if not pkg.candidate:
             return ("internal error: pkg %s has no candidate" % pkg.candidate)
         if pkg.marked_install or pkg.marked_upgrade:
+            if candidate_defers_install(pkg):
+                return ("pkg %s is marked for deferred installation and is "
+                        "not safe to upgrade unattended" % pkg.name)
             # apt will never fallback from a trusted to a untrusted
             # origin so its good enough if we have a single trusted one
             if not any([o.trusted for o in pkg.candidate.origins]):
