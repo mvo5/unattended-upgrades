@@ -2079,8 +2079,8 @@ def calculate_upgradable_pkgs(cache,            # type: UnattendedUpgradesCache
                 getattr(pkg, "candidate", pkg.name),
                 getattr(pkg.candidate, "origins", [])))
 
-        if (pkg.is_upgradable or candidate_version_changed(pkg)
-           and is_pkgname_in_whitelist(pkg.name, cache.whitelist)):
+        if ((pkg.is_upgradable or candidate_version_changed(pkg))
+                and is_pkgname_in_whitelist(pkg.name, cache.whitelist)):
             try:
                 ver_in_allowed_origin(pkg, cache.allowed_origins)
             except NoAllowedOriginError:
