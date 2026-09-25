@@ -33,6 +33,7 @@ import email.charset
 # workaround LP:2080940, email.errors changes as part of a security
 # update in python itself but is lazy loaded so import early to ensure
 import email.generator
+from enum import Enum
 import fcntl
 import fnmatch
 import gettext
@@ -213,6 +214,18 @@ class NoAllowedOriginError(ValueError):
     pass
 
 
+class UpgradeFilter(Enum):
+    """Filter whole transactions instead of individual packages.
+
+    DRIVERS_ONLY includes ordinary dependencies needed by a driver update.
+    NO_DRIVERS rejects any transaction that would install a driver.
+    """
+
+    ALL_UPGRADES = 1
+    DRIVERS_ONLY = 2
+    NO_DRIVERS = 3
+
+
 PkgPin = namedtuple('PkgPin', ['pkg', 'priority'])
 PkgFilePin = namedtuple('PkgFilePin', ['id', 'priority'])
 
@@ -377,7 +390,9 @@ class PluginManager:
 
 class UnattendedUpgradesCache(apt.Cache):
 
-    def __init__(self, rootdir: str) -> None:
+    def __init__(self, rootdir: str, upgrade_filter: UpgradeFilter = UpgradeFilter.NO_DRIVERS) -> None:
+        # Keep the mode across dependency adjustment and cache reopening.
+        self.upgrade_filter = upgrade_filter
         self._cached_candidate_pkgnames: set[str] = set()
 
         self.allowed_origins = get_allowed_origins()
@@ -1241,7 +1256,7 @@ def candidate_defers_install(pkg: apt.Package) -> bool:
         == "yes")
 
 
-def cache_commit(cache: apt.Cache,
+def cache_commit(cache: UnattendedUpgradesCache,
                  logfile_dpkg: str,
                  verbose: bool,
                  iprogress: apt.progress.base.InstallProgress | None = None,
@@ -1258,7 +1273,7 @@ def cache_commit(cache: apt.Cache,
         if (pkg.marked_install or pkg.marked_upgrade)
         and candidate_defers_install(pkg)
     ]
-    if deferred_packages:
+    if cache.upgrade_filter == UpgradeFilter.NO_DRIVERS and deferred_packages:
         error = RuntimeError(
             "refusing to install packages marked for deferred installation "
             "unattended: %s" % ", ".join(deferred_packages))
@@ -1277,7 +1292,7 @@ def cache_commit(cache: apt.Cache,
     return res, error
 
 
-def upgrade_normal(cache: apt.Cache, logfile_dpkg: str, verbose: bool) -> bool:
+def upgrade_normal(cache: UnattendedUpgradesCache, logfile_dpkg: str, verbose: bool) -> bool:
     res, error = cache_commit(cache, logfile_dpkg, verbose)
     if res:
         logging.info(_("All upgrades installed"))
@@ -1604,7 +1619,8 @@ def sanity_problem(cache: UnattendedUpgradesCache,
         if not pkg.candidate:
             return ("internal error: pkg %s has no candidate" % pkg.candidate)
         if pkg.marked_install or pkg.marked_upgrade:
-            if candidate_defers_install(pkg):
+            if (cache.upgrade_filter == UpgradeFilter.NO_DRIVERS
+                    and candidate_defers_install(pkg)):
                 return ("pkg %s is marked for deferred installation and is "
                         "not safe to upgrade unattended" % pkg.name)
             # apt will never fallback from a trusted to a untrusted
@@ -2287,6 +2303,12 @@ def write_stamp_file() -> None:
         pass
 
 
+def transaction_has_driver(cache: UnattendedUpgradesCache) -> bool:
+    return any(candidate_defers_install(pkg)
+               for pkg in cache.get_changes()
+               if pkg.marked_install or pkg.marked_upgrade)
+
+
 def try_to_upgrade(pkg: apt.Package,
                    pkgs_to_upgrade: list[apt.Package],
                    cache: UnattendedUpgradesCache,
@@ -2301,11 +2323,20 @@ def try_to_upgrade(pkg: apt.Package,
                 return
         except NoAllowedOriginError:
             return
+        if cache.upgrade_filter == UpgradeFilter.DRIVERS_ONLY:
+            # Check this root alone so an earlier driver does not make an
+            # unrelated update qualify.
+            cache.clear()
         cache._cached_candidate_pkgnames.add(pkg.name)
         cache.mark_upgrade_adjusted(pkg, from_user=not pkg.is_auto_installed)
-        if check_changes_for_sanity(cache, pkg):
+        if (check_changes_for_sanity(cache, pkg)
+                and (cache.upgrade_filter != UpgradeFilter.DRIVERS_ONLY
+                     or transaction_has_driver(cache))):
             # add to packages to upgrade
             pkgs_to_upgrade.append(pkg)
+            if cache.upgrade_filter == UpgradeFilter.DRIVERS_ONLY:
+                # Restore all accepted roots after checking this one alone.
+                rewind_cache(cache, pkgs_to_upgrade)
         else:
             rewind_cache(cache, pkgs_to_upgrade)
     except (SystemError, NoAllowedOriginError) as e:

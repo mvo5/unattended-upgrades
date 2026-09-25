@@ -17,3 +17,17 @@ Architecture: all
 Version: 2.0
 Description-en: unrelated package safe to upgrade normally
 Filename: ./unrelated-safe_2.0_all.deb
+
+Package: driver-root
+Architecture: all
+Version: 2.0
+Depends: ordinary-dependency (= 2.0)
+Defer-Install-To-Shutdown: yes
+Description-en: deferred-install update requiring an ordinary dependency update
+Filename: ./driver-root_2.0_all.deb
+
+Package: ordinary-dependency
+Architecture: all
+Version: 2.0
+Description-en: ordinary dependency required by a driver
+Filename: ./ordinary-dependency_2.0_all.deb
