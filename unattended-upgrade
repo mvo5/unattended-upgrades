@@ -2365,7 +2365,7 @@ def main(options, rootdir="/"):
                   install_start_time)
         logging.debug("upgrade result: %s %s" % (res.success, res.result_str))
 
-        if res.success and res.result_str:
+        if res.success and res.result_str and not options.dry_run:
             # complete, successful run
             update_kept_pkgs_file(res.pkgs_kept_back,
                                   os.path.join(rootdir, KEPT_PACKAGES_FILE))
