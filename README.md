@@ -245,6 +245,16 @@ Supported Options Reference
 
  NOTE that "never" is achieved by not setting any `Unattended-Upgrade::Mail`
 
+* `Unattended-Upgrade::MailReport-Kept-Back` - string (default: "always")
+
+ With `Unattended-Upgrade::MailReport` set to "on-change", decides whether
+ packages kept back (for example blacklisted or on hold) are enough for a
+ mail when nothing else happened. Possible values are "always" (a mail on
+ every run while packages are kept back), "on-change" (a mail only for newly
+ kept back packages or versions) or "never". Mails sent for any other reason
+ still list all the packages kept back. With "on-change" the versions already
+ reported are saved in `/var/lib/unattended-upgrades/kept-back-mailed`.
+
 * `Unattended-Upgrade::Remove-Unused-Dependencies` - boolean (default:False)
  
  Remove all unused dependencies after the upgrade has finished.
