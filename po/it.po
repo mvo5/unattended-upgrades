@@ -1,0 +1,519 @@
+# Italian translation for unattended-upgrades
+# Copyright (c) 2008 Rosetta Contributors and Canonical Ltd 2008
+# This file is distributed under the same license as the unattended-upgrades package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, 2008.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: unattended-upgrades\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2026-09-29 18:49+0000\n"
+"PO-Revision-Date: 2020-03-13 12:43+0000\n"
+"Last-Translator: Milo Casagrande <milo.casagrande@gmail.com>\n"
+"Language-Team: Italian <it@li.org>\n"
+"Language: it\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=n != 1;\n"
+"X-Launchpad-Export-Date: 2026-09-05 11:48+0000\n"
+"X-Generator: Launchpad (build b0097495a28d09c3303dbd078ca616792464b9f2)\n"
+
+#: ../unattended-upgrade:362
+#, c-format
+msgid "Allowed origins are: %s"
+msgstr "Origini consentite sono: %s"
+
+#: ../unattended-upgrade:367
+#, c-format
+msgid "Initial blacklist: %s"
+msgstr "Blacklist iniziale: %s"
+
+#: ../unattended-upgrade:373
+#, c-format
+msgid "Initial whitelist (%s): %s"
+msgstr "Whitelist iniziale (%s): %s"
+
+#: ../unattended-upgrade:412
+msgid "The list of kept packages can't be calculated in dry-run mode."
+msgstr ""
+"L'elenco dei pacchetti conservati non può essere calcolato in modalità di "
+"funzionamento a secco."
+
+#: ../unattended-upgrade:435
+#, c-format
+msgid "Package %s is marked to be held back."
+msgstr "Il pacchetto %s è marcato da non aggiornare."
+
+#: ../unattended-upgrade:437
+#, c-format
+msgid "Package %s is blacklisted."
+msgstr "Il pacchetto %s è nella blacklist."
+
+#: ../unattended-upgrade:442
+#, c-format
+msgid "Package %s is not on the strict whitelist."
+msgstr "Il pacchetto %s non è nella whitelist."
+
+#: ../unattended-upgrade:447
+#, c-format
+msgid ""
+"Package %s is not whitelisted and it is not a dependency of a whitelisted "
+"package."
+msgstr ""
+"Il pacchetto %s non è nella whitelist e non è una dipendenza di un pacchetto "
+"nella whitelist."
+
+#: ../unattended-upgrade:451
+#, c-format
+msgid "Package %s's origin is not trusted."
+msgstr "L'origine del pacchetto %s non è affidabile."
+
+#: ../unattended-upgrade:452
+#, c-format
+msgid ""
+"Package %s is kept back because a related package is kept back or due to "
+"local apt_preferences(5)."
+msgstr ""
+"Il pacchetto %s non viene aggiornato perché o un pacchetto correlato non "
+"viene aggiornato o a causa di apt_preferences(5)."
+
+#: ../unattended-upgrade:572 ../unattended-upgrade:1188
+#: ../unattended-upgrade:2050
+#, c-format
+msgid "package %s upgradable but fails to be marked for upgrade (%s)"
+msgstr ""
+"il pacchetto %s è aggiornabile, ma non è possibile impostarlo per essere "
+"aggiornato (%s)"
+
+#: ../unattended-upgrade:673
+#, c-format
+msgid "Progress: %s %% (%s)"
+msgstr "Avanzamento: %s %% (%s)"
+
+#: ../unattended-upgrade:901
+msgid ""
+"Checking if connection is metered is skipped. Please install python3-gi "
+"package to detect metered connections and skip downloading updates."
+msgstr ""
+"Controllo della connessione a consumo saltato. Installare il pacchetto "
+"python3-gi per determinare se la connessione Internet è a consumo e per "
+"saltare lo scaricamento degli aggiornamenti."
+
+#: ../unattended-upgrade:919
+#, c-format
+msgid ""
+"Checking if connection is metered is skipped because NetworkManager could "
+"not be queried: %s"
+msgstr ""
+
+#: ../unattended-upgrade:942
+msgid ""
+"Checking if system is running on battery is skipped. Please install "
+"powermgmt-base package to check power status and skip installing updates "
+"when the system is running on battery."
+msgstr ""
+"Controllo dell'alimentazione da batteria saltato. Installare il pacchetto "
+"powermgmt-base per controllare lo stato dell'alimentazione del sistema e per "
+"saltare l'installazione degli aggiornamento se il sistema è alimentato dalla "
+"batteria."
+
+#: ../unattended-upgrade:948
+msgid "System is on metered connection, stopping"
+msgstr "Il sistema utilizza una connessione a consumo, fermato"
+
+#: ../unattended-upgrade:1044 ../unattended-upgrade:1061
+#, c-format
+msgid "Unable to parse %s."
+msgstr "Impossibile analizzare %s."
+
+#: ../unattended-upgrade:1147 ../unattended-upgrade:1230
+#: ../unattended-upgrade:2798 ../unattended-upgrade-shutdown:113
+msgid "All upgrades installed"
+msgstr "Installati tutti gli aggiornamenti"
+
+#: ../unattended-upgrade:1149 ../unattended-upgrade:1222
+msgid "Installing the upgrades failed!"
+msgstr "Installazione degli aggiornamenti non riuscita."
+
+#: ../unattended-upgrade:1150 ../unattended-upgrade:1223
+#: ../unattended-upgrade:1519 ../unattended-upgrade:1521
+#: ../unattended-upgrade:2513 ../unattended-upgrade:2515
+#, c-format
+msgid "error message: %s"
+msgstr "messaggio di errore: %s"
+
+#: ../unattended-upgrade:1151 ../unattended-upgrade:1224
+#, c-format
+msgid "dpkg returned a error! See %s for details"
+msgstr ""
+"dpkg è terminato con un errore. Per maggiori informazioni consultare %s"
+
+#: ../unattended-upgrade:1518 ../unattended-upgrade:1520
+#: ../unattended-upgrade:2512 ../unattended-upgrade:2514
+#: ../unattended-upgrade:2517
+msgid "Apt returned an error, exiting"
+msgstr "apt è terminato con un errore, uscita"
+
+#: ../unattended-upgrade:1703
+msgid ""
+"No /usr/bin/mail or /usr/sbin/sendmail, can not send mail. You probably want "
+"to install the mailx package."
+msgstr ""
+"/usr/bin/mail o /usr/sbin/sendmail non disponibili, impossibile inviare "
+"l'email. Potrebbe essere necessario installare il pacchetto mailx."
+
+#: ../unattended-upgrade:1735
+msgid "[reboot required]"
+msgstr "[richiesto riavvio]"
+
+#: ../unattended-upgrade:1737
+msgid "[package on hold]"
+msgstr "[pacchetto bloccato]"
+
+#: ../unattended-upgrade:1741
+msgid ""
+"{hold_flag}{reboot_flag} unattended-upgrades result for {machine}: {result}"
+msgstr ""
+"{hold_flag}{reboot_flag} risultato di unattended-upgrades per {machine}: "
+"{result}"
+
+#: ../unattended-upgrade:1745
+#, c-format
+msgid "Unattended upgrade result: %s"
+msgstr "Risultato aggiornamenti senza controllo: %s"
+
+#: ../unattended-upgrade:1749
+msgid ""
+"Warning: A reboot is required to complete this upgrade, or a previous one.\n"
+"\n"
+msgstr ""
+"Attenzione: è richiesto riavviare il sistema per completare questo "
+"l'aggiornamento o uno precedente.\n"
+"\n"
+
+#: ../unattended-upgrade:1753
+msgid "Packages that were upgraded:\n"
+msgstr "Pacchetti che sono stati aggiornati:\n"
+
+#: ../unattended-upgrade:1755
+msgid "Packages that attempted to upgrade:\n"
+msgstr "Pacchetti che si è tentato di aggiornare:\n"
+
+#: ../unattended-upgrade:1759
+msgid "Packages with upgradable origin but kept back:\n"
+msgstr "Pacchetti aggiornabili, ma mantenuti alla versione attuale:\n"
+
+#: ../unattended-upgrade:1766
+msgid "Packages that were auto-removed:\n"
+msgstr "Pacchetti rimossi automaticamente:\n"
+
+#: ../unattended-upgrade:1770
+msgid "Packages that were kept from being auto-removed:\n"
+msgstr "Pacchetti mantenuti e non rimossi automaticamente:\n"
+
+#: ../unattended-upgrade:1774
+msgid "Package installation log:"
+msgstr "Registro installazione pacchetto:"
+
+#: ../unattended-upgrade:1777
+msgid "Unattended-upgrades log:\n"
+msgstr "Registro di unattended-upgrades:\n"
+
+#: ../unattended-upgrade:1806
+#, c-format
+msgid "Writing dpkg log to %s"
+msgstr "Scrittura registro di dpkg su %s"
+
+#: ../unattended-upgrade:1995
+#, fuzzy, c-format
+#| msgid "Found %s, but not rebooting because %s is logged in."
+#| msgid_plural "Found %s, but not rebooting because %s are logged in."
+msgid "Found %s, but not rebooting because non-system user %s is logged in."
+msgid_plural ""
+"Found %s, but not rebooting because non-system user %s are logged in."
+msgstr[0] ""
+"Trovato %s, ma non viene eseguito il riavvio perché l'utente %s è collegato."
+msgstr[1] ""
+"Trovato %s, ma non viene eseguito il riavvio perché gli utenti %s sono "
+"collegati."
+
+#: ../unattended-upgrade:2008
+#, c-format
+msgid "Found %s, but not rebooting because %s is logged in."
+msgid_plural "Found %s, but not rebooting because %s are logged in."
+msgstr[0] ""
+"Trovato %s, ma non viene eseguito il riavvio perché l'utente %s è collegato."
+msgstr[1] ""
+"Trovato %s, ma non viene eseguito il riavvio perché gli utenti %s sono "
+"collegati."
+
+#: ../unattended-upgrade:2074
+msgid "SIGNAL received, stopping package check"
+msgstr ""
+
+#: ../unattended-upgrade:2148
+#, c-format
+msgid ""
+"Keeping the following auto-removable package(s) because they include %s "
+"which is set to be kept unmodified: %s"
+msgstr ""
+"I seguenti pacchetti auto-rimovibili sono stati tenuti in quanto includono "
+"%s che è impostato per essere tenuto non modificato: %s"
+
+#: ../unattended-upgrade:2155
+#, c-format
+msgid ""
+"Keeping auto-removable %s package(s) because it would also remove the "
+"following packages which should be kept in this step: %s"
+msgstr ""
+"Il pacchetto auto-rimovibile %s viene tenuto in quanto verrebbero rimossi "
+"anche i seguenti pacchetti da mantenere: %s"
+
+#: ../unattended-upgrade:2161
+#, c-format
+msgid ""
+"Keeping %s auto-removable package(s) because it would also remove the "
+"following packages which should be kept in this step: %s"
+msgstr ""
+"%s pacchetti auto-rimovibili vengono tenuti in quanto verrebbero rimossi "
+"anche i seguenti pacchetti da mantenere: %s"
+
+#: ../unattended-upgrade:2171
+#, c-format
+msgid ""
+"Keeping the following auto-removable package(s) because they include %s "
+"which package is related to the running kernel: %s"
+msgstr ""
+"Vengono tenuti i seguenti pacchetti auto-rimovibili in quanto includono il "
+"pacchetto %s che è necessario al kernel in esecuzione: %s"
+
+#: ../unattended-upgrade:2255
+#, c-format
+msgid "Packages that were successfully auto-removed: %s"
+msgstr "Pacchetti rimossi automaticamente con successo: %s"
+
+#: ../unattended-upgrade:2257
+#, c-format
+msgid "Packages that are kept back: %s"
+msgstr "Pacchetti mantenuti alla versione attuale: %s"
+
+#: ../unattended-upgrade:2261
+msgid "Auto-removing the packages failed!"
+msgstr "Rimozione automatica dei pacchetti non riuscita"
+
+#: ../unattended-upgrade:2262
+#, c-format
+msgid "Error message: %s"
+msgstr "Messaggio di errore: %s"
+
+#: ../unattended-upgrade:2263
+#, c-format
+msgid "dpkg returned an error! See %s for details"
+msgstr ""
+"dpkg è terminato con un errore. Per maggiori informazioni consultare %s"
+
+#: ../unattended-upgrade:2315
+#, c-format
+msgid "Could not open %s for saving list of packages kept back."
+msgstr ""
+"Impossibile aprire %s per salvare l'elenco dei pacchetto non aggiornati."
+
+#: ../unattended-upgrade:2398 ../unattended-upgrade:2576
+#: ../unattended-upgrade:2577
+#, c-format
+msgid "An error occurred: %s"
+msgstr "Si è verificato un errore: %s"
+
+#: ../unattended-upgrade:2402
+msgid "An error occurred"
+msgstr "Si è verificato un errore"
+
+#: ../unattended-upgrade:2458 ../unattended-upgrade:2462
+#, c-format
+msgid "Not running on this development release before %s"
+msgstr "Non viene eseguito su questo rilascio di sviluppo prima di %s"
+
+#: ../unattended-upgrade:2471 ../unattended-upgrade:2472
+msgid "Not running on the development release."
+msgstr "Non in esecuzione su una versione di sviluppo."
+
+#: ../unattended-upgrade:2475
+msgid "Starting unattended upgrades script"
+msgstr "Avvio script avanzamento senza controllo"
+
+#: ../unattended-upgrade:2481
+msgid "Lock could not be acquired (another package manager running?)"
+msgstr ""
+"Impossibile impostare il blocco (un altro gestore di pacchetti potrebbe "
+"essere in esecuzione)"
+
+#: ../unattended-upgrade:2483
+msgid "Cache lock can not be acquired, exiting"
+msgstr "Impossibile impostare il blocco sulla cache, uscita"
+
+#: ../unattended-upgrade:2485
+msgid "Lock could not be acquired"
+msgstr "Impossibile acquisire il blocco"
+
+#: ../unattended-upgrade:2494 ../unattended-upgrade:2495
+msgid "Unclean dpkg state detected, trying to correct"
+msgstr "Rilevato stato unclean di dpkg, tentativo di correzione"
+
+#: ../unattended-upgrade:2506
+#, c-format
+msgid ""
+"dpkg --configure -a output:\n"
+"%s"
+msgstr ""
+"output di \"dpkg --configure -a\":\n"
+"%s"
+
+#: ../unattended-upgrade:2520 ../unattended-upgrade:2521
+#: ../unattended-upgrade:2523 ../unattended-upgrade:2744
+#: ../unattended-upgrade:2745 ../unattended-upgrade:2747
+msgid "Cache has broken packages, exiting"
+msgstr "La cache contiene dei pacchetti danneggiati, uscita"
+
+#: ../unattended-upgrade:2551
+msgid "Upgrade was interrupted"
+msgstr "L'aggiornamento è stato interrotto"
+
+#: ../unattended-upgrade:2555
+#, c-format
+msgid "GetArchives() failed: %s"
+msgstr "GetArchives() non riuscita: %s"
+
+#: ../unattended-upgrade:2579 ../unattended-upgrade:2581
+#: ../unattended-upgrade:2584
+#, c-format
+msgid "The URI %s failed to download, aborting"
+msgstr "Impossibile scaricare l'URI %s, uscita"
+
+#: ../unattended-upgrade:2587 ../unattended-upgrade:2592
+#, c-format
+msgid "Download finished, but file %s not there?!?"
+msgstr "Scaricamento completato, ma il file %s non è presente."
+
+#: ../unattended-upgrade:2612 ../unattended-upgrade:2616
+#, c-format
+msgid "Package %s has conffile prompt and needs to be upgraded manually"
+msgstr ""
+"Il pacchetto %s necessità di configurazioni personalizzate e deve essere "
+"aggiornato manualmente"
+
+#: ../unattended-upgrade:2644
+#, c-format
+msgid "package %s not upgraded"
+msgstr "pacchetto %s non aggiornato"
+
+#: ../unattended-upgrade:2674
+#, c-format
+msgid "Removing unused kernel packages: %s"
+msgstr "Rimozione di pacchetti kernel non utilizzati: %s"
+
+#: ../unattended-upgrade:2694 ../unattended-upgrade:2700
+msgid ""
+"No packages found that can be upgraded unattended and no pending auto-"
+"removals"
+msgstr ""
+"Nessun pacchetto trovato che possa essere aggiornato e nessuna rimozione "
+"automatica in attesa"
+
+#: ../unattended-upgrade:2724
+#, c-format
+msgid "Packages that will be upgraded: %s"
+msgstr "Pacchetti che verranno aggiornati: %s"
+
+#: ../unattended-upgrade:2838
+msgid "print debug messages"
+msgstr "Stampa messaggi di debug"
+
+#: ../unattended-upgrade:2841
+msgid "make apt/libapt print verbose debug messages"
+msgstr "Fa in modo che apt/libapt stampino messaggi di debug"
+
+#: ../unattended-upgrade:2846
+msgid "print info messages"
+msgstr "Stampa messaggi informativi"
+
+#: ../unattended-upgrade:2849
+msgid "Simulation, download but do not install"
+msgstr "Simulazione, scarica ma non installa"
+
+#: ../unattended-upgrade:2852
+msgid "Only download, do not even try to install."
+msgstr "Scarica solamente, non installa nulla"
+
+#: ../unattended-upgrade:2855
+msgid ""
+"Upgrade in minimal steps (and allow interrupting with SIGTERM) (default)"
+msgstr ""
+"Avanzamento con passi minimali (consente interruzione con SIGTERM) "
+"(predefinito)"
+
+#: ../unattended-upgrade:2860
+msgid "Upgrade all packages together instead of in smaller sets"
+msgstr "Aggiorna tutti i pacchetti assieme invece che in gruppi ridotti"
+
+#: ../unattended-upgrade:2869
+msgid "You need to be root to run this application"
+msgstr "È necessario essere root per eseguire questa applicazione"
+
+#: ../unattended-upgrade-shutdown:88
+msgid ""
+"Unattended-upgrade in progress during shutdown, please don't turn off the "
+"computer"
+msgstr ""
+"Esecuzione di unattended-upgrade durante lo spegnimento del computer. Non "
+"spegnerlo manualmente."
+
+#: ../unattended-upgrade-shutdown:116
+msgid ""
+"Unattended-upgrades stopped. There may be upgrades left to be installed in "
+"the next run."
+msgstr ""
+"«unattended-upgrades» fermato: potrebbero essere presenti degli "
+"aggiornamenti da installare alla prossima esecuzione."
+
+#: ../unattended-upgrade-shutdown:208 ../unattended-upgrade-shutdown:265
+msgid "Unable to monitor PrepareForShutdown() signal, polling instead."
+msgstr ""
+"Impossibile controllare il segnale PrepareForShutdown(), viene eseguito un "
+"poll."
+
+#: ../unattended-upgrade-shutdown:211
+msgid ""
+"To enable monitoring the PrepareForShutdown() signal instead of polling "
+"please install the python3-gi package"
+msgstr ""
+"Per poter controllare il segnale PrepareForShutdown() installare il "
+"pacchetto python3-gi"
+
+#: ../unattended-upgrade-shutdown:268
+msgid "Maybe systemd-logind service is not running."
+msgstr "Forse il servizio systemd-logind non è in esecuzione."
+
+#: ../unattended-upgrade-shutdown:291
+msgid "Apt returned an error thus shutdown mode is disabled"
+msgstr "apt ha restituito un errore e la modalità shutdwon è disabilitata"
+
+#: ../unattended-upgrade-shutdown:293 ../unattended-upgrade-shutdown:374
+#, c-format
+msgid "error message: '%s'"
+msgstr "messaggio d'errore: \"%s\""
+
+#: ../unattended-upgrade-shutdown:309
+msgid "Running unattended-upgrades in shutdown mode"
+msgstr "Esecuzione di unattended-upgrade in modalità arresto"
+
+#: ../unattended-upgrade-shutdown:330
+#, c-format
+msgid "Giving up on lockfile after %s minutes of delay"
+msgstr "File di blocco rilasciato dopo %s minuti di ritardo"
+
+#: ../unattended-upgrade-shutdown:372
+msgid "Apt returned an error when loading configuration, using default values"
+msgstr ""
+"apt ha restituito un errore nel caricare la configurazione, vengono usati i "
+"valori predefiniti"
