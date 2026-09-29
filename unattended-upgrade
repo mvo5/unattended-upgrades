@@ -2251,7 +2251,7 @@ def do_auto_remove(cache,             # type: UnattendedUpgradesCache
     if res:
         logging.info(_("Packages that were successfully auto-removed: %s"),
                      " ".join(sorted(pkgs_removed)))
-        logging.info(_("Packages that are kept back: %s"),
+        logging.info(_("Packages that were kept from being auto-removed: %s"),
                      " ".join(sorted(pkgs_kept_installed)))
     if not res:
         cache.clear()
