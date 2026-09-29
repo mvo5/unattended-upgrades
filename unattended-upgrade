@@ -1041,7 +1041,7 @@ def get_allowed_origins_legacy():
             allowed_origins.append("o=%s,a=%s" % (substitute(distro_id),
                                    substitute(distro_codename)))
     except ValueError:
-        logging.error(_("Unable to parse %s." % key))
+        logging.error(_("Unable to parse %s.") % key)
         raise
     return allowed_origins
 
@@ -1058,7 +1058,7 @@ def get_allowed_origins():
         for s in apt_pkg.config.value_list(key):
             allowed_origins.append(substitute(s))
     except ValueError:
-        logging.error(_("Unable to parse %s." % key))
+        logging.error(_("Unable to parse %s.") % key)
         raise
     return allowed_origins
 
@@ -2313,7 +2313,7 @@ def update_kept_pkgs_file(kept_pkgs, kept_file):
                 kf.write(" ".join(sorted(pkgs_all_origins)))
         except FileNotFoundError:
             logging.error(_("Could not open %s for saving list of packages "
-                            "kept back." % kept_file))
+                            "kept back.") % kept_file)
     else:
         if os.path.exists(kept_file):
             os.remove(kept_file)
