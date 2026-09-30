@@ -435,18 +435,15 @@ class UnattendedUpgradesCache(apt.Cache):
             return _("Package %s is marked to be held back.") % pkg.name
         elif is_pkgname_in_blacklist(pkg.name, blacklist):
             return _("Package %s is blacklisted.") % pkg.name
-        elif whitelist:
+        elif whitelist and not is_pkgname_in_whitelist(pkg.name, whitelist):
             if strict_whitelist:
-                if not is_pkgname_in_whitelist(pkg.name, whitelist):
-                    return (_(
-                        "Package %s is not on the strict whitelist.")
-                        % pkg.name)
-                else:
-                    if not is_pkgname_in_whitelist(pkg.name, whitelist):
-                        return (_(
-                            "Package %s is not whitelisted and it is not a"
-                            " dependency of a whitelisted package.")
-                            % pkg.name)
+                return (_(
+                    "Package %s is not on the strict whitelist.")
+                    % pkg.name)
+            return (_(
+                "Package %s is not whitelisted and it is not a"
+                " dependency of a whitelisted package.")
+                % pkg.name)
         elif not any([o.trusted for o in better_version.origins]):
             return _("Package %s's origin is not trusted.") % pkg.name
         return (_("Package %s is kept back because a related package"
@@ -2254,7 +2251,7 @@ def do_auto_remove(cache,             # type: UnattendedUpgradesCache
     if res:
         logging.info(_("Packages that were successfully auto-removed: %s"),
                      " ".join(sorted(pkgs_removed)))
-        logging.info(_("Packages that are kept back: %s"),
+        logging.info(_("Packages that were kept from being auto-removed: %s"),
                      " ".join(sorted(pkgs_kept_installed)))
     if not res:
         cache.clear()
