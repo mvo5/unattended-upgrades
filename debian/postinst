@@ -37,6 +37,21 @@ uu_running() {
     python3 -c 'import apt; import apt_pkg; import sys; sys.exit(1 if apt_pkg.get_lock("/var/run/unattended-upgrades.lock") >= 0 else 0)'
 }
 
+# Return the (lower-case) distribution ID from os-release(5), e.g. "debian"
+# or "ubuntu". Read directly instead of via lsb_release(1) so we do not
+# depend on the lsb-release package. Sourced in a subshell so the os-release
+# variables do not leak into this script. See os-release(5).
+distro_id() {
+    (
+        if [ -e /etc/os-release ]; then
+            . /etc/os-release
+        elif [ -e /usr/lib/os-release ]; then
+            . /usr/lib/os-release
+        fi
+        printf '%s\n' "${ID:-}"
+    ) 2>/dev/null
+}
+
 case "$1" in
     configure)
 	# *sigh* typo in filename in version 0.51ubuntu1
@@ -72,11 +87,11 @@ case "$1" in
 	ucfr unattended-upgrades "$CONFIG"
 
         # Recover from broken dh_installinit override in versions < 0.93.1+nmu1 (or < 0.93.1ubuntu3 in Ubuntu)
-        if ([ "$(lsb_release -i -s)" != "Ubuntu" ] \
+        if ([ "$(distro_id)" != "ubuntu" ] \
                 && ( dpkg --compare-versions "$2" lt "0.93.1+nmu1" \
                          || (dpkg --compare-versions "$2" ge "1.5~" \
                                  && dpkg --compare-versions "$2" lt "1.7~" ) ) ) || \
-               ([ "$(lsb_release -i -s)" = "Ubuntu" ] \
+               ([ "$(distro_id)" = "ubuntu" ] \
                     && ( dpkg --compare-versions "$2" lt "0.93.1ubuntu3" \
                              || (dpkg --compare-versions "$2" ge "1.5ubuntu1~" \
                                      && dpkg --compare-versions "$2" lt "1.5ubuntu4~" ) \
@@ -118,11 +133,11 @@ esac
 # sees the service as disable and will not enable it.
 case "$1" in
     configure)
-        if ( ([ "$(lsb_release -i -s)" != "Ubuntu" ] \
+        if ( ([ "$(distro_id)" != "ubuntu" ] \
                   && ( dpkg --compare-versions "$2" lt "0.93.1+nmu1" \
                            || (dpkg --compare-versions "$2" ge "1.5~" \
                                    && dpkg --compare-versions "$2" lt "1.7~" ) ) ) || \
-                 ([ "$(lsb_release -i -s)" = "Ubuntu" ] \
+                 ([ "$(distro_id)" = "ubuntu" ] \
                       && ( dpkg --compare-versions "$2" lt "0.93.1ubuntu3" \
                                || (dpkg --compare-versions "$2" ge "1.5ubuntu1~" \
                                        && dpkg --compare-versions "$2" lt "1.5ubuntu4~" ) \
