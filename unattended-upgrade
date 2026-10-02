@@ -2657,6 +2657,21 @@ def update_apply_on_shutdown_marker(rootdir: str, pending: bool) -> None:
             pass
 
 
+def recheck_deferred_upgrades(cache: UnattendedUpgradesCache,
+                               options: Options,
+                               rootdir: str,
+                               retained_packages: set[str]) -> set[str]:
+    # Minimal-step installation can succeed while some transactions remain.
+    remaining = calculate_upgradable_pkgs(cache, options)
+    mark_pkgs_to_upgrade(cache, [pkg.name for pkg in remaining])
+    if not should_stop():
+        retained_packages = {pkg.shortname for pkg in cache.get_changes()
+                             if pkg.marked_install or pkg.marked_upgrade}
+        update_apply_on_shutdown_marker(rootdir, bool(remaining))
+    cache.clear()
+    return retained_packages
+
+
 def is_update_day() -> bool:
     # check if patch days are configured
     patch_days = apt_pkg.config.value_list("Unattended-Upgrade::Update-Days")
@@ -2957,13 +2972,14 @@ def run(options: Options,
     install_on_shutdown = apt_pkg.config.find_b(
         "Unattended-Upgrade::InstallOnShutdown", False)
     preparation_filter = (UpgradeFilter.ALL_UPGRADES
-                          if not on_shutdown and not install_on_shutdown
+                          if not on_shutdown or install_on_shutdown
                           else UpgradeFilter.NO_DRIVERS)
 
     # get a cache
     try:
         cache = UnattendedUpgradesCache(
             rootdir=rootdir, upgrade_filter=preparation_filter)
+        cache.cache_only = on_shutdown and install_on_shutdown
     except SystemError as error:
         print(_("Apt returned an error, exiting"))
         print(_("error message: %s") % error)
@@ -3064,17 +3080,23 @@ def run(options: Options,
         logging.debug("dpkg is configured not to cause conffile prompts")
 
     retained_packages: set[str] = set()
-    if not on_shutdown and not install_on_shutdown:
+    if on_shutdown and install_on_shutdown:
+        pkgs_to_upgrade, retained_packages = select_deferred_upgrades(cache, options)
+    elif not on_shutdown:
         # Reuse this cache so conffile exclusions survive the filter change.
-        cache.upgrade_filter = UpgradeFilter.DRIVERS_ONLY
+        cache.upgrade_filter = (UpgradeFilter.ALL_UPGRADES
+                                if install_on_shutdown
+                                else UpgradeFilter.DRIVERS_ONLY)
         _deferred, retained_packages = select_deferred_upgrades(cache, options)
         cache.upgrade_filter = UpgradeFilter.NO_DRIVERS
-        pkgs_to_upgrade = calculate_upgradable_pkgs(cache, options)
+        if not install_on_shutdown:
+            pkgs_to_upgrade = calculate_upgradable_pkgs(cache, options)
 
+    if not on_shutdown or install_on_shutdown:
         if should_stop():
             return UnattendedUpgradesResult(False, _("Upgrade was interrupted"))
         if not options.dry_run:
-            pending = bool(retained_packages)
+            pending = bool(pkgs_to_upgrade if on_shutdown else retained_packages)
             # A conffile conflict is not evidence that pending work is finished.
             if pending or not pkg_conffile_prompt:
                 update_apply_on_shutdown_marker(rootdir, pending)
@@ -3239,6 +3261,11 @@ def run(options: Options,
                   % (cache._depcache.inst_count,
                      cache._depcache.del_count,
                      cache._depcache.broken_count))
+
+    if (on_shutdown and install_on_shutdown and successful_run
+            and not options.dry_run and not should_stop()):
+        retained_packages = recheck_deferred_upgrades(
+            cache, options, rootdir, retained_packages)
 
     # clean after success install (if needed)
     keep_key = "Unattended-Upgrade::Keep-Debs-After-Install"
