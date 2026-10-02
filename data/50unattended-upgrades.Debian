@@ -101,6 +101,12 @@ Unattended-Upgrade::Package-Blacklist {
 // is used to chose between "only-on-error" and "on-change"
 //Unattended-Upgrade::MailReport "on-change";
 
+// With MailReport "on-change", decide whether packages kept back (e.g.
+// blacklisted or on hold) are enough for a mail when nothing else happened:
+// "always" (every run), "on-change" (only for newly kept back packages or
+// versions) or "never"
+//Unattended-Upgrade::MailReport-Kept-Back "always";
+
 // Remove unused automatically installed kernel-related packages
 // (kernel images, kernel headers and kernel version locked tools).
 //Unattended-Upgrade::Remove-Unused-Kernel-Packages "true";
