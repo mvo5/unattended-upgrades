@@ -2971,15 +2971,16 @@ def run(options: Options,
         "UNATTENDED_UPGRADES_FORCE_INSTALL_ON_SHUTDOWN" in os.environ)
     install_on_shutdown = apt_pkg.config.find_b(
         "Unattended-Upgrade::InstallOnShutdown", False)
-    preparation_filter = (UpgradeFilter.ALL_UPGRADES
-                          if not on_shutdown or install_on_shutdown
-                          else UpgradeFilter.NO_DRIVERS)
+    # Download all eligible updates normally; limit selection at shutdown.
+    preparation_filter = (UpgradeFilter.DRIVERS_ONLY
+                          if on_shutdown and not install_on_shutdown
+                          else UpgradeFilter.ALL_UPGRADES)
 
     # get a cache
     try:
         cache = UnattendedUpgradesCache(
             rootdir=rootdir, upgrade_filter=preparation_filter)
-        cache.cache_only = on_shutdown and install_on_shutdown
+        cache.cache_only = on_shutdown
     except SystemError as error:
         print(_("Apt returned an error, exiting"))
         print(_("error message: %s") % error)
@@ -3080,9 +3081,9 @@ def run(options: Options,
         logging.debug("dpkg is configured not to cause conffile prompts")
 
     retained_packages: set[str] = set()
-    if on_shutdown and install_on_shutdown:
+    if on_shutdown:
         pkgs_to_upgrade, retained_packages = select_deferred_upgrades(cache, options)
-    elif not on_shutdown:
+    else:
         # Reuse this cache so conffile exclusions survive the filter change.
         cache.upgrade_filter = (UpgradeFilter.ALL_UPGRADES
                                 if install_on_shutdown
@@ -3092,14 +3093,13 @@ def run(options: Options,
         if not install_on_shutdown:
             pkgs_to_upgrade = calculate_upgradable_pkgs(cache, options)
 
-    if not on_shutdown or install_on_shutdown:
-        if should_stop():
-            return UnattendedUpgradesResult(False, _("Upgrade was interrupted"))
-        if not options.dry_run:
-            pending = bool(pkgs_to_upgrade if on_shutdown else retained_packages)
-            # A conffile conflict is not evidence that pending work is finished.
-            if pending or not pkg_conffile_prompt:
-                update_apply_on_shutdown_marker(rootdir, pending)
+    if should_stop():
+        return UnattendedUpgradesResult(False, _("Upgrade was interrupted"))
+    if not options.dry_run:
+        pending = bool(pkgs_to_upgrade if on_shutdown else retained_packages)
+        # A conffile conflict is not evidence that pending work is finished.
+        if pending or not pkg_conffile_prompt:
+            update_apply_on_shutdown_marker(rootdir, pending)
 
     # auto-removals
     kernel_pkgs_remove_success: bool = True
@@ -3262,8 +3262,8 @@ def run(options: Options,
                      cache._depcache.del_count,
                      cache._depcache.broken_count))
 
-    if (on_shutdown and install_on_shutdown and successful_run
-            and not options.dry_run and not should_stop()):
+    if (on_shutdown and successful_run and not options.dry_run
+            and not should_stop()):
         retained_packages = recheck_deferred_upgrades(
             cache, options, rootdir, retained_packages)
 

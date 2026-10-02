@@ -48,6 +48,8 @@ from optparse import OptionParser, Values
 from gettext import gettext as _
 from threading import Event
 
+APPLY_ON_SHUTDOWN_FILE = "/var/run/unattended-upgrades-apply-on-shutdown"
+
 try:
     import apt_pkg
 except Exception:
@@ -288,12 +290,14 @@ class UnattendedUpgradesShutdown():
             self.apt_pkg_reinit_done = False
 
         if self.on_shutdown_mode is None:
+            # Pending drivers also trigger a run when the global option is off.
             self.on_shutdown_mode = (
                 not self.options.stop_only
                 and not self.stop_signal_received.is_set()
                 and self.apt_pkg_reinit_done
-                and apt_pkg.config.find_b(
-                    "Unattended-Upgrade::InstallOnShutdown", False))
+                and (apt_pkg.config.find_b(
+                    "Unattended-Upgrade::InstallOnShutdown", False)
+                    or os.path.isfile(APPLY_ON_SHUTDOWN_FILE)))
             if self.on_shutdown_mode:
                 env = os.environ.copy()
                 env["UNATTENDED_UPGRADES_FORCE_INSTALL_ON_SHUTDOWN"] = "1"
