@@ -393,6 +393,7 @@ class UnattendedUpgradesCache(apt.Cache):
     def __init__(self, rootdir: str, upgrade_filter: UpgradeFilter = UpgradeFilter.NO_DRIVERS) -> None:
         # Keep the mode across dependency adjustment and cache reopening.
         self.upgrade_filter = upgrade_filter
+        self.cache_only = False
         self._cached_candidate_pkgnames: set[str] = set()
 
         self.allowed_origins = get_allowed_origins()
@@ -427,8 +428,40 @@ class UnattendedUpgradesCache(apt.Cache):
             logging.debug("Using %s regexp to find running kernel packages",
                           self.running_kernel_pkgs_regexp.pattern)
 
-    def find_better_version(self, pkg: apt.Package
-                            ) -> apt.package.Version | None:
+    def _run_fetcher(self, fetcher: apt_pkg.Acquire,
+                     allow_unauthenticated: bool | None = None) -> int:
+        if not self.cache_only:
+            return super()._run_fetcher(fetcher, allow_unauthenticated)
+
+        # cache.commit() also fetches archives through this method.
+        self._check_cached_archives(fetcher, allow_unauthenticated)
+        return apt_pkg.Acquire.RESULT_CONTINUE
+
+    def _check_cached_archives(self, fetcher: apt_pkg.Acquire,
+                                allow_unauthenticated: bool | None) -> None:
+        if allow_unauthenticated is None:
+            allow_unauthenticated = apt_pkg.config.find_b(
+                "APT::Get::AllowUnauthenticated", False)
+        hashes = {}
+        for pkg in self.get_changes():
+            if not (pkg.marked_install or pkg.marked_upgrade):
+                continue
+            candidate = pkg.candidate
+            if candidate is not None:
+                for uri in candidate.uris:
+                    hashes[uri] = candidate._records.hashes
+        # GetArchives checks cached file sizes, but not their contents.
+        for item in fetcher.items:
+            expected = hashes.get(item.desc_uri)
+            if (not item.complete
+                    or (not item.is_trusted and not allow_unauthenticated)
+                    or expected is None or not expected.usable
+                    or not expected.verify_file(item.destfile)):
+                raise SystemError("Required archive is not available in the "
+                                  "cache or failed validation: %s" %
+                                  item.desc_uri)
+
+    def find_better_version(self, pkg: apt.Package) -> apt.package.Version | None:
         installed = pkg.installed
         if installed and pkg.versions[0] > installed:
             logging.debug(
