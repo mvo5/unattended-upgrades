@@ -289,18 +289,13 @@ Supported Options Reference
  InhibitDelayMaxSec=30min
  ```
 
-* `Unattended-Upgrade::MinBatteryLevel` - percentage or "ac-only" (default:"40")
- 
- The average charge of the batteries, in percent, needed to upgrade
- while the machine is running on battery. Below that, the upgrade is
- skipped or gracefully stopped. Set it to "0" to upgrade regardless of
- power source, or to "ac-only" to only upgrade on AC power. With
- `Unattended-Upgrade::MinimalSteps`, the power is checked before each
- upgrade step.
-
- If this isn't set but the legacy boolean
- `Unattended-Upgrade::OnlyOnACPower` is, "true" works like "ac-only"
- and "false" like "0".
+ Upgrade transactions that include a package whose candidate carries the
+ `Defer-Install-To-Shutdown: yes` field are downloaded during the regular run
+ and installed at shutdown even when this option is false. Pending work is
+ signalled by `/var/run/unattended-upgrades-apply-on-shutdown`, and the required
+ archives are retained in the APT cache. Shutdown installations use cached
+ archives only; missing or invalid archives leave the work pending. With this
+ option enabled, all eligible upgrades are deferred to shutdown.
 
 * `Unattended-Upgrade::Mail` - string (default:"")
 

@@ -5,6 +5,7 @@ from __future__ import annotations
 import os
 import os.path
 import unittest
+from unittest.mock import patch
 
 import apt
 import unattended_upgrade
@@ -47,6 +48,21 @@ class TestClean(TestBase):
         self.assertEqual(os.path.exists("lock"), True)
         # dirs are untouched
         self.assertEqual(os.path.exists("dir"), True)
+
+    def test_retained_transaction_archives(self):
+        apt.apt_pkg.config.set("dir::cache::archives", self.tempdir)
+        fetcher = MockFetcher()
+        names = ("driver", "dependency", "ordinary")
+        for name in names:
+            with open(name, "w"):
+                pass
+        fetcher.items = [MockAcquireItem(name) for name in names]
+        with patch("unattended_upgrade.pkgname_from_deb", side_effect=lambda p: p):
+            unattended_upgrade.clean_downloaded_packages(
+                fetcher, {"driver", "dependency"})
+        self.assertTrue(os.path.exists("driver"))
+        self.assertTrue(os.path.exists("dependency"))
+        self.assertFalse(os.path.exists("ordinary"))
 
 
 if __name__ == "__main__":
