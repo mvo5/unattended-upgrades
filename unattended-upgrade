@@ -27,13 +27,14 @@ from __future__ import annotations
 import atexit
 import collections.abc
 import contextlib
+import copy
 import datetime
 import errno
 import email.charset
 # workaround LP:2080940, email.errors changes as part of a security
 # update in python itself but is lazy loaded so import early to ensure
 import email.generator
-from enum import Enum
+from enum import Enum, auto
 import fcntl
 import fnmatch
 import gettext
@@ -222,9 +223,9 @@ class UpgradeFilter(Enum):
     NO_DRIVERS rejects any transaction that would install a driver.
     """
 
-    ALL_UPGRADES = 1
-    DRIVERS_ONLY = 2
-    NO_DRIVERS = 3
+    ALL_UPGRADES = auto()
+    DRIVERS_ONLY = auto()
+    NO_DRIVERS = auto()
 
 
 PkgPin = namedtuple('PkgPin', ['pkg', 'priority'])
@@ -391,7 +392,9 @@ class PluginManager:
 
 class UnattendedUpgradesCache(apt.Cache):
 
-    def __init__(self, rootdir: str, upgrade_filter: UpgradeFilter = UpgradeFilter.NO_DRIVERS) -> None:
+    def __init__(self, rootdir: str,
+                 upgrade_filter: UpgradeFilter = UpgradeFilter.NO_DRIVERS,
+                 ) -> None:
         # Keep the mode across dependency adjustment and cache reopening.
         self.upgrade_filter = upgrade_filter
         self.cache_only = False
@@ -439,7 +442,7 @@ class UnattendedUpgradesCache(apt.Cache):
         return apt_pkg.Acquire.RESULT_CONTINUE
 
     def _check_cached_archives(self, fetcher: apt_pkg.Acquire,
-                                allow_unauthenticated: bool | None) -> None:
+                               allow_unauthenticated: bool | None) -> None:
         if allow_unauthenticated is None:
             allow_unauthenticated = apt_pkg.config.find_b(
                 "APT::Get::AllowUnauthenticated", False)
@@ -841,6 +844,25 @@ class LogInstallProgress(apt.progress.base.InstallProgress):
             self._redirect_stdin()
             self._redirect_output()
         return pid
+
+
+class Unlocked:
+    """
+    Context manager for unlocking the apt lock while cache.commit() is run
+    """
+
+    def __enter__(self) -> None:
+        try:
+            apt_pkg.pkgsystem_unlock_inner()
+        except Exception:
+            # earlier python-apt used to leak lock
+            logging.warning("apt_pkg.pkgsystem_unlock() failed due to not "
+                            "holding the lock but trying to continue")
+            pass
+
+    def __exit__(self, exc_type: object, exc_value: object,
+                 exc_tb: object) -> None:
+        apt_pkg.pkgsystem_lock_inner()
 
 
 class KeptPkgs(defaultdict):
@@ -1297,7 +1319,7 @@ def cache_commit(cache: UnattendedUpgradesCache,
                  ) -> tuple[bool, Exception | None]:
     """Commit the changes from the given cache to the system"""
 
-    error = None  # type: Optional[Exception]
+    error: Exception | None = None
     res = False
     if iprogress is None:
         iprogress = LogInstallProgress(logfile_dpkg, verbose)
@@ -1326,7 +1348,8 @@ def cache_commit(cache: UnattendedUpgradesCache,
     return res, error
 
 
-def upgrade_normal(cache: UnattendedUpgradesCache, logfile_dpkg: str, verbose: bool) -> bool:
+def upgrade_normal(cache: UnattendedUpgradesCache,
+                   logfile_dpkg: str, verbose: bool) -> bool:
     res, error = cache_commit(cache, logfile_dpkg, verbose)
     if res:
         logging.info(_("All upgrades installed"))
@@ -2357,21 +2380,24 @@ def try_to_upgrade(pkg: apt.Package,
                 return
         except NoAllowedOriginError:
             return
-        if cache.upgrade_filter == UpgradeFilter.DRIVERS_ONLY:
+        drivers_only = cache.upgrade_filter == UpgradeFilter.DRIVERS_ONLY
+        if drivers_only:
             # Check this root alone so an earlier driver does not make an
             # unrelated update qualify.
             cache.clear()
+
         cache._cached_candidate_pkgnames.add(pkg.name)
         cache.mark_upgrade_adjusted(pkg, from_user=not pkg.is_auto_installed)
-        if (check_changes_for_sanity(cache, pkg)
-                and (cache.upgrade_filter != UpgradeFilter.DRIVERS_ONLY
-                     or transaction_has_driver(cache))):
-            # add to packages to upgrade
+
+        accepted_upgrade = (
+            check_changes_for_sanity(cache, pkg)
+            and (not drivers_only or transaction_has_driver(cache))
+        )
+        if accepted_upgrade:
             pkgs_to_upgrade.append(pkg)
-            if cache.upgrade_filter == UpgradeFilter.DRIVERS_ONLY:
-                # Restore all accepted roots after checking this one alone.
-                rewind_cache(cache, pkgs_to_upgrade)
-        else:
+
+        if not accepted_upgrade or drivers_only:
+            # Restore accepted roots after rejection or an isolated check.
             rewind_cache(cache, pkgs_to_upgrade)
     except (SystemError, NoAllowedOriginError) as e:
         # can't upgrade
@@ -2616,8 +2642,10 @@ def do_auto_remove(cache: UnattendedUpgradesCache,
     return (res, pkgs_removed, pkgs_kept_installed)
 
 
-def clean_downloaded_packages(fetcher: apt_pkg.Acquire,
-                               retained_packages: frozenset = frozenset()) -> None:
+def clean_downloaded_packages(
+        fetcher: apt_pkg.Acquire,
+        retained_packages: set[str] | frozenset[str] = frozenset(),
+) -> None:
     archivedir = os.path.dirname(
         apt_pkg.config.find_dir("Dir::Cache::archives"))
     for item in fetcher.items:
@@ -2631,9 +2659,10 @@ def clean_downloaded_packages(fetcher: apt_pkg.Acquire,
                 pass
 
 
-def select_deferred_upgrades(cache: UnattendedUpgradesCache,
-                              options: Options,
-                              ) -> tuple[list[apt.Package], set[str]]:
+def select_deferred_upgrades(
+        cache: UnattendedUpgradesCache,
+        options: Options,
+) -> tuple[list[apt.Package], set[str]]:
     """Return deferred roots and archive names, leaving package marks clear."""
     deferred = calculate_upgradable_pkgs(cache, options)
     mark_pkgs_to_upgrade(cache, [pkg.name for pkg in deferred])
@@ -2658,9 +2687,9 @@ def update_apply_on_shutdown_marker(rootdir: str, pending: bool) -> None:
 
 
 def recheck_deferred_upgrades(cache: UnattendedUpgradesCache,
-                               options: Options,
-                               rootdir: str,
-                               retained_packages: set[str]) -> set[str]:
+                              options: Options,
+                              rootdir: str,
+                              retained_packages: set[str]) -> set[str]:
     # Minimal-step installation can succeed while some transactions remain.
     remaining = calculate_upgradable_pkgs(cache, options)
     mark_pkgs_to_upgrade(cache, [pkg.name for pkg in remaining])
