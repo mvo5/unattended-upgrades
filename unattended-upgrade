@@ -2465,7 +2465,9 @@ def run(options,             # type: Options
                                  - datetime.timedelta(days=1)))
                 return UnattendedUpgradesResult(True)
 
-            logging.debug("Running on the development release")
+            if (isinstance(devel, distro_info.DistroRelease)
+                    and devel.series == DISTRO_CODENAME):
+                logging.debug("Running on the development release")
     elif "(development branch)" in DISTRO_DESC and not\
             apt_pkg.config.find_b("Unattended-Upgrade::DevRelease", True):
         syslog.syslog(_("Not running on the development release."))

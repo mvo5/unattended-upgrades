@@ -3,6 +3,7 @@
 import datetime
 import os
 import unittest
+from unittest.mock import patch
 
 import apt
 
@@ -122,6 +123,20 @@ Unattended-Upgrade::OnlyOnAcPower "false";
             haystack = f.read()
             self.assertTrue(needle in haystack,
                             "Can not find '%s' in '%s'" % (needle, haystack))
+
+    def test_auto_stable_release(self):
+        """A stable series proceeds without the development-release message."""
+        self.write_config("auto")
+        self.mock_distro("Ubuntu", "stable", "Ubuntu stable release")
+
+        with patch.object(unattended_upgrade, "distro_info",
+                          MockDistroInfoModule(MockDistroAuto)):
+            unattended_upgrade.main(MockOptions(), rootdir=self.rootdir)
+
+        with open(self.log) as f:
+            log = f.read()
+        self.assertIn("Starting unattended upgrades script", log)
+        self.assertNotIn("Running on the development release", log)
 
     def test_norelease_devrelease(self):
         """The devel series has no release update, so do updates"""
