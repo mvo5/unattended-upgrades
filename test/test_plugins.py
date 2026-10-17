@@ -62,7 +62,7 @@ class TestPlugins(TestBase):
         self.assertTrue(log_dpkg.startswith("Log started:"))
         self.assertTrue(
             "Starting unattended upgrades script" in log_uu)
-        self.assertIn("Packages that will be upgraded: test-package", log_uu)
+        self.assertIn("Packages that were upgraded: test-package", log_uu)
 
     def test_plugin_data_postrun(self):
         res = unattended_upgrade.PluginDataPostrun({
