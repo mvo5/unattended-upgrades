@@ -45,6 +45,8 @@ class TestBase(unittest.TestCase):
         unattended_upgrade.LOCK_FILE = os.path.join(self.tempdir, "u-u.lock")
         # reset apt config
         apt.apt_pkg.init_config()
+        # set by dry-run tests, init_config() does not reset it
+        apt.apt_pkg.config.clear("Debug::pkgDPkgPM")
         apt.apt_pkg.config.set("APT::Architecture", "amd64")
         # must be last
         self._saved_apt_conf = {}
