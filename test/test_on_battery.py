@@ -1,9 +1,10 @@
 #!/usr/bin/python3
 
+import itertools
 import os
 import unittest
 
-from unittest.mock import patch
+from unittest.mock import Mock, patch
 
 import apt_pkg
 
@@ -160,6 +161,82 @@ class TestOnBattery(TestBase):
             self.assertIn("Invalid MinBatteryLevel", logs.output[0])
         # no fallback to OnlyOnACPower
         self.assertTrue(self.should_stop("50%", only_on_ac_power="false"))
+
+
+class TestMinBatteryLevelInMinimalSteps(TestBase):
+    """ On battery the minimal steps mode keeps upgrading until the charge
+        drops below MinBatteryLevel, then it stops before the next step """
+
+    def setUp(self):
+        TestBase.setUp(self)
+        self.mock_allowed_origins("origin=Ubuntu,archive=lucid-security")
+        self.rootdir = self.make_fake_aptroot(
+            os.path.join(self.testdir, "root.rewind"))
+        # the progress file of the install log lives there
+        os.makedirs(os.path.join(self.rootdir, "var", "run"))
+        self.cache = unattended_upgrade.UnattendedUpgradesCache(
+            rootdir=self.rootdir)
+        # fake on_ac_power reporting battery
+        on_battery = os.path.join(self.testdir, "root.on-battery", "usr", "bin")
+        patcher = patch.dict(
+            os.environ, {"PATH": on_battery + ":" + os.environ["PATH"]})
+        patcher.start()
+        self.addCleanup(patcher.stop)
+        for key, value in (
+                ("Unattended-Upgrade::MinBatteryLevel", "80"),
+                ("Unattended-Upgrade::Skip-Updates-On-Metered-Connections",
+                 "false")):
+            apt_pkg.config.set(key, value)
+            self.addCleanup(apt_pkg.config.clear, key)
+        self.committed = []
+
+    def fake_commit(self, cache, logfile_dpkg, verbose, iprogress=None):
+        self.committed.append(sorted(p.name for p in cache.get_changes()))
+        cache.clear()
+        return (True, None)
+
+    def upgrade(self, battery_levels):
+        """ run upgrade_in_minimal_steps() with the given sequence of
+            battery charge levels, one per should_stop() check """
+        levels = iter(battery_levels)
+        with patch.object(unattended_upgrade, "get_battery_level",
+                          side_effect=lambda: next(levels)), \
+                patch.object(unattended_upgrade, "fetch_archives",
+                             return_value=Mock(items=[])), \
+                patch.object(unattended_upgrade, "cache_commit",
+                             side_effect=self.fake_commit), \
+                patch.object(unattended_upgrade, "logged_msgs", set()):
+            return unattended_upgrade.upgrade_in_minimal_steps(
+                self.cache, ["test-package", "test2-package", "test3-package"],
+                logfile_dpkg=os.path.join(self.tempdir, "dpkg.log"),
+                dry_run=True)
+
+    def test_upgrades_everything_while_charged_enough(self):
+        success, upgraded, conffile_prompt = self.upgrade(
+            itertools.repeat(90))
+        self.assertTrue(success)
+        self.assertEqual(upgraded,
+                         ["test-package", "test2-package", "test3-package"])
+        self.assertEqual(len(self.committed), 3)
+
+    def test_stops_when_charge_drops_below_threshold(self):
+        # the charge is checked twice per step, before marking the package
+        # and again after the download: two steps at 90%, then 70%
+        success, upgraded, conffile_prompt = self.upgrade(
+            itertools.chain([90] * 4, itertools.repeat(70)))
+        self.assertFalse(success)
+        self.assertEqual(upgraded, ["test-package", "test2-package"])
+        # one dpkg run per step (the first one pulls in a dependency)
+        self.assertEqual(len(self.committed), 2)
+        self.assertIn("test-package", self.committed[0])
+        self.assertIn("test2-package", self.committed[1])
+
+    def test_stops_before_the_first_step(self):
+        success, upgraded, conffile_prompt = self.upgrade(
+            itertools.repeat(70))
+        self.assertFalse(success)
+        self.assertEqual(upgraded, [])
+        self.assertEqual(self.committed, [])
 
 
 if __name__ == "__main__":
