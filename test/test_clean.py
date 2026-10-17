@@ -1,5 +1,6 @@
 #!/usr/bin/python3
 
+from __future__ import annotations
 
 import os
 import os.path
@@ -8,17 +9,11 @@ import unittest
 import apt
 import unattended_upgrade
 
-try:
-    from typing import List
-    List   # pyflaks
-except ImportError:
-    pass
-
 from test.test_base import TestBase
 
 
 class MockFetcher:
-    items = []  # type: List[MockAcquireItem]
+    items: list[MockAcquireItem] = []
 
 
 class MockAcquireItem:
