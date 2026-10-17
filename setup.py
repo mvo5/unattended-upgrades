@@ -11,6 +11,7 @@ if __name__ == "__main__":
     setup(
         name='unattended-upgrades',
         version='0.1',
+        python_requires='>=3.8',
         scripts=['unattended-upgrade'],
         packages=[],
         data_files=[
