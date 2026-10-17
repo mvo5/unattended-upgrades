@@ -23,7 +23,16 @@ class PackagePep484TestCase(unittest.TestCase):
         top_src_dir = os.path.join(os.path.dirname(__file__), "..")
         # FIXME: add pyi file for python-apt to get rid of the
         # --ignore-missing-imports
-        res = subprocess.call(["mypy", "--ignore-missing-imports", top_src_dir])
+        # mypy only looks for its config in the current directory, and
+        # only picks up *.py files from a directory: the main script is
+        # found via the unattended_upgrade.py symlink, the shutdown
+        # script has to be passed explicitly
+        res = subprocess.call(["mypy", "--ignore-missing-imports",
+                               "--config-file",
+                               os.path.join(top_src_dir, "setup.cfg"),
+                               top_src_dir,
+                               os.path.join(top_src_dir,
+                                            "unattended-upgrade-shutdown")])
         self.assertEqual(res, 0)
 
 

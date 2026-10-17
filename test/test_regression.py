@@ -1,6 +1,8 @@
 #!/usr/bin/python3
 # -*- coding: utf-8 -*-
 
+from __future__ import annotations
+
 import io
 import os
 import tempfile
@@ -15,13 +17,10 @@ import apt_pkg
 from unattended_upgrade import do_install
 from test.test_base import TestBase
 
-from typing import List
-List  # flake8
-
 
 class MockCache(dict):
-    blacklist = []  # type: List[str]
-    whitelist = []  # type: List[str]
+    blacklist: list[str] = []
+    whitelist: list[str] = []
 
     def __iter__(self):
         raise StopIteration
