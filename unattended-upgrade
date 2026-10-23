@@ -2626,9 +2626,20 @@ def run(options,             # type: Options
         return UnattendedUpgradesResult(
             False, _("Cache has broken packages, exiting"))
 
+    # check if its configured for install on shutdown, if so, the
+    # environment UNATTENDED_UPGRADES_FORCE_INSTALL_ON_SHUTDOWN will
+    # be set by the unatteded-upgrades-shutdown script
+    install_on_shutdown = (
+        "UNATTENDED_UPGRADES_FORCE_INSTALL_ON_SHUTDOWN" not in os.environ
+        and apt_pkg.config.find_b(
+            "Unattended-Upgrade::InstallOnShutdown", False))
+
     # in minimal steps mode each step is checked, downloaded and installed
-    # in do_install() so that the first upgrade starts right away
-    greedy = options.minimal_upgrade_steps and not options.download_only
+    # in do_install() so that the first upgrade starts right away, unless
+    # this run only downloads for --download-only or the install on shutdown
+    greedy = (options.minimal_upgrade_steps
+              and not options.download_only
+              and not install_on_shutdown)
 
     with try_nice(20):
         auto_removable = get_auto_removable(cache)
@@ -2735,12 +2746,10 @@ def run(options,             # type: Options
     else:
         pending_autoremovals = set()
 
-    # exit if there is nothing to do and nothing to report
-    if (len(pending_autoremovals) == 0
-            and len(pkgs_to_upgrade) == 0):
+    def nothing_to_do_result():
+        # type: () -> UnattendedUpgradesResult
         logging.info(_("No packages found that can be upgraded unattended "
                        "and no pending auto-removals"))
-
         pkgs_kept_back = cache.find_kept_packages(options.dry_run)
         return UnattendedUpgradesResult(
             kernel_pkgs_remove_success,
@@ -2751,12 +2760,12 @@ def run(options,             # type: Options
             pkgs_kept_installed=kernel_pkgs_kept_installed,
             update_stamp=True)
 
-    # check if its configured for install on shutdown, if so, the
-    # environment UNATTENDED_UPGRADES_FORCE_INSTALL_ON_SHUTDOWN will
-    # be set by the unatteded-upgrades-shutdown script
-    if ("UNATTENDED_UPGRADES_FORCE_INSTALL_ON_SHUTDOWN" not in os.environ
-        and apt_pkg.config.find_b(
-            "Unattended-Upgrade::InstallOnShutdown", False)):
+    # exit if there is nothing to do and nothing to report
+    if (len(pending_autoremovals) == 0
+            and len(pkgs_to_upgrade) == 0):
+        return nothing_to_do_result()
+
+    if install_on_shutdown:
         logger = logging.getLogger()
         logger.debug("Configured to install on shutdown, so exiting now")
         return UnattendedUpgradesResult(True)
@@ -2768,7 +2777,11 @@ def run(options,             # type: Options
 
     # do the install based on the new list of pkgs
     pkgs = [pkg.name for pkg in pkgs_to_upgrade]
-    logging.info(_("Packages that will be upgraded: %s"), " ".join(pkgs))
+    if greedy:
+        # the candidates are only checked step by step in do_install()
+        logging.info(_("Packages that may be upgraded: %s"), " ".join(pkgs))
+    else:
+        logging.info(_("Packages that will be upgraded: %s"), " ".join(pkgs))
 
     # only perform install step if we actually have packages to install
     pkg_install_success = True
@@ -2783,6 +2796,12 @@ def run(options,             # type: Options
         pkg_conffile_prompt = pkg_conffile_prompt or install_conffile_prompt
         if greedy:
             pkgs = sorted(pkgs_upgraded)
+            if (not pkgs and pkg_install_success
+                    and not pkg_conffile_prompt
+                    and len(pending_autoremovals) == 0):
+                # none of the candidates could be upgraded, report it
+                # like the non-greedy mode does
+                return nothing_to_do_result()
             logging.info(_("Packages that were upgraded: %s"),
                          " ".join(pkgs))
     # Was the overall run succesful: only if everything installed
