@@ -56,8 +56,9 @@ import sys
 import syslog
 
 try:
-    from typing import AbstractSet, cast, DefaultDict, Dict, Iterable, List
+    from typing import AbstractSet, Any, cast, DefaultDict, Dict, Iterable, List
     AbstractSet  # pyflakes
+    Any  # pyflakes
     DefaultDict  # pyflakes
     Dict  # pyflakes
     Iterable  # pyflakes
@@ -105,6 +106,7 @@ if not sys.warnoptions:
 # the reboot required flag file used by packages
 REBOOT_REQUIRED_FILE = "/var/run/reboot-required"
 KEPT_PACKAGES_FILE = "var/lib/unattended-upgrades/kept-back"
+KEPT_PACKAGES_MAILED_FILE = "var/lib/unattended-upgrades/kept-back-mailed"
 MAIL_BINARY = "/usr/bin/mail"
 SENDMAIL_BINARY = "/usr/sbin/sendmail"
 USERS = "/usr/bin/users"
@@ -857,6 +859,12 @@ class KeptPkgs(defaultdict):
     Packages to keep by highest allowed pretty-printed origin
 
     """
+    def __init__(self, *args, **kwargs):
+        # type: (*Any, **Any) -> None
+        super().__init__(*args, **kwargs)
+        # the version kept back for each package
+        self.versions = {}  # type: Dict[str, str]
+
     def add(self, pkg,  # type: apt.Package
             version,    # type: apt.package.Version
             cache       # type: UnattendedUpgradesCache
@@ -865,7 +873,14 @@ class KeptPkgs(defaultdict):
         for origin in version.origins:
             if is_allowed_origin(origin, cache.allowed_origins):
                 self[origin.origin + " " + origin.archive].add(pkg.name)
+                self.versions[pkg.name] = version.version
                 return
+
+    def versions_set(self):
+        # type: () -> Set[str]
+        """ Return the kept back packages as "name=version" strings """
+        return set("%s=%s" % (pkg, self.versions.get(pkg, ""))
+                   for origin_pkgs in self.values() for pkg in origin_pkgs)
 
 
 class UnattendedUpgradesResult:
@@ -1728,6 +1743,27 @@ def _send_mail_using_sendmail(from_address, to_address, subject, body):
     return ret
 
 
+def get_mail_report_option():
+    # type: () -> str
+    """ Return the Unattended-Upgrade::MailReport value
+
+    The admin may well wish to get a mail report regardless of what was done.
+    This is set by Unattended-Upgrade::MailReport values of:
+        "always", "only-on-error", "on-change", "on-new-change" or
+        "on-upgrade"
+    (you can achieve "never" by not setting Unattended-Upgrade::Mail).
+    If this is not set, then set it using any legacy MailOnlyOnError
+    setting (default True)
+    """
+    mail_opt = apt_pkg.config.find("Unattended-Upgrade::MailReport")
+    if (mail_opt == ""):    # None set - map from legacy value
+        if apt_pkg.config.find_b("Unattended-Upgrade::MailOnlyOnError", False):
+            mail_opt = "only-on-error"
+        else:
+            mail_opt = "on-change"
+    return mail_opt
+
+
 def send_summary_mail(pkgs,                 # type: List[str]
                       res,                  # type: bool
                       result_str,           # type: str
@@ -1736,6 +1772,7 @@ def send_summary_mail(pkgs,                 # type: List[str]
                       pkgs_kept_installed,  # type: List[str]
                       mem_log,              # type: Optional[StringIO]
                       dpkg_log_content,     # type: str
+                      rootdir="/",          # type: str
                       ):
     # type: (...) -> None
     """ send mail (if configured in Unattended-Upgrade::Mail) """
@@ -1748,19 +1785,9 @@ def send_summary_mail(pkgs,                 # type: List[str]
                         "You probably want to install the mailx package."))
         return
 
-    # The admin may well wish to get a mail report regardless of what was done.
-    # This is now set by Unattended-Upgrade::MailReport values of:
-    #       "always", "only-on-error" or "on-change"
-    # (you can achieve "never" by not setting Unattended-Upgrade::Mail).
-    # If this is not set, then set it using any legacy MailOnlyOnError
-    # setting (default True)
-    #
-    mail_opt = apt_pkg.config.find("Unattended-Upgrade::MailReport")
-    if (mail_opt == ""):    # None set - map from legacy value
-        if apt_pkg.config.find_b("Unattended-Upgrade::MailOnlyOnError", False):
-            mail_opt = "only-on-error"
-        else:
-            mail_opt = "on-change"
+    mail_opt = get_mail_report_option()
+    # whether the kept back packages are worth a mail depends on mail_opt
+    kept_back = KeptBackMailState(pkgs_kept_back, mail_opt, rootdir)
 
     # if the operation was successful and the user has requested to get
     # mails only on errors, just exit here
@@ -1769,8 +1796,9 @@ def send_summary_mail(pkgs,                 # type: List[str]
 
     # if the run was successful but nothing had to be done skip sending email
     # unless the admin wants it anyway
-    if (((mail_opt != "always") and res and not pkgs and not pkgs_kept_back
-         and not pkgs_removed)):
+    if (((mail_opt != "always") and res and not pkgs
+         and not kept_back.is_news and not pkgs_removed)):
+        kept_back.record_mailed(False)
         return
 
     # Check if reboot-required flag is present
@@ -1835,6 +1863,9 @@ def send_summary_mail(pkgs,                 # type: List[str]
             "either have sendmail or mailx. Maybe they've been removed in "
             "this right moment?")
     logging.debug("mail returned: %s", ret)
+    if res:
+        # failed runs do not know the kept back packages
+        kept_back.record_mailed(ret == 0)
 
 
 def do_install(cache,             # type: UnattendedUpgradesCache
@@ -2345,6 +2376,58 @@ def is_update_day():
     return False
 
 
+class KeptBackMailState:
+    """
+    Which kept back packages the admin was already told about by mail,
+    see the "on-new-change" and "on-upgrade" values of
+    Unattended-Upgrade::MailReport
+    """
+    def __init__(self, kept_pkgs, mode, rootdir):
+        # type: (Optional[KeptPkgs], str, str) -> None
+        self.mode = mode
+        self.path = os.path.join(rootdir, KEPT_PACKAGES_MAILED_FILE)
+        self.versions = kept_pkgs.versions_set() if kept_pkgs else set()
+        self.mailed = set()  # type: Set[str]
+        if self.mode == "on-new-change":
+            self.mailed = self._read_mailed()
+
+    def _read_mailed(self):
+        # type: () -> Set[str]
+        try:
+            with open(self.path) as f:
+                return set(f.read().split())
+        except FileNotFoundError:
+            pass
+        except OSError as e:
+            logging.error(_("Could not read %s: %s"), self.path, e)
+        return set()
+
+    @property
+    def is_news(self):
+        # type: () -> bool
+        """ True if the kept back packages alone are worth a mail """
+        if not self.versions or self.mode == "on-upgrade":
+            return False
+        if self.mode == "on-new-change":
+            return not self.versions <= self.mailed
+        return True
+
+    def record_mailed(self, mail_sent):
+        # type: (bool) -> None
+        """ Remember the kept back packages once the admin knows them """
+        if self.mode != "on-new-change" or (self.is_news and not mail_sent):
+            return
+        try:
+            if self.versions:
+                with open(self.path, "w") as f:
+                    f.write("\n".join(sorted(self.versions)) + "\n")
+            elif os.path.exists(self.path):
+                os.remove(self.path)
+        except OSError as e:
+            logging.error(_("Could not save the list of kept back packages "
+                            "already mailed to %s: %s"), self.path, e)
+
+
 def update_kept_pkgs_file(kept_pkgs, kept_file):
     # type: (DefaultDict[str, List[str]], str) -> None
     if kept_pkgs:
@@ -2420,7 +2503,7 @@ def main(options, rootdir="/"):
             send_summary_mail(res.pkgs, res.success, res.result_str,
                               res.pkgs_kept_back, res.pkgs_removed,
                               res.pkgs_kept_installed, mem_log,
-                              log_content)
+                              log_content, rootdir)
             # report results to any plugin
             plugin_manager.postrun(res, mem_log, log_content)
 
@@ -2443,7 +2526,7 @@ def main(options, rootdir="/"):
                                            install_start_time)
         if not options.dry_run:
             send_summary_mail(["<unknown>"], False, _("An error occurred"),
-                              None, [], [], mem_log, log_content)
+                              None, [], [], mem_log, log_content, rootdir)
         # Re-raise exceptions for apport
         raise
 

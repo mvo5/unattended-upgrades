@@ -240,7 +240,20 @@ Supported Options Reference
 
 * `Unattended-Upgrade::MailReport` - string (default: "on-change")
  
- Possible values are "always", "only-on-error" or "on-change".
+ Possible values are:
+ - "always": mail after every run, even when nothing had to be done.
+ - "only-on-error": mail only when the run failed.
+ - "on-change": mail when packages were upgraded or removed, on error, and
+   on every run while packages are kept back (for example blacklisted or on
+   hold), even when nothing else happened.
+ - "on-new-change": like "on-change", but a package that stays kept back is
+   reported once, and again only when a new version of it is kept back, or
+   when it is kept back again after it was not; the versions already
+   reported are saved in `/var/lib/unattended-upgrades/kept-back-mailed`.
+ - "on-upgrade": mail only when packages were upgraded or removed, or on
+   error; packages that are kept back are listed in those mails, but never
+   trigger a mail by themselves.
+
  If this value is not set then the value is set by using the legacy
  option `Unattended-Upgrade::MailOnlyOnError` (default:False) to choose
  between "only-on-error" and "on-change".

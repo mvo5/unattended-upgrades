@@ -76,7 +76,8 @@ class CommonTestsForMailxAndSendmail(object):
         pkgs = ["2vcard"]
         res = successful
         result_str = "Result String"
-        pkgs_kept_back = {"Debian wheezy-security": ["linux-image"]}
+        pkgs_kept_back = unattended_upgrade.KeptPkgs(set)
+        pkgs_kept_back["Debian wheezy-security"].add("linux-image")
         pkgs_removed = ["telnet"]
         pkgs_kept_installed = ["hello"]
         # include some unicode chars here for good measure
@@ -285,6 +286,120 @@ class SendmailTestCase(CommonTestsForMailxAndSendmail, TestBase):
             "'origin=3DDebian,archive=\n"\
             "=3Dstable,label=3DDebian-Security']"
         self.assertTrue(needle in log_data)
+
+
+class KeptBackMailTestCase(TestBase):
+    """ Unattended-Upgrade::MailReport and kept back packages, with run()
+        mocked """
+
+    def setUp(self):
+        TestBase.setUp(self)
+        self.rootdir = self.make_fake_aptroot(
+            template=os.path.join(self.testdir, "root.untrusted"))
+        self.mail_txt = os.path.join(self.tempdir, "mail.txt")
+        self.mailed_file = os.path.join(
+            self.rootdir, unattended_upgrade.KEPT_PACKAGES_MAILED_FILE)
+        for name, value in (
+                ("MAIL_BINARY", "./no-mailx-binary-here"),
+                ("SENDMAIL_BINARY", make_mock_sendmail(self.tempdir))):
+            patcher = patch.object(unattended_upgrade, name, value)
+            patcher.start()
+            self.addCleanup(patcher.stop)
+        # main() reads the configuration from the fake root
+        self.addCleanup(apt_pkg.config.clear, "Unattended-Upgrade")
+
+    def configure(self, mail_report="on-change"):
+        with open(os.path.join(self.rootdir, "etc/apt/apt.conf"), "a") as fp:
+            fp.write('Unattended-Upgrade::Mail "root";\n')
+            fp.write('Unattended-Upgrade::MailReport "%s";\n' % mail_report)
+
+    def run_with_result(self, res):
+        """ run main() with the given result, return True if a mail was sent
+        """
+        if os.path.exists(self.mail_txt):
+            os.remove(self.mail_txt)
+        with patch("unattended_upgrade.run", return_value=res):
+            unattended_upgrade.main(MockOptions(), rootdir=self.rootdir)
+        return os.path.exists(self.mail_txt)
+
+    def run_with_kept_pkgs(self, kept):
+        """ run main() with nothing to upgrade and kept back the packages
+            in the given name: version dict, return True if a mail was sent
+        """
+        kept_pkgs = unattended_upgrade.KeptPkgs(set)
+        for pkg, version in kept.items():
+            kept_pkgs["Debian trixie-security"].add(pkg)
+            kept_pkgs.versions[pkg] = version
+        res = unattended_upgrade.UnattendedUpgradesResult(
+            True, "No packages found that can be upgraded unattended",
+            pkgs=[], pkgs_kept_back=kept_pkgs)
+        return self.run_with_result(res)
+
+    def test_kept_pkgs_versions(self):
+        self.mock_allowed_origins("origin=Ubuntu,archive=lucid-security")
+        cache = unattended_upgrade.UnattendedUpgradesCache(
+            rootdir=self.make_fake_aptroot(
+                template=os.path.join(self.testdir, "root.rewind")))
+        # nothing was upgraded, so every upgradable package is kept back
+        kept_pkgs = cache.find_kept_packages(dry_run=False)
+        self.assertEqual(
+            kept_pkgs.versions_set(),
+            {"test-package=2.0", "test2-package=2.0", "test3-package=2.0"})
+
+    def test_kept_back_mail_on_change(self):
+        self.configure("on-change")
+        self.assertTrue(self.run_with_kept_pkgs({"linux-image-amd64": "1"}))
+        self.assertTrue(self.run_with_kept_pkgs({"linux-image-amd64": "1"}))
+        self.assertFalse(os.path.exists(self.mailed_file))
+
+    def test_kept_back_mail_on_new_change(self):
+        self.configure("on-new-change")
+        self.assertTrue(self.run_with_kept_pkgs({"linux-image-amd64": "1"}))
+        with open(self.mailed_file) as fp:
+            self.assertEqual(fp.read(), "linux-image-amd64=1\n")
+        # nothing new
+        self.assertFalse(self.run_with_kept_pkgs({"linux-image-amd64": "1"}))
+        # a new version of a package that is still kept back
+        self.assertTrue(self.run_with_kept_pkgs({"linux-image-amd64": "2"}))
+        # a new package
+        self.assertTrue(self.run_with_kept_pkgs(
+            {"linux-image-amd64": "2", "linux-headers-amd64": "2"}))
+        # packages that are no longer kept back are forgotten
+        self.assertFalse(self.run_with_kept_pkgs(
+            {"linux-headers-amd64": "2"}))
+        self.assertTrue(self.run_with_kept_pkgs({"linux-image-amd64": "2"}))
+        self.assertFalse(self.run_with_kept_pkgs({}))
+        self.assertFalse(os.path.exists(self.mailed_file))
+
+    def test_kept_back_mail_on_new_change_after_failed_mail(self):
+        self.configure("on-new-change")
+        with patch.object(unattended_upgrade, "SENDMAIL_BINARY", "/bin/false"):
+            self.run_with_kept_pkgs({"linux-image-amd64": "1"})
+        self.assertFalse(os.path.exists(self.mailed_file))
+        self.assertTrue(self.run_with_kept_pkgs({"linux-image-amd64": "1"}))
+
+    def test_kept_back_mail_on_new_change_after_failed_run(self):
+        self.configure("on-new-change")
+        self.assertTrue(self.run_with_kept_pkgs({"linux-image-amd64": "1"}))
+        # a failed run mails its error without the kept back packages
+        self.assertTrue(self.run_with_result(
+            unattended_upgrade.UnattendedUpgradesResult(
+                False, "Lock could not be acquired")))
+        with open(self.mailed_file) as fp:
+            self.assertEqual(fp.read(), "linux-image-amd64=1\n")
+        self.assertFalse(self.run_with_kept_pkgs({"linux-image-amd64": "1"}))
+
+    def test_kept_back_mail_on_new_change_unusable_state_file(self):
+        self.configure("on-new-change")
+        # neither readable nor writable, even as root
+        os.makedirs(self.mailed_file)
+        self.assertTrue(self.run_with_kept_pkgs({"linux-image-amd64": "1"}))
+        self.assertTrue(self.run_with_kept_pkgs({"linux-image-amd64": "1"}))
+
+    def test_kept_back_mail_on_upgrade(self):
+        self.configure("on-upgrade")
+        self.assertFalse(self.run_with_kept_pkgs({"linux-image-amd64": "1"}))
+        self.assertFalse(os.path.exists(self.mailed_file))
 
 
 class SendmailAndMailxTestCase(SendmailTestCase):
