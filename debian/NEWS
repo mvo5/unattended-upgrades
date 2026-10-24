@@ -1,3 +1,26 @@
+unattended-upgrades (2.14) unstable; urgency=medium
+
+  Unattended-Upgrade::Package-Whitelist works again in the default,
+  non-strict mode. Since version 1.16 it was silently ignored, and
+  every package from an allowed origin was upgraded unless
+  Unattended-Upgrade::Package-Whitelist-Strict was also set.
+
+  Systems with a Package-Whitelist will now only upgrade the listed
+  packages and their dependencies, as documented. If the unrestricted
+  upgrades were relied upon, remove or widen the whitelist, otherwise
+  security updates for packages not on the list will no longer be
+  installed.
+
+  If Package-Whitelist-Strict, or a Package-Blacklist of everything
+  but the wanted packages, was only a workaround for this bug, a plain
+  whitelist can be used again: it also upgrades the dependencies of
+  the listed packages.
+
+  "unattended-upgrades --dry-run --verbose" shows which packages
+  would now be upgraded.
+
+ -- Fabio Fantoni <fantonifabio@tiscali.it>  Sat, 24 Oct 2026 14:16:37 +0200
+
 unattended-upgrades (2.0) unstable; urgency=medium
 
   Unattended-upgrades now applies ephemeral pinning (apt_preferences(5))
