@@ -96,9 +96,13 @@ Unattended-Upgrade::Package-Blacklist {
 //Unattended-Upgrade::Mail "";
 
 // Set this value to one of:
-//    "always", "only-on-error" or "on-change"
+//    "always", "only-on-error", "on-change", "on-new-change" or "on-upgrade"
+// "on-new-change" is like "on-change", but a package that stays kept back
+// is reported once, and again only when a new version of it is kept back.
+// "on-upgrade" mails only when packages were upgraded or removed, or on
+// error; kept back packages are listed but never trigger a mail by themselves.
 // If this is not set, then any legacy MailOnlyOnError (boolean) value
-// is used to chose between "only-on-error" and "on-change"
+// is used to choose between "only-on-error" and "on-change"
 //Unattended-Upgrade::MailReport "on-change";
 
 // Remove unused automatically installed kernel-related packages
