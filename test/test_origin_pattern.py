@@ -1,5 +1,7 @@
 #!/usr/bin/python3
 
+from __future__ import annotations
+
 import logging
 import unittest
 
@@ -13,9 +15,6 @@ from unattended_upgrade import (
     match_whitelist_string,
     UnknownMatcherError,
 )
-
-from typing import List
-List  # flake8
 
 from test.test_base import TestBase
 
@@ -40,10 +39,10 @@ class MockCache(dict):
     def get_changes(self):
         for pkgname in self.keys():
             yield self[pkgname]
-    allowed_origins = []  # type: List[str]
-    blacklist = []        # type: List[str]
-    whitelist = []        # type: List[str]
-    strict_whitelist = False  # type: bool
+    allowed_origins: list[str] = []
+    blacklist: list[str] = []
+    whitelist: list[str] = []
+    strict_whitelist: bool = False
 
 
 class MockDepCache():

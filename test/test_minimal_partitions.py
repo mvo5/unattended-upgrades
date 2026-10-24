@@ -1,18 +1,13 @@
 #!/usr/bin/python3
 
+from __future__ import annotations
+
 import os
 import unittest
 
 import apt_pkg
 
 import apt
-
-try:
-    from typing import List, Tuple
-    List   # pyflaks
-    Tuple  # pyflakes
-except ImportError:
-    pass
 
 import unattended_upgrade
 from test.test_base import TestBase
@@ -22,7 +17,7 @@ class LogInstallProgressMock(unattended_upgrade.LogInstallProgress):
 
     # klass data so that we can verify in the test as the actual
     # object is destroyed
-    DATA = []  # type: List[Tuple[str, float]]
+    DATA: list[tuple[str, float]] = []
 
     # overwrite to log the data
     def status_change(self, pkg, percent, status):

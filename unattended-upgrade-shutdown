@@ -25,6 +25,8 @@
 # Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 #
 
+from __future__ import annotations
+
 import copy
 import dbus
 import signal
@@ -44,7 +46,6 @@ except ImportError:
     pass
 
 from optparse import OptionParser, Values
-Values  # pyflakes
 from gettext import gettext as _
 from threading import Event
 
@@ -57,32 +58,28 @@ except Exception:
     sys.exit(0)
 
 
-def do_usplash(msg):
-    # type: (str) -> None
+def do_usplash(msg: str) -> None:
     if os.path.exists("/sbin/usplash_write"):
         logging.debug("Running usplash_write")
         subprocess.call(["/sbin/usplash_write", "TEXT", msg])
         subprocess.call(["/sbin/usplash_write", "PULSATE"])
 
 
-def do_plymouth(msg):
-    # type: (str) -> None
+def do_plymouth(msg: str) -> None:
     if os.path.exists("/bin/plymouth"):
         for line in msg.split("\n"):
             logging.debug("Running plymouth --text")
             subprocess.call(["/bin/plymouth", "message", "--text", line])
 
 
-def log_msg(msg, level=logging.WARN):
-    # type: (str, int) -> None
+def log_msg(msg: str, level: int = logging.WARN) -> None:
     """ helper that will print msg to usplash, plymouth, console """
     logging.log(level, msg)
     do_plymouth(msg)
     do_usplash(msg)
 
 
-def log_progress():
-    # type: () -> None
+def log_progress() -> None:
     """ helper to log the install progress (if any) """
     # wait a some seconds and try again
     msg = _("Unattended-upgrade in progress during shutdown, "
@@ -120,8 +117,7 @@ def exit_log_result(success):
 
 class UnattendedUpgradesShutdown():
 
-    def __init__(self, options):
-        # type: (Values) -> None
+    def __init__(self, options: Values) -> None:
         self.options = options
         self.max_delay = options.delay * 60
         self.iter_timer_set = False
@@ -231,8 +227,7 @@ class UnattendedUpgradesShutdown():
         """ delay shutdown and wait for PrepareForShutdown or other signals"""
 
         # set signal handlers
-        def signal_handler(signum, frame):
-            # type: (object) -> None
+        def signal_handler(signum: int, frame: object) -> None:
             logging.warning(
                 "SIGTERM or SIGHUP received, stopping unattended-upgrades "
                 "only if it is running")
