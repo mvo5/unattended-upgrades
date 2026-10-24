@@ -136,9 +136,11 @@ Supported Options Reference
  Only packages from this origin:archive pair will be installed. You
  can see all available origin:archive pairs by running `apt-cache policy`
  and checking the "o=" and "a=" fields. Variable substitution is supported
- for ${distro_id} that contains the output of `lsb_release -i`,
- ${distro_codename} that contains the output of `lsb_release -c` and
- ${distro_release} that contains the output of `lsb_release -r`.
+ for ${distro_id} that contains the distribution ID (e.g. "Debian" or
+ "Ubuntu"), ${distro_codename} that contains the release codename
+ (e.g. "trixie" or "noble") and ${distro_release} that contains the
+ release version (e.g. "13" or "24.04"). These values are read from
+ os-release(5), see the `ID`, `VERSION_CODENAME` and `VERSION_ID` fields.
  
  Example:
  ```
