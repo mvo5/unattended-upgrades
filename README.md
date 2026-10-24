@@ -216,6 +216,19 @@ Supported Options Reference
  Perform the upgrade when the machine is shutting down instead of
  doing it in the background while the machine is running.
 
+* `Unattended-Upgrade::MinBatteryLevel` - percentage or "ac-only" (default:"ac-only")
+ 
+ The average charge of the batteries, in percent, needed to upgrade
+ while the machine is running on battery. Below that, the upgrade is
+ skipped or gracefully stopped. Set it to "0" to upgrade regardless of
+ power source, or to "ac-only" to only upgrade on AC power. With
+ `Unattended-Upgrade::MinimalSteps`, the power is checked before each
+ upgrade step.
+
+ If this isn't set, the legacy boolean
+ `Unattended-Upgrade::OnlyOnACPower` is used instead: "true" (the
+ default) works like "ac-only", and "false" like "0".
+
 * `Unattended-Upgrade::Mail` - string (default:"")
 
  Send an email to this address with information about the packages

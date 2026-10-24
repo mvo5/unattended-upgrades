@@ -150,6 +150,8 @@ logged_msgs = set()  # type: AbstractSet[str]
 # keep the NetworkManager D-Bus query short so a slow NM never blocks long
 METERED_DBUS_TIMEOUT_MSEC = 2000
 
+POWER_SUPPLY_DIR = "/sys/class/power_supply"
+
 NEVER_PIN = -32768
 
 
@@ -873,10 +875,10 @@ def signal_handler(signal, frame):
     SIGNAL_STOP_REQUEST = True
 
 
-def log_once(msg):
-    # type: (str) -> None
+def log_once(msg, level=logging.INFO):
+    # type: (str, int) -> None
     if msg not in logged_msgs:
-        logging.info(msg)
+        logging.log(level, msg)
         logged_msgs.add(msg)  # type: ignore
 
 
@@ -920,6 +922,88 @@ def is_metered_connection():
     return ret.unpack()[0] in (1, 3)
 
 
+def read_power_supply_attr(supply, attr):
+    # type: (str, str) -> Optional[str]
+    try:
+        with open(os.path.join(supply, attr)) as f:
+            return f.read().strip()
+    except OSError:
+        return None
+
+
+def get_battery_level():
+    # type: () -> Optional[int]
+    """
+    Return the average charge in percent of the system batteries, or None
+    if any of them can not be read.
+    """
+    levels = []  # type: List[int]
+    for supply in glob.glob(os.path.join(POWER_SUPPLY_DIR, "*")):
+        if read_power_supply_attr(supply, "type") != "Battery":
+            continue
+        # skip batteries of peripherals like mice and keyboards
+        if read_power_supply_attr(supply, "scope") == "Device":
+            continue
+        # skip empty battery bays
+        if read_power_supply_attr(supply, "present") == "0":
+            continue
+        capacity = read_power_supply_attr(supply, "capacity")
+        if capacity is None or not capacity.isdigit():
+            return None
+        levels.append(int(capacity))
+    if not levels:
+        return None
+    return sum(levels) // len(levels)
+
+
+def get_min_battery_level():
+    # type: () -> Optional[int]
+    """
+    Return the battery charge in percent needed to upgrade on battery, or
+    None if upgrades should only run on AC power.
+    """
+    value = apt_pkg.config.find("Unattended-Upgrade::MinBatteryLevel")
+    if not value:
+        if apt_pkg.config.find_b("Unattended-Upgrade::OnlyOnACPower", True):
+            return None
+        return 0
+    if apt_pkg.config.find("Unattended-Upgrade::OnlyOnACPower"):
+        log_once(_("Both MinBatteryLevel and OnlyOnACPower are set, "
+                   "ignoring OnlyOnACPower"), logging.WARNING)
+    if value == "ac-only":
+        return None
+    try:
+        if 0 <= int(value) <= 100:
+            return int(value)
+    except ValueError:
+        pass
+    log_once(_("Invalid MinBatteryLevel \"%s\", upgrading only on AC power")
+             % value, logging.WARNING)
+    return None
+
+
+def battery_charged_enough(min_level):
+    # type: (Optional[int]) -> bool
+    """
+    Return True if the batteries are charged at least min_level percent.
+    None means only on AC power, so never.
+    """
+    if min_level is None:
+        return False
+    level = get_battery_level()
+    if level is None:
+        log_once(_("Battery charge level could not be read"),
+                 logging.WARNING)
+        return False
+    if level < min_level:
+        logging.info(_("Battery charge is %d%%, below %d%%") % (
+            level, min_level))
+        return False
+    log_once(_("On battery power, charge is %d%%, at least %d%%") % (
+        level, min_level))
+    return True
+
+
 def should_stop():
     # type: () -> bool
     """
@@ -930,8 +1014,10 @@ def should_stop():
         logging.warning("SIGNAL received, stopping")
         return True
     try:
-        if apt_pkg.config.find_b("Unattended-Upgrade::OnlyOnACPower", True) \
-           and subprocess.call("on_ac_power") == 1:
+        min_level = get_min_battery_level()
+        if min_level != 0 \
+           and subprocess.call("on_ac_power") == 1 \
+           and not battery_charged_enough(min_level):
             logging.warning("System is on battery power, stopping")
             return True
     except FileNotFoundError:
