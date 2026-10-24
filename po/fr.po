@@ -4,13 +4,14 @@
 #
 # Michael Vogt <mvo@debian.org>, 2008.
 # Alban Vidal <alban.vidal@zordhak.fr>, 2019.
+# Jean-Pierre Giraud <jean-pierregiraud@neuf.fr>, 2021.
 msgid ""
 msgstr ""
 "Project-Id-Version: unattended-upgrades 1.10\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2015-07-02 12:27+0200\n"
-"PO-Revision-Date: 2019-04-22 05:08+0100\n"
-"Last-Translator: Alban Vidal <alban.vidal@zordhak.fr>\n"
+"PO-Revision-Date: 2021-06-08 17:19+0100\n"
+"Last-Translator: Jean-Pierre Giraud <jean-pierregiraud@neuf.fr>\n"
 "Language-Team: French <debian-l10n-french@lists.debian.org>\n"
 "Language: fr\n"
 "MIME-Version: 1.0\n"
@@ -37,16 +38,23 @@ msgid ""
 "powermgmt-base package to check power status and skip installing updates "
 "when the system is running on battery."
 msgstr ""
+"La vérification de l'exécution du système sur batterie est ignorée. Veuillez "
+"installer le paquet powermgmt-base pour vérifier l'état de l'alimentation et "
+"ignorer l'installation des mises à jour lorsque le système fonctionne sur "
+"batterie."
 
 #: ../unattended-upgrade:549
 msgid "System is on metered connection, stopping"
-msgstr ""
+msgstr "Le système a une connexion limitée, arrêt."
 
 #: ../unattended-upgrade:552
 msgid ""
 "Checking if connection is metered is skipped. Please install python3-gi "
 "package to detect metered connections and skip downloading updates."
 msgstr ""
+"La vérification de la limitation de connexion est ignorée. Veuillez "
+"installer le paquet python3-gi pour la détection des connexions limitées et "
+"ignorer le téléchargement des mises à jour."
 
 #: ../unattended-upgrade:600 ../unattended-upgrade:617
 #, python-format
@@ -105,17 +113,17 @@ msgstr ""
 "{result}"
 
 #: ../unattended-upgrade:1258
-#, fuzzy, python-format
+#, python-format
 msgid "Unattended upgrade result: %s"
-msgstr "La mise à niveau automatique a renvoyé : %s"
+msgstr "Résultat de la mise à niveau automatique : %s"
 
 #: ../unattended-upgrade:1262
 msgid ""
 "Warning: A reboot is required to complete this upgrade, or a previous one.\n"
 "\n"
 msgstr ""
-"Avertissement : un redémarrage est requis afin d'achever cette mise à "
-"niveau ou une précédente.\n"
+"Avertissement : un redémarrage est requis afin d'achever cette mise à niveau "
+"ou une précédente.\n"
 "\n"
 
 #: ../unattended-upgrade:1266
@@ -167,7 +175,7 @@ msgid ""
 "which is set to be kept unmodified: %s"
 msgstr ""
 "Conserver le ou les paquets suivants, marqués à supprimer automatiquement, "
-"parce qu'ils incluent %s qui est placé pour rester non modifié : %s"
+"parce qu'ils incluent %s qui est réglé pour rester non modifié : %s"
 
 #: ../unattended-upgrade:1631
 #, python-format
@@ -236,21 +244,21 @@ msgstr "Une erreur s'est produite"
 #: ../unattended-upgrade:1862 ../unattended-upgrade:1866
 #, python-format
 msgid "Not running on this development release before %s"
-msgstr ""
+msgstr "Ne fonctionne pas dans cette version de développement avant %s"
 
 #: ../unattended-upgrade:1875 ../unattended-upgrade:1876
 msgid "Not running on the development release."
-msgstr ""
+msgstr "Ne fonctionne pas dans la version de développement."
 
 #: ../unattended-upgrade:1883
-#, fuzzy, python-format
+#, python-format
 msgid "Initial blacklist: %s"
-msgstr "Paquets initialement sur la liste noire : %s"
+msgstr "Liste noire initiale : %s"
 
 #: ../unattended-upgrade:1888
-#, fuzzy, python-format
+#, python-format
 msgid "Initial whitelist: %s"
-msgstr "Paquets initialement sur la liste blanche : %s"
+msgstr "Liste blanche initiale : %s"
 
 #: ../unattended-upgrade:1891
 msgid "Starting unattended upgrades script"
@@ -272,9 +280,8 @@ msgid "Cache lock can not be acquired, exiting"
 msgstr "Le verrouillage du cache est impossible, abandon"
 
 #: ../unattended-upgrade:1904
-#, fuzzy
 msgid "Lock could not be acquired"
-msgstr "Le verrouillage du cache est impossible, abandon"
+msgstr "Le verrouillage du cache est impossible"
 
 #: ../unattended-upgrade:1913 ../unattended-upgrade:1914
 msgid "Unclean dpkg state detected, trying to correct"
@@ -297,7 +304,7 @@ msgstr "Le cache contient des paquets cassés, abandon"
 
 #: ../unattended-upgrade:1987
 msgid "Upgrade was interrupted"
-msgstr ""
+msgstr "La mise à niveau a été interrompue"
 
 #: ../unattended-upgrade:1991
 #, python-format
@@ -358,18 +365,18 @@ msgstr "Afficher les messages d'information"
 
 #: ../unattended-upgrade:2281
 msgid "Simulation, download but do not install"
-msgstr "Simulation, télécharge mais n'installe pas"
+msgstr "Simulation, télécharger mais ne pas installer"
 
 #: ../unattended-upgrade:2284
 msgid "Only download, do not even try to install."
-msgstr "Téléchargement seulement, n'essaye même pas d'installer. "
+msgstr "Téléchargement seulement, ne même pas essayer d'installer."
 
 #: ../unattended-upgrade:2287
-#, fuzzy
 msgid ""
 "Upgrade in minimal steps (and allow interrupting with SIGTERM) (default)"
 msgstr ""
 "Mise à niveau par étapes minimales (et interruption avec SIGTERM autorisée)"
+"(par défaut)"
 
 #: ../unattended-upgrade:2292
 msgid "Upgrade in minimal steps (and allow interrupting with SIGTERM"
@@ -401,25 +408,31 @@ msgstr ""
 #: ../unattended-upgrade-shutdown:167
 msgid "Stop ongoing upgrades or perform upgrades before shutdown"
 msgstr ""
+"Arrêter les mises à niveau en cours ou réaliser les mises à niveau avant "
+"l'extinction."
 
 #: ../unattended-upgrade-shutdown:206 ../unattended-upgrade-shutdown:263
 msgid "Unable to monitor PrepareForShutdown() signal, polling instead."
 msgstr ""
+"Surveillance du signal PrepareForShutdown() impossible, attente active "
+"activée à la place."
 
 #: ../unattended-upgrade-shutdown:209
 msgid ""
 "To enable monitoring the PrepareForShutdown() signal instead of polling "
 "please install the python3-gi package"
 msgstr ""
+"Pour activer la surveillance du signal PrepareForShutdown() à la place de "
+"l'attente active, veuillez installer le paquet python3-gi."
 
 #: ../unattended-upgrade-shutdown:266
 msgid "Maybe systemd-logind service is not running."
-msgstr ""
+msgstr "Le service systemd-logind n'est peut-être pas en cours d'exécution."
 
 #: ../unattended-upgrade-shutdown:289
-#, fuzzy
 msgid "Apt returned an error thus shutdown mode is disabled"
-msgstr "Apt a renvoyé une erreur, arrêt"
+msgstr ""
+"Apt a renvoyé une erreur, par conséquent le mode extinction est désactivé."
 
 #: ../unattended-upgrade-shutdown:291 ../unattended-upgrade-shutdown:372
 #, python-format
@@ -428,16 +441,18 @@ msgstr "Message d'erreur : %s"
 
 #: ../unattended-upgrade-shutdown:307
 msgid "Running unattended-upgrades in shutdown mode"
-msgstr "Exécuter unattended-upgrades lors de l'extinction"
+msgstr "Exécution d'unattended-upgrades lors de l'extinction"
 
 #: ../unattended-upgrade-shutdown:328
-#, fuzzy, python-format
+#, python-format
 msgid "Giving up on lockfile after %s minutes of delay"
-msgstr "Renonciation sur un fichier verrou après un délai de %s."
+msgstr "Renonciation sur un fichier verrou après un délai de %s minutes."
 
 #: ../unattended-upgrade-shutdown:370
 msgid "Apt returned an error when loading configuration, using default values"
 msgstr ""
+"Apt a renvoyé une erreur lors du chargement de la configuration, utilisation "
+"des valeurs par défaut."
 
 #, fuzzy
 #~| msgid "Packages that will be upgraded: %s"
