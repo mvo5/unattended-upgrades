@@ -77,7 +77,7 @@ Unattended-Upgrade::DevRelease "auto";
 // Set this value to one of:
 //    "always", "only-on-error" or "on-change"
 // If this is not set, then any legacy MailOnlyOnError (boolean) value
-// is used to chose between "only-on-error" and "on-change"
+// is used to choose between "only-on-error" and "on-change"
 //Unattended-Upgrade::MailReport "on-change";
 
 // Remove unused automatically installed kernel-related packages
