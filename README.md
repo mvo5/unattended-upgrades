@@ -90,6 +90,60 @@ details.
 If you want mail support you need to have a mail-transport-agent (e.g
 postfix) or mailx installed.
 
+Following Debian testing
+------------------------
+
+unattended-upgrades can keep a Debian testing system continuously up
+to date without ever removing a package. Every upgrade step is checked
+first and held back if it would remove a package (e.g. in a library
+transition), install from a not allowed or untrusted origin, cause a
+conffile prompt or leave broken dependencies.
+
+With the default `Unattended-Upgrade::MinimalSteps "true"` each
+self-contained set of packages is checked, downloaded and installed on
+its own. Packages that are stuck in a transition are kept back while
+the rest of the system is upgraded; they are retried on every run and
+installed once the transition has finished.
+
+To follow testing, add e.g. /etc/apt/apt.conf.d/52unattended-upgrades-local:
+```
+#clear Unattended-Upgrade::Origins-Pattern;
+Unattended-Upgrade::Origins-Pattern {
+        "origin=Debian,archive=testing,label=Debian";
+        "origin=Debian,archive=testing-security,label=Debian-Security";
+};
+```
+Matching on the archive keeps following testing across releases. To
+stay on the current release once it becomes stable, match on
+`codename=${distro_codename}` instead, like the default configuration
+does.
+
+After a successful upgrade unattended-upgrades by default autoremoves
+packages that became unused (`Remove-New-Unused-Dependencies`) and
+automatically installed kernels that are no longer running
+(`Remove-Unused-Kernel-Packages`), i.e. what `apt autoremove` would
+remove. To never remove anything, disable both; old kernels then
+accumulate in /boot until removed manually:
+```
+Unattended-Upgrade::Remove-New-Unused-Dependencies "false";
+Unattended-Upgrade::Remove-Unused-Kernel-Packages "false";
+```
+
+Also useful on testing:
+
+* `Unattended-Upgrade::Allow-APT-Mark-Fallback "false";` - faster
+  runs when many packages are not installable, at the cost of a few
+  more kept back packages.
+* `Dpkg::Options {"--force-confold"};` - packages with conffile
+  prompts are upgraded instead of held back; the local configuration
+  file is kept and the new one installed as `.dpkg-dist`.
+* `Unattended-Upgrade::Automatic-Reboot` - kernel and libc upgrades
+  are frequent on testing.
+
+To see what would be done and why packages are kept back, run
+`sudo unattended-upgrade --dry-run --debug` and look for "sanity check
+failed" in /var/log/unattended-upgrades/unattended-upgrades.log.
+
 Debugging
 ---------
 
