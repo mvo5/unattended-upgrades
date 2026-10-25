@@ -40,9 +40,11 @@ if which valgrind > /dev/null; then
     chroot_exec "$chroot_dir" apt-get install -y valgrind 2>&1
 fi
 
-# add package set with many dependencies
+# add package set with many dependencies, but without the recommends
+# which would roughly triple the number of packages (and the test time)
+# without adding much coverage
 # apt prints "W: APT had planned for dpkg to do more than it reported back" to stderr LP: #1647638
-chroot_exec "$chroot_dir" apt-get install -y xfce4 apparmor hello 2>&1
+chroot_exec "$chroot_dir" apt-get install -y --no-install-recommends xfce4 apparmor hello 2>&1
 chroot_exec "$chroot_dir" apt-mark auto hello
 
 # the "ubuntu-advantage-tools" will pull in "ubuntu-pro-tools" which has
