@@ -11,9 +11,11 @@ set -ex
 
 chroot_dir=$AUTOPKGTEST_TMP/chroot
 
-distro="$(lsb_release -c -s)"
-# fall back to latest release on any development release
-if [ "$distro" = sid ] || lsb_release -d -s | grep -q 'development branch' \
+distro="$(. /etc/os-release && printf '%s\n' "${VERSION_CODENAME:-}")"
+description="$(. /etc/os-release && printf '%s\n' "${PRETTY_NAME:-}")"
+# fall back to latest release on any development release (Debian sid
+# has no VERSION_CODENAME)
+if [ -z "$distro" ] || echo "$description" | grep -q 'development branch' \
        || ( distro-info -t 2> /dev/null && [ "$(distro-info -t)" = "$distro" ] ) ; then
     distro="$(distro-info -s)"
 fi
