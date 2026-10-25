@@ -2491,8 +2491,9 @@ def main(options, rootdir="/"):
                   install_start_time)
         logging.debug("upgrade result: %s %s" % (res.success, res.result_str))
 
-        if res.success and res.result_str and not options.dry_run:
-            # complete, successful run
+        if res.update_stamp and not options.dry_run:
+            # the run got far enough to know the kept back packages, even
+            # if it failed, e.g. because of a conffile prompt
             update_kept_pkgs_file(res.pkgs_kept_back,
                                   os.path.join(rootdir, KEPT_PACKAGES_FILE))
 
