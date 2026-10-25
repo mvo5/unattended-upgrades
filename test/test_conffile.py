@@ -3,14 +3,17 @@
 import os
 import logging
 import unittest
+from unittest.mock import patch
 
 import apt_pkg
 
+import unattended_upgrade
 from unattended_upgrade import (
     conffile_prompt,
     dpkg_conffile_prompt,
 )
-from test.test_base import TestBase
+from test.test_base import TestBase, MockOptions
+from test.test_mail import make_mock_sendmail
 
 
 class TestConffilePrompt(TestBase):
@@ -127,6 +130,52 @@ class DpkgConffileTestCase(TestBase):
     def test_dpkg_will_never_prompt(self):
         apt_pkg.config.set("DPkg::Options::", "--force-confold")
         self.assertFalse(dpkg_conffile_prompt())
+
+
+class TestConffilePromptRun(TestBase):
+    """ A package held back because of a conffile prompt is an error even
+        when nothing else is pending (GH: #336) """
+
+    def setUp(self):
+        TestBase.setUp(self)
+        self.rootdir = self.make_fake_aptroot(
+            template=os.path.join(self.testdir, "root.unused-deps"),
+            fake_pkgs=[
+                ("test-package", "1.0",
+                 {"Depends": ["test-package-dependency"]}),
+                ("test-package-dependency", "1.0", {}),
+            ])
+        # fake on_ac_power
+        os.environ["PATH"] = (os.path.join(self.rootdir, "usr", "bin") + ":"
+                              + os.environ["PATH"])
+        self.mail_txt = os.path.join(self.tempdir, "mail.txt")
+        with open(os.path.join(self.rootdir, "etc/apt/apt.conf"), "a") as fp:
+            fp.write('Unattended-Upgrade::Mail "root";\n')
+            fp.write('Unattended-Upgrade::MailReport "only-on-error";\n')
+        self.addCleanup(apt_pkg.config.clear, "Unattended-Upgrade")
+        for name, value in (
+                ("MAIL_BINARY", "./no-mailx-binary-here"),
+                ("SENDMAIL_BINARY", make_mock_sendmail(self.tempdir))):
+            patcher = patch.object(unattended_upgrade, name, value)
+            patcher.start()
+            self.addCleanup(patcher.stop)
+
+    def test_conffile_prompt_only(self):
+        # the host apt config may disable conffile prompts via
+        # DPkg::Options (e.g. --force-confold on the CI runners)
+        with patch.object(unattended_upgrade, "dpkg_conffile_prompt",
+                          return_value=True), \
+                patch.object(unattended_upgrade, "conffile_prompt",
+                             return_value=True):
+            ret = unattended_upgrade.main(MockOptions(), rootdir=self.rootdir)
+        self.assertEqual(ret, 1)
+        # the package is still reported as kept back (used by the motd)
+        with open(os.path.join(
+                self.rootdir, unattended_upgrade.KEPT_PACKAGES_FILE)) as fp:
+            self.assertEqual(fp.read().split(), ["test-package"])
+        # and the admin is told about it with "only-on-error"
+        with open(self.mail_txt) as fp:
+            self.assertIn("test-package", fp.read())
 
 
 if __name__ == "__main__":
