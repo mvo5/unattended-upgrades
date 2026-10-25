@@ -1,29 +1,79 @@
 name: CI
 
-on: [push, pull_request]
+on:
+  push:
+    branches: [master]
+  pull_request:
+
+# a new push to the same branch supersedes the running jobs
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
 
 jobs:
-  tests:
+  lint:
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v2
-    - name: static checks
+    - uses: actions/checkout@v7
+    - name: install dependencies
       run: |
-        sudo apt update
+        sudo apt-get update
         sudo apt build-dep -y ./
-        sudo apt install -y python3-pytest
-        pytest-3
-        # ensure running each test standalone works
+        sudo apt-get install -y python3-pytest
+    - name: flake8 and mypy
+      run: pytest-3 test/test_flake8.py test/test_pep484.py
+
+  py38-syntax:
+    # python_requires is 3.8 but ubuntu-latest only has a much newer
+    # python, so at least make sure the scripts still compile with 3.8
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v7
+    - uses: actions/setup-python@v7
+      with:
+        python-version: "3.8"
+    - name: compile with python 3.8
+      run: python -m py_compile unattended-upgrade unattended-upgrade-shutdown
+
+  unit-tests:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v7
+    - name: install dependencies
+      run: |
+        sudo apt-get update
+        sudo apt build-dep -y ./
+        sudo apt-get install -y python3-pytest python3-coverage
+    - name: pytest with coverage
+      run: |
+        python3 -m coverage run -m pytest
+        python3 -m coverage report unattended_upgrade.py
+        python3 -m coverage xml unattended_upgrade.py
+    - uses: actions/upload-artifact@v7
+      with:
+        name: coverage
+        path: coverage.xml
+    - name: ensure each test file works standalone
+      run: |
         for f in test/test_*.py; do
             if [ "$(basename $f)" = "test_base.py" ]; then
                 continue
             fi
             pytest-3 $f
         done
+
+  tests:
+    # the expensive part, only after the quick checks passed; keeps the
+    # job name "tests" that the branch protection of master requires
+    needs: [lint, py38-syntax, unit-tests]
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    steps:
+    - uses: actions/checkout@v7
     - name: setup
       run: |
         sudo apt-get update
-        sudo apt-get install distro-info autopkgtest git-buildpackage
+        sudo apt-get install -y distro-info autopkgtest git-buildpackage
     - name: build source
       run: gbp buildpackage -us -uc -S -d -nc --git-ignore-branch --git-prebuild=
     - name: autopkgtest
