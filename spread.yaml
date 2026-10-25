@@ -16,7 +16,7 @@ suites:
   spread_tests/:
     summary: run integration test
     prepare: |
-      echo "deb http://security.ubuntu.com/ubuntu $(lsb_release -c -s)-security main restricted universe" >> /etc/apt/sources.list
+      echo "deb http://security.ubuntu.com/ubuntu $(. /etc/os-release && echo "$VERSION_CODENAME")-security main restricted universe" >> /etc/apt/sources.list
       apt update
       apt install -y fakeroot
       apt build-dep -y /home/ubuntu/unattended-upgrades
