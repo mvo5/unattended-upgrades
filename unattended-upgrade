@@ -435,18 +435,15 @@ class UnattendedUpgradesCache(apt.Cache):
             return _("Package %s is marked to be held back.") % pkg.name
         elif is_pkgname_in_blacklist(pkg.name, blacklist):
             return _("Package %s is blacklisted.") % pkg.name
-        elif whitelist:
+        elif whitelist and not is_pkgname_in_whitelist(pkg.name, whitelist):
             if strict_whitelist:
-                if not is_pkgname_in_whitelist(pkg.name, whitelist):
-                    return (_(
-                        "Package %s is not on the strict whitelist.")
-                        % pkg.name)
-                else:
-                    if not is_pkgname_in_whitelist(pkg.name, whitelist):
-                        return (_(
-                            "Package %s is not whitelisted and it is not a"
-                            " dependency of a whitelisted package.")
-                            % pkg.name)
+                return (_(
+                    "Package %s is not on the strict whitelist.")
+                    % pkg.name)
+            return (_(
+                "Package %s is not whitelisted and it is not a"
+                " dependency of a whitelisted package.")
+                % pkg.name)
         elif not any([o.trusted for o in better_version.origins]):
             return _("Package %s's origin is not trusted.") % pkg.name
         return (_("Package %s is kept back because a related package"
@@ -1041,7 +1038,7 @@ def get_allowed_origins_legacy():
             allowed_origins.append("o=%s,a=%s" % (substitute(distro_id),
                                    substitute(distro_codename)))
     except ValueError:
-        logging.error(_("Unable to parse %s." % key))
+        logging.error(_("Unable to parse %s.") % key)
         raise
     return allowed_origins
 
@@ -1058,7 +1055,7 @@ def get_allowed_origins():
         for s in apt_pkg.config.value_list(key):
             allowed_origins.append(substitute(s))
     except ValueError:
-        logging.error(_("Unable to parse %s." % key))
+        logging.error(_("Unable to parse %s.") % key)
         raise
     return allowed_origins
 
@@ -2079,8 +2076,8 @@ def calculate_upgradable_pkgs(cache,            # type: UnattendedUpgradesCache
                 getattr(pkg, "candidate", pkg.name),
                 getattr(pkg.candidate, "origins", [])))
 
-        if (pkg.is_upgradable or candidate_version_changed(pkg)
-           and is_pkgname_in_whitelist(pkg.name, cache.whitelist)):
+        if ((pkg.is_upgradable or candidate_version_changed(pkg))
+                and is_pkgname_in_whitelist(pkg.name, cache.whitelist)):
             try:
                 ver_in_allowed_origin(pkg, cache.allowed_origins)
             except NoAllowedOriginError:
@@ -2254,7 +2251,7 @@ def do_auto_remove(cache,             # type: UnattendedUpgradesCache
     if res:
         logging.info(_("Packages that were successfully auto-removed: %s"),
                      " ".join(sorted(pkgs_removed)))
-        logging.info(_("Packages that are kept back: %s"),
+        logging.info(_("Packages that were kept from being auto-removed: %s"),
                      " ".join(sorted(pkgs_kept_installed)))
     if not res:
         cache.clear()
@@ -2313,7 +2310,7 @@ def update_kept_pkgs_file(kept_pkgs, kept_file):
                 kf.write(" ".join(sorted(pkgs_all_origins)))
         except FileNotFoundError:
             logging.error(_("Could not open %s for saving list of packages "
-                            "kept back." % kept_file))
+                            "kept back.") % kept_file)
     else:
         if os.path.exists(kept_file):
             os.remove(kept_file)
@@ -2365,7 +2362,7 @@ def main(options, rootdir="/"):
                   install_start_time)
         logging.debug("upgrade result: %s %s" % (res.success, res.result_str))
 
-        if res.success and res.result_str:
+        if res.success and res.result_str and not options.dry_run:
             # complete, successful run
             update_kept_pkgs_file(res.pkgs_kept_back,
                                   os.path.join(rootdir, KEPT_PACKAGES_FILE))
@@ -2465,7 +2462,9 @@ def run(options,             # type: Options
                                  - datetime.timedelta(days=1)))
                 return UnattendedUpgradesResult(True)
 
-            logging.debug("Running on the development release")
+            if (isinstance(devel, distro_info.DistroRelease)
+                    and devel.series == DISTRO_CODENAME):
+                logging.debug("Running on the development release")
     elif "(development branch)" in DISTRO_DESC and not\
             apt_pkg.config.find_b("Unattended-Upgrade::DevRelease", True):
         syslog.syslog(_("Not running on the development release."))
