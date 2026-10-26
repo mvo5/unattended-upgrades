@@ -27,9 +27,12 @@ class TestOnBattery(TestBase):
             "unattended-upgrades.log")
 
     def test_on_battery(self):
+        self.make_power_supply("BAT0", "Battery", capacity=20)
         # run it
         options = MockOptions()
-        ret = unattended_upgrade.main(options, rootdir=self.rootdir)
+        with patch.object(unattended_upgrade, "POWER_SUPPLY_DIR",
+                          os.path.join(self.tempdir, "power_supply")):
+            ret = unattended_upgrade.main(options, rootdir=self.rootdir)
         self.assertEqual(ret, 1)
         # read the log to see what happend
         with open(self.log) as f:
@@ -79,12 +82,19 @@ class TestOnBattery(TestBase):
         self.assertFalse(self.should_stop("0"))
         self.assertTrue(self.should_stop("ac-only"))
         # empty means unset
-        self.assertTrue(self.should_stop(""))
-        self.assertFalse(self.should_stop("", only_on_ac_power="false"))
+        self.assertFalse(self.should_stop(""))
+        self.assertTrue(self.should_stop("", only_on_ac_power="true"))
+
+    def test_min_battery_level_default(self):
+        self.make_power_supply("BAT0", "Battery", capacity=40)
+        self.assertFalse(self.should_stop())
+
+    def test_min_battery_level_default_below(self):
+        self.make_power_supply("BAT0", "Battery", capacity=39)
+        self.assertTrue(self.should_stop())
 
     def test_only_on_ac_power(self):
         self.make_power_supply("BAT0", "Battery", capacity=60)
-        self.assertTrue(self.should_stop())
         self.assertTrue(self.should_stop(only_on_ac_power="true"))
         self.assertTrue(self.should_stop(only_on_ac_power="1"))
         self.assertTrue(self.should_stop(only_on_ac_power="yes"))

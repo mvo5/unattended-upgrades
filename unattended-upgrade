@@ -185,6 +185,7 @@ logged_msgs: collections.abc.Set[str] = set()
 METERED_DBUS_TIMEOUT_MSEC = 2000
 
 POWER_SUPPLY_DIR = "/sys/class/power_supply"
+DEFAULT_MIN_BATTERY_LEVEL = 40
 
 NEVER_PIN = -32768
 
@@ -968,6 +969,8 @@ def get_min_battery_level() -> int | None:
     """
     value = apt_pkg.config.find("Unattended-Upgrade::MinBatteryLevel")
     if not value:
+        if not apt_pkg.config.find("Unattended-Upgrade::OnlyOnACPower"):
+            return DEFAULT_MIN_BATTERY_LEVEL
         if apt_pkg.config.find_b("Unattended-Upgrade::OnlyOnACPower", True):
             return None
         return 0
