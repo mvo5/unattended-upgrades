@@ -6,7 +6,8 @@ import re
 import subprocess
 import unittest
 
-from unattended_upgrade import (running_kernel_pkgs_regexp,
+from unattended_upgrade import (KERNEL_VERSION_REGEXP,
+                                running_kernel_pkgs_regexp,
                                 versioned_kernel_pkgs_regexp)
 
 
@@ -21,7 +22,7 @@ class TestKernelPatterns(unittest.TestCase):
         running_escaped_regexp = ".*" + re.escape(running_kernel_version) + '$'
         try:
             running_noflavor_regexp = "linux.*-" + re.escape(
-                re.match("[1-9][0-9]*\\.[0-9]+\\.[0-9]+-[0-9]+",
+                re.match(KERNEL_VERSION_REGEXP,
                          running_kernel_version)[0])
         except TypeError:
             self.skipTest("Could not find flavor of running kernel. It may "
