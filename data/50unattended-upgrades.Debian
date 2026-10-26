@@ -10,7 +10,7 @@
 //   c,component     (eg, "main", "contrib", "non-free-firmware", "non-free")
 //   l,label         (eg, "Debian", "Debian-Security")
 //   o,origin        (eg, "Debian", "Unofficial Multimedia Packages")
-//   n,codename      (eg, "trixie", "trixie-security", "trixie-updates")
+//   n,codename      (eg, "forky", "forky-security", "forky-updates")
 //     site          (eg, "deb.debian.org")
 // The available values on the system are printed by the command
 // "apt-cache policy", and can be debugged by running
@@ -19,8 +19,8 @@
 // Within lines unattended-upgrades allows three macros whose values are
 // derived from /etc/os-release and /usr/lib/os-release:
 //   ${distro_id}            Installed origin (eg, "Debian")
-//   ${distro_codename}      Installed codename (eg, "trixie")
-//   ${distro_release}       Installed release number (eg, "13")
+//   ${distro_codename}      Installed codename (eg, "forky")
+//   ${distro_release}       Installed release number (eg, "14")
 Unattended-Upgrade::Origins-Pattern {
         // Codename based matching:
         // This will follow the migration of a release through different
