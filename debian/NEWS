@@ -1,5 +1,6 @@
 unattended-upgrades (2.14) unstable; urgency=medium
 
+  [ Fabio Fantoni ]
   Unattended-Upgrade::Package-Whitelist works again in the default,
   non-strict mode. Since version 1.16 it was silently ignored, and
   every package from an allowed origin was upgraded unless
@@ -18,6 +19,13 @@ unattended-upgrades (2.14) unstable; urgency=medium
 
   "unattended-upgrades --dry-run --verbose" shows which packages
   would now be upgraded.
+
+  [ Johan Walles ]
+  Upgrades now also run on battery power, as long as the average charge
+  of the batteries is at least 40%. Before, they only ran on AC power.
+  To keep the old behaviour, set
+  Unattended-Upgrade::MinBatteryLevel "ac-only".
+  Systems that set Unattended-Upgrade::OnlyOnACPower are not affected.
 
  -- Fabio Fantoni <fantonifabio@tiscali.it>  Sat, 24 Oct 2026 14:16:37 +0200
 
