@@ -149,12 +149,12 @@ Unattended-Upgrade::Package-Blacklist {
 // Specify syslog facility. Default is daemon
 // Unattended-Upgrade::SyslogFacility "daemon";
 
-// Download and install upgrades only on AC power
-// (i.e. skip or gracefully stop updates on battery).
-// Set it to a percentage like "40" to also run on battery while the
-// average charge of the batteries is at least that much, or to "0" to
-// run regardless of power source.
-// Unattended-Upgrade::MinBatteryLevel "ac-only";
+// Download and install upgrades on battery only while the average
+// charge of the batteries is at least this many percent
+// (i.e. skip or gracefully stop updates below that).
+// Set it to "ac-only" to only run on AC power, or to "0" to run
+// regardless of power source.
+// Unattended-Upgrade::MinBatteryLevel "40";
 
 // Download and install upgrades only on non-metered connection
 // (i.e. skip or gracefully stop updates on a metered connection)
