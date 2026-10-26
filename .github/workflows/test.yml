@@ -79,4 +79,6 @@ jobs:
     - name: autopkgtest
       # skipping tests is ok, virt-null is used because lxd keeps failing
       # with: "Timed out waiting for container to boot"
-      run: sudo autopkgtest -U ../build-area/*.dsc -- null || [ $? == 2 ]
+      # no "-U": with virt-null that would dist-upgrade the whole runner
+      # (kernels, snapd, php, ...) which regularly hits the install timeout
+      run: sudo autopkgtest ../build-area/*.dsc -- null || [ $? == 2 ]
