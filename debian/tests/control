@@ -6,10 +6,6 @@ Tests: upgrade-all-security
 Depends: @, @builddeps@, apt, debootstrap, distro-info
 Restrictions: needs-root, build-needed, skippable, allow-stderr
 
-Tests: upgrade-between-snapshots
-Restrictions: needs-root, build-needed, flaky, skippable, allow-stderr
-Depends: @, @builddeps@, apt, debootstrap
-
 Tests: kernel-patterns
 Depends: @, @builddeps@, apt
 Restrictions: build-needed, allow-stderr

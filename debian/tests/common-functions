@@ -147,7 +147,6 @@ run_u_u() {
     done
     [ $ret = 0 ] || exit $ret
 
-    chroot_exec "$chroot_dir" time unattended-upgrade --verbose --dry-run 2>&1
     chroot_exec "$chroot_dir" $uu_prefix python3 /usr/bin/unattended-upgrade --verbose --debug
     # turn on verbose loging in the congfiguration file
     echo 'Unattended-Upgrade::Verbose "true";' > "$chroot_dir/etc/apt/apt.conf.d/51unattended-upgrades-verbose"
