@@ -2925,7 +2925,6 @@ def run(options: Options,
         if greedy:
             pkgs = sorted(pkgs_upgraded)
             if (not pkgs and pkg_install_success
-                    and not pkg_conffile_prompt
                     and len(pending_autoremovals) == 0):
                 # none of the candidates could be upgraded, report it
                 # like the non-greedy mode does

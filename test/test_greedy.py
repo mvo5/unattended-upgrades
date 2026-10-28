@@ -70,7 +70,7 @@ Unattended-Upgrade::Skip-Updates-On-Metered-Connections "false";
     def run_greedy(self):
         options = MockOptions()
         options.minimal_upgrade_steps = True
-        unattended_upgrade.main(options, rootdir=self.rootdir)
+        self.ret = unattended_upgrade.main(options, rootdir=self.rootdir)
         with open(self.log) as fp:
             return fp.read()
 
@@ -114,11 +114,31 @@ Unattended-Upgrade::Skip-Updates-On-Metered-Connections "false";
         self.assertEqual(self.read_kept_back(), "")
         self.assertEqual(os.path.getmtime(stamp), stamp_mtime)
 
+    def test_greedy_conffile_prompt_only(self):
+        # the only candidate is held back by a conffile prompt, the result
+        # is the same as in the non-greedy mode (see test_conffile.py)
+        with patch.object(unattended_upgrade, "dpkg_conffile_prompt",
+                          return_value=True), \
+                patch.object(unattended_upgrade, "conffile_prompt",
+                             return_value=True):
+            log = self.run_greedy()
+        self.assertEqual(self.ret, 1)
+        self.assertIn("Package test-package has conffile prompt and needs "
+                      "to be upgraded manually", log)
+        self.assertNotIn("All upgrades installed", log)
+        self.assertIn("No packages found that can be upgraded unattended "
+                      "and no pending auto-removals", log)
+        self.assertIn("test-package", self.read_kept_back())
+
     def test_greedy_install_on_shutdown(self):
         # the archives are downloaded now and installed on shutdown, there
         # is nothing to be greedy about
         self.install_on_shutdown()
-        log = self.run_greedy()
+        # the host apt config may disable conffile prompts via
+        # DPkg::Options (e.g. --force-confold on the CI runners)
+        with patch.object(unattended_upgrade, "dpkg_conffile_prompt",
+                          return_value=True):
+            log = self.run_greedy()
         self.assertNotIn("Packages that were upgraded", log)
         self.assertNotIn("All upgrades installed", log)
         self.assertIn("Configured to install on shutdown, so exiting now", log)
