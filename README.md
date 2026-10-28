@@ -178,7 +178,7 @@ Plugin support
 --------------
 
 Plugin support is available to integrate with webhooks or other custom
-tools that need to read u-u run results. Check the [example plugin](https://github.com/mvo5/unattended-upgrades/blob/master/examples/plugins/simple.py)
+tools that need to read u-u run results. Check the [example plugin](https://github.com/mvo5/unattended-upgrades/blob/main/examples/plugins/simple.py)
 in the git repository for more details.
 
 

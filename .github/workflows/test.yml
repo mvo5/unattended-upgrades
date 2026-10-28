@@ -2,7 +2,7 @@ name: CI
 
 on:
   push:
-    branches: [master]
+    branches: [main]
   pull_request:
 
 # a new push to the same branch supersedes the running jobs
@@ -64,7 +64,7 @@ jobs:
 
   tests:
     # the expensive part, only after the quick checks passed; keeps the
-    # job name "tests" that the branch protection of master requires
+    # job name "tests" that the branch protection of main requires
     needs: [lint, py38-syntax, unit-tests]
     runs-on: ubuntu-latest
     timeout-minutes: 90
