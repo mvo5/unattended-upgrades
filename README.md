@@ -37,7 +37,7 @@ Also in this file are a range of other options that can be configured.
 
 To override the configuration it is recommended to create a separate APT
 configuration file fragment which overrides the shipped default
-value because updates to to shipped configuration file may conflict
+value because updates to the shipped configuration file may conflict
 with the local changes blocking updating unattended-upgrades itself.
 The new file should sort later than 50unattended-upgrades to be
 parsed later than the one shipping the default values, it can
@@ -73,7 +73,7 @@ Unattended-Upgrade::Origins-Pattern {
 };
 ```
 
-If you already configure what to install via apt pinning, you can
+If you already configured what to install via apt pinning, you can
 simply use "origin=*", e.g.:
 ```
  Unattended-Upgrade::Origins-Pattern {
