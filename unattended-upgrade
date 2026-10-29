@@ -2256,6 +2256,10 @@ def calculate_upgradable_pkgs(cache: UnattendedUpgradesCache,
 
     # now do the actual upgrade
     for pkg in find_upgrade_candidates(cache, options.debug):
+        # trying the candidates is the slow part, so check here as well
+        if SIGNAL_STOP_REQUEST:
+            logging.warning(_("SIGNAL received, stopping package check"))
+            break
         try_to_upgrade(pkg,
                        pkgs_to_upgrade,
                        cache)

@@ -3,6 +3,8 @@
 import os
 import unittest
 
+from unittest.mock import patch
+
 import unattended_upgrade
 from test.test_base import TestBase, MockOptions
 
@@ -36,6 +38,26 @@ class TestRewindCache(TestBase):
         to_upgrade = unattended_upgrade.calculate_upgradable_pkgs(
             self.cache, options)
         self.assertEqual(to_upgrade, [])
+
+    def test_calculate_upgradable_pkgs_stops_on_signal_while_checking(self):
+        """ a stop signal while a candidate is checked aborts the check """
+        options = MockOptions()
+        self.addCleanup(
+            setattr, unattended_upgrade, "SIGNAL_STOP_REQUEST", False)
+        orig_try_to_upgrade = unattended_upgrade.try_to_upgrade
+        checked = []
+
+        def try_to_upgrade(pkg, pkgs_to_upgrade, cache):
+            checked.append(pkg.name)
+            unattended_upgrade.SIGNAL_STOP_REQUEST = True
+            orig_try_to_upgrade(pkg, pkgs_to_upgrade, cache)
+
+        with patch.object(unattended_upgrade, "try_to_upgrade",
+                          try_to_upgrade):
+            to_upgrade = unattended_upgrade.calculate_upgradable_pkgs(
+                self.cache, options)
+        self.assertEqual(len(checked), 1)
+        self.assertEqual(to_upgrade, [self.cache[checked[0]]])
 
 
 if __name__ == "__main__":
