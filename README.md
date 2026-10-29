@@ -73,7 +73,7 @@ Unattended-Upgrade::Origins-Pattern {
 };
 ```
 
-If you already configure what to install via apt pinning, you can
+If you already configured what to install via apt pinning, you can
 simply use "origin=*", e.g.:
 ```
  Unattended-Upgrade::Origins-Pattern {
