@@ -1275,6 +1275,8 @@ def upgrade_in_minimal_steps(cache: UnattendedUpgradesCache,
                              logfile_dpkg: str = "",
                              verbose: bool = False,
                              dry_run: bool = False,
+                             *,
+                             debug: bool = False,
                              ) -> tuple[bool, list[str], bool]:
     """Mark, download, check and install one package set at a time
 
@@ -1289,6 +1291,7 @@ def upgrade_in_minimal_steps(cache: UnattendedUpgradesCache,
     success = True
     pkgs_upgraded: list[str] = []
     conffile_prompt_found = False
+    retried_fetchers: list[apt_pkg.Acquire] = []
 
     # to upgrade contains the package names
     to_upgrade = set(pkgs_to_upgrade)
@@ -1332,9 +1335,10 @@ def upgrade_in_minimal_steps(cache: UnattendedUpgradesCache,
             continue
 
         try:
-            fetcher = fetch_archives(cache, verbose)
+            fetcher = fetch_archives(cache, debug)
         except (apt.cache.FetchFailedException,
-                apt.cache.FetchCancelledException) as e:
+                apt.cache.FetchCancelledException,
+                apt.cache.LockFailedException, SystemError) as e:
             print(_("Fetching the archives failed: %s") % e)
             logging.error(_("Fetching the archives failed: %s"), e)
             cache.clear()
@@ -1348,6 +1352,8 @@ def upgrade_in_minimal_steps(cache: UnattendedUpgradesCache,
             cache.apply_pinning(cache.pinning_from_regex_list(
                 blacklist, NEVER_PIN))  # type: ignore
             cache.clear()
+            # a later step may still need some of these debs
+            retried_fetchers.append(fetcher)
             order.insert(0, pkgname)
             continue
 
@@ -1360,7 +1366,7 @@ def upgrade_in_minimal_steps(cache: UnattendedUpgradesCache,
         if len(pkgs_to_upgrade) > 0:
             all_count = len(pkgs_to_upgrade)
             remaining_count = all_count - len(to_upgrade)
-            percent = remaining_count / float(all_count * 100.0)
+            percent = remaining_count * 100.0 / all_count
         else:
             percent = 100.0
         install_log.status_change(pkg=",".join(changes),
@@ -1387,6 +1393,9 @@ def upgrade_in_minimal_steps(cache: UnattendedUpgradesCache,
         if len(to_upgrade) == 0:
             logging.info(_("All upgrades installed"))
             break
+    if not keep_debs and not dry_run:
+        for fetcher in retried_fetchers:
+            clean_downloaded_packages(fetcher)
     return (success, pkgs_upgraded, conffile_prompt_found)
 
 
@@ -1983,7 +1992,8 @@ def do_install(cache: UnattendedUpgradesCache,
                 cache, pkgs_to_upgrade,
                 logfile_dpkg,
                 options.verbose or options.debug,
-                options.dry_run)
+                options.dry_run,
+                debug=options.debug)
         else:
             mark_pkgs_to_upgrade(cache, pkgs_to_upgrade)
             pkg_install_success = upgrade_normal(
@@ -2788,7 +2798,8 @@ def run(options: Options,
         try:
             fetcher = fetch_archives(cache, options.debug)
         except (apt.cache.FetchFailedException,
-                apt.cache.FetchCancelledException) as e:
+                apt.cache.FetchCancelledException,
+                apt.cache.LockFailedException, SystemError) as e:
             print(_("Fetching the archives failed: %s") % e)
             logging.error(_("Fetching the archives failed: %s"), e)
             return UnattendedUpgradesResult(
@@ -2910,11 +2921,22 @@ def run(options: Options,
                                                pkgs,
                                                options,
                                                logfile_dpkg)
+        if not pkg_install_success and should_stop():
+            # the install was cut short by a signal, low battery or a
+            # metered connection: the packages not reached yet are not
+            # kept back, so leave the kept-back list and the stamp alone
+            if greedy and pkgs_upgraded:
+                logging.info(_("Packages that were upgraded: %s"),
+                             " ".join(sorted(pkgs_upgraded)))
+            return UnattendedUpgradesResult(
+                False, _("Upgrade was interrupted"),
+                pkgs=sorted(pkgs_upgraded),
+                pkgs_removed=kernel_pkgs_removed,
+                pkgs_kept_installed=kernel_pkgs_kept_installed)
         pkg_conffile_prompt = pkg_conffile_prompt or install_conffile_prompt
         if greedy:
             pkgs = sorted(pkgs_upgraded)
             if (not pkgs and pkg_install_success
-                    and not pkg_conffile_prompt
                     and len(pending_autoremovals) == 0):
                 # none of the candidates could be upgraded, report it
                 # like the non-greedy mode does
