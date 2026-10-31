@@ -1,7 +1,9 @@
 #!/usr/bin/python3
 
+import hashlib
 import itertools
 import os
+import shutil
 import unittest
 from unittest.mock import patch
 
@@ -66,6 +68,37 @@ Unattended-Upgrade::Skip-Updates-On-Metered-Connections "false";
         # main() resets the Unattended-Upgrade config tree from the rootdir
         with open(self.apt_conf, "a") as fp:
             fp.write('Unattended-Upgrade::InstallOnShutdown "true";\n')
+
+    def set_archive(self, pkgs):
+        """Replace the lucid-security packages with pkgs, a list of
+           (name, version, depends), their debs are already downloaded"""
+        lists = os.path.join(self.rootdir, "var", "lib", "apt", "lists")
+        archives = os.path.join(self.rootdir, "var", "cache", "apt",
+                                "archives")
+        deb = os.path.join(archives, "test-package_2.0_all.deb")
+        with open(os.path.join(lists, "archive.ubuntu.com_ubuntu_dists_"
+                               "lucid-security_main_binary-amd64_Packages"),
+                  "w") as fp:
+            for name, ver, depends in pkgs:
+                debname = "%s_%s_all.deb" % (name, ver)
+                fp.write("Package: %s\nArchitecture: all\nVersion: %s\n"
+                         % (name, ver))
+                if depends:
+                    fp.write("Depends: %s\n" % depends)
+                fp.write("Filename: %s\nSize: %s\nSHA256: %s\n\n" % (
+                    debname, os.path.getsize(deb),
+                    hashlib.sha256(open(deb, "rb").read()).hexdigest()))
+                if not os.path.exists(os.path.join(archives, debname)):
+                    shutil.copy(deb, os.path.join(archives, debname))
+        cachedir = os.path.dirname(archives)
+        for f in os.listdir(cachedir):
+            if f.endswith(".bin"):
+                os.unlink(os.path.join(cachedir, f))
+        # nothing can be downloaded, only the debs above are available
+        with open(self.apt_conf, "a") as fp:
+            fp.write('Acquire::http::Proxy "http://127.0.0.1:9";\n'
+                     'Acquire::Retries "0";\n')
+        return archives
 
     def run_greedy(self):
         options = MockOptions()
@@ -153,6 +186,32 @@ Unattended-Upgrade::Skip-Updates-On-Metered-Connections "false";
         self.assertIn("No packages found that can be upgraded unattended "
                       "and no pending auto-removals", log)
         self.assertIn("test-package", self.read_kept_back())
+
+    def test_greedy_conffile_prompt_keeps_shared_debs(self):
+        # test-package has a conffile prompt and shares a new dependency
+        # with test-package-dependency: the retried step must not remove
+        # the deb that the later step still needs
+        archives = self.set_archive([
+            ("test-package", "2.0", "test-package-newdep"),
+            ("test-package-dependency", "2.0", "test-package-newdep"),
+            ("test-package-newdep", "1.0", "")])
+        with patch.object(unattended_upgrade, "dpkg_conffile_prompt",
+                          return_value=True), \
+                patch.object(unattended_upgrade, "conffile_prompt",
+                             side_effect=lambda deb: os.path.basename(
+                                 deb).startswith("test-package_")), \
+                patch.object(unattended_upgrade, "pkgname_from_deb",
+                             side_effect=lambda deb: os.path.basename(
+                                 deb).split("_")[0]):
+            log = self.run_greedy()
+        self.assertIn("Package test-package has conffile prompt", log)
+        self.assertNotIn("Fetching the archives failed", log)
+        self.assertIn("Packages that were upgraded: test-package-dependency",
+                      log)
+        # the debs of the retried step are removed at the end
+        self.assertNotIn("test-package_2.0_all.deb", os.listdir(archives))
+        self.assertNotIn("test-package-newdep_1.0_all.deb",
+                         os.listdir(archives))
 
 
 if __name__ == "__main__":

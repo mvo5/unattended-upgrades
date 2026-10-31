@@ -1291,6 +1291,7 @@ def upgrade_in_minimal_steps(cache: UnattendedUpgradesCache,
     success = True
     pkgs_upgraded: list[str] = []
     conffile_prompt_found = False
+    retried_fetchers: list[apt_pkg.Acquire] = []
 
     # to upgrade contains the package names
     to_upgrade = set(pkgs_to_upgrade)
@@ -1351,8 +1352,8 @@ def upgrade_in_minimal_steps(cache: UnattendedUpgradesCache,
             cache.apply_pinning(cache.pinning_from_regex_list(
                 blacklist, NEVER_PIN))  # type: ignore
             cache.clear()
-            if not keep_debs and not dry_run:
-                clean_downloaded_packages(fetcher)
+            # a later step may still need some of these debs
+            retried_fetchers.append(fetcher)
             order.insert(0, pkgname)
             continue
 
@@ -1392,6 +1393,9 @@ def upgrade_in_minimal_steps(cache: UnattendedUpgradesCache,
         if len(to_upgrade) == 0:
             logging.info(_("All upgrades installed"))
             break
+    if not keep_debs and not dry_run:
+        for fetcher in retried_fetchers:
+            clean_downloaded_packages(fetcher)
     return (success, pkgs_upgraded, conffile_prompt_found)
 
 
