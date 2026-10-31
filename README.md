@@ -258,7 +258,10 @@ Supported Options Reference
  
  Run `dpkg --force-confold --configure -a` if a unclean dpkg state is
  detected. This defaults to true to ensure that updates get installed
- even when the system got interrupted during a previous run.
+ even when the system got interrupted during a previous run. It is not
+ done with `--dry-run` or `--download-only`, nor while another package
+ manager holds the dpkg frontend lock. With `InstallOnShutdown` it is
+ left to the run at shutdown.
 
 * `Unattended-Upgrade::MinimalSteps` - boolean (default:True)
  
