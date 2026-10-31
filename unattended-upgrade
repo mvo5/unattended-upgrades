@@ -794,24 +794,6 @@ class LogInstallProgress(apt.progress.base.InstallProgress):
         return pid
 
 
-class Unlocked:
-    """
-    Context manager for unlocking the apt lock while cache.commit() is run
-    """
-
-    def __enter__(self) -> None:
-        try:
-            apt_pkg.pkgsystem_unlock_inner()
-        except Exception:
-            # earlier python-apt used to leak lock
-            logging.warning("apt_pkg.pkgsystem_unlock() failed due to not "
-                            "holding the lock but trying to continue")
-            pass
-
-    def __exit__(self, exc_type: object, exc_value: object, exc_tb: object) -> None:
-        apt_pkg.pkgsystem_lock_inner()
-
-
 class KeptPkgs(defaultdict):
     """
     Packages to keep by highest allowed pretty-printed origin
@@ -873,6 +855,40 @@ def is_dpkg_journal_dirty() -> bool:
         if re.match("[0-9]+", f):
             return True
     return False
+
+
+def fix_interrupted_dpkg(options: Options) -> None:
+    """
+    Run "dpkg --configure -a" on a dirty dpkg journal, this has to happen
+    before apt_pkg.pkgsystem_lock() as apt refuses to lock in that case
+    """
+    if options.dry_run or options.download_only:
+        logging.debug("Unclean dpkg state, but not trying to correct it "
+                      "in dry-run or download-only mode")
+        return
+    # a running package manager leaves entries in the journal as well
+    # (LP: #754330), hold the frontend lock like apt does while dpkg runs
+    admindir = os.path.dirname(apt_pkg.config.find_file("Dir::State::status"))
+    lockfd = apt_pkg.get_lock(os.path.join(admindir, "lock-frontend"), False)
+    if lockfd < 0:
+        logging.debug("Unclean dpkg state, but locked, another package "
+                      "manager working?")
+        return
+    logging.warning(_("Unclean dpkg state detected, trying to correct"))
+    print(_("Unclean dpkg state detected, trying to correct"))
+    env = copy.copy(os.environ)
+    env["DPKG_FRONTEND_LOCKED"] = "1"
+    try:
+        output = subprocess.check_output(
+            ["dpkg", "--force-confold", "--configure", "-a"],
+            env=env,
+            stderr=subprocess.STDOUT,
+            universal_newlines=True)
+    except subprocess.CalledProcessError as e:
+        output = e.output
+    finally:
+        os.close(lockfd)
+    logging.warning(_("dpkg --configure -a output:\n%s"), output)
 
 
 def reboot_required() -> bool:
@@ -2696,6 +2712,14 @@ def run(options: Options,
 
     logging.info(_("Starting unattended upgrades script"))
 
+    # check if the journal is dirty and if so, take emergceny action
+    # the alternative is to leave the system potentially unsecure until
+    # the user comes in and fixes
+    if is_dpkg_journal_dirty() and \
+       apt_pkg.config.find_b("Unattended-Upgrade::AutoFixInterruptedDpkg",
+                             True):
+        fix_interrupted_dpkg(options)
+
     # check and get lock
     try:
         apt_pkg.pkgsystem_lock()
@@ -2705,27 +2729,6 @@ def run(options: Options,
         print(_("Cache lock can not be acquired, exiting"))
         return UnattendedUpgradesResult(
             False, _("Lock could not be acquired"))
-
-    # check if the journal is dirty and if so, take emergceny action
-    # the alternative is to leave the system potentially unsecure until
-    # the user comes in and fixes
-    if is_dpkg_journal_dirty() and \
-       apt_pkg.config.find_b("Unattended-Upgrade::AutoFixInterruptedDpkg",
-                             True):
-        logging.warning(
-            _("Unclean dpkg state detected, trying to correct"))
-        print(_("Unclean dpkg state detected, trying to correct"))
-        env = copy.copy(os.environ)
-        env["DPKG_FRONTEND_LOCKED"] = "1"
-        try:
-            with Unlocked():
-                output = subprocess.check_output(
-                    ["dpkg", "--force-confold", "--configure", "-a"],
-                    env=env,
-                    universal_newlines=True)
-        except subprocess.CalledProcessError as e:
-            output = e.output
-        logging.warning(_("dpkg --configure -a output:\n%s"), output)
 
     # get a cache
     try:
