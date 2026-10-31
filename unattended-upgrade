@@ -2920,6 +2920,9 @@ def run(options: Options,
             # the install was cut short by a signal, low battery or a
             # metered connection: the packages not reached yet are not
             # kept back, so leave the kept-back list and the stamp alone
+            if greedy and pkgs_upgraded:
+                logging.info(_("Packages that were upgraded: %s"),
+                             " ".join(sorted(pkgs_upgraded)))
             return UnattendedUpgradesResult(
                 False, _("Upgrade was interrupted"),
                 pkgs=sorted(pkgs_upgraded),
