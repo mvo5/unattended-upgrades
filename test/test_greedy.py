@@ -129,6 +129,22 @@ Unattended-Upgrade::Skip-Updates-On-Metered-Connections "false";
         self.assertIn("Package test-package is marked to be held back.", log)
         self.assertIn("test-package", self.read_kept_back())
 
+    def test_greedy_blacklisted_candidate(self):
+        with open(self.apt_conf, "a") as fp:
+            fp.write('Unattended-Upgrade::Package-Blacklist '
+                     '{ "test-package$"; };\n')
+        self.set_archive([
+            ("test-package", "2.0", ""),
+            ("test-package-dependency", "2.0", "")])
+        log = self.run_greedy()
+        self.assertIn("Packages that may be upgraded: "
+                      "test-package-dependency\n", log)
+        self.assertIn("Packages that were upgraded: test-package-dependency\n",
+                      log)
+        self.assertIn("INFO All upgrades installed\n", log)
+        self.assertIn("Package test-package is blacklisted.", log)
+        self.assertEqual(self.ret, 0)
+
     def test_greedy_interrupted(self):
         # a run that is stopped (signal, battery, metered connection) before
         # all the steps are done must not report the packages not reached

@@ -2769,7 +2769,11 @@ def run(options: Options,
         # find out about the packages that are upgradable (in an
         # allowed_origin)
         if greedy:
-            pkgs_to_upgrade = find_upgrade_candidates(cache, options.debug)
+            pkgs_to_upgrade = [
+                pkg for pkg in find_upgrade_candidates(cache, options.debug)
+                if is_pkg_change_allowed(pkg, cache.blacklist,
+                                         cache.whitelist,
+                                         cache.strict_whitelist)]
         else:
             pkgs_to_upgrade = calculate_upgradable_pkgs(cache, options)
         pkgs_to_upgrade.sort(key=lambda p: p.name)
