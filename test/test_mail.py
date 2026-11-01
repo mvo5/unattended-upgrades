@@ -204,6 +204,22 @@ Debian-Security']
         self.assertTrue(
             "From: rootolv" in mail_txt, "missing From: in %s" % mail_txt)
 
+    def test_summary_mail_mailer_exits_early(self):
+        # the mailer fails without reading the mail, which is bigger than
+        # the pipe buffer
+        for name in ("MAIL_BINARY", "SENDMAIL_BINARY"):
+            if os.path.exists(getattr(unattended_upgrade, name)):
+                patcher = patch.object(unattended_upgrade, name, "/bin/false")
+                patcher.start()
+                self.addCleanup(patcher.stop)
+        (pkgs, res, result_str, pkgs_kept_back, pkgs_removed,
+         pkgs_kept_installed, mem_log, _) = self._return_mock_data()
+        with self.assertLogs(level="DEBUG") as logs:
+            send_summary_mail(pkgs, res, result_str, pkgs_kept_back,
+                              pkgs_removed, pkgs_kept_installed, mem_log,
+                              "dpkg log line\n" * 100000)
+        self.assertIn("DEBUG:root:mail returned: 1", logs.output)
+
     @patch("unattended_upgrade.run")
     def test_exception(self, mock_run):
         exception_string = "Test exception for email"

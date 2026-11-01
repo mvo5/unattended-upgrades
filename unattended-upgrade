@@ -1802,11 +1802,8 @@ def _send_mail_using_mailx(from_address: str,
     mail = subprocess.Popen(
         [MAIL_BINARY, "-r", from_address, "-s", subject, to_address],
         stdin=subprocess.PIPE, universal_newlines=False)
-    assert mail.stdin  # mypy
-    mail.stdin.write(encoded_body)
-    mail.stdin.close()
-    ret = mail.wait()
-    return ret
+    mail.communicate(encoded_body)
+    return mail.returncode
 
 
 def _send_mail_using_sendmail(from_address: str,
@@ -1828,11 +1825,8 @@ def _send_mail_using_sendmail(from_address: str,
     sendmail = subprocess.Popen(
         [SENDMAIL_BINARY, "-oi", "-t"],
         stdin=subprocess.PIPE, universal_newlines=True)
-    assert sendmail.stdin  # mypy
-    sendmail.stdin.write(msg.as_string())
-    sendmail.stdin.close()
-    ret = sendmail.wait()
-    return ret
+    sendmail.communicate(msg.as_string())
+    return sendmail.returncode
 
 
 def get_mail_report_option() -> str:
