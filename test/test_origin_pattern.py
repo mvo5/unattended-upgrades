@@ -13,6 +13,7 @@ from unattended_upgrade import (
     is_in_allowed_origin,
     get_distro_codename,
     match_whitelist_string,
+    MinimumAge,
     UnknownMatcherError,
 )
 
@@ -154,6 +155,7 @@ class TestOriginPatern(TestBase):
         cache._depcache = MockDepCache()
         cache._depcache.broken_count = 0
         cache.install_count = 1
+        cache.minimum_age = MinimumAge(self.tempdir, [])
         return cache
 
     def _get_mock_origin(self, aorigin="", label="", archive="",

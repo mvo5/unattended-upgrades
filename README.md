@@ -254,6 +254,42 @@ Supported Options Reference
  Unattended-Upgrade::Package-Whitelist-Strict "true";
  ```
 
+* `Unattended-Upgrade::MinimumAge` - duration (default:"0")
+
+ Delay ordinary updates until a version has been seen locally for the configured time.
+ Use `h` for hours or `d` for days, with bare numbers treated as days.
+ Set `0` to disable the cooldown.
+
+ Example - wait 48 hours before installing ordinary updates:
+ ```
+ Unattended-Upgrade::MinimumAge "48h";
+ ```
+
+ First-seen times are saved per package, architecture and version in `/var/lib/unattended-upgrades/seen-versions.json`.
+ New versions start their own cooldown, while missing or invalid timestamps restart the wait.
+ This measures time since local observation, not since publication.
+ Dry runs do not save timestamps.
+
+ Trusted security origins are exempt by default.
+ Ordinary dependencies must finish their cooldown too, but required dependencies of exempt updates may skip it.
+ Holds, blacklists and allowed origins still apply.
+
+* `Unattended-Upgrade::MinimumAge-Exempt-Origins` - list of origin patterns
+
+ Choose which origins can skip the cooldown, using the same format as `Origins-Pattern`.
+ An origin must be trusted and already allowed for the exemption to apply.
+ Setting this list replaces the built-in defaults below:
+ ```
+ Unattended-Upgrade::MinimumAge-Exempt-Origins {
+     "origin=${distro_id},archive=${distro_codename}-security";
+     "origin=${distro_id},codename=${distro_codename}-security";
+     "origin=UbuntuESMApps,archive=${distro_codename}-apps-security";
+     "origin=UbuntuESM,archive=${distro_codename}-infra-security";
+ };
+ ```
+
+ Clear any previously configured list with `#clear Unattended-Upgrade::MinimumAge-Exempt-Origins;` before setting a replacement.
+
 * `Unattended-Upgrade::AutoFixInterruptedDpkg` - boolean (default:True)
  
  Run `dpkg --force-confold --configure -a` if a unclean dpkg state is
