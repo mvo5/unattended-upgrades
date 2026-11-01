@@ -1391,11 +1391,13 @@ def upgrade_in_minimal_steps(cache: UnattendedUpgradesCache,
         to_upgrade = to_upgrade - set(changes)
         logging.debug("left to upgrade %s" % to_upgrade)
         if len(to_upgrade) == 0:
-            logging.info(_("All upgrades installed"))
             break
     if not keep_debs and not dry_run:
         for fetcher in retried_fetchers:
             clean_downloaded_packages(fetcher)
+    # the candidates that can not be upgraded are left in to_upgrade
+    if pkgs_upgraded and (success or not to_upgrade):
+        logging.info(_("All upgrades installed"))
     return (success, pkgs_upgraded, conffile_prompt_found)
 
 
