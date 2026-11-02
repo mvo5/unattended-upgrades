@@ -272,6 +272,20 @@ Supported Options Reference
  Perform the upgrade when the machine is shutting down instead of
  doing it in the background while the machine is running.
 
+ The shutdown waits for the upgrade at most for logind's
+ `InhibitDelayMaxSec`, which unattended-upgrades sets to 30 seconds,
+ then the upgrade is stopped and what is left is installed on a later
+ shutdown. To allow more time, put a file with the same name as the one
+ of unattended-upgrades in `/etc/systemd/logind.conf.d/`. A setting in
+ `/etc/systemd/logind.conf`, or in a drop-in whose name sorts before
+ `unattended-upgrades-logind-maxdelay.conf`, has no effect because the
+ file of unattended-upgrades is read after it:
+ ```
+ # /etc/systemd/logind.conf.d/unattended-upgrades-logind-maxdelay.conf
+ [Login]
+ InhibitDelayMaxSec=30min
+ ```
+
 * `Unattended-Upgrade::MinBatteryLevel` - percentage or "ac-only" (default:"40")
  
  The average charge of the batteries, in percent, needed to upgrade
