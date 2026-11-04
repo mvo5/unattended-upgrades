@@ -44,6 +44,13 @@ Unattended-Upgrade::Origins-Pattern {
 //      "o=Debian Backports,a=stable-backports,l=Debian Backports";
 };
 
+// Delay ordinary updates from when each version is first seen locally.
+// Use h for hours or d for days. Default: 0 (disabled).
+// Security updates and their required dependencies are exempt.
+//Unattended-Upgrade::MinimumAge "48h";
+
+// Override exempt origins with MinimumAge-Exempt-Origins (see README).
+
 // Python regular expressions, matching packages to exclude from upgrading
 Unattended-Upgrade::Package-Blacklist {
     // The following matches all packages starting with linux-

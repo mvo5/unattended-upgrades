@@ -41,11 +41,13 @@ import glob
 import grp
 import inspect
 import io
+import json
 from importlib.abc import Loader
 import importlib.util
 import locale
 import logging
 import logging.handlers
+import math
 import re
 import os
 import pwd
@@ -57,8 +59,11 @@ import string
 import subprocess
 import sys
 import syslog
+import tempfile
+import time
 
 from collections import defaultdict, namedtuple
+from collections.abc import Iterable
 from datetime import date
 from email.message import Message
 from gettext import gettext as _
@@ -375,6 +380,130 @@ class PluginManager:
         self._call_plugin_func(func_name, result)
 
 
+class MinimumAge:
+    """Delay ordinary updates using saved first-seen times.
+
+    Track each package, architecture and version separately.
+    """
+
+    def __init__(self, rootdir: str, allowed_origins: list[str]) -> None:
+        setting = apt_pkg.config.find("Unattended-Upgrade::MinimumAge", "0")
+        match = re.fullmatch(r"(\d+)([dh]?)", setting.strip().lower())
+        if match is None:
+            raise ValueError("Invalid Unattended-Upgrade::MinimumAge: %s"
+                             % setting)
+        self.seconds = int(match.group(1)) * (
+            3600 if match.group(2) == "h" else 86400)
+
+        self.allowed_origins = allowed_origins
+        self.exempt_origins = apt_pkg.config.value_list(
+            "Unattended-Upgrade::MinimumAge-Exempt-Origins")
+        if not self.exempt_origins:
+            self.exempt_origins = [
+                "origin=${distro_id},archive=${distro_codename}-security",
+                "origin=${distro_id},codename=${distro_codename}-security",
+                "origin=UbuntuESMApps,archive=${distro_codename}-apps-security",
+                "origin=UbuntuESM,archive=${distro_codename}-infra-security",
+            ]
+
+        self.state_file = os.path.join(
+            rootdir, "var/lib/unattended-upgrades/seen-versions.json")
+        self.seen_versions: dict[str, dict[str, float]] = {}
+        if self.seconds:
+            try:
+                with open(self.state_file) as state:
+                    saved = json.load(state)
+                if isinstance(saved, dict):
+                    self.seen_versions = saved
+                else:
+                    logging.warning("Invalid minimum-age state, resetting")
+            except FileNotFoundError:
+                pass
+            except (OSError, ValueError) as error:
+                logging.warning("Cannot load minimum-age state: %s", error)
+
+    def exempt(self, version: apt.package.Version) -> bool:
+        """Check whether a trusted, allowed origin can skip the cooldown."""
+        # Exemptions must not enable repositories outside the allowed origins.
+        return any(origin.trusted
+                   and is_allowed_origin(origin, self.allowed_origins)
+                   and is_allowed_origin(origin, self.exempt_origins)
+                   for origin in version.origins)
+
+    def observe(self, cache: Iterable[apt.Package], dry_run: bool = False,
+                now: float | None = None) -> None:
+        """Keep first-seen times and remove versions no longer available.
+
+        Save the timestamps unless this is a dry run.
+        """
+        if not self.seconds:
+            return
+
+        if now is None:
+            now = time.time()
+
+        observed: dict[str, dict[str, float]] = {}
+        for package in cache:
+            previous = self.seen_versions.get(package.fullname, {})
+            if not isinstance(previous, dict):
+                previous = {}
+
+            versions = {}
+            for version in package.versions:
+                if not is_in_allowed_origin(version, self.allowed_origins):
+                    continue
+
+                first_seen = previous.get(version.version, now)
+                if (type(first_seen) not in (int, float)
+                        or not math.isfinite(first_seen)):
+                    # Invalid timestamps restart the wait instead of skipping it.
+                    first_seen = now
+                versions[version.version] = first_seen
+
+            if versions:
+                observed[package.fullname] = versions
+
+        self.seen_versions = observed
+
+        # A dry run must not start a persistent cooldown for newly seen versions.
+        if dry_run:
+            return
+
+        directory = os.path.dirname(self.state_file)
+        os.makedirs(directory, exist_ok=True)
+        temporary = None
+        try:
+            # Replace atomically so interruption cannot leave partial JSON.
+            with tempfile.NamedTemporaryFile(
+                    mode="w", dir=directory, delete=False) as state:
+                temporary = state.name
+                json.dump(observed, state, sort_keys=True)
+                state.write("\n")
+
+            os.replace(temporary, self.state_file)
+        finally:
+            if temporary is not None and os.path.exists(temporary):
+                os.unlink(temporary)
+
+    def reason(self, package: apt.Package, version: apt.package.Version,
+               now: float | None = None) -> str | None:
+        """Return why a version must wait, or None if no cooldown is needed."""
+        if not self.seconds or self.exempt(version):
+            return None
+
+        if now is None:
+            now = time.time()
+
+        first_seen = self.seen_versions.get(
+            package.fullname, {}).get(version.version, now)
+        # A backward clock jump must not count as elapsed cooldown time.
+        if max(0, now - first_seen) < self.seconds:
+            return _("Package %s version %s is still within its minimum age") \
+                % (package.fullname, version.version)
+
+        return None
+
+
 class UnattendedUpgradesCache(apt.Cache):
 
     def __init__(self, rootdir: str) -> None:
@@ -383,6 +512,7 @@ class UnattendedUpgradesCache(apt.Cache):
         self.allowed_origins = get_allowed_origins()
         logging.info(_("Allowed origins are: %s"),
                      ", ".join(self.allowed_origins))
+        self.minimum_age = MinimumAge(rootdir, self.allowed_origins)
 
         self.blacklist = apt_pkg.config.value_list(
             "Unattended-Upgrade::Package-Blacklist")
@@ -562,7 +692,8 @@ class UnattendedUpgradesCache(apt.Cache):
             updates pocket with a higher version number
         """
         try:
-            new_cand = ver_in_allowed_origin(pkg, self.allowed_origins)
+            new_cand = ver_in_allowed_origin(
+                pkg, self.allowed_origins, self.minimum_age)
             # Only adjust to lower versions to avoid flipping back and forth
             # and to avoid picking a newer version, not selected by apt.
             # This helps avoiding upgrades to experimental's packages.
@@ -1434,9 +1565,14 @@ def is_in_allowed_origin(ver: apt.package.Version, allowed_origins: list[str]) -
 
 
 def ver_in_allowed_origin(pkg: apt.Package,
-                          allowed_origins: list[str]) -> apt.package.Version:
+                          allowed_origins: list[str],
+                          minimum_age: MinimumAge | None = None,
+                          ) -> apt.package.Version:
+    """Find the newest allowed version that does not need to wait."""
     for ver in pkg.versions:
-        if is_in_allowed_origin(ver, allowed_origins):
+        if (is_in_allowed_origin(ver, allowed_origins)
+                and (minimum_age is None
+                     or minimum_age.reason(pkg, ver) is None)):
             # leave as soon as we have the highest new candidate
             return ver
     raise NoAllowedOriginError()
@@ -1542,6 +1678,48 @@ def check_changes_for_sanity(cache: UnattendedUpgradesCache,
         return False
 
 
+def minimum_age_exempt_dependencies(cache: UnattendedUpgradesCache,
+                                    changes: Iterable[apt.Package],
+                                    ) -> set[str]:
+    """Find dependencies needed by updates that skip the cooldown.
+
+    Follow required dependencies without visiting the same package twice.
+    Holds and repository restrictions still apply.
+    """
+    selected = {package.fullname: package.candidate for package in changes
+                if package.candidate and not package.marked_delete}
+    pending = [version for version in selected.values()
+               if cache.minimum_age.exempt(version)]
+    exempt: set[str] = set()
+
+    while pending:
+        version = pending.pop()
+        for alternatives in version.dependencies:
+            required = [dependency for dependency in alternatives
+                        if dependency.rawtype in ("Depends", "PreDepends")]
+
+            # An unchanged installed alternative needs no age exemption.
+            if any(target.package.fullname not in selected
+                   for dependency in required
+                   for target in dependency.installed_target_versions):
+                continue
+
+            targets = [target for dependency in required
+                       for target in dependency.target_versions
+                       if target.package.fullname in selected
+                       and target == selected[target.package.fullname]]
+
+            if targets:
+                # Exempt one selected provider, not every alternative in the group.
+                target = targets[0]
+                fullname = target.package.fullname
+                if fullname not in exempt:
+                    exempt.add(fullname)
+                    pending.append(target)
+
+    return exempt
+
+
 def sanity_problem(cache: UnattendedUpgradesCache,
                    desired_pkg: apt.Package | None) -> str | None:
     if cache._depcache.broken_count != 0:
@@ -1550,6 +1728,8 @@ def sanity_problem(cache: UnattendedUpgradesCache,
     if cache.install_count == 0:
         return ("no package is selected to be upgraded or installed")
     changes = cache.get_changes()
+    age_exempt = (minimum_age_exempt_dependencies(cache, changes)
+                  if cache.minimum_age.seconds else set())
     for pkg in changes:
         if pkg.marked_delete:
             return ("pkg %s is marked to be deleted" % pkg.name)
@@ -1568,6 +1748,11 @@ def sanity_problem(cache: UnattendedUpgradesCache,
                                          cache.strict_whitelist):
                 return ("pkg %s is blacklisted or is not whitelisted"
                         % pkg.name)
+            # Security dependencies bypass age only, never trust checks or holds.
+            reason = cache.minimum_age.reason(pkg, pkg.candidate)
+            if reason and pkg.fullname not in age_exempt:
+                return reason
+
             # check if the package is unsafe to upgrade unattended
             ignore_require_restart = apt_pkg.config.find_b(
                 "Unattended-Upgrade::IgnoreAppsRequireRestart", False)
@@ -2774,6 +2959,8 @@ def run(options: Options,
     greedy = (options.minimal_upgrade_steps
               and not options.download_only
               and not install_on_shutdown)
+
+    cache.minimum_age.observe(cache, dry_run=options.dry_run)
 
     with try_nice(20):
         auto_removable = get_auto_removable(cache)
