@@ -1,3 +1,89 @@
+unattended-upgrades (2.14) unstable; urgency=medium
+
+  [ Fabio Fantoni ]
+  * Fix Package-Whitelist being ignored unless the whitelist is strict
+    and add a NEWS entry about it (Closes: #1078049)
+  * Fix the excuses logged for kept back packages with a whitelist
+  * Fix the log message for auto-removable packages that were not removed
+  * Fix --dry-run deleting the list of kept-back packages
+  * Add the MailReport values "on-new-change" and "on-upgrade" to avoid
+    a daily mail about the same kept back packages
+  * Do not crash when the mailer exits without reading the mail
+  * Run the AutoFixInterruptedDpkg fix before taking the apt lock, apt
+    refuses the lock while dpkg is interrupted so the fix was never run
+  * Check for a stop request while trying the upgrade candidates
+  * greedy: keep the debs of a retried step until the end, log the
+    upgraded packages of an interrupted run, do not list held and
+    blacklisted packages as candidates and log "All upgrades installed"
+    when a candidate is kept back
+  * Move string formatting out of _() calls
+  * README: explain the time limit of InstallOnShutdown
+  * Import the Italian translation from Ubuntu, complete and update it
+  * Update the POT file
+
+  [ Michael Vogt ]
+  * main: rework minimal-steps mode to be greedy: start the first upgrade
+    step as soon as a candidate set is found instead of calculating the
+    full set of steps up front, this makes the time until the first
+    download/install much shorter
+  * kernel: update KERNEL_VERSION_REGEXP for newer trixie kernels
+    (Closes: #1114967)
+  * debian: use os-release and drop the lsb-release dependency and
+    build-dependency (Closes: #1115548)
+  * many: set min python version to 3.8, modernize pep484
+    (Closes: #1150359)
+  * data: update Debian config for forky
+  * tests: skip the mypy check under autopkgtest (Closes: #1146138)
+  * tests: fold upgrade-between-snapshots into the existing autopkgtests,
+    drop the --dry-run test already covered by the unit tests, use
+    --no-install-recommends and drop -U to speed up the test setup
+  * README: explain how to easily follow debian/testing
+  * HACKING: add a section about conffiles and ucf
+
+  [ Johan Walles ]
+  * Add the MinBatteryLevel option to upgrade on battery power, default
+    it to 40% and add a NEWS entry about the new default
+
+  [ Simon Arlott ]
+  * Consider conffile prompts to be errors when there's nothing else to do
+
+  [ Olaf Meeuwissen ]
+  * Honor the APT::Get::Purge setting when removing packages
+
+  [ Jochen Sprickerhof ]
+  * Catch PermissionError when executing on_ac_power (Closes: #1031880)
+
+  [ c99e ]
+  * Fix the development-release debug message on stable releases
+
+  [ Alexandre Detiste ]
+  * Drop the remaining uses of pycodestyle and pep8
+
+  [ Daniel Lewart ]
+  * Update 50unattended-upgrades.Debian for trixie
+    (Closes: #1115376, #1111238, #767208)
+
+  [ Jarno Suni ]
+  * README: document Remove-Unused-Kernel-Packages and
+    Remove-New-Unused-Dependencies
+
+  [ Arturo Rodríguez ]
+  * Fix a small typo in README.md
+
+  [ Jean-Pierre Giraud ]
+  * Move the French translation of the program to po/fr.po
+
+  [ Baptiste Jammet ]
+  * Update the French debconf translation (Closes: #1104858, #1121127)
+
+  [ Pedro Ribeiro ]
+  * Update the Portuguese translation (Closes: #1102157)
+
+  [ NorwayFun ]
+  * Add the Georgian translation
+
+ -- Michael Vogt <mvo@debian.org>  Sun, 08 Nov 2026 16:19:09 +0100
+
 unattended-upgrades (2.13) unstable; urgency=medium
 
   [ Michael Vogt ]
