@@ -2796,6 +2796,53 @@ def remove_unused_kernels(cache: UnattendedUpgradesCache,
             kernel_pkgs_kept_installed, auto_removable)
 
 
+def remove_unused_dependencies(cache: UnattendedUpgradesCache,
+                               previous_autoremovals: collections.abc.Set[str],
+                               options: Options,
+                               logfile_dpkg: str,
+                               ) -> tuple[bool, list[str], list[str]]:
+    """Remove the unused dependencies after the upgrade, all of them or
+       only the ones that became unused in this run depending on the
+       config
+
+    Returns (success, pkgs_removed, pkgs_kept_installed).
+    """
+    # make sure we start autoremovals with a clear cache
+    if cache.get_changes():
+        cache.clear()
+
+    # the user wants *all* auto-removals to be removed
+    # (unless u-u got signalled to stop gracefully quickly)
+    pkg_remove_success: bool = True
+    pkgs_removed: list[str] = []
+    pkgs_kept_installed: list[str] = []
+    if ((apt_pkg.config.find_b(
+            "Unattended-Upgrade::Remove-Unused-Dependencies", False)
+         and not SIGNAL_STOP_REQUEST)):
+        auto_removals = get_auto_removable(cache)
+        (pkg_remove_success,
+         pkgs_removed,
+         pkgs_kept_installed) = do_auto_remove(
+            cache, auto_removals, logfile_dpkg, options.minimal_upgrade_steps,
+            options.verbose or options.debug,
+            options.dry_run)
+        logging.debug("pkg_remove_success: %s" % pkg_remove_success)
+    # the user wants *only new* auto-removals to be removed
+    elif apt_pkg.config.find_b(
+            "Unattended-Upgrade::Remove-New-Unused-Dependencies", True):
+        # calculate the new auto-removals
+        new_pending_autoremovals = get_auto_removable(cache)
+        auto_removals = new_pending_autoremovals - previous_autoremovals
+        (pkg_remove_success,
+         pkgs_removed,
+         pkgs_kept_installed) = do_auto_remove(
+            cache, auto_removals, logfile_dpkg, options.minimal_upgrade_steps,
+            options.verbose or options.debug,
+            options.dry_run)
+        logging.debug("pkg_remove_success: %s" % pkg_remove_success)
+    return (pkg_remove_success, pkgs_removed, pkgs_kept_installed)
+
+
 def run(options: Options,
         rootdir: str,
         mem_log: StringIO | None,
@@ -3020,40 +3067,11 @@ def run(options: Options,
         return UnattendedUpgradesResult(
             False, _("Cache has broken packages, exiting"), pkgs=pkgs)
 
-    # make sure we start autoremovals with a clear cache
-    if cache.get_changes():
-        cache.clear()
-
-    # the user wants *all* auto-removals to be removed
-    # (unless u-u got signalled to stop gracefully quickly)
-    pkgs_removed: list[str] = []
-    pkgs_kept_installed: list[str] = []
-    if ((apt_pkg.config.find_b(
-            "Unattended-Upgrade::Remove-Unused-Dependencies", False)
-         and not SIGNAL_STOP_REQUEST)):
-        auto_removals = get_auto_removable(cache)
-        (pkg_remove_success,
-         pkgs_removed,
-         pkgs_kept_installed) = do_auto_remove(
-            cache, auto_removals, logfile_dpkg, options.minimal_upgrade_steps,
-            options.verbose or options.debug,
-            options.dry_run)
-        logging.debug("pkg_remove_success: %s" % pkg_remove_success)
-        successful_run = successful_run and pkg_remove_success
-    # the user wants *only new* auto-removals to be removed
-    elif apt_pkg.config.find_b(
-            "Unattended-Upgrade::Remove-New-Unused-Dependencies", True):
-        # calculate the new auto-removals
-        new_pending_autoremovals = get_auto_removable(cache)
-        auto_removals = new_pending_autoremovals - previous_autoremovals
-        (pkg_remove_success,
-         pkgs_removed,
-         pkgs_kept_installed) = do_auto_remove(
-            cache, auto_removals, logfile_dpkg, options.minimal_upgrade_steps,
-            options.verbose or options.debug,
-            options.dry_run)
-        logging.debug("pkg_remove_success: %s" % pkg_remove_success)
-        successful_run = successful_run and pkg_remove_success
+    (pkg_remove_success,
+     pkgs_removed,
+     pkgs_kept_installed) = remove_unused_dependencies(
+        cache, previous_autoremovals, options, logfile_dpkg)
+    successful_run = successful_run and pkg_remove_success
 
     logging.debug("InstCount=%i DelCount=%i BrokenCount=%i"
                   % (cache._depcache.inst_count,
