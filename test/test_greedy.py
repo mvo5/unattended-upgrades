@@ -1,9 +1,7 @@
 #!/usr/bin/python3
 
-import hashlib
 import itertools
 import os
-import shutil
 import unittest
 from unittest.mock import patch
 
@@ -77,37 +75,6 @@ Unattended-Upgrade::Skip-Updates-On-Metered-Connections "false";
         with open(self.apt_conf, "a") as fp:
             fp.write('Unattended-Upgrade::InstallOnShutdown "true";\n')
 
-    def set_archive(self, pkgs):
-        """Replace the lucid-security packages with pkgs, a list of
-           (name, version, depends), their debs are already downloaded"""
-        lists = os.path.join(self.rootdir, "var", "lib", "apt", "lists")
-        archives = os.path.join(self.rootdir, "var", "cache", "apt",
-                                "archives")
-        deb = os.path.join(archives, "test-package_2.0_all.deb")
-        with open(os.path.join(lists, "archive.ubuntu.com_ubuntu_dists_"
-                               "lucid-security_main_binary-amd64_Packages"),
-                  "w") as fp:
-            for name, ver, depends in pkgs:
-                debname = "%s_%s_all.deb" % (name, ver)
-                fp.write("Package: %s\nArchitecture: all\nVersion: %s\n"
-                         % (name, ver))
-                if depends:
-                    fp.write("Depends: %s\n" % depends)
-                fp.write("Filename: %s\nSize: %s\nSHA256: %s\n\n" % (
-                    debname, os.path.getsize(deb),
-                    hashlib.sha256(open(deb, "rb").read()).hexdigest()))
-                if not os.path.exists(os.path.join(archives, debname)):
-                    shutil.copy(deb, os.path.join(archives, debname))
-        cachedir = os.path.dirname(archives)
-        for f in os.listdir(cachedir):
-            if f.endswith(".bin"):
-                os.unlink(os.path.join(cachedir, f))
-        # nothing can be downloaded, only the debs above are available
-        with open(self.apt_conf, "a") as fp:
-            fp.write('Acquire::http::Proxy "http://127.0.0.1:9";\n'
-                     'Acquire::Retries "0";\n')
-        return archives
-
     def run_greedy(self):
         options = MockOptions()
         options.minimal_upgrade_steps = True
@@ -124,6 +91,28 @@ Unattended-Upgrade::Skip-Updates-On-Metered-Connections "false";
         self.assertIn("Packages that may be upgraded: test-package", log)
         self.assertIn("Packages that were upgraded: test-package", log)
         self.assertIn("All upgrades installed", log)
+
+    def test_greedy_candidate_from_allowed_origin(self):
+        # the newer version in lucid-updates is not from an allowed origin,
+        # the step must pick the lucid-security one like the non-greedy
+        # mode does in calculate_upgradable_pkgs()
+        self.set_archive([("test-package", "3.0", "")],
+                         pocket="lucid-updates")
+        log = self.run_greedy()
+        self.assertIn("Packages that were upgraded: test-package\n", log)
+        self.assertIn("test-package_2.0_all.deb", log)
+        self.assertNotIn("test-package_3.0_all.deb", log)
+        self.assertIn("All upgrades installed", log)
+        self.assertEqual(self.ret, 0)
+
+    def test_greedy_candidate_from_allowed_origin_no_fallback(self):
+        # same without the apt-mark fallback (the default on sid)
+        with open(self.apt_conf, "a") as fp:
+            fp.write('Unattended-Upgrade::Allow-APT-Mark-Fallback "false";\n')
+        # main() loads the apt.conf into the global config
+        self.addCleanup(apt.apt_pkg.config.clear,
+                        "Unattended-Upgrade::Allow-APT-Mark-Fallback")
+        self.test_greedy_candidate_from_allowed_origin()
 
     def test_greedy_nothing_upgradable(self):
         # a candidate that turns out to be kept back must not be reported
