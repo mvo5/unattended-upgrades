@@ -2836,6 +2836,27 @@ def remove_unused_dependencies(cache: UnattendedUpgradesCache,
     return removal
 
 
+def nothing_to_do_result(cache: UnattendedUpgradesCache,
+                         options: Options,
+                         kernel: RemovalResult,
+                         conffile_prompt: bool,
+                         ) -> UnattendedUpgradesResult:
+    """The result of a run that found nothing to upgrade, only the
+       kernel removal and a conffile prompt may have happened
+    """
+    logging.info(_("No packages found that can be upgraded unattended "
+                   "and no pending auto-removals"))
+    pkgs_kept_back = cache.find_kept_packages(options.dry_run)
+    return UnattendedUpgradesResult(
+        kernel.success and not conffile_prompt,
+        _("No packages found that can be upgraded unattended and no "
+          "pending auto-removals"),
+        pkgs_removed=kernel.removed,
+        pkgs_kept_back=pkgs_kept_back,
+        pkgs_kept_installed=kernel.kept_installed,
+        update_stamp=True)
+
+
 def run(options: Options,
         rootdir: str,
         mem_log: StringIO | None,
@@ -2974,23 +2995,11 @@ def run(options: Options,
     else:
         pending_autoremovals = set()
 
-    def nothing_to_do_result() -> UnattendedUpgradesResult:
-        logging.info(_("No packages found that can be upgraded unattended "
-                       "and no pending auto-removals"))
-        pkgs_kept_back = cache.find_kept_packages(options.dry_run)
-        return UnattendedUpgradesResult(
-            kernel.success and not pkg_conffile_prompt,
-            _("No packages found that can be upgraded unattended and no "
-              "pending auto-removals"),
-            pkgs_removed=kernel.removed,
-            pkgs_kept_back=pkgs_kept_back,
-            pkgs_kept_installed=kernel.kept_installed,
-            update_stamp=True)
-
     # exit if there is nothing to do and nothing to report
     if (len(pending_autoremovals) == 0
             and len(pkgs_to_upgrade) == 0):
-        return nothing_to_do_result()
+        return nothing_to_do_result(cache, options, kernel,
+                                    pkg_conffile_prompt)
 
     if install_on_shutdown:
         logger = logging.getLogger()
@@ -3039,7 +3048,8 @@ def run(options: Options,
                     and len(pending_autoremovals) == 0):
                 # none of the candidates could be upgraded, report it
                 # like the non-greedy mode does
-                return nothing_to_do_result()
+                return nothing_to_do_result(cache, options, kernel,
+                                            pkg_conffile_prompt)
             logging.info(_("Packages that were upgraded: %s"),
                          " ".join(pkgs))
     # Was the overall run succesful: only if everything installed
