@@ -1,2 +1,3 @@
 tar-ignore = *.pyc
 tar-ignore = __pycache__
+tar-ignore = .pytest_cache
