@@ -2755,6 +2755,47 @@ def mark_and_fetch_all(cache: UnattendedUpgradesCache,
     return (None, pkgs_to_upgrade, pkg_conffile_prompt, fetcher)
 
 
+def remove_unused_kernels(cache: UnattendedUpgradesCache,
+                          auto_removable: collections.abc.Set[str],
+                          options: Options,
+                          logfile_dpkg: str,
+                          ) -> tuple[bool, list[str], list[str],
+                                     collections.abc.Set[str]]:
+    """Remove the auto-removable kernel packages before the upgrade
+
+    Returns (success, pkgs_removed, pkgs_kept_installed, auto_removable)
+    with the auto-removals that are left afterwards.
+    """
+    kernel_pkgs_remove_success: bool = True
+    kernel_pkgs_removed: list[str] = []
+    kernel_pkgs_kept_installed: list[str] = []
+    if (auto_removable and apt_pkg.config.find_b(
+            "Unattended-Upgrade::Remove-Unused-Kernel-Packages", True)):
+        # remove unused kernels before installing new ones because the newly
+        # installed ones may fill up /boot and break the system right before
+        # removing old ones could take place
+        #
+        # this step may also remove _auto-removable_ reverse dependencies
+        # of kernel packages
+        auto_removable_kernel_pkgs = {
+            p for p in auto_removable
+            if (cache.versioned_kernel_pkgs_regexp
+                and cache.versioned_kernel_pkgs_regexp.match(p)
+                and not cache.running_kernel_pkgs_regexp.match(p))}
+        if auto_removable_kernel_pkgs:
+            logging.info(_("Removing unused kernel packages: %s"),
+                         " ".join(auto_removable_kernel_pkgs))
+            (kernel_pkgs_remove_success,
+             kernel_pkgs_removed,
+             kernel_pkgs_kept_installed) = do_auto_remove(
+                cache, auto_removable_kernel_pkgs, logfile_dpkg,
+                options.minimal_upgrade_steps,
+                options.verbose or options.debug, options.dry_run)
+            auto_removable = get_auto_removable(cache)
+    return (kernel_pkgs_remove_success, kernel_pkgs_removed,
+            kernel_pkgs_kept_installed, auto_removable)
+
+
 def run(options: Options,
         rootdir: str,
         mem_log: StringIO | None,
@@ -2883,32 +2924,11 @@ def run(options: Options,
             return result
 
     # auto-removals
-    kernel_pkgs_remove_success: bool = True
-    kernel_pkgs_removed: list[str] = []
-    kernel_pkgs_kept_installed: list[str] = []
-    if (auto_removable and apt_pkg.config.find_b(
-            "Unattended-Upgrade::Remove-Unused-Kernel-Packages", True)):
-        # remove unused kernels before installing new ones because the newly
-        # installed ones may fill up /boot and break the system right before
-        # removing old ones could take place
-        #
-        # this step may also remove _auto-removable_ reverse dependencies
-        # of kernel packages
-        auto_removable_kernel_pkgs = {
-            p for p in auto_removable
-            if (cache.versioned_kernel_pkgs_regexp
-                and cache.versioned_kernel_pkgs_regexp.match(p)
-                and not cache.running_kernel_pkgs_regexp.match(p))}
-        if auto_removable_kernel_pkgs:
-            logging.info(_("Removing unused kernel packages: %s"),
-                         " ".join(auto_removable_kernel_pkgs))
-            (kernel_pkgs_remove_success,
-             kernel_pkgs_removed,
-             kernel_pkgs_kept_installed) = do_auto_remove(
-                cache, auto_removable_kernel_pkgs, logfile_dpkg,
-                options.minimal_upgrade_steps,
-                options.verbose or options.debug, options.dry_run)
-            auto_removable = get_auto_removable(cache)
+    (kernel_pkgs_remove_success,
+     kernel_pkgs_removed,
+     kernel_pkgs_kept_installed,
+     auto_removable) = remove_unused_kernels(
+        cache, auto_removable, options, logfile_dpkg)
 
     previous_autoremovals = auto_removable
     if apt_pkg.config.find_b(
