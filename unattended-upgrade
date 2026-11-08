@@ -27,7 +27,6 @@ from __future__ import annotations
 import atexit
 import collections.abc
 import contextlib
-import copy
 import datetime
 import errno
 import email.charset
@@ -880,7 +879,7 @@ def fix_interrupted_dpkg(options: Options, install_on_shutdown: bool) -> None:
         return
     logging.warning(_("Unclean dpkg state detected, trying to correct"))
     print(_("Unclean dpkg state detected, trying to correct"))
-    env = copy.copy(os.environ)
+    env = os.environ.copy()
     env["DPKG_FRONTEND_LOCKED"] = "1"
     try:
         output = subprocess.check_output(

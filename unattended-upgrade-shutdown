@@ -27,7 +27,6 @@
 
 from __future__ import annotations
 
-import copy
 import dbus
 import signal
 import sys
@@ -296,7 +295,7 @@ class UnattendedUpgradesShutdown():
                 and apt_pkg.config.find_b(
                     "Unattended-Upgrade::InstallOnShutdown", False))
             if self.on_shutdown_mode:
-                env = copy.copy(os.environ)
+                env = os.environ.copy()
                 env["UNATTENDED_UPGRADES_FORCE_INSTALL_ON_SHUTDOWN"] = "1"
                 logging.debug("starting unattended-upgrades in shutdown mode")
                 self.on_shutdown_mode_uu_proc = subprocess.Popen(
