@@ -73,7 +73,7 @@ from subprocess import (
     PIPE,
 )
 from textwrap import wrap
-from typing import Any, cast
+from typing import Any, NamedTuple, cast
 
 import apt
 import apt_inst
@@ -215,6 +215,13 @@ class NoAllowedOriginError(ValueError):
 
 PkgPin = namedtuple('PkgPin', ['pkg', 'priority'])
 PkgFilePin = namedtuple('PkgFilePin', ['id', 'priority'])
+
+
+class RemovalResult(NamedTuple):
+    """What an auto-removal did"""
+    success: bool
+    removed: list[str]
+    kept_installed: list[str]
 
 
 class PluginDataPostrun(dict):
@@ -2422,11 +2429,11 @@ def do_auto_remove(cache: UnattendedUpgradesCache,
                    minimal_steps: bool,
                    verbose: bool = False,
                    dry_run: bool = False
-                   ) -> tuple[bool, list[str], list[str]]:
+                   ) -> RemovalResult:
     res = True
     error: Exception | None = None
     if not auto_removable:
-        return (res, [], [])
+        return RemovalResult(res, [], [])
 
     pkgs_removed: list[str] = []
     pkgs_kept_installed: list[str] = []
@@ -2435,7 +2442,7 @@ def do_auto_remove(cache: UnattendedUpgradesCache,
         for pkgname in auto_removable:
             if should_stop():
                 pkgs_kept_installed = list(auto_removable - set(pkgs_removed))
-                return (False, pkgs_removed, pkgs_kept_installed)
+                return RemovalResult(False, pkgs_removed, pkgs_kept_installed)
             logging.debug("marking %s for removal" % pkgname)
             if pkgname in pkgs_removed:
                 continue
@@ -2477,7 +2484,7 @@ def do_auto_remove(cache: UnattendedUpgradesCache,
         logging.error(_("Error message: %s"), error)
         logging.error(_("dpkg returned an error! See %s for details"),
                       logfile_dpkg)
-    return (res, pkgs_removed, pkgs_kept_installed)
+    return RemovalResult(res, pkgs_removed, pkgs_kept_installed)
 
 
 def clean_downloaded_packages(fetcher: apt_pkg.Acquire) -> None:
@@ -2759,16 +2766,13 @@ def remove_unused_kernels(cache: UnattendedUpgradesCache,
                           auto_removable: collections.abc.Set[str],
                           options: Options,
                           logfile_dpkg: str,
-                          ) -> tuple[bool, list[str], list[str],
-                                     collections.abc.Set[str]]:
+                          ) -> tuple[RemovalResult, collections.abc.Set[str]]:
     """Remove the auto-removable kernel packages before the upgrade
 
-    Returns (success, pkgs_removed, pkgs_kept_installed, auto_removable)
-    with the auto-removals that are left afterwards.
+    Returns (removal, auto_removable) with the auto-removals that are
+    left afterwards.
     """
-    kernel_pkgs_remove_success: bool = True
-    kernel_pkgs_removed: list[str] = []
-    kernel_pkgs_kept_installed: list[str] = []
+    removal = RemovalResult(True, [], [])
     if (auto_removable and apt_pkg.config.find_b(
             "Unattended-Upgrade::Remove-Unused-Kernel-Packages", True)):
         # remove unused kernels before installing new ones because the newly
@@ -2785,27 +2789,22 @@ def remove_unused_kernels(cache: UnattendedUpgradesCache,
         if auto_removable_kernel_pkgs:
             logging.info(_("Removing unused kernel packages: %s"),
                          " ".join(auto_removable_kernel_pkgs))
-            (kernel_pkgs_remove_success,
-             kernel_pkgs_removed,
-             kernel_pkgs_kept_installed) = do_auto_remove(
+            removal = do_auto_remove(
                 cache, auto_removable_kernel_pkgs, logfile_dpkg,
                 options.minimal_upgrade_steps,
                 options.verbose or options.debug, options.dry_run)
             auto_removable = get_auto_removable(cache)
-    return (kernel_pkgs_remove_success, kernel_pkgs_removed,
-            kernel_pkgs_kept_installed, auto_removable)
+    return (removal, auto_removable)
 
 
 def remove_unused_dependencies(cache: UnattendedUpgradesCache,
                                previous_autoremovals: collections.abc.Set[str],
                                options: Options,
                                logfile_dpkg: str,
-                               ) -> tuple[bool, list[str], list[str]]:
+                               ) -> RemovalResult:
     """Remove the unused dependencies after the upgrade, all of them or
        only the ones that became unused in this run depending on the
        config
-
-    Returns (success, pkgs_removed, pkgs_kept_installed).
     """
     # make sure we start autoremovals with a clear cache
     if cache.get_changes():
@@ -2813,34 +2812,28 @@ def remove_unused_dependencies(cache: UnattendedUpgradesCache,
 
     # the user wants *all* auto-removals to be removed
     # (unless u-u got signalled to stop gracefully quickly)
-    pkg_remove_success: bool = True
-    pkgs_removed: list[str] = []
-    pkgs_kept_installed: list[str] = []
+    removal = RemovalResult(True, [], [])
     if ((apt_pkg.config.find_b(
             "Unattended-Upgrade::Remove-Unused-Dependencies", False)
          and not SIGNAL_STOP_REQUEST)):
         auto_removals = get_auto_removable(cache)
-        (pkg_remove_success,
-         pkgs_removed,
-         pkgs_kept_installed) = do_auto_remove(
+        removal = do_auto_remove(
             cache, auto_removals, logfile_dpkg, options.minimal_upgrade_steps,
             options.verbose or options.debug,
             options.dry_run)
-        logging.debug("pkg_remove_success: %s" % pkg_remove_success)
+        logging.debug("pkg_remove_success: %s" % removal.success)
     # the user wants *only new* auto-removals to be removed
     elif apt_pkg.config.find_b(
             "Unattended-Upgrade::Remove-New-Unused-Dependencies", True):
         # calculate the new auto-removals
         new_pending_autoremovals = get_auto_removable(cache)
         auto_removals = new_pending_autoremovals - previous_autoremovals
-        (pkg_remove_success,
-         pkgs_removed,
-         pkgs_kept_installed) = do_auto_remove(
+        removal = do_auto_remove(
             cache, auto_removals, logfile_dpkg, options.minimal_upgrade_steps,
             options.verbose or options.debug,
             options.dry_run)
-        logging.debug("pkg_remove_success: %s" % pkg_remove_success)
-    return (pkg_remove_success, pkgs_removed, pkgs_kept_installed)
+        logging.debug("pkg_remove_success: %s" % removal.success)
+    return removal
 
 
 def run(options: Options,
@@ -2971,10 +2964,7 @@ def run(options: Options,
             return result
 
     # auto-removals
-    (kernel_pkgs_remove_success,
-     kernel_pkgs_removed,
-     kernel_pkgs_kept_installed,
-     auto_removable) = remove_unused_kernels(
+    (kernel, auto_removable) = remove_unused_kernels(
         cache, auto_removable, options, logfile_dpkg)
 
     previous_autoremovals = auto_removable
@@ -2989,12 +2979,12 @@ def run(options: Options,
                        "and no pending auto-removals"))
         pkgs_kept_back = cache.find_kept_packages(options.dry_run)
         return UnattendedUpgradesResult(
-            kernel_pkgs_remove_success and not pkg_conffile_prompt,
+            kernel.success and not pkg_conffile_prompt,
             _("No packages found that can be upgraded unattended and no "
               "pending auto-removals"),
-            pkgs_removed=kernel_pkgs_removed,
+            pkgs_removed=kernel.removed,
             pkgs_kept_back=pkgs_kept_back,
-            pkgs_kept_installed=kernel_pkgs_kept_installed,
+            pkgs_kept_installed=kernel.kept_installed,
             update_stamp=True)
 
     # exit if there is nothing to do and nothing to report
@@ -3040,8 +3030,8 @@ def run(options: Options,
             return UnattendedUpgradesResult(
                 False, _("Upgrade was interrupted"),
                 pkgs=sorted(pkgs_upgraded),
-                pkgs_removed=kernel_pkgs_removed,
-                pkgs_kept_installed=kernel_pkgs_kept_installed)
+                pkgs_removed=kernel.removed,
+                pkgs_kept_installed=kernel.kept_installed)
         pkg_conffile_prompt = pkg_conffile_prompt or install_conffile_prompt
         if greedy:
             pkgs = sorted(pkgs_upgraded)
@@ -3054,10 +3044,10 @@ def run(options: Options,
                          " ".join(pkgs))
     # Was the overall run succesful: only if everything installed
     # fine and nothing was held back because of a conffile prompt.
-    logging.debug("kernel_pkgs_remove_success: %s" % kernel_pkgs_remove_success)
+    logging.debug("kernel_pkgs_remove_success: %s" % kernel.success)
     logging.debug("pkg_install_success: %s", pkg_install_success)
     logging.debug("pkg_conffile_prompt: %s" % pkg_conffile_prompt)
-    successful_run = (kernel_pkgs_remove_success and pkg_install_success
+    successful_run = (kernel.success and pkg_install_success
                       and not pkg_conffile_prompt)
 
     # now check if any auto-removing needs to be done
@@ -3067,11 +3057,9 @@ def run(options: Options,
         return UnattendedUpgradesResult(
             False, _("Cache has broken packages, exiting"), pkgs=pkgs)
 
-    (pkg_remove_success,
-     pkgs_removed,
-     pkgs_kept_installed) = remove_unused_dependencies(
+    deps = remove_unused_dependencies(
         cache, previous_autoremovals, options, logfile_dpkg)
-    successful_run = successful_run and pkg_remove_success
+    successful_run = successful_run and deps.success
 
     logging.debug("InstCount=%i DelCount=%i BrokenCount=%i"
                   % (cache._depcache.inst_count,
@@ -3090,8 +3078,8 @@ def run(options: Options,
     return UnattendedUpgradesResult(
         successful_run, _("All upgrades installed"), pkgs,
         pkgs_kept_back,
-        kernel_pkgs_removed + pkgs_removed,
-        kernel_pkgs_kept_installed + pkgs_kept_installed,
+        kernel.removed + deps.removed,
+        kernel.kept_installed + deps.kept_installed,
         update_stamp=True)
 
 
