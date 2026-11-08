@@ -2684,6 +2684,77 @@ def mark_pkgs_to_upgrade(cache: UnattendedUpgradesCache,
             cache.mark_install_adjusted(pkg, from_user=False)
 
 
+def mark_and_fetch_all(cache: UnattendedUpgradesCache,
+                       pkgs_to_upgrade: list[apt.Package],
+                       options: Options,
+                       ) -> tuple[UnattendedUpgradesResult | None,
+                                  list[apt.Package], bool,
+                                  apt_pkg.Acquire | None]:
+    """Mark and download all the upgrades up front (the non-greedy mode)
+       and drop the packages that would ask a conffile prompt
+
+    Returns (result, pkgs_to_upgrade, conffile_prompt, fetcher), the
+    result is set when the run has to stop here.
+    """
+    pkgs = [pkg.name for pkg in pkgs_to_upgrade]
+    # download what looks good
+    mark_pkgs_to_upgrade(cache, pkgs)
+
+    # don't start downloading during shutdown
+    # TODO: download files one by one and check for stop request after
+    # each of them
+    if should_stop():
+        return (UnattendedUpgradesResult(
+            False, _("Upgrade was interrupted")), pkgs_to_upgrade, False, None)
+    try:
+        fetcher = fetch_archives(cache, options.debug)
+    except (apt.cache.FetchFailedException,
+            apt.cache.FetchCancelledException,
+            apt.cache.LockFailedException, SystemError) as e:
+        print(_("Fetching the archives failed: %s") % e)
+        logging.error(_("Fetching the archives failed: %s"), e)
+        return (UnattendedUpgradesResult(
+            False, _("Fetching the archives failed: %s") % e),
+            pkgs_to_upgrade, False, None)
+
+    if options.download_only:
+        return (UnattendedUpgradesResult(True), pkgs_to_upgrade, False,
+                fetcher)
+
+    if cache.get_changes():
+        cache.clear()
+
+    conffile_blacklist = conffile_prompt_blacklist(fetcher, cache)
+    pkg_conffile_prompt = len(conffile_blacklist) > 0
+
+    # redo the selection about the packages to upgrade based on the new
+    # blacklist
+    if len(conffile_blacklist) > 0:
+        for regex in conffile_blacklist:
+            cache.blacklist.append(regex)
+        cache.apply_pinning(cache.pinning_from_regex_list(
+            conffile_blacklist, NEVER_PIN))  # type: ignore
+        old_pkgs_to_upgrade = pkgs_to_upgrade[:]
+        pkgs_to_upgrade = []
+        for pkg in old_pkgs_to_upgrade:
+            logging.debug("Checking the black and whitelist: %s" %
+                          (pkg.name))
+            cache.mark_upgrade_adjusted(
+                pkg, from_user=not pkg.is_auto_installed)
+            if check_changes_for_sanity(cache):
+                pkgs_to_upgrade.append(pkg)
+            else:
+                logging.info(_("package %s not upgraded"), pkg.name)
+                cache.clear()
+                for pkg2 in pkgs_to_upgrade:
+                    cache.call_adjusted(
+                        apt.package.Package.mark_upgrade, pkg2,
+                        from_user=not pkg2.is_auto_installed)
+        if cache.get_changes():
+            cache.clear()
+    return (None, pkgs_to_upgrade, pkg_conffile_prompt, fetcher)
+
+
 def run(options: Options,
         rootdir: str,
         mem_log: StringIO | None,
@@ -2806,59 +2877,10 @@ def run(options: Options,
     pkg_conffile_prompt = False
     fetcher: apt_pkg.Acquire | None = None
     if not greedy:
-        # download what looks good
-        mark_pkgs_to_upgrade(cache, pkgs)
-
-        # don't start downloading during shutdown
-        # TODO: download files one by one and check for stop request after
-        # each of them
-        if should_stop():
-            return UnattendedUpgradesResult(
-                False, _("Upgrade was interrupted"))
-        try:
-            fetcher = fetch_archives(cache, options.debug)
-        except (apt.cache.FetchFailedException,
-                apt.cache.FetchCancelledException,
-                apt.cache.LockFailedException, SystemError) as e:
-            print(_("Fetching the archives failed: %s") % e)
-            logging.error(_("Fetching the archives failed: %s"), e)
-            return UnattendedUpgradesResult(
-                False, _("Fetching the archives failed: %s") % e)
-
-        if options.download_only:
-            return UnattendedUpgradesResult(True)
-
-        if cache.get_changes():
-            cache.clear()
-
-        conffile_blacklist = conffile_prompt_blacklist(fetcher, cache)
-        pkg_conffile_prompt = len(conffile_blacklist) > 0
-
-        # redo the selection about the packages to upgrade based on the new
-        # blacklist
-        if len(conffile_blacklist) > 0:
-            for regex in conffile_blacklist:
-                cache.blacklist.append(regex)
-            cache.apply_pinning(cache.pinning_from_regex_list(
-                conffile_blacklist, NEVER_PIN))  # type: ignore
-            old_pkgs_to_upgrade = pkgs_to_upgrade[:]
-            pkgs_to_upgrade = []
-            for pkg in old_pkgs_to_upgrade:
-                logging.debug("Checking the black and whitelist: %s" %
-                              (pkg.name))
-                cache.mark_upgrade_adjusted(
-                    pkg, from_user=not pkg.is_auto_installed)
-                if check_changes_for_sanity(cache):
-                    pkgs_to_upgrade.append(pkg)
-                else:
-                    logging.info(_("package %s not upgraded"), pkg.name)
-                    cache.clear()
-                    for pkg2 in pkgs_to_upgrade:
-                        cache.call_adjusted(
-                            apt.package.Package.mark_upgrade, pkg2,
-                            from_user=not pkg2.is_auto_installed)
-            if cache.get_changes():
-                cache.clear()
+        (result, pkgs_to_upgrade, pkg_conffile_prompt,
+         fetcher) = mark_and_fetch_all(cache, pkgs_to_upgrade, options)
+        if result is not None:
+            return result
 
     # auto-removals
     kernel_pkgs_remove_success: bool = True
