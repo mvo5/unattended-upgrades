@@ -64,6 +64,14 @@ Unattended-Upgrade::Skip-Updates-On-Metered-Connections "false";
         with open(status, "w") as fp:
             fp.write(content)
 
+    def edit_status(self, old, new):
+        status = os.path.join(self.rootdir, "var", "lib", "dpkg", "status")
+        with open(status) as fp:
+            content = fp.read()
+        self.assertIn(old, content)
+        with open(status, "w") as fp:
+            fp.write(content.replace(old, new))
+
     def install_on_shutdown(self):
         # main() resets the Unattended-Upgrade config tree from the rootdir
         with open(self.apt_conf, "a") as fp:
@@ -128,6 +136,49 @@ Unattended-Upgrade::Skip-Updates-On-Metered-Connections "false";
                       "and no pending auto-removals", log)
         self.assertIn("Package test-package is marked to be held back.", log)
         self.assertIn("test-package", self.read_kept_back())
+
+    def test_greedy_held_and_kept_back_candidates(self):
+        # test-package is held and test-package-dependency can not be
+        # upgraded without it: the held package is not a candidate, the
+        # dependency is only found out in do_install()
+        self.edit_status(
+            "Package: test-package\nStatus: install ok installed\n"
+            "Architecture: all\nVersion: 1.0\n"
+            "Depends: test-package-dependency\n",
+            "Package: test-package\nStatus: hold ok installed\n"
+            "Architecture: all\nVersion: 1.0\n"
+            "Depends: test-package-dependency (= 1.0)\n"
+            "\nPackage: test-package-other\nStatus: install ok installed\n"
+            "Architecture: all\nVersion: 1.0\n")
+        self.set_archive([
+            ("test-package", "2.0", "test-package-dependency (= 2.0)"),
+            ("test-package-dependency", "2.0", ""),
+            ("test-package-other", "2.0", "")])
+        log = self.run_greedy()
+        self.assertIn("Packages that may be upgraded: "
+                      "test-package-dependency test-package-other\n", log)
+        self.assertIn("Packages that were upgraded: test-package-other\n",
+                      log)
+        self.assertIn("INFO All upgrades installed\n", log)
+        self.assertIn("Package test-package is marked to be held back.", log)
+        self.assertIn("Package test-package-dependency is kept back", log)
+        self.assertEqual(self.ret, 0)
+
+    def test_greedy_blacklisted_candidate(self):
+        with open(self.apt_conf, "a") as fp:
+            fp.write('Unattended-Upgrade::Package-Blacklist '
+                     '{ "test-package$"; };\n')
+        self.set_archive([
+            ("test-package", "2.0", ""),
+            ("test-package-dependency", "2.0", "")])
+        log = self.run_greedy()
+        self.assertIn("Packages that may be upgraded: "
+                      "test-package-dependency\n", log)
+        self.assertIn("Packages that were upgraded: test-package-dependency\n",
+                      log)
+        self.assertIn("INFO All upgrades installed\n", log)
+        self.assertIn("Package test-package is blacklisted.", log)
+        self.assertEqual(self.ret, 0)
 
     def test_greedy_interrupted(self):
         # a run that is stopped (signal, battery, metered connection) before
