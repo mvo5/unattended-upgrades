@@ -29,6 +29,7 @@ import collections.abc
 import contextlib
 import copy
 import datetime
+import enum
 import errno
 import email.charset
 # workaround LP:2080940, email.errors changes as part of a security
@@ -1309,6 +1310,72 @@ def conffile_prompt_blacklist(fetcher: apt_pkg.Acquire,
     return blacklist
 
 
+class MinimalStepOutcome(enum.Enum):
+    """What prepare_minimal_step() did with the package"""
+    SKIPPED = "skipped"  # nothing to do for it
+    FAILED = "failed"    # marking or downloading failed
+    RETRY = "retry"      # a conffile prompt got pinned down, mark it again
+    READY = "ready"      # the set is marked and downloaded
+
+
+def prepare_minimal_step(cache: UnattendedUpgradesCache,
+                         pkgname: str,
+                         debug: bool,
+                         ) -> tuple[MinimalStepOutcome, list[str],
+                                    apt_pkg.Acquire | None]:
+    """Mark the package set of pkgname, check it and download the debs
+
+    Returns (outcome, changes, fetcher) with the names of the packages
+    in the set and the fetcher that downloaded them, which is None
+    unless the outcome is READY or RETRY.
+    """
+    pkg = cache[pkgname]
+    try:
+        if pkg.is_upgradable \
+           or candidate_version_changed(pkg):
+            cache.mark_upgrade_adjusted(
+                pkg, from_user=not pkg.is_auto_installed)
+        elif not pkg.is_installed:
+            cache.mark_install_adjusted(pkg, from_user=False)
+        else:
+            return (MinimalStepOutcome.SKIPPED, [], None)
+    except Exception as e:
+        logging.warning(
+            _("package %s upgradable but fails to "
+              "be marked for upgrade (%s)"), pkgname, e)
+        cache.clear()
+        return (MinimalStepOutcome.FAILED, [], None)
+
+    # double check that we are not running into side effects like
+    # what could have been caused LP: #1020680
+    if not check_changes_for_sanity(cache):
+        logging.info("While building minimal partition: "
+                     "cache has not allowed changes")
+        cache.clear()
+        return (MinimalStepOutcome.SKIPPED, [], None)
+    changes = [p.name for p in cache.get_changes()]
+    if not changes:
+        return (MinimalStepOutcome.SKIPPED, [], None)
+
+    try:
+        fetcher = fetch_archives(cache, debug)
+    except (apt.cache.FetchFailedException,
+            apt.cache.FetchCancelledException,
+            apt.cache.LockFailedException, SystemError) as e:
+        print(_("Fetching the archives failed: %s") % e)
+        logging.error(_("Fetching the archives failed: %s"), e)
+        cache.clear()
+        return (MinimalStepOutcome.FAILED, changes, None)
+    blacklist = conffile_prompt_blacklist(fetcher, cache)
+    if blacklist:
+        cache.blacklist.extend(blacklist)
+        cache.apply_pinning(cache.pinning_from_regex_list(
+            blacklist, NEVER_PIN))  # type: ignore
+        cache.clear()
+        return (MinimalStepOutcome.RETRY, changes, fetcher)
+    return (MinimalStepOutcome.READY, changes, fetcher)
+
+
 def upgrade_in_minimal_steps(cache: UnattendedUpgradesCache,
                              pkgs_to_upgrade: list[str],
                              logfile_dpkg: str = "",
@@ -1344,53 +1411,15 @@ def upgrade_in_minimal_steps(cache: UnattendedUpgradesCache,
             continue
         if should_stop():
             return (False, pkgs_upgraded, conffile_prompt_found)
-        pkg = cache[pkgname]
-        try:
-            if pkg.is_upgradable \
-               or candidate_version_changed(pkg):
-                cache.mark_upgrade_adjusted(
-                    pkg, from_user=not pkg.is_auto_installed)
-            elif not pkg.is_installed:
-                cache.mark_install_adjusted(pkg, from_user=False)
-            else:
-                continue
-        except Exception as e:
-            logging.warning(
-                _("package %s upgradable but fails to "
-                  "be marked for upgrade (%s)"), pkgname, e)
-            cache.clear()
-            success = False
+        outcome, changes, fetcher = prepare_minimal_step(
+            cache, pkgname, debug)
+        if fetcher is None:
+            # nothing to install for this package
+            success = success and outcome is not MinimalStepOutcome.FAILED
             continue
-
-        # double check that we are not running into side effects like
-        # what could have been caused LP: #1020680
-        if not check_changes_for_sanity(cache):
-            logging.info("While building minimal partition: "
-                         "cache has not allowed changes")
-            cache.clear()
-            continue
-        changes = [p.name for p in cache.get_changes()]
-        if not changes:
-            continue
-
-        try:
-            fetcher = fetch_archives(cache, debug)
-        except (apt.cache.FetchFailedException,
-                apt.cache.FetchCancelledException,
-                apt.cache.LockFailedException, SystemError) as e:
-            print(_("Fetching the archives failed: %s") % e)
-            logging.error(_("Fetching the archives failed: %s"), e)
-            cache.clear()
-            success = False
-            continue
-        blacklist = conffile_prompt_blacklist(fetcher, cache)
-        if blacklist:
+        if outcome is MinimalStepOutcome.RETRY:
             # retry the step with the blacklisted packages pinned down
             conffile_prompt_found = True
-            cache.blacklist.extend(blacklist)
-            cache.apply_pinning(cache.pinning_from_regex_list(
-                blacklist, NEVER_PIN))  # type: ignore
-            cache.clear()
             # a later step may still need some of these debs
             retried_fetchers.append(fetcher)
             order.insert(0, pkgname)
