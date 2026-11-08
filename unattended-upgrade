@@ -225,6 +225,13 @@ class RemovalResult(NamedTuple):
     kept_installed: list[str]
 
 
+class InstallResult(NamedTuple):
+    """What do_install() did"""
+    success: bool
+    upgraded: list[str]
+    conffile_prompt: bool
+
+
 class PluginDataPostrun(dict):
     """PluginResultData represents the result of the unattended upgrade
     operation for a plugin.
@@ -1383,12 +1390,11 @@ def upgrade_in_minimal_steps(cache: UnattendedUpgradesCache,
                              dry_run: bool = False,
                              *,
                              debug: bool = False,
-                             ) -> tuple[bool, list[str], bool]:
+                             ) -> InstallResult:
     """Mark, download, check and install one package set at a time
 
     This way the first upgrade starts right away and an interrupted run
-    keeps the finished steps. Returns (success, pkgs_upgraded,
-    conffile_prompt).
+    keeps the finished steps.
     """
     install_log = LogInstallProgress(logfile_dpkg, verbose)
     keep_debs = apt_pkg.config.find_b(
@@ -1410,7 +1416,7 @@ def upgrade_in_minimal_steps(cache: UnattendedUpgradesCache,
             # pkg is upgraded in a previous set
             continue
         if should_stop():
-            return (False, pkgs_upgraded, conffile_prompt_found)
+            return InstallResult(False, pkgs_upgraded, conffile_prompt_found)
         outcome, changes, fetcher = prepare_minimal_step(
             cache, pkgname, debug)
         if fetcher is None:
@@ -1428,7 +1434,7 @@ def upgrade_in_minimal_steps(cache: UnattendedUpgradesCache,
         # a stop request may have arrived during the download
         if should_stop():
             cache.clear()
-            return (False, pkgs_upgraded, conffile_prompt_found)
+            return InstallResult(False, pkgs_upgraded, conffile_prompt_found)
 
         # write progress log information
         if len(pkgs_to_upgrade) > 0:
@@ -1451,7 +1457,7 @@ def upgrade_in_minimal_steps(cache: UnattendedUpgradesCache,
             logging.error(_("error message: %s"), error)
             logging.error(_("dpkg returned a error! See %s for details"),
                           logfile_dpkg)
-            return (False, pkgs_upgraded, conffile_prompt_found)
+            return InstallResult(False, pkgs_upgraded, conffile_prompt_found)
         success = success and res
         if not keep_debs and not dry_run:
             clean_downloaded_packages(fetcher)
@@ -1466,7 +1472,7 @@ def upgrade_in_minimal_steps(cache: UnattendedUpgradesCache,
     # the candidates that can not be upgraded are left in to_upgrade
     if pkgs_upgraded and (success or not to_upgrade):
         logging.info(_("All upgrades installed"))
-    return (success, pkgs_upgraded, conffile_prompt_found)
+    return InstallResult(success, pkgs_upgraded, conffile_prompt_found)
 
 
 def is_allowed_origin(origin: apt.package.Origin | apt_pkg.PackageFile,
@@ -2035,8 +2041,7 @@ def do_install(cache: UnattendedUpgradesCache,
                pkgs_to_upgrade: list[str],
                options: Options,
                logfile_dpkg: str,
-               ) -> tuple[bool, list[str], bool]:
-    """Returns (success, pkgs_upgraded, conffile_prompt)"""
+               ) -> InstallResult:
     setup_apt_listchanges()
 
     logging.info(_("Writing dpkg log to %s"), logfile_dpkg)
@@ -2044,15 +2049,11 @@ def do_install(cache: UnattendedUpgradesCache,
     if cache.get_changes():
         cache.clear()
 
-    pkg_install_success = False
-    pkgs_upgraded: list[str] = []
-    conffile_prompt_found = False
+    install = InstallResult(False, [], False)
     try:
         if options.minimal_upgrade_steps:
             # try upgrade all "pkgs" in minimal steps
-            (pkg_install_success,
-             pkgs_upgraded,
-             conffile_prompt_found) = upgrade_in_minimal_steps(
+            install = upgrade_in_minimal_steps(
                 cache, pkgs_to_upgrade,
                 logfile_dpkg,
                 options.verbose or options.debug,
@@ -2060,15 +2061,16 @@ def do_install(cache: UnattendedUpgradesCache,
                 debug=options.debug)
         else:
             mark_pkgs_to_upgrade(cache, pkgs_to_upgrade)
-            pkg_install_success = upgrade_normal(
-                cache, logfile_dpkg, options.verbose or options.debug)
-            pkgs_upgraded = pkgs_to_upgrade
+            install = InstallResult(
+                upgrade_normal(
+                    cache, logfile_dpkg, options.verbose or options.debug),
+                pkgs_to_upgrade, False)
     except Exception as e:
         # print unhandled exceptions here this way, while stderr is redirected
         os.write(2, ("Exception: %s\n" % e).encode('utf-8'))
-        pkg_install_success = False
+        install = InstallResult(False, [], False)
 
-    return (pkg_install_success, pkgs_upgraded, conffile_prompt_found)
+    return install
 
 
 def _setup_alternative_rootdir(rootdir: str) -> None:
@@ -3049,31 +3051,26 @@ def run(options: Options,
         logging.info(_("Packages that will be upgraded: %s"), " ".join(pkgs))
 
     # only perform install step if we actually have packages to install
-    pkg_install_success = True
+    install = InstallResult(True, [], False)
     if len(pkgs_to_upgrade) > 0:
         # do install
-        (pkg_install_success,
-         pkgs_upgraded,
-         install_conffile_prompt) = do_install(cache,
-                                               pkgs,
-                                               options,
-                                               logfile_dpkg)
-        if not pkg_install_success and should_stop():
+        install = do_install(cache, pkgs, options, logfile_dpkg)
+        if not install.success and should_stop():
             # the install was cut short by a signal, low battery or a
             # metered connection: the packages not reached yet are not
             # kept back, so leave the kept-back list and the stamp alone
-            if greedy and pkgs_upgraded:
+            if greedy and install.upgraded:
                 logging.info(_("Packages that were upgraded: %s"),
-                             " ".join(sorted(pkgs_upgraded)))
+                             " ".join(sorted(install.upgraded)))
             return UnattendedUpgradesResult(
                 False, _("Upgrade was interrupted"),
-                pkgs=sorted(pkgs_upgraded),
+                pkgs=sorted(install.upgraded),
                 pkgs_removed=kernel.removed,
                 pkgs_kept_installed=kernel.kept_installed)
-        pkg_conffile_prompt = pkg_conffile_prompt or install_conffile_prompt
+        pkg_conffile_prompt = pkg_conffile_prompt or install.conffile_prompt
         if greedy:
-            pkgs = sorted(pkgs_upgraded)
-            if (not pkgs and pkg_install_success
+            pkgs = sorted(install.upgraded)
+            if (not pkgs and install.success
                     and len(pending_autoremovals) == 0):
                 # none of the candidates could be upgraded, report it
                 # like the non-greedy mode does
@@ -3084,9 +3081,9 @@ def run(options: Options,
     # Was the overall run succesful: only if everything installed
     # fine and nothing was held back because of a conffile prompt.
     logging.debug("kernel_pkgs_remove_success: %s" % kernel.success)
-    logging.debug("pkg_install_success: %s", pkg_install_success)
+    logging.debug("pkg_install_success: %s", install.success)
     logging.debug("pkg_conffile_prompt: %s" % pkg_conffile_prompt)
-    successful_run = (kernel.success and pkg_install_success
+    successful_run = (kernel.success and install.success
                       and not pkg_conffile_prompt)
 
     # now check if any auto-removing needs to be done
@@ -3110,7 +3107,7 @@ def run(options: Options,
     if (fetcher is not None
             and not apt_pkg.config.find_b(keep_key, False)
             and not options.dry_run
-            and pkg_install_success):
+            and install.success):
         clean_downloaded_packages(fetcher)
 
     pkgs_kept_back = cache.find_kept_packages(options.dry_run)
