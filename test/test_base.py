@@ -1,5 +1,6 @@
 #!/usr/bin/python3
 
+import hashlib
 import logging
 import os
 import os.path
@@ -108,6 +109,37 @@ print(sys.argv)
         os.chmod(fake_dpkg, 0o755)
         apt.apt_pkg.config.set("Dir::Bin::Dpkg", fake_dpkg)
         return aptroot
+
+    def set_archive(self, pkgs, pocket="lucid-security"):
+        """Replace the packages of the pocket with pkgs, a list of
+           (name, version, depends), their debs are already downloaded"""
+        lists = os.path.join(self.rootdir, "var", "lib", "apt", "lists")
+        archives = os.path.join(self.rootdir, "var", "cache", "apt",
+                                "archives")
+        deb = os.path.join(archives, "test-package_2.0_all.deb")
+        with open(os.path.join(lists, "archive.ubuntu.com_ubuntu_dists_"
+                               "%s_main_binary-amd64_Packages" % pocket),
+                  "w") as fp:
+            for name, ver, depends in pkgs:
+                debname = "%s_%s_all.deb" % (name, ver)
+                fp.write("Package: %s\nArchitecture: all\nVersion: %s\n"
+                         % (name, ver))
+                if depends:
+                    fp.write("Depends: %s\n" % depends)
+                fp.write("Filename: %s\nSize: %s\nSHA256: %s\n\n" % (
+                    debname, os.path.getsize(deb),
+                    hashlib.sha256(open(deb, "rb").read()).hexdigest()))
+                if not os.path.exists(os.path.join(archives, debname)):
+                    shutil.copy(deb, os.path.join(archives, debname))
+        cachedir = os.path.dirname(archives)
+        for f in os.listdir(cachedir):
+            if f.endswith(".bin"):
+                os.unlink(os.path.join(cachedir, f))
+        # nothing can be downloaded, only the debs above are available
+        with open(self.apt_conf, "a") as fp:
+            fp.write('Acquire::http::Proxy "http://127.0.0.1:9";\n'
+                     'Acquire::Retries "0";\n')
+        return archives
 
     def mock_distro(self, distro_id, codename, descr, release="1.0"):
         for attr, fake_value in [
