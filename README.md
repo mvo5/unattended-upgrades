@@ -369,10 +369,18 @@ Supported Options Reference
 
  Automatically reboot even if users are logged in.
 
+ When set to false, the logged in users are checked only when
+ unattended-upgrades schedules the reboot: with a later
+ `Unattended-Upgrade::Automatic-Reboot-Time`, users who log in after
+ that do not block it, and a later run that finds them logged in does
+ not cancel it. With systemd, new logins of unprivileged users are
+ refused in the last 5 minutes before the reboot (see `shutdown(8)`).
+
 * `Unattended-Upgrade::Automatic-Reboot-Time` - time (default:"now")
 
 If automatic reboot is enabled and needed, reboot at the specific
-time instead of immediately.
+time instead of immediately. The value is passed to `shutdown -r`, see
+`shutdown(8)` for the accepted formats.
 
 Example - reboot at 02:00:
 ```

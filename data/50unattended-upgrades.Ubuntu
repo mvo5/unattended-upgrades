@@ -115,7 +115,8 @@ Unattended-Upgrade::DevRelease "auto";
 //Unattended-Upgrade::Automatic-Reboot-IgnoredUsers "Debian-gdm,sddm,lightdm";
 
 // If automatic reboot is enabled and needed, reboot at the specific
-// time instead of immediately
+// time instead of immediately. Logged in users are checked only when
+// the reboot is scheduled, so users who log in later do not block it
 //  Default: "now"
 //Unattended-Upgrade::Automatic-Reboot-Time "02:00";
 
