@@ -25,8 +25,9 @@ jobs:
 
   py38-syntax:
     # python_requires is 3.8 but ubuntu-latest only has a much newer
-    # python, so at least make sure the scripts still compile with 3.8
-    runs-on: ubuntu-latest
+    # python, so at least make sure the scripts still compile with 3.8.
+    # setup-python has no 3.8 for ubuntu 26.04, 24.04 is the newest with it
+    runs-on: ubuntu-24.04
     steps:
     - uses: actions/checkout@v7
     - uses: actions/setup-python@v7
