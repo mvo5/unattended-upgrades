@@ -56,6 +56,7 @@ import string
 import subprocess
 import sys
 import syslog
+import tarfile
 
 from collections import defaultdict, namedtuple
 from datetime import date
@@ -1632,21 +1633,46 @@ def md5sum(data: Union[bytes, IO[bytes]]) -> str:
 
 
 def get_md5sum_for_file_in_deb(deb_file: str, conf_file: str) -> str:
+    """md5sum of conf_file in the deb, or of empty content if it is absent
+
+    data.tar members can be stored as "./etc/foo" (dpkg-deb) or as
+    "etc/foo" (some third-party tools), dpkg accepts both (GH: #426).
+    """
+    content = b""
+    found = False
+    error = ""
     dpkg_cmd = ["dpkg-deb", "--fsys-tarfile", deb_file]
-    tar_cmd = ["tar", "-x", "-O", "-f", "-", "." + conf_file]
-    md5_cmd = ["md5sum"]
-    dpkg_p = Popen(dpkg_cmd, stdout=PIPE)
-    tar_p = Popen(tar_cmd, stdin=dpkg_p.stdout, stdout=PIPE,
-                  universal_newlines=True)
-    md5_p = Popen(md5_cmd, stdin=tar_p.stdout, stdout=PIPE,
-                  universal_newlines=True)
-    pkg_md5sum = md5_p.communicate()[0].split()[0]
-    for __p in [dpkg_p, tar_p, md5_p]:
-        p = cast(Popen, __p)
-        if p.stdout:
-            p.stdout.close()
-        p.wait()
-    return pkg_md5sum
+    with Popen(dpkg_cmd, stdout=PIPE) as dpkg_p:
+        try:
+            with tarfile.open(fileobj=dpkg_p.stdout, mode="r|") as tar:
+                for member in tar:
+                    name = os.path.normpath(os.path.join("/", member.name))
+                    if name != conf_file or not member.isreg():
+                        continue
+                    f = tar.extractfile(member)
+                    if f:
+                        # the last copy wins, as with dpkg
+                        content = f.read()
+                        found = True
+        except tarfile.TarError as e:
+            error = str(e)
+        # read what tarfile leaves, like the padding after the end of the
+        # archive, so that dpkg-deb does not fail on a closed pipe
+        if dpkg_p.stdout:
+            while dpkg_p.stdout.read(65536):
+                pass
+    if not error and dpkg_p.returncode != 0:
+        error = "dpkg-deb exit status %s" % dpkg_p.returncode
+    if error:
+        # unreadable deb: hash empty content, as the tar pipeline did,
+        # which is then treated as a conffile prompt
+        logging.warning("cannot read %s from %s: %s",
+                        conf_file, deb_file, error)
+        content = b""
+    elif not found:
+        logging.warning("%s not found as a regular file in %s",
+                        conf_file, deb_file)
+    return md5sum(content)
 
 
 def get_md5sum_for_file_installed(conf_file: str, prefix: str) -> str:
@@ -1780,13 +1806,19 @@ def conffile_prompt(destFile: str, prefix: str = "") -> bool:
     # in the previous version in the dpkg status file
     if pkg_conffiles:
         for conf_file in pkg_conffiles:
+            # skip entries with flags, like "remove-on-upgrade /etc/foo"
+            if not conf_file.startswith("/"):
+                continue
             old_conf_file = map_conf_file(conf_file, dpkg_status_conffiles)
             if not old_conf_file:
-                pkg_md5sum = get_md5sum_for_file_in_deb(destFile, conf_file)
                 current_md5 = get_md5sum_for_file_installed(conf_file, prefix)
+                # no file on disk, no prompt: skip reading the deb
+                if current_md5 == "":
+                    continue
+                pkg_md5sum = get_md5sum_for_file_in_deb(destFile, conf_file)
                 logging.debug("no old_conf_file, pkg_md5sum: %s, current_md5: %s" % (
                     pkg_md5sum, current_md5))
-                if current_md5 != "" and pkg_md5sum != current_md5:
+                if pkg_md5sum != current_md5:
                     logging.debug("(old) conffile prompt found for %s (%s)" % (
                         conf_file, pkgname))
                     return True

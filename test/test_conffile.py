@@ -62,6 +62,33 @@ No really.
         self.assertFalse(conffile_prompt(test_pkg, prefix=self.rootdir),
                          "conffile prompt detection incorrect")
 
+    def test_will_not_prompt_without_dot_prefix(self):
+        # same as test_will_not_prompt, but the deb's data.tar stores
+        # "etc/configuration-file" rather than "./etc/configuration-file"
+        # (GH: #426)
+        test_pkg = os.path.join(
+            self.packagedir, "conf-test-package-no-dot-prefix_1.0.deb")
+        self.assertFalse(conffile_prompt(test_pkg, prefix=self.rootdir),
+                         "conffile prompt detection incorrect")
+
+    def test_md5sum_for_missing_file_in_deb_warns(self):
+        test_pkg = os.path.join(self.packagedir, "conf-test-package_1.0.deb")
+        with self.assertLogs(level="WARNING") as logs:
+            md5 = unattended_upgrade.get_md5sum_for_file_in_deb(
+                test_pkg, "/etc/not-in-package")
+        self.assertEqual(md5, unattended_upgrade.md5sum(b""))
+        self.assertTrue(any("/etc/not-in-package not found" in line
+                            for line in logs.output), logs.output)
+
+    def test_md5sum_for_file_in_unreadable_deb_warns(self):
+        with self.assertLogs(level="WARNING") as logs:
+            md5 = unattended_upgrade.get_md5sum_for_file_in_deb(
+                os.path.join(self.packagedir, "no-such-package.deb"),
+                "/etc/configuration-file")
+        self.assertEqual(md5, unattended_upgrade.md5sum(b""))
+        self.assertTrue(any("cannot read /etc/configuration-file" in line
+                            for line in logs.output), logs.output)
+
     def test_will_not_prompt_on_moves(self):
         # changed /etc/foo becomes /etc/foo/foo, same as shipped before
         test_pkg = os.path.join(self.packagedir, "test-package_1.3_all.deb")
