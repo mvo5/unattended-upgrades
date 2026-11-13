@@ -418,12 +418,36 @@ class UnattendedUpgradesCache(apt.Cache):
             logging.debug(
                 "Package %s has a higher version available, checking if it is "
                 "from an allowed origin and is not pinned down.", pkg.name)
+            installed_priority = self.priority_before_pinning(installed)
             for v in pkg.versions:
                 if installed < v \
-                   and installed.policy_priority <= v.policy_priority \
+                   and installed_priority <= self.priority_before_pinning(v) \
                    and is_in_allowed_origin(v, self.allowed_origins):
                     return v
         return None
+
+    def get_priorities_before_pinning(self) -> dict[int, int]:
+        """ Priorities of the versions of the installed packages pinned
+            by name, before apply_pinning()
+
+            The Package-Blacklist and -Whitelist pins give all versions of
+            such a package the same priority, so find_better_version()
+            needs the priorities from apt_preferences(5) to tell whether
+            a version is pinned down (GH: #410).
+        """
+        regexps = self.blacklist + self.whitelist
+        policy = self._depcache.policy
+        priorities: dict[int, int] = {}
+        for pkg in self._cache.packages:
+            if pkg.current_ver and any(re.match(regex, pkg.name)
+                                       for regex in regexps):
+                for ver in pkg.version_list:
+                    priorities[ver.id] = policy.get_priority(ver)
+        return priorities
+
+    def priority_before_pinning(self, ver: apt.package.Version) -> int:
+        return self._priorities_before_pinning.get(
+            ver._cand.id, ver.policy_priority)
 
     def find_kept_packages(self, dry_run: bool) -> KeptPkgs:
         """ Find kept packages not collected already """
@@ -550,6 +574,7 @@ class UnattendedUpgradesCache(apt.Cache):
 
     def open(self, progress: apt.progress.base.OpProgress | None = None) -> None:
         apt.Cache.open(self, progress)
+        self._priorities_before_pinning = self.get_priorities_before_pinning()
         # apply pinning generated from unattended-upgrades configuration
         self.apply_pinning(self.pinning_from_config())
 

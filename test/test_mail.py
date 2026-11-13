@@ -391,6 +391,28 @@ class KeptBackMailTestCase(TestBase):
             kept_pkgs.versions_set(),
             {"test-package=2.0", "test2-package=2.0", "test3-package=2.0"})
 
+    def test_kept_pkgs_blacklisted_and_pinned_down(self):
+        # the blacklist pins all versions of test-package to the same
+        # priority, which must not hide that apt_preferences(5) pins 2.0
+        # down (GH: #410)
+        self.mock_allowed_origins("origin=Ubuntu,archive=lucid-security")
+        apt_pkg.config.set("Unattended-Upgrade::Package-Blacklist::",
+                           "test-package")
+        rootdir = self.make_fake_aptroot(
+            template=os.path.join(self.testdir, "root.rewind"))
+        cache = unattended_upgrade.UnattendedUpgradesCache(rootdir=rootdir)
+        self.assertIn("test-package=2.0",
+                      cache.find_kept_packages(dry_run=False).versions_set())
+        with open(os.path.join(rootdir, "etc/apt/preferences.d/test"),
+                  "w") as fp:
+            fp.write("Package: test-package\n"
+                     "Pin: version 2.0\n"
+                     "Pin-Priority: -1\n")
+        cache = unattended_upgrade.UnattendedUpgradesCache(rootdir=rootdir)
+        self.assertEqual(
+            cache.find_kept_packages(dry_run=False).versions_set(),
+            {"test2-package=2.0", "test3-package=2.0"})
+
     def test_kept_back_mail_on_change(self):
         self.configure("on-change")
         self.assertTrue(self.run_with_kept_pkgs({"linux-image-amd64": "1"}))
