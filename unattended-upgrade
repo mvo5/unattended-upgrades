@@ -2307,10 +2307,22 @@ def calculate_upgradable_pkgs(cache: UnattendedUpgradesCache,
     return pkgs_to_upgrade
 
 
+def get_dpkg_progress_prefixes() -> tuple[str, ...]:
+    """Return the text dpkg starts its "Reading database" progress lines with
+
+    dpkg translates it, and since dpkg 1.23 even its English catalog does
+    (with an ellipsis character instead of "..."), so also look it up in
+    dpkg's catalog for the locale dpkg runs with.
+    """
+    text = "(Reading database ... "
+    return (text, gettext.dgettext("dpkg", text))
+
+
 def get_dpkg_log_content(logfile_dpkg: str,
                          install_start_time: datetime.datetime) -> str:
     logging.debug("Extracting content from %s since %s" % (
         logfile_dpkg, install_start_time))
+    progress_prefixes = get_dpkg_progress_prefixes()
     content = []
     found_start = False
     try:
@@ -2327,9 +2339,8 @@ def get_dpkg_log_content(logfile_dpkg: str,
                 if found_start:
                     # skip progress indicator until #860931 is fixed in apt
                     # and dpkg
-                    if re.match(
-                            "^\\(Reading database \\.\\.\\. ()|([0-9]+%)$",
-                            line):
+                    if (line.startswith(progress_prefixes)
+                            or re.match("[0-9]+%$", line)):
                         continue
                     content.append(line)
         return "".join(content)

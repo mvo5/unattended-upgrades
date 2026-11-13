@@ -48,6 +48,35 @@ class ExtractDpkgLogTestCase(TestBase):
         dpkg_log_content = get_dpkg_log_content(logfile_dpkg, start_time)
         self.assertEqual(dpkg_log_content, NEW_LOG)
 
+    def test_get_dpkg_log_content_skips_progress(self):
+        logfile_dpkg = os.path.join(self.tempdir, "apt-term.log")
+        start_time = LoggingDateTime.from_string("2014-10-28  10:00:00")
+        # dpkg translates the progress text, since dpkg 1.23 even in English
+        for text in ("(Reading database ... ",
+                     "(Reading database\u2026 ",
+                     "(Lese Datenbank ... "):
+            with self.subTest(text=text):
+                # as apt writes it: each update starts with "\r"
+                progress = "".join(
+                    "\r%s%d%%" % (text, n) for n in range(0, 101, 5))
+                with open(logfile_dpkg, "w", encoding="utf-8") as fp:
+                    fp.write(
+                        "Log started: 2014-10-28  10:00:00\n"
+                        "Selecting previously unselected package foo.\n"
+                        + text + progress + "\r" + text
+                        + "42 files and directories currently installed.)\n"
+                        "Preparing to unpack foo.deb ...\n"
+                        "Log ended: 2014-10-28  10:01:00\n")
+                with patch("gettext.dgettext", return_value=text):
+                    dpkg_log_content = get_dpkg_log_content(
+                        logfile_dpkg, start_time)
+                self.assertEqual(dpkg_log_content, dedent("""\
+                    Log started: 2014-10-28  10:00:00
+                    Selecting previously unselected package foo.
+                    Preparing to unpack foo.deb ...
+                    Log ended: 2014-10-28  10:01:00
+                    """))
+
 
 # note this is not a unittest.TestCase as it needs to be parameterized
 class CommonTestsForMailxAndSendmail(object):
