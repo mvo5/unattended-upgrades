@@ -27,7 +27,6 @@ from __future__ import annotations
 import atexit
 import collections.abc
 import contextlib
-import copy
 import datetime
 import errno
 import email.charset
@@ -846,25 +845,6 @@ class LogInstallProgress(apt.progress.base.InstallProgress):
         return pid
 
 
-class Unlocked:
-    """
-    Context manager for unlocking the apt lock while cache.commit() is run
-    """
-
-    def __enter__(self) -> None:
-        try:
-            apt_pkg.pkgsystem_unlock_inner()
-        except Exception:
-            # earlier python-apt used to leak lock
-            logging.warning("apt_pkg.pkgsystem_unlock() failed due to not "
-                            "holding the lock but trying to continue")
-            pass
-
-    def __exit__(self, exc_type: object, exc_value: object,
-                 exc_tb: object) -> None:
-        apt_pkg.pkgsystem_lock_inner()
-
-
 class KeptPkgs(defaultdict):
     """
     Packages to keep by highest allowed pretty-printed origin
@@ -1407,6 +1387,7 @@ def upgrade_in_minimal_steps(cache: UnattendedUpgradesCache,
                              dry_run: bool = False,
                              *,
                              debug: bool = False,
+                             retained_packages: collections.abc.Set[str] = frozenset(),
                              ) -> tuple[bool, list[str], bool]:
     """Mark, download, check and install one package set at a time
 
@@ -1516,7 +1497,7 @@ def upgrade_in_minimal_steps(cache: UnattendedUpgradesCache,
             return (False, pkgs_upgraded, conffile_prompt_found)
         success = success and res
         if not keep_debs and not dry_run:
-            clean_downloaded_packages(fetcher)
+            clean_downloaded_packages(fetcher, retained_packages)
         pkgs_upgraded.extend(p for p in changes if p in to_upgrade)
         to_upgrade = to_upgrade - set(changes)
         logging.debug("left to upgrade %s" % to_upgrade)
@@ -1524,7 +1505,7 @@ def upgrade_in_minimal_steps(cache: UnattendedUpgradesCache,
             break
     if not keep_debs and not dry_run:
         for fetcher in retried_fetchers:
-            clean_downloaded_packages(fetcher)
+            clean_downloaded_packages(fetcher, retained_packages)
     # the candidates that can not be upgraded are left in to_upgrade
     if pkgs_upgraded and (success or not to_upgrade):
         logging.info(_("All upgrades installed"))
@@ -2137,6 +2118,7 @@ def do_install(cache: UnattendedUpgradesCache,
                pkgs_to_upgrade: list[str],
                options: Options,
                logfile_dpkg: str,
+               retained_packages: collections.abc.Set[str] = frozenset(),
                ) -> tuple[bool, list[str], bool]:
     """Returns (success, pkgs_upgraded, conffile_prompt)"""
     setup_apt_listchanges()
@@ -2159,7 +2141,8 @@ def do_install(cache: UnattendedUpgradesCache,
                 logfile_dpkg,
                 options.verbose or options.debug,
                 options.dry_run,
-                debug=options.debug)
+                debug=options.debug,
+                retained_packages=retained_packages)
         else:
             mark_pkgs_to_upgrade(cache, pkgs_to_upgrade)
             pkg_install_success = upgrade_normal(
@@ -2644,7 +2627,7 @@ def do_auto_remove(cache: UnattendedUpgradesCache,
 
 def clean_downloaded_packages(
         fetcher: apt_pkg.Acquire,
-        retained_packages: set[str] | frozenset[str] = frozenset(),
+        retained_packages: collections.abc.Set[str] = frozenset(),
 ) -> None:
     archivedir = os.path.dirname(
         apt_pkg.config.find_dir("Dir::Cache::archives"))
@@ -2671,6 +2654,23 @@ def select_deferred_upgrades(
                 if pkg.marked_install or pkg.marked_upgrade}
     cache.clear()
     return deferred, retained
+
+
+def fetch_deferred_archives(cache: UnattendedUpgradesCache,
+                            deferred: list[apt.Package],
+                            debug: bool = False,
+                            ) -> apt_pkg.Acquire:
+    """Download the archives of the deferred transactions in one go, raises
+       on failure, leaves the cache clear
+
+    With cache.cache_only this only checks the cached archives, so that a
+    shutdown run installs nothing when one of them is missing or damaged.
+    """
+    mark_pkgs_to_upgrade(cache, [pkg.name for pkg in deferred])
+    try:
+        return fetch_archives(cache, debug)
+    finally:
+        cache.clear()
 
 
 def update_apply_on_shutdown_marker(rootdir: str, pending: bool) -> None:
@@ -2952,10 +2952,12 @@ def run(options: Options,
     # check if its configured for install on shutdown, if so, the
     # environment UNATTENDED_UPGRADES_FORCE_INSTALL_ON_SHUTDOWN will
     # be set by the unatteded-upgrades-shutdown script
-    install_on_shutdown = (
-        "UNATTENDED_UPGRADES_FORCE_INSTALL_ON_SHUTDOWN" not in os.environ
-        and apt_pkg.config.find_b(
-            "Unattended-Upgrade::InstallOnShutdown", False))
+    on_shutdown = (
+        "UNATTENDED_UPGRADES_FORCE_INSTALL_ON_SHUTDOWN" in os.environ)
+    shutdown_configured = apt_pkg.config.find_b(
+        "Unattended-Upgrade::InstallOnShutdown", False)
+    # this run only prepares the upgrades for the install on shutdown
+    install_on_shutdown = not on_shutdown and shutdown_configured
 
     # check if the journal is dirty and if so, take emergency action
     # the alternative is to leave the system potentially unsecure until
@@ -2975,34 +2977,9 @@ def run(options: Options,
         return UnattendedUpgradesResult(
             False, _("Lock could not be acquired"))
 
-    # check if the journal is dirty and if so, take emergceny action
-    # the alternative is to leave the system potentially unsecure until
-    # the user comes in and fixes
-    if is_dpkg_journal_dirty() and \
-       apt_pkg.config.find_b("Unattended-Upgrade::AutoFixInterruptedDpkg",
-                             True):
-        logging.warning(
-            _("Unclean dpkg state detected, trying to correct"))
-        print(_("Unclean dpkg state detected, trying to correct"))
-        env = copy.copy(os.environ)
-        env["DPKG_FRONTEND_LOCKED"] = "1"
-        try:
-            with Unlocked():
-                output = subprocess.check_output(
-                    ["dpkg", "--force-confold", "--configure", "-a"],
-                    env=env,
-                    universal_newlines=True)
-        except subprocess.CalledProcessError as e:
-            output = e.output
-        logging.warning(_("dpkg --configure -a output:\n%s"), output)
-
-    on_shutdown = (
-        "UNATTENDED_UPGRADES_FORCE_INSTALL_ON_SHUTDOWN" in os.environ)
-    install_on_shutdown = apt_pkg.config.find_b(
-        "Unattended-Upgrade::InstallOnShutdown", False)
     # Download all eligible updates normally; limit selection at shutdown.
     preparation_filter = (UpgradeFilter.DRIVERS_ONLY
-                          if on_shutdown and not install_on_shutdown
+                          if on_shutdown and not shutdown_configured
                           else UpgradeFilter.ALL_UPGRADES)
 
     # get a cache
@@ -3106,25 +3083,62 @@ def run(options: Options,
             if cache.get_changes():
                 cache.clear()
 
-    else:
-        logging.debug("dpkg is configured not to cause conffile prompts")
-
     retained_packages: set[str] = set()
     if on_shutdown:
         pkgs_to_upgrade, retained_packages = select_deferred_upgrades(cache, options)
+        if greedy and pkgs_to_upgrade:
+            # only cached archives are installed at shutdown, check all of
+            # them before the first step is installed
+            try:
+                fetcher = fetch_deferred_archives(
+                    cache, pkgs_to_upgrade, options.debug)
+            except (apt.cache.FetchFailedException,
+                    apt.cache.FetchCancelledException,
+                    apt.cache.LockFailedException, SystemError) as e:
+                print(_("Fetching the archives failed: %s") % e)
+                logging.error(_("Fetching the archives failed: %s"), e)
+                return UnattendedUpgradesResult(
+                    False, _("Fetching the archives failed: %s") % e)
     else:
         # Reuse this cache so conffile exclusions survive the filter change.
         cache.upgrade_filter = (UpgradeFilter.ALL_UPGRADES
-                                if install_on_shutdown
+                                if shutdown_configured
                                 else UpgradeFilter.DRIVERS_ONLY)
-        _deferred, retained_packages = select_deferred_upgrades(cache, options)
+        deferred, retained_packages = select_deferred_upgrades(cache, options)
+        if greedy and deferred:
+            # greedy runs only download step by step what they install, the
+            # deferred transactions are downloaded now for the shutdown
+            try:
+                fetcher = fetch_deferred_archives(
+                    cache, deferred, options.debug)
+            except (apt.cache.FetchFailedException,
+                    apt.cache.FetchCancelledException,
+                    apt.cache.LockFailedException, SystemError) as e:
+                print(_("Fetching the archives failed: %s") % e)
+                logging.error(_("Fetching the archives failed: %s"), e)
+                return UnattendedUpgradesResult(
+                    False, _("Fetching the archives failed: %s") % e)
+            conffile_blacklist = conffile_prompt_blacklist(fetcher, cache)
+            if conffile_blacklist:
+                # select the deferred transactions again without them
+                pkg_conffile_prompt = True
+                cache.blacklist.extend(conffile_blacklist)
+                cache.apply_pinning(cache.pinning_from_regex_list(
+                    conffile_blacklist, NEVER_PIN))  # type: ignore
+                deferred, retained_packages = select_deferred_upgrades(
+                    cache, options)
         cache.upgrade_filter = UpgradeFilter.NO_DRIVERS
-        if not install_on_shutdown:
+        if greedy:
+            # the other candidates are checked step by step with the
+            # NO_DRIVERS filter in do_install()
+            deferred_names = {pkg.name for pkg in deferred}
+            pkgs_to_upgrade = [pkg for pkg in pkgs_to_upgrade
+                               if pkg.name not in deferred_names]
+        elif not shutdown_configured:
             pkgs_to_upgrade = calculate_upgradable_pkgs(cache, options)
 
-    if should_stop():
-        return UnattendedUpgradesResult(False, _("Upgrade was interrupted"))
-    if not options.dry_run:
+    # do not touch the marker when the run is stopped, the result is unknown
+    if not options.dry_run and not should_stop():
         pending = bool(pkgs_to_upgrade if on_shutdown else retained_packages)
         # A conffile conflict is not evidence that pending work is finished.
         if pending or not pkg_conffile_prompt:
@@ -3183,10 +3197,7 @@ def run(options: Options,
             and len(pkgs_to_upgrade) == 0):
         return nothing_to_do_result()
 
-    # check if its configured for install on shutdown, if so, the
-    # environment UNATTENDED_UPGRADES_FORCE_INSTALL_ON_SHUTDOWN will
-    # be set by the unatteded-upgrades-shutdown script
-    if not on_shutdown and install_on_shutdown:
+    if install_on_shutdown:
         logger = logging.getLogger()
         logger.debug("Configured to install on shutdown, so exiting now")
         return UnattendedUpgradesResult(True)
@@ -3213,7 +3224,8 @@ def run(options: Options,
          install_conffile_prompt) = do_install(cache,
                                                pkgs,
                                                options,
-                                               logfile_dpkg)
+                                               logfile_dpkg,
+                                               retained_packages)
         if not pkg_install_success and should_stop():
             # the install was cut short by a signal, low battery or a
             # metered connection: the packages not reached yet are not

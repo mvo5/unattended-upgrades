@@ -6,7 +6,7 @@ import os
 import shutil
 import subprocess
 import unittest
-from unittest.mock import patch
+from unittest.mock import Mock, patch
 
 import apt_pkg
 import unattended_upgrade
@@ -122,11 +122,14 @@ class TestUpgradeFilter(TestBase):
                             {pkg.name for pkg in cache.get_changes()})
                         return True
 
-                    # Resolve real APT changes, but do not invoke dpkg.
+                    # Resolve real APT changes, but do not invoke dpkg; the
+                    # minimal steps download each step before committing it.
                     with patch.object(cache, "commit",
-                                      side_effect=record_commit):
+                                      side_effect=record_commit), \
+                            patch("unattended_upgrade.fetch_archives",
+                                  return_value=Mock(items=[])):
                         if minimal:
-                            success = (
+                            success, _, _ = (
                                 unattended_upgrade.upgrade_in_minimal_steps(
                                     cache, ["driver-root"]))
                         else:
@@ -306,7 +309,8 @@ class TestDriverFlow(TestBase):
         self.assertTrue(self.run_upgrade(download_only=True).success)
         # A successful return alone does not mean all selected work was applied
         # (minimal steps can skip transactions that fail the final sanity check).
-        with patch("unattended_upgrade.do_install", return_value=True):
+        with patch("unattended_upgrade.do_install",
+                   return_value=(True, [], False)):
             self.assertTrue(self.run_upgrade(shutdown=True).success)
         self.assertTrue(os.path.exists(self.marker))
         self.assertEqual(len(self.cached_packages()), 5)
@@ -318,7 +322,11 @@ class TestDriverFlow(TestBase):
             with patch("apt.Cache.install_archives", side_effect=SystemError):
                 self.assertFalse(self.run_upgrade().success)
             self.assertTrue(os.path.exists(self.marker))
-            self.assertEqual(len(self.cached_packages()), 5)
+            # minimal steps stop at the failed step, later steps are not
+            # downloaded, but the deferred work is kept for the shutdown
+            self.assertLessEqual({
+                "driver-root", "driver-dependency", "ordinary-root",
+                "ordinary-dependency"}, self.cached_packages())
 
         with self.subTest(case="interrupted shutdown"):
             self.assertTrue(self.run_upgrade().success)
@@ -396,9 +404,10 @@ class TestDriverFlow(TestBase):
                     # Exercise commit's own acquisition, not just run's preflight.
                     options = MockOptions()
                     options.minimal_upgrade_steps = minimal
-                    self.assertFalse(unattended_upgrade.do_install(
+                    success, _, _ = unattended_upgrade.do_install(
                         cache, ["driver-root"], options,
-                        os.path.join(self.tempdir, "dpkg.log")))
+                        os.path.join(self.tempdir, "dpkg.log"))
+                    self.assertFalse(success)
                     self.assertEqual(self.installed, [])
                     self.assertTrue(os.path.exists(self.marker))
                     # The available repository must not have repaired the file.
