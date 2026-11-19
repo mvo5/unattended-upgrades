@@ -33,7 +33,7 @@ class MockPackage():
 
 
 class MockCache(dict):
-    upgrade_filter = unattended_upgrade.UpgradeFilter.NO_DRIVERS
+    upgrade_filter = unattended_upgrade.UpgradeFilter.NO_DEFERRED
 
     def __iter__(self):
         for pkgname in self.keys():
@@ -152,7 +152,7 @@ class TestOriginPatern(TestBase):
         pkg.candidate.record["Defer-Install-To-Shutdown"] = "yes"
 
         cache = Mock()
-        cache.upgrade_filter = unattended_upgrade.UpgradeFilter.NO_DRIVERS
+        cache.upgrade_filter = unattended_upgrade.UpgradeFilter.NO_DEFERRED
         cache.get_changes.return_value = [pkg]
 
         result, error = unattended_upgrade.cache_commit(

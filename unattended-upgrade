@@ -218,13 +218,13 @@ class NoAllowedOriginError(ValueError):
 class UpgradeFilter(Enum):
     """Filter whole transactions instead of individual packages.
 
-    DRIVERS_ONLY includes ordinary dependencies needed by a driver update.
-    NO_DRIVERS rejects any transaction that would install a driver.
+    DEFERRED_ONLY includes ordinary dependencies needed by a deferred update.
+    NO_DEFERRED rejects any transaction that would install a deferred package.
     """
 
     ALL_UPGRADES = auto()
-    DRIVERS_ONLY = auto()
-    NO_DRIVERS = auto()
+    DEFERRED_ONLY = auto()
+    NO_DEFERRED = auto()
 
 
 PkgPin = namedtuple('PkgPin', ['pkg', 'priority'])
@@ -392,7 +392,7 @@ class PluginManager:
 class UnattendedUpgradesCache(apt.Cache):
 
     def __init__(self, rootdir: str,
-                 upgrade_filter: UpgradeFilter = UpgradeFilter.NO_DRIVERS,
+                 upgrade_filter: UpgradeFilter = UpgradeFilter.NO_DEFERRED,
                  ) -> None:
         # Keep the mode across dependency adjustment and cache reopening.
         self.upgrade_filter = upgrade_filter
@@ -1309,7 +1309,7 @@ def cache_commit(cache: UnattendedUpgradesCache,
         if (pkg.marked_install or pkg.marked_upgrade)
         and candidate_defers_install(pkg)
     ]
-    if cache.upgrade_filter == UpgradeFilter.NO_DRIVERS and deferred_packages:
+    if cache.upgrade_filter == UpgradeFilter.NO_DEFERRED and deferred_packages:
         error = RuntimeError(
             "refusing to install packages marked for deferred installation "
             "unattended: %s" % ", ".join(deferred_packages))
@@ -1657,7 +1657,7 @@ def sanity_problem(cache: UnattendedUpgradesCache,
         if not pkg.candidate:
             return ("internal error: pkg %s has no candidate" % pkg.candidate)
         if pkg.marked_install or pkg.marked_upgrade:
-            if (cache.upgrade_filter == UpgradeFilter.NO_DRIVERS
+            if (cache.upgrade_filter == UpgradeFilter.NO_DEFERRED
                     and candidate_defers_install(pkg)):
                 return ("pkg %s is marked for deferred installation and is "
                         "not safe to upgrade unattended" % pkg.name)
@@ -2343,7 +2343,7 @@ def write_stamp_file() -> None:
         pass
 
 
-def transaction_has_driver(cache: UnattendedUpgradesCache) -> bool:
+def transaction_has_deferred(cache: UnattendedUpgradesCache) -> bool:
     return any(candidate_defers_install(pkg)
                for pkg in cache.get_changes()
                if pkg.marked_install or pkg.marked_upgrade)
@@ -2363,9 +2363,9 @@ def try_to_upgrade(pkg: apt.Package,
                 return
         except NoAllowedOriginError:
             return
-        drivers_only = cache.upgrade_filter == UpgradeFilter.DRIVERS_ONLY
-        if drivers_only:
-            # Check this root alone so an earlier driver does not make an
+        deferred_only = cache.upgrade_filter == UpgradeFilter.DEFERRED_ONLY
+        if deferred_only:
+            # Check this root alone so an earlier deferred package does not make an
             # unrelated update qualify.
             cache.clear()
 
@@ -2374,12 +2374,12 @@ def try_to_upgrade(pkg: apt.Package,
 
         accepted_upgrade = (
             check_changes_for_sanity(cache, pkg)
-            and (not drivers_only or transaction_has_driver(cache))
+            and (not deferred_only or transaction_has_deferred(cache))
         )
         if accepted_upgrade:
             pkgs_to_upgrade.append(pkg)
 
-        if not accepted_upgrade or drivers_only:
+        if not accepted_upgrade or deferred_only:
             # Restore accepted roots after rejection or an isolated check.
             rewind_cache(cache, pkgs_to_upgrade)
     except (SystemError, NoAllowedOriginError) as e:
@@ -2978,7 +2978,7 @@ def run(options: Options,
             False, _("Lock could not be acquired"))
 
     # Download all eligible updates normally; limit selection at shutdown.
-    preparation_filter = (UpgradeFilter.DRIVERS_ONLY
+    preparation_filter = (UpgradeFilter.DEFERRED_ONLY
                           if on_shutdown and not shutdown_configured
                           else UpgradeFilter.ALL_UPGRADES)
 
@@ -3103,7 +3103,7 @@ def run(options: Options,
         # Reuse this cache so conffile exclusions survive the filter change.
         cache.upgrade_filter = (UpgradeFilter.ALL_UPGRADES
                                 if shutdown_configured
-                                else UpgradeFilter.DRIVERS_ONLY)
+                                else UpgradeFilter.DEFERRED_ONLY)
         deferred, retained_packages = select_deferred_upgrades(cache, options)
         if greedy and deferred:
             # greedy runs only download step by step what they install, the
@@ -3127,10 +3127,10 @@ def run(options: Options,
                     conffile_blacklist, NEVER_PIN))  # type: ignore
                 deferred, retained_packages = select_deferred_upgrades(
                     cache, options)
-        cache.upgrade_filter = UpgradeFilter.NO_DRIVERS
+        cache.upgrade_filter = UpgradeFilter.NO_DEFERRED
         if greedy:
             # the other candidates are checked step by step with the
-            # NO_DRIVERS filter in do_install()
+            # NO_DEFERRED filter in do_install()
             deferred_names = {pkg.name for pkg in deferred}
             pkgs_to_upgrade = [pkg for pkg in pkgs_to_upgrade
                                if pkg.name not in deferred_names]

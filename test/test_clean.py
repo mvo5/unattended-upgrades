@@ -52,15 +52,15 @@ class TestClean(TestBase):
     def test_retained_transaction_archives(self):
         apt.apt_pkg.config.set("dir::cache::archives", self.tempdir)
         fetcher = MockFetcher()
-        names = ("driver", "dependency", "ordinary")
+        names = ("deferred", "dependency", "ordinary")
         for name in names:
             with open(name, "w"):
                 pass
         fetcher.items = [MockAcquireItem(name) for name in names]
         with patch("unattended_upgrade.pkgname_from_deb", side_effect=lambda p: p):
             unattended_upgrade.clean_downloaded_packages(
-                fetcher, {"driver", "dependency"})
-        self.assertTrue(os.path.exists("driver"))
+                fetcher, {"deferred", "dependency"})
+        self.assertTrue(os.path.exists("deferred"))
         self.assertTrue(os.path.exists("dependency"))
         self.assertFalse(os.path.exists("ordinary"))
 

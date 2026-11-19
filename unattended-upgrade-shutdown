@@ -290,7 +290,7 @@ class UnattendedUpgradesShutdown():
             self.apt_pkg_reinit_done = False
 
         if self.on_shutdown_mode is None:
-            # Pending drivers also trigger a run when the global option is off.
+            # Pending deferred work also triggers a run when the global option is off.
             self.on_shutdown_mode = (
                 not self.options.stop_only
                 and not self.stop_signal_received.is_set()

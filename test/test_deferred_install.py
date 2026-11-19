@@ -13,14 +13,14 @@ import unattended_upgrade
 from test.test_base import MockOptions, TestBase
 
 
-class TestDriverDeferral(TestBase):
+class TestDeferredInstall(TestBase):
 
     def setUp(self):
         TestBase.setUp(self)
         self.mock_allowed_origins(
             "origin=Ubuntu,archive=lucid-security")
         rootdir = self.make_fake_aptroot(
-            os.path.join(self.testdir, "root.driver-deferral"))
+            os.path.join(self.testdir, "root.deferred-install"))
         self.cache = unattended_upgrade.UnattendedUpgradesCache(
             rootdir=rootdir)
 
@@ -30,10 +30,10 @@ class TestDriverDeferral(TestBase):
 
         self.assertEqual(
             {pkg.name for pkg in self.cache.get_changes()},
-            {"ordinary-root", "driver-dependency"})
+            {"ordinary-root", "deferred-dependency"})
         self.assertEqual(
             unattended_upgrade.sanity_problem(self.cache, root),
-            "pkg driver-dependency is marked for deferred installation and "
+            "pkg deferred-dependency is marked for deferred installation and "
             "is not safe to upgrade unattended")
         self.assertFalse(
             unattended_upgrade.check_changes_for_sanity(self.cache, root))
@@ -52,26 +52,26 @@ class TestUpgradeFilter(TestBase):
         TestBase.setUp(self)
         self.mock_allowed_origins("origin=Ubuntu,archive=lucid-security")
         self.rootdir = self.make_fake_aptroot(
-            os.path.join(self.testdir, "root.driver-deferral"),
-            fake_pkgs=[("driver-root", "1.0", {}),
+            os.path.join(self.testdir, "root.deferred-install"),
+            fake_pkgs=[("deferred-root", "1.0", {}),
                        ("ordinary-dependency", "1.0", {})])
         os.makedirs(os.path.join(self.rootdir, "var/run"), exist_ok=True)
 
     def test_filter_selects_roots_and_resolves_dependencies(self):
         filters = unattended_upgrade.UpgradeFilter
         for mode, roots, changes in (
-                (filters.NO_DRIVERS,
+                (filters.NO_DEFERRED,
                  {"ordinary-dependency", "unrelated-safe"},
                  {"ordinary-dependency", "unrelated-safe"}),
-                (filters.DRIVERS_ONLY,
-                 {"driver-root", "ordinary-root"},
-                 {"driver-root", "ordinary-dependency", "ordinary-root",
-                  "driver-dependency"}),
+                (filters.DEFERRED_ONLY,
+                 {"deferred-root", "ordinary-root"},
+                 {"deferred-root", "ordinary-dependency", "ordinary-root",
+                  "deferred-dependency"}),
                 (filters.ALL_UPGRADES,
-                 {"driver-root", "ordinary-root", "ordinary-dependency",
+                 {"deferred-root", "ordinary-root", "ordinary-dependency",
                   "unrelated-safe"},
-                 {"driver-root", "ordinary-root", "ordinary-dependency",
-                  "driver-dependency", "unrelated-safe"})):
+                 {"deferred-root", "ordinary-root", "ordinary-dependency",
+                  "deferred-dependency", "unrelated-safe"})):
             with self.subTest(mode=mode):
                 cache = unattended_upgrade.UnattendedUpgradesCache(
                     self.rootdir, upgrade_filter=mode)
@@ -85,20 +85,20 @@ class TestUpgradeFilter(TestBase):
                 self.assertIsNone(
                     unattended_upgrade.sanity_problem(cache, None))
 
-    def test_driver_modes_still_reject_blacklisted_dependencies(self):
+    def test_deferred_modes_still_reject_blacklisted_dependencies(self):
         filters = unattended_upgrade.UpgradeFilter
-        for mode in (filters.DRIVERS_ONLY, filters.ALL_UPGRADES):
+        for mode in (filters.DEFERRED_ONLY, filters.ALL_UPGRADES):
             with self.subTest(mode=mode):
                 cache = unattended_upgrade.UnattendedUpgradesCache(
                     self.rootdir, upgrade_filter=mode)
-                cache["driver-root"].mark_upgrade()
+                cache["deferred-root"].mark_upgrade()
                 cache.blacklist = ["ordinary-dependency$"]
                 self.assertEqual(
                     unattended_upgrade.sanity_problem(cache, None),
                     "pkg ordinary-dependency is blacklisted or is not "
                     "whitelisted")
 
-    def test_no_drivers_commit_guard_checks_resolved_changes(self):
+    def test_no_deferred_commit_guard_checks_resolved_changes(self):
         cache = unattended_upgrade.UnattendedUpgradesCache(self.rootdir)
         cache["ordinary-root"].mark_upgrade()
         with patch.object(cache, "commit") as commit:
@@ -108,9 +108,9 @@ class TestUpgradeFilter(TestBase):
         commit.assert_not_called()
         self.assertEqual(cache.get_changes(), [])
 
-    def test_driver_modes_reach_commit_in_both_install_paths(self):
+    def test_deferred_modes_reach_commit_in_both_install_paths(self):
         filters = unattended_upgrade.UpgradeFilter
-        for mode in (filters.DRIVERS_ONLY, filters.ALL_UPGRADES):
+        for mode in (filters.DEFERRED_ONLY, filters.ALL_UPGRADES):
             for minimal in (False, True):
                 with self.subTest(mode=mode, minimal=minimal):
                     cache = unattended_upgrade.UnattendedUpgradesCache(
@@ -131,20 +131,20 @@ class TestUpgradeFilter(TestBase):
                         if minimal:
                             success, _, _ = (
                                 unattended_upgrade.upgrade_in_minimal_steps(
-                                    cache, ["driver-root"]))
+                                    cache, ["deferred-root"]))
                         else:
                             unattended_upgrade.mark_pkgs_to_upgrade(
-                                cache, ["driver-root"])
+                                cache, ["deferred-root"])
                             success = unattended_upgrade.upgrade_normal(
                                 cache, "", False)
                     self.assertTrue(success)
                     self.assertEqual(
-                        committed, [{"driver-root", "ordinary-dependency"}])
+                        committed, [{"deferred-root", "ordinary-dependency"}])
                     # Both install paths reopen the cache after committing.
                     self.assertEqual(cache.upgrade_filter, mode)
 
 
-class TestDriverFlow(TestBase):
+class TestDeferredInstallFlow(TestBase):
     """Exercise real resolution, acquisition and commit, replacing only dpkg."""
 
     def setUp(self):
@@ -154,8 +154,8 @@ class TestDriverFlow(TestBase):
         apt_pkg.config.set("Debug::pkgDPkgPM", "false")
         self.mock_allowed_origins("origin=Ubuntu,archive=lucid-security")
         self.rootdir = self.make_fake_aptroot(
-            os.path.join(self.testdir, "root.driver-deferral"),
-            fake_pkgs=[("driver-root", "1.0", {}),
+            os.path.join(self.testdir, "root.deferred-install"),
+            fake_pkgs=[("deferred-root", "1.0", {}),
                        ("ordinary-dependency", "1.0", {})])
         self.archives = os.path.join(self.rootdir, "var/cache/apt/archives")
         os.makedirs(os.path.join(self.archives, "partial"), exist_ok=True)
@@ -201,7 +201,7 @@ class TestDriverFlow(TestBase):
         control_dir = os.path.join(self.tempdir, record["Package"], "DEBIAN")
         os.makedirs(control_dir, exist_ok=True)
         with open(os.path.join(control_dir, "control"), "w") as f:
-            f.write(section + "\nDescription: driver deferral test\n"
+            f.write(section + "\nDescription: deferred install test\n"
                     "Maintainer: Test <test@example.org>\n")
         deb = os.path.join(self.repo, record["Filename"])
         subprocess.check_call(
@@ -262,10 +262,10 @@ class TestDriverFlow(TestBase):
         self.assertEqual(set(self.installed),
                          {"ordinary-dependency", "unrelated-safe"})
         self.assertEqual(set(self.modes),
-                         {unattended_upgrade.UpgradeFilter.NO_DRIVERS})
+                         {unattended_upgrade.UpgradeFilter.NO_DEFERRED})
         self.assertTrue(os.path.isfile(self.marker))
         self.assertEqual(self.cached_packages(), {
-            "driver-root", "driver-dependency", "ordinary-root",
+            "deferred-root", "deferred-dependency", "ordinary-root",
             "ordinary-dependency"})
         self.installed.clear()
         self.modes.clear()
@@ -273,22 +273,22 @@ class TestDriverFlow(TestBase):
         shutil.rmtree(self.repo)
         self.assertTrue(self.run_upgrade(shutdown=True).success)
         self.assertEqual(set(self.installed),
-                         {"driver-root", "driver-dependency", "ordinary-root"})
+                         {"deferred-root", "deferred-dependency", "ordinary-root"})
         self.assertEqual(set(self.modes),
-                         {unattended_upgrade.UpgradeFilter.DRIVERS_ONLY})
+                         {unattended_upgrade.UpgradeFilter.DEFERRED_ONLY})
         self.assertFalse(os.path.exists(self.marker))
 
-    def test_driver_only_early_return(self):
+    def test_deferred_only_early_return(self):
         apt_pkg.config.set("Unattended-Upgrade::Package-Blacklist::",
                            "unrelated-safe$")
         apt_pkg.config.set("Unattended-Upgrade::Package-Blacklist::",
-                           "driver-root$")
+                           "deferred-root$")
         apt_pkg.config.set("Unattended-Upgrade::Package-Blacklist::",
                            "ordinary-dependency$")
         self.assertTrue(self.run_upgrade().success)
         self.assertEqual(self.installed, [])
         self.assertEqual(self.cached_packages(),
-                         {"ordinary-root", "driver-dependency"})
+                         {"ordinary-root", "deferred-dependency"})
         self.assertTrue(os.path.exists(self.marker))
 
     def test_install_on_shutdown_preserves_all_upgrades(self):
@@ -325,7 +325,7 @@ class TestDriverFlow(TestBase):
             # minimal steps stop at the failed step, later steps are not
             # downloaded, but the deferred work is kept for the shutdown
             self.assertLessEqual({
-                "driver-root", "driver-dependency", "ordinary-root",
+                "deferred-root", "deferred-dependency", "ordinary-root",
                 "ordinary-dependency"}, self.cached_packages())
 
         with self.subTest(case="interrupted shutdown"):
@@ -341,12 +341,12 @@ class TestDriverFlow(TestBase):
     def test_conffile_blacklist_survives_filter_switch(self):
         with patch("unattended_upgrade.dpkg_conffile_prompt", return_value=True), \
                 patch("unattended_upgrade.conffile_prompt", side_effect=lambda p:
-                      unattended_upgrade.pkgname_from_deb(p) == "driver-dependency"):
+                      unattended_upgrade.pkgname_from_deb(p) == "deferred-dependency"):
             self.assertFalse(self.run_upgrade().success)
         self.assertEqual(set(self.installed),
                          {"ordinary-dependency", "unrelated-safe"})
         self.assertEqual(self.cached_packages(),
-                         {"driver-root", "ordinary-dependency"})
+                         {"deferred-root", "ordinary-dependency"})
         self.assertTrue(os.path.exists(self.marker))
 
     def test_stale_marker_is_cleared_after_completed_check(self):
@@ -377,7 +377,7 @@ class TestDriverFlow(TestBase):
                 self.assertEqual(os.path.exists(self.marker), exists)
 
     def test_incomplete_download_does_not_schedule(self):
-        os.unlink(os.path.join(self.repo, "driver-root_2.0_all.deb"))
+        os.unlink(os.path.join(self.repo, "deferred-root_2.0_all.deb"))
         self.assertFalse(self.run_upgrade().success)
         self.assertEqual(self.installed, [])
         self.assertFalse(os.path.exists(self.marker))
@@ -385,8 +385,8 @@ class TestDriverFlow(TestBase):
     def test_cached_commit_rejects_missing_and_corrupt_archives(self):
         self.assertTrue(self.run_upgrade(download_only=True).success)
         unattended_upgrade.update_apply_on_shutdown_marker(self.rootdir, True)
-        archive = os.path.join(self.archives, "driver-root_2.0_all.deb")
-        source = os.path.join(self.repo, "driver-root_2.0_all.deb")
+        archive = os.path.join(self.archives, "deferred-root_2.0_all.deb")
+        source = os.path.join(self.repo, "deferred-root_2.0_all.deb")
         for minimal in (False, True):
             for damage in ("missing", "same-size corruption"):
                 with self.subTest(minimal=minimal, damage=damage):
@@ -399,13 +399,13 @@ class TestDriverFlow(TestBase):
                     self.assertFalse(self.run_upgrade(shutdown=True).success)
                     self.assertEqual(self.installed, [])
                     cache = unattended_upgrade.UnattendedUpgradesCache(
-                        self.rootdir, unattended_upgrade.UpgradeFilter.DRIVERS_ONLY)
+                        self.rootdir, unattended_upgrade.UpgradeFilter.DEFERRED_ONLY)
                     cache.cache_only = True
                     # Exercise commit's own acquisition, not just run's preflight.
                     options = MockOptions()
                     options.minimal_upgrade_steps = minimal
                     success, _, _ = unattended_upgrade.do_install(
-                        cache, ["driver-root"], options,
+                        cache, ["deferred-root"], options,
                         os.path.join(self.tempdir, "dpkg.log"))
                     self.assertFalse(success)
                     self.assertEqual(self.installed, [])
