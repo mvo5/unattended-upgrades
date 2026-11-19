@@ -1,0 +1,9 @@
+Origin: Ubuntu
+Label: Ubuntu
+Suite: lucid-security
+Version: 10.04
+Codename: lucid
+Date: Tue, 08 Apr 2014  6:19:06 UTC
+Architectures: amd64
+Components: main
+Description: Ubuntu Lucid 10.04
