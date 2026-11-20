@@ -943,8 +943,14 @@ def is_metered_connection() -> bool | None:
             METERED_DBUS_TIMEOUT_MSEC,
             None)
     except GLib.Error as e:
+        # no system bus, or NetworkManager not running (e.g. ifupdown)
+        not_available = (
+            e.matches(Gio.io_error_quark(), Gio.IOErrorEnum.NOT_FOUND)
+            or e.matches(Gio.dbus_error_quark(),
+                         Gio.DBusError.NAME_HAS_NO_OWNER))
         log_once(_("Checking if connection is metered is skipped because "
-                   "NetworkManager could not be queried: %s") % str(e))
+                   "NetworkManager could not be queried: %s") % str(e),
+                 logging.DEBUG if not_available else logging.INFO)
         return None
     # NMMetered enum: 1 = YES, 3 = GUESS_YES are metered
     return ret.unpack()[0] in (1, 3)
