@@ -43,6 +43,12 @@ try:
     from gi.repository import GLib
 except ImportError:
     pass
+try:
+    import gi
+    gi.require_version("GLibUnix", "2.0")
+    from gi.repository import GLibUnix
+except (ImportError, ValueError):
+    pass
 
 from optparse import OptionParser, Values
 from gettext import gettext as _
@@ -240,9 +246,14 @@ class UnattendedUpgradesShutdown():
             self.run_polling(signal_handler)
             return
 
+        # GLib.unix_signal_add() is deprecated where GLibUnix.signal_add()
+        # exists, older GLib has no GLibUnix or only signal_add_full()
+        try:
+            signal_add = GLibUnix.signal_add
+        except (NameError, AttributeError):
+            signal_add = GLib.unix_signal_add
         for sig in (signal.SIGTERM, signal.SIGHUP):
-            GLib.unix_signal_add(GLib.PRIORITY_DEFAULT, sig,
-                                 signal_handler, None, None)
+            signal_add(GLib.PRIORITY_DEFAULT, sig, signal_handler, None, None)
         if self.options.wait_for_signal:
             def prepare_for_shutdown_handler(active):
                 """ Handle PrepareForShutdown() """
