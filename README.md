@@ -392,14 +392,20 @@ Unattended-Upgrade::Automatic-Reboot-Time "02:00";
  Keep the downloaded deb packages after successful installs. By default
  these are removed after successful installs.
 
-* `Acquire::http::Dl-Limit` - integer (default:0)
+* `Acquire::http::Dl-Limit`, `Acquire::https::Dl-Limit` - integer (default:0)
 
- Use apt bandwidth limit feature when fetching the upgrades. The
- number is how many kb/sec apt is allowed to use.
+ Use apt bandwidth limit feature, the number is how many KiB/s apt is
+ allowed to use. These apt options (see `apt-transport-http(1)`) apply
+ to all apt downloads, not only to unattended-upgrades.
 
- Example - limit the download to 70kb/sec:
+ `Acquire::http::Dl-Limit` also limits https sources, but apt then
+ downloads from several https servers in parallel, each at the limit;
+ set `Acquire::https::Dl-Limit` too to download from one at a time.
+
+ Example - limit the download to 70 KiB/s:
  ```
  Acquire::http::Dl-Limit "70";
+ Acquire::https::Dl-Limit "70";
  ```
 
 * `Dpkg::Options` - list of strings
