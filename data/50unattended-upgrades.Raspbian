@@ -141,8 +141,11 @@ Unattended-Upgrade::Package-Blacklist {
 //Unattended-Upgrade::Automatic-Reboot-Time "02:00";
 
 // Use apt bandwidth limit feature, this example limits the download
-// speed to 70kb/sec
+// speed to 70 KiB/s. These apt options apply to all apt downloads, not
+// only to unattended-upgrades. The http one also limits https, but
+// without the https one apt fetches from several https servers at once.
 //Acquire::http::Dl-Limit "70";
+//Acquire::https::Dl-Limit "70";
 
 // Enable logging to syslog. Default is False
 // Unattended-Upgrade::SyslogEnable "false";
