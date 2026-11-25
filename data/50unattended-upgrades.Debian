@@ -34,6 +34,9 @@ Unattended-Upgrade::Origins-Pattern {
         "origin=Debian,codename=${distro_codename}-security,label=Debian-Security";
 //      "o=Debian Backports,n=${distro_codename}-backports,l=Debian Backports";
 
+        // Firefox (and other packages) from the Mozilla APT repository.
+//      "site=packages.mozilla.org";
+
         // Archive or Suite based matching:
         // Note that this will silently match a different release after
         // migration to the specified archive (e.g. testing becomes the

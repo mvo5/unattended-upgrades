@@ -81,6 +81,24 @@ simply use "origin=*", e.g.:
  };
 ```
 
+Third-party repositories are generally not upgraded by default. For
+example, to automatically upgrade Firefox when it is installed from
+the Mozilla APT repository (packages.mozilla.org), add this to the
+apt configuration:
+```
+Unattended-Upgrade::Origins-Pattern {
+        "site=packages.mozilla.org";
+};
+```
+Without a preceding `#clear` this is allowed in addition to the stock
+origins. Matching on the site is used here because the Origin field
+of that repository is not a stable, human-friendly name; run
+`apt-cache policy` to see the values a repository provides. The
+pattern covers every package installed from that repository
+(e.g. also firefox-esr, firefox-beta or thunderbird). Run
+`unattended-upgrade --dry-run --debug` to check that the packages
+are picked up.
+
 All operations are logged in /var/log/unattended-upgrades/. This
 includes the dpkg output as well. The file
 /etc/logrotate.d/unattended-upgrades controls how long logfiles are
