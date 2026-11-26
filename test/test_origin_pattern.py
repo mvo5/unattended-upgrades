@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import logging
 import unittest
+from unittest.mock import Mock
 
 import apt_pkg
 
@@ -32,6 +33,8 @@ class MockPackage():
 
 
 class MockCache(dict):
+    upgrade_filter = unattended_upgrade.UpgradeFilter.NO_DEFERRED
+
     def __iter__(self):
         for pkgname in self.keys():
             yield self[pkgname]
@@ -133,6 +136,32 @@ class TestOriginPatern(TestBase):
         pkg.name = "apt"
         self.assertTrue(
             check_changes_for_sanity(cache))
+
+    def test_deferred_candidate_is_not_safe_to_upgrade(self):
+        pkg = self._get_mock_package()
+        cache = self._get_mock_cache()
+        cache[pkg.name] = pkg
+        cache.allowed_origins = ["o=Ubuntu"]
+
+        pkg.candidate.record["Defer-Install-To-Shutdown"] = "yes"
+
+        self.assertFalse(check_changes_for_sanity(cache))
+
+    def test_deferred_candidate_cannot_be_committed(self):
+        pkg = self._get_mock_package()
+        pkg.candidate.record["Defer-Install-To-Shutdown"] = "yes"
+
+        cache = Mock()
+        cache.upgrade_filter = unattended_upgrade.UpgradeFilter.NO_DEFERRED
+        cache.get_changes.return_value = [pkg]
+
+        result, error = unattended_upgrade.cache_commit(
+            cache, "", False, iprogress=Mock())
+
+        self.assertFalse(result)
+        self.assertIsInstance(error, RuntimeError)
+        cache.commit.assert_not_called()
+        cache.clear.assert_called_once_with()
 
     def test_whitelist_with_strict_whitelisting(self):
         cache = self._get_mock_cache()

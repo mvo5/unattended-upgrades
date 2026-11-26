@@ -1,0 +1,9 @@
+Package: ordinary-root
+Status: install ok installed
+Architecture: all
+Version: 1.0
+
+Package: unrelated-safe
+Status: install ok installed
+Architecture: all
+Version: 1.0
