@@ -1363,9 +1363,15 @@ def upgrade_in_minimal_steps(cache: UnattendedUpgradesCache,
 
         # double check that we are not running into side effects like
         # what could have been caused LP: #1020680
-        if not check_changes_for_sanity(cache):
-            logging.info("While building minimal partition: "
-                         "cache has not allowed changes")
+        problem = sanity_problem(cache, None)
+        if problem is not None:
+            logging.info("While building minimal partition for %s: "
+                         "cache has not allowed changes (%s)",
+                         pkgname, problem)
+            logging.debug(
+                "changes when marking %s: %s", pkgname,
+                ", ".join(sorted(describe_change(p)
+                                 for p in cache.get_changes())))
             cache.clear()
             continue
         changes = [p.name for p in cache.get_changes()]
@@ -1558,6 +1564,27 @@ def upgrade_order(to_upgrade: collections.abc.Set[str], cache: apt.Cache) -> lis
     return sorted(to_upgrade, key=lambda name: (upgrade_set_size(name), name))
 
 
+def describe_change(pkg: apt.Package) -> str:
+    """Return "name (installed -> candidate) [action]" for the debug log"""
+    if pkg.marked_delete:
+        action = "delete"
+    elif pkg.marked_upgrade:
+        action = "upgrade"
+    elif pkg.marked_downgrade:
+        action = "downgrade"
+    elif pkg.marked_install:
+        action = "install"
+    elif pkg.marked_reinstall:
+        action = "reinstall"
+    elif pkg.marked_keep:
+        action = "keep"
+    else:
+        action = "unknown"
+    installed = pkg.installed.version if pkg.installed else "none"
+    candidate = pkg.candidate.version if pkg.candidate else "none"
+    return "%s (%s -> %s) [%s]" % (pkg.name, installed, candidate, action)
+
+
 def check_changes_for_sanity(cache: UnattendedUpgradesCache,
                              desired_pkg: apt.Package | None = None) -> bool:
     sanity_check_result = sanity_problem(cache, desired_pkg)
@@ -1582,7 +1609,7 @@ def sanity_problem(cache: UnattendedUpgradesCache,
         if pkg.marked_delete:
             return ("pkg %s is marked to be deleted" % pkg.name)
         if not pkg.candidate:
-            return ("internal error: pkg %s has no candidate" % pkg.candidate)
+            return ("internal error: pkg %s has no candidate" % pkg.name)
         if pkg.marked_install or pkg.marked_upgrade:
             # apt will never fallback from a trusted to a untrusted
             # origin so its good enough if we have a single trusted one
@@ -1603,7 +1630,7 @@ def sanity_problem(cache: UnattendedUpgradesCache,
             if pkg.marked_upgrade and ignore_require_restart is False \
                and upgrade_requires == "app-restart":
                 return ("pkg %s requires app-restart, it is not safe to "
-                        "upgrade it unattended")
+                        "upgrade it unattended" % pkg.name)
     # check that the package we want to upgrade is in the change set
     if desired_pkg and desired_pkg not in changes:
         return ("pkg %s to be marked for upgrade/install is not marked "
